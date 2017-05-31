@@ -98,6 +98,10 @@ def ieee(number):
             elif meta['content'] in ["IEEE Xplore - Instrumentation & Measurement Magazine, IEEE", "IEEE Xplore - IEEE Instrumentation & Measurement Magazine"]:
                 jnlname = 'IEEE Instrum.Measur.Mag.'
                 tc = 'I'
+            elif meta['content'] in ["IEEE Xplore - IEEE Symposium Conference Record Nuclear Science 2004.",
+                                     "IEEE Xplore - IEEE Nuclear Science Symposium Conference Record, 2005"]:
+                jnlname = 'BOOK'
+                tc = 'C'
             else:
                 print 'unknown journal',meta['content']
                 sys.exit(0)
@@ -153,15 +157,24 @@ def ieee(number):
         if gdm['isFreeDocument']:
             rec['FFT'] = urltrunc + gdm['pdfPath']
         rec['tit'] = gdm['formulaStrippedArticleTitle']
-        rec['abs'] = gdm['abstract']
-        rec['pages'] = int(gdm['endPage']) - int(gdm['startPage']) + 1
+        if gdm.has_key('abstract'):
+            rec['abs'] = gdm['abstract']
+        ## mistake in metadata
+        if re.search('\d+ pp', gdm['startPage']):
+            rec['pages'] = re.sub(' .*', '', gdm['startPage'])
+            rec['p1'] = str(int(gdm['endPage']) - int(rec['pages']) + 1)            
+        else:
+            rec['pages'] = int(re.sub(' .*', '', gdm['endPage'])) - int(gdm['startPage']) + 1
         rec['doi'] = gdm['doi']
         if gdm.has_key('keywords'):
             for kws in gdm['keywords']:
                 for kw in kws['kwd']:
                     if not kw in rec['keyw']:
                         rec['keyw'].append(kw)
-        rec['date'] = gdm['journalDisplayDateOfPublication']
+        try:
+            rec['date'] = gdm['journalDisplayDateOfPublication']
+        except:
+            rec['date'] = gdm['publicationDate']
         rec['year'] = rec['date'][-4:]
         if gdm.has_key('issue'):
             rec['issue'] = gdm['issue']
