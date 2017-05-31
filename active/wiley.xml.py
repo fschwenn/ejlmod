@@ -108,8 +108,9 @@ for doi in doisoa.keys():
                 rec['p1'] = meta['content']
             elif meta['name'] == 'citation_lastpage':
                 rec['p2'] = meta['content']
-            elif meta['name'] == 'article_references':
-                rec['p1'] = re.sub('.* ([A-Z\d]+)\.?$', r'\1', meta['content'])
+            elif meta['name'] == 'article_references' and not rec.has_key('p1'):
+                if re.search(' ([A-Z\d]+)\.?$',  meta['content']):
+                    rec['p1'] = re.sub('.* ([A-Z\d]+)\.?$', r'\1', meta['content'])
             #date
             elif meta['name'] == 'citation_publication_date':
                 rec['date'] = meta['content']
