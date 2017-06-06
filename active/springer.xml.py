@@ -75,7 +75,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '10723': ['jgc', 'J.Grid Comput.'],
       '10909': ['jltp', 'J.Low.Temp.Phys.'],
       '11448': ['jtpl', 'JETP Lett.', 'Pisma Zh.Eksp.Teor.Fiz.'],
-      '13130': ['jhep', 'JHEP '],
+      '13130': ['jhep', 'JHEP'],
       '40042': ['jkps', 'J.Korean Phys.Soc.'],
       '10958': ['jms', 'J.Math.Sci.', 'Zap.Nauchn.Semin.'],
 #==      '10853': ['jmsme', 'J.Mater.Sci.'],
@@ -307,6 +307,10 @@ def xmlExtract():
     except:
         print "no arxiv-bull (don't worry)"
     rec["year"] = ''
+    try:
+        rec["doi"] = artxml.getElementsByTagName('ArticleDOI')[0].firstChild.data
+    except: #(FS) for Books: Chapter=Article 
+        rec["doi"] = artxml.getElementsByTagName('ChapterDOI')[0].firstChild.data
     for cdate in artxml.getElementsByTagName('CoverDate'):
         rec["year"] = str(cdate.getElementsByTagName('Year')[0].firstChild.data)
     if artxml.getElementsByTagName('CoverDate')==[]: # (FS) For books: get year from Copyright
@@ -329,11 +333,13 @@ def xmlExtract():
     except: 
         rec["seq"] = '' 
         try:
+            print 'articleID instead of pagination', rec['doi']
             rec["p2"] = artxml.getElementsByTagName('ArticleLastPage')[0].firstChild.data
             if jnr in ['13130', '10050', '10052', '10053', '10051', '13360', '00159', '11433']: #JHEP allways starts with page 1
                 rec['pages'] = rec["p2"]
-                if rec['jnl']=='JHEP': 
-                    rec['p1'] = articlenumber=re.sub('.*\)','',rec['doi'])
+                print 'e[%s] ' % (rec['jnl'])
+                if rec['jnl']=='JHEP':
+                    rec['p1'] = re.sub('.*\)','',rec['doi'])
                     del rec['p2']
                 elif (rec['jnl']=='Astron.Astrophys.Rev.'):
                     rec['p1'] = re.sub('^0*','',rec['doi'].split("-")[-2])
@@ -344,15 +350,12 @@ def xmlExtract():
                 else:
                     rec['p1'] =  artxml.getElementsByTagName('ArticleCitationID')[0].firstChild.data
                     del rec['p2']
+            print rec['p1']
         except:
             try: #(FS) for Books: Chapter=Article
                 rec["p2"] = artxml.getElementsByTagName('ChapterLastPage')[0].firstChild.data
             except:
                 rec['p2'] = ''
-    try:
-    	rec["doi"] = artxml.getElementsByTagName('ArticleDOI')[0].firstChild.data
-    except: #(FS) for Books: Chapter=Article 
-    	rec["doi"] = artxml.getElementsByTagName('ChapterDOI')[0].firstChild.data
     try:
         if jnr in ['10050','10051','10052','10053','13129']:
             if jnr == '10050': rec["vol"] = 'A'
