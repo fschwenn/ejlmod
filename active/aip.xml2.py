@@ -47,7 +47,6 @@ elif (jnl == 'aipconf') or (jnl == 'aipcp') or (jnl == 'apc'):
     jnl = 'apc'
     iss = '1'
     typecode = 'C'
-    cnum = sys.argv[3]
 
     
 urltrunk = 'http://aip.scitation.org/toc/%s/%s/%s?size=all' % (jnl,vol,iss)
