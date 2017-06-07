@@ -107,6 +107,9 @@ for tag in toc.body.find_all():
                 rec['vol'] = re.sub('.*\/.*?\.(\d+)\..*', r'\1', rec['doi'])
                 if len(sys.argv) > 3:
                     rec['cnum'] = sys.argv[3]
+                    if len(sys.argv) > 4:
+                        rec['licence'] = {'statement' : sys.argv[4]}
+                        rec['FFT'] = 'http://journals.jps.jp/doi/pdf/%s' % (rec['doi'])
             rec['p1'] = re.sub('.*\.', '', rec['doi'])\
             #check abstract page
             try:
