@@ -102,7 +102,7 @@ for doi in doisoa.keys():
                 rec['tit'] = meta['content']
             #keywords
             elif meta['name'] == 'citation_keywords':
-                rec['keyw'].append(['content'])
+                rec['keyw'].append(meta['content'])
             #pubnote
             elif meta['name'] == 'citation_firstpage':
                 rec['p1'] = meta['content']
@@ -130,6 +130,9 @@ for doi in doisoa.keys():
             #PDF
             elif meta['name'] == 'citation_pdf_url' and doisoa[doi]:
                 rec['FFT'] = meta['content']
+    if not rec.has_key('p1'):
+        for meta in artpage.head.find_all('meta', attrs = {'name' : 'article_references'}):
+            rec['p1'] = re.sub('.*, (.+?)\..*', r'\1', meta['content'])
     rec['autaff'].append(autaff)
     #abstract
     for section in artpage.body.find_all('section', attrs = {'id' : 'abstract'}):
