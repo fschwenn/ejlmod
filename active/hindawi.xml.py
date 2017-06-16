@@ -117,6 +117,10 @@ for articleID in articleIDs:
                 rec['note'].append(meta['content'])
                 if re.search('Review', meta['content']):
                     rec['tc'] = 'R'
+    #editorial
+    for div in artpage.body.find_all('div', attrs = {'class' : 'article_type'}):
+        if div.text == 'Editorial':
+            rec['tc'] = 'Editorial'
     #licence
     for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
         rec['licence'] = {'url' : a['href']}
@@ -178,7 +182,8 @@ for articleID in articleIDs:
                     a.replace_with('')
             ref = li.text.strip()
             rec['refs'].append([('x', ref)])
-    recs.append(rec)
+    if not rec['tc'] == 'Editorial':
+        recs.append(rec)
 
 
 
