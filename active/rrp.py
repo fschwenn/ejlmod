@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 #!/usr/bin/python
 #program to harvest Romanian Reports in Physics
-# FS 2014-11-14
+# FS 2017-06-27
 
 import os
 import ejlmod2
@@ -10,6 +10,10 @@ import sys
 import unicodedata
 import string
 import codecs
+import urllib2
+import urlparse
+import codecs
+from bs4 import BeautifulSoup
 
 
 
@@ -33,34 +37,37 @@ xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 
 url = 'http://rrp.infim.ro/%s_%s_%s.html' % (year, vol, issue)
 
-print "get table of content of %s%s.%s ..." %(jnlname, vol, issue)
-os.system("lynx -source \"%s\" > %s/%s.toc" % (url,tmpdir,jnlfilename))
+print "get table of content of %s%s.%s ... via %s" %(jnlname, vol, issue, url)
+tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(url))
 
-print "read table of contents..."
-tocfil = codecs.EncodedFile(open(tmpdir+"/"+jnlfilename+".toc",mode='rb'),"utf8")
-
-lines = ''.join(map(tfstrip,tocfil.readlines()))
-
+tsection = ''
 recs = []
-note = ''
-for part in re.split('<TR.*?>', lines):
-    if re.search('colspan=2.*<strong>', part):
-        note = re.sub('.*<strong>(.*?)<.strong.*', r'\1', part)
-    if re.search('<SPAN class=times>', part):
-        rec = {'jnl' : jnlname, 'year' : year, 'vol' : vol, 'issue' : issue, 'tc' : 'P', 'auts' : []}
-        if note != '':
-            rec['note'] = [note]
-        rec['p1'] = re.sub('.* class=times>(.*?)<.*', R'\1', part)
-        if not rec['p1']:
-            rec['p1'] = re.sub('.*TD>(.*?)<SPAN.*', R'\1', part)
-        rec['tit'] = re.sub('.* class=tocTitle>(.*?)<.*', r'\1', part)
-        authors = re.sub('.*class=tocAuth>(.*?)<.*', r'\1', part)    
-        for aut in re.split(', ', authors):
-            rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', aut))
-    if re.search('Acrobat.*PDF', part):
-        rec['FFT'] = 'http://rrp.infim.ro' + re.sub('.*HREF=".(.*?)".*', r'\1', part)
-        rec['pdf'] = rec['FFT'] 
-        recs.append(rec)
+done = []
+for table in tocpage.body.find_all('table', attrs = {'dwcopytype' : 'CopyTableRow'}):
+    for tr in table.find_all('tr'):
+        for font in tr.find_all('font', attrs = {'color' : '#ff0000'}):
+            fonttext = font.text.strip()
+            if fonttext:
+                tsection = fonttext
+        for b in tr.find_all('b', attrs = {'class' : 'tocTitle'}):
+            rec = {'jnl' : jnlname, 'vol' : vol, 'iss' : issue, 'year' : year,
+                   'tc' : 'P', 'note' : [tsection], 'auts' : []}
+            rec['tit'] = b.text.strip()
+        for div in tr.find_all('div'):
+            for i1 in div.find_all('i'):
+                i1.replace_with('')
+                rec['abs'] = re.sub('[\n\t\r ]+', ' ', div.text.strip())
+        for i2 in tr.find_all('i', attrs = {'class' : 'tocAuth'}):
+            authors = i2.text.strip()
+            for author in re.split(' *, *', authors):
+                rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', author))
+        for td in tr.find_all('td', attrs = {'width' : '60%'}):
+            for a in td.find_all('a'):
+                rec['pdf'] = 'http://www.rrp.infim.ro/' + re.sub('^\.\/', '', a['href'])
+                rec['p1'] = re.sub('.*? (\d+).*', r'\1', re.sub('[\n\t\r]', '', td.text.strip()))
+                if rec['p1'] not in done:
+                    recs.append(rec)
+                    done.append(rec['p1'])
 
 xmlfile  = codecs.EncodedFile(open(xmlf,mode='wb'),"utf8")
 ejlmod2.writeXML(recs,xmlfile,publisher)

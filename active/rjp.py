@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 #!/usr/bin/python
 #program to harvest Romanian Journal of Physics
-# FS 2014-11-14
+# FS 2017-06-27
 
 import os
 import ejlmod2
@@ -10,6 +10,10 @@ import sys
 import unicodedata
 import string
 import codecs
+import urllib2
+import urlparse
+import codecs
+from bs4 import BeautifulSoup
 
 
 
@@ -33,32 +37,43 @@ xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 
 url = 'http://www.nipne.ro/%s/%s_%s_%s.html' % (jnl, year, vol, issue)
 
-print "get table of content of %s%s.%s ..." %(jnlname, vol, issue)
-os.system("lynx -source \"%s\" > %s/%s.toc" % (url,tmpdir,jnlfilename))
 
-print "read table of contents..."
-tocfil = codecs.EncodedFile(open(tmpdir+"/"+jnlfilename+".toc",mode='rb'),"utf8")
+print "get table of content of %s%s.%s ... via %s" %(jnlname, vol, issue, url)
+tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(url))
 
-lines = ''.join(map(tfstrip,tocfil.readlines()))
-
+tsection = ''
 recs = []
-note = ''
-for part in re.split('<tr><td colspan="2">', lines):
-    if re.search('class="tsection">', part):
-        note = re.sub('.*class="tsection">(.*?)<.*', r'\1', part)
-    if re.search('<span class="times">', part):
-        rec = {'jnl' : jnlname, 'year' : year, 'vol' : vol, 'issue' : issue, 'tc' : 'P', 'auts' : []}
-        if note != '':
-            rec['note'] = [note]
-        rec['p1'] = re.sub('.*<span class="times">(.*?)<.span.*', r'\1', part)
-        rec['tit'] = re.sub('.*<span class="toct">(.*?)<.span.*', r'\1', part)
-        authors = re.sub('.*<span class="toca">(.*?)<.span.*', r'\1', part)    
-        for aut in re.split(', ', authors):
-            rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', aut))
-        if re.search('Full text', part):
-            rec['FFT'] = 'http://www.nipne.ro/%s/%s' % (jnl, re.sub('.*href="(.*?)".*', r'\1', part))
-            rec['pdf'] = rec['FFT'] 
-        recs.append(rec)
+for div in tocpage.body.find_all('div'):
+    if div.has_attr('class'):
+        if 'tsection' in div['class']:
+            tsection = div.text.strip()
+        elif 'docsource' in div['class']:
+            for a in div.find_all('a'):
+                if re.search('Full text', a.text):
+                    rec['pdf'] = 'http://www.nipne.ro/rjp/' + a['href']
+                    print '   [%s]' % (rec['pdf'])
+        elif 'abstract' in div['class']:
+            rec['abs'] = div.text.strip()
+            recs.append(rec)
+    elif div.has_attr('style') and div['style'] == 'vertical-align:top;text-align:left;':
+        rec = {'jnl' : jnlname, 'vol' : vol, 'iss' : issue, 'year' : year, 
+               'tc' : 'P', 'note' : [tsection], 'auts' : []}
+        for span in div.find_all('span', attrs = {'class' : 'toct'}):
+            rec['tit'] = span.text.strip()
+        for span in div.find_all('span', attrs = {'class' : 'toca'}):
+            authors = span.text.strip()
+            for author in re.split(' *, *', authors):
+                rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', author))
+        for span in div.find_all('span', attrs = {'style' : 'font-size:8pt;'}):
+            p1p2 = re.sub('[\r\n\t]', ' ', span.text.strip())            
+            p1p2 = re.split('\-', re.sub('.*,.*?(\d+\-?\d+).*', r'\1', p1p2))
+            rec['p1'] = p1p2[0]
+            if len(p1p2) > 1:
+                rec['p2'] = p1p2[1]
+        print rec
+    
+        
+
 
 xmlfile  = codecs.EncodedFile(open(xmlf,mode='wb'),"utf8")
 ejlmod2.writeXML(recs,xmlfile,publisher)
