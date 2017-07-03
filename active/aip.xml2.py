@@ -63,6 +63,7 @@ except:
 def getarticle(href, sec, subsec, p1):
     artlink = 'http://aip.scitation.org%s' % (href)
     try:
+        print artlink
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
         time.sleep(3)
     except:
@@ -71,6 +72,7 @@ def getarticle(href, sec, subsec, p1):
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
     rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : iss, 'tc' : typecode, 
            'note' : [], 'auts' : [], 'aff' : [], 'p1' : p1}
+    emails = {}
     if cnum:
         rec['cnum'] = cnum
     if sec:
@@ -93,40 +95,67 @@ def getarticle(href, sec, subsec, p1):
     for header in artpage.body.find_all('header', attrs = {'class' : 'publicationContentTitle'}):
         for h2 in header.find_all('h2'):
             rec['tit'] = h2.text.strip()
+            rec['tit'] = re.sub('\n* *Scilight relation icon', '', rec['tit'])
     #doi
     rec['doi'] = re.sub('.doi.abs.', '', href)
+    #emails
+    for authornotes in artpage.body.find_all('author-notes'):
+        for p in authornotes.find_all('p', attrs = {'class' : 'first last'}):
+            affnr = 'NOAFFNR'
+            for sup in p.find_all('sup'):
+                affnr =  re.sub('\)', '', sup.text)
+            for a in p.find_all('a', attrs = {'class' : 'email'}):
+                emails[affnr] = re.sub('mailto:', '', a.text.strip())
     #affiliations
     for div in artpage.body.find_all('div', attrs = {'class' : 'affiliations-list hide'}):
         for li in div.find_all('li'):
             for sup in li.find_all('sup'):
-                affnr = sup.text
+                affnr =  re.sub('\)', '', sup.text)
                 sup.replace_with('Aff%s= ' % affnr)
             rec['aff'].append(li.text)
+    if not rec['aff']:
+        for div in artpage.body.find_all('div', attrs = {'class' : 'affiliations-list list-unstyled hide'}):
+            for li in div.find_all('li'):
+                for sup in li.find_all('sup'):
+                    affnr =  re.sub('\)', '', sup.text)
+                    sup.replace_with('Aff%s= ' % affnr)
+                rec['aff'].append(li.text)
     #authors
     for div in artpage.body.find_all('div', attrs = {'class' : 'entryAuthor'}):
         for span in div.find_all('span'):
             affs = []
             for sup in span.find_all('sup'):
-                affs += re.split(',', sup.text)
+                affs += re.split(',', re.sub('\)', '', sup.text))
                 sup.replace_with('')
             author = re.sub(' and *$', '', span.text.strip())
             author = re.sub(',', '', author)
-            author = re.sub('([A-Z]\.) ([A-Z]\.) ', r'\1\2', author)
-            author = re.sub('([A-Z]\.) ([A-Z]\.) ', r'\1\2', author)
+            author = re.sub('([A-Z]\.) ([A-Z]\.) ', r'\1\2 ', author)
+            author = re.sub('([A-Z]\.) ([A-Z]\.) ', r'\1\2 ', author)
             author = re.sub('(.*) (.*)', r'\2, \1', author)
             for a in span.find_all('a'):
                 if a.has_attr('href') and re.search('orcid.org', a['href']):
                     re.sub('http...orcid.org.', ', ORCID:', a['href'])
-            rec['auts'].append(author)
+            for affi in range(len(affs)):
+                if emails.has_key(affs[affi]):
+                    author += ', EMAIL:%s' % (emails[affs[affi]])
+                    affs[affi] = ''
+            rec['auts'].append(author)                    
             for aff in affs:
-                rec['auts'].append('=Aff%s' % (aff))
+                if aff:
+                    rec['auts'].append('=Aff%s' % (aff))
+    if len(rec['auts']) == 1 and not re.search('EMAIL', rec['auts'][0]) and emails.has_key('NOAFFNR'):
+        rec['auts'][0] += ', EMAIL:%s' % (emails['NOAFFNR'])        
     #abstract
     for div in artpage.body.find_all('div', attrs = {'class' : 'abstractSection abstractInFull'}):
         rec['abs'] = div.text.strip()
+    if not rec.has_key('abs'):
+        for div in artpage.body.find_all('div', attrs = {'class' : 'hlFld-Abstract'}):
+            for div2 in div.find_all('div', attrs = {'class' : 'NLM_paragraph'}):
+                rec['abs'] = div2.text.strip()
     #references
     for div in artpage.body.find_all('div', attrs = {'class' : 'article-paragraphs'}):
         for h4 in div.find_all('h4'):
-            if re.search('References', h4.text):
+            if re.search('References', h4.text, re.IGNORECASE):
                 rec['refs'] = []
                 for li in div.find_all('li'):
                     for span in li.find_all('span'):
@@ -171,7 +200,9 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'sub-section'}):
                             for div3  in child2.find_all('div', attrs = {'class' : 'meta-article'}):
                                 p1 = re.sub('.*, ([A-Z0-9]+) \(\d\d\d\d\);.*', r'\1', div3.text.strip())
                             if href and p1:
-                                recs.append(getarticle(href, sec, subsec, p1))
+                                article = getarticle(href, sec, subsec, p1)
+                                if article['auts']:
+                                    recs.append(article)
                         
 
 
