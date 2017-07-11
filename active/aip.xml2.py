@@ -97,7 +97,7 @@ def getarticle(href, sec, subsec, p1):
             rec['tit'] = h2.text.strip()
             rec['tit'] = re.sub('\n* *Scilight relation icon', '', rec['tit'])
     #doi
-    rec['doi'] = re.sub('.doi.abs.', '', href)
+    rec['doi'] = re.sub('\/doi\/', '', re.sub('.doi.abs.', '', href))
     #emails
     for authornotes in artpage.body.find_all('author-notes'):
         for p in authornotes.find_all('p', attrs = {'class' : 'first last'}):
@@ -121,8 +121,18 @@ def getarticle(href, sec, subsec, p1):
                     sup.replace_with('Aff%s= ' % affnr)
                 rec['aff'].append(li.text)
     #authors
+    affnr = 2 + len(rec['aff'])
     for div in artpage.body.find_all('div', attrs = {'class' : 'entryAuthor'}):
-        for span in div.find_all('span'):
+        #for li in div.find_all('li', attrs = {'class' : 'author-affiliation hide'}):
+        for li in div.find_all('li'):
+            aff = li.text.strip()
+            rec['aff'].append('Aff%s= %s' % (affnr, aff))
+            li.string = str(affnr)
+            li.wrap(artpage.new_tag('sup')).wrap(artpage.new_tag('span'))
+            affnr += 1
+
+
+        for span in div.find_all('span'):            
             affs = []
             for sup in span.find_all('sup'):
                 affs += re.split(',', re.sub('\)', '', sup.text))
