@@ -27,12 +27,12 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 jnlfilename = '%s.%s' % (jnl, stampoftoday)
 
-done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
-done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
-done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
+done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
+done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
+done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
 
 
-starturl = 'http://www.mdpi.com/search?journal=%s&year_from=1996&year_to=2020&page_count=50&sort=pubdate&view=default' % (jnl)
+starturl = 'http://www.mdpi.com/search?journal=%s&year_from=1996&year_to=2025&page_count=100&sort=pubdate&view=default' % (jnl)
 tocpage = BeautifulSoup(urllib2.urlopen(starturl))
 
 recs = []
@@ -41,7 +41,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
            'note' : [], 'refs' : []}
     #title and link
     for a in div.find_all('a', attrs = {'class' : 'title-link'}):
-        link = 'http://www.mdpi.com' + a['href']  + '/htm'
+        link = 'http://www.mdpi.com' + a['href']
         rec['FFT'] = 'http://www.mdpi.com' + a['href']  + '/pdf'
         rec['tit'] = a.text
         print link
@@ -107,7 +107,9 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
         for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
             rec['aff'].append(aff.strip())
     #references 
-    for section in page.body.find_all('section', attrs = {'id' : 'html-references_list'}):
+    reflink = 'http://www.mdpi.com' + a['href']  + '/htm'
+    refpage = BeautifulSoup(urllib2.urlopen(reflink))
+    for section in refpage.body.find_all('section', attrs = {'id' : 'html-references_list'}):
         for li in section.find_all('li'):
             for a in li.find_all('a', attrs = {'class' : 'cross-ref'}):
                 rdoi = re.sub('.*doi\.org\/', 'doi: ', a['href'])
