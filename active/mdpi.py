@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 #!/usr/bin/python
-#program to harvest Universe
-# FS 2015-11-11
+#program to harvest MDPI journals (Universe, Symmetry, Sensors, Instruments, Galaxies, Entropy)
+# FS 2017-07-17
 
 import os
 import ejlmod2
@@ -17,33 +17,43 @@ import datetime
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
+def tfstrip(x): return x.strip()
 
 publisher = 'MDPI'
+jnl = sys.argv[1]
 
-def tfstrip(x): return x.strip()
-done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/universe*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir)))
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-jnlfilename = 'universe.%s' % (stampoftoday)
+jnlfilename = '%s.%s' % (jnl, stampoftoday)
 
-starturl = 'http://www.mdpi.com/search?journal=universe&year_from=1996&year_to=2020&page_count=50&sort=pubdate&view=default'
+done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
+done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
+done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
+
+
+starturl = 'http://www.mdpi.com/search?journal=%s&year_from=1996&year_to=2020&page_count=50&sort=pubdate&view=default' % (jnl)
 tocpage = BeautifulSoup(urllib2.urlopen(starturl))
 
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
-    rec = {'jnl' : 'Universe', 'tc' : 'P', 'keyw' : [], 'aff' : [], 'auts' : []}
+    rec = {'jnl' : jnl.title(), 'tc' : 'P', 'keyw' : [], 'aff' : [], 'auts' : [],
+           'note' : [], 'refs' : []}
     #title and link
     for a in div.find_all('a', attrs = {'class' : 'title-link'}):
-        link = 'http://www.mdpi.com' + a['href']
-        rec['FFT'] = link + '/pdf'
+        link = 'http://www.mdpi.com' + a['href']  + '/htm'
+        rec['FFT'] = 'http://www.mdpi.com' + a['href']  + '/pdf'
         rec['tit'] = a.text
         print link
     #get detailed page
     page = BeautifulSoup(urllib2.urlopen(link))
-    ##Review?
+    ##Review?1
     for meta in page.head.find_all('meta', attrs = {'name' : 'dc.type'}):
         if meta['content'] == 'Review': rec['tc'] = 'R'
+    for atype in page.find_all('span', attrs = {'class' : 'label articletype'}):
+        rec['note'].append(atype.text)
+        if atype.text == 'Review':
+            rec['tc'] = 'R'
     ##Date
     for meta in page.head.find_all('meta', attrs = {'name' : 'dc.date'}):
         rec['date'] = meta['content']
@@ -65,7 +75,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
         rec['p2'] = meta['content']
     for meta in page.head.find_all('meta', attrs = {'name' : 'citation_doi'}):
         rec['doi'] = meta['content']
-        if rec['doi'] in done: continue        
+    if rec['doi'] in done: continue        
     ##abstract
     for meta in page.head.find_all('meta', attrs = {'name' : 'dc.description'}):
         rec['abs'] = meta['content']
@@ -73,7 +83,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
     for div in page.body.find_all('div', attrs = {'class' : 'belongsTo'}):
         if re.search('Special Issue', div.text):
             for a in div.find_all('a'):
-                rec['note'] = [ a.text ]
+                rec['note'].append([ a.text ])
     ##authors and affiliations
     for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):
         for sup in div.find_all('sup'):
@@ -96,7 +106,15 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
             span.replace_with(';;;')
         for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
             rec['aff'].append(aff.strip())
-    ##references are in link + '/xml', but too much work
+    #references 
+    for section in page.body.find_all('section', attrs = {'id' : 'html-references_list'}):
+        for li in section.find_all('li'):
+            for a in li.find_all('a', attrs = {'class' : 'cross-ref'}):
+                rdoi = re.sub('.*doi\.org\/', 'doi: ', a['href'])
+                a.replace_with(rdoi)
+            for a in li.find_all('a'):
+                a.replace_with('')
+            rec['refs'].append([('x', li.text.strip())])
     recs.append(rec)
 
 
