@@ -82,8 +82,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
     ##special issue
     for div in page.body.find_all('div', attrs = {'class' : 'belongsTo'}):
         if re.search('Special Issue', div.text):
-            for a in div.find_all('a'):
-                rec['note'].append([ a.text ])
+            for a2 in div.find_all('a'):
+                rec['note'].append([ a2.text ])
     ##authors and affiliations
     for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):
         for sup in div.find_all('sup'):
@@ -96,6 +96,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
             script.replace_with('')
         authors = re.sub(' and ', ' , ', re.sub('\xa0', ' ', div.text))
         authors = re.sub('&nbsp;', ' ', authors)
+        authors = re.sub('\*', ' ', authors)
         for author in re.split(' *, *', re.sub('[\n\t]', '', authors)):
             if len(author.strip()) > 2:
                 rec['auts'].append(author.strip())        
@@ -111,11 +112,11 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
     refpage = BeautifulSoup(urllib2.urlopen(reflink))
     for section in refpage.body.find_all('section', attrs = {'id' : 'html-references_list'}):
         for li in section.find_all('li'):
-            for a in li.find_all('a', attrs = {'class' : 'cross-ref'}):
-                rdoi = re.sub('.*doi\.org\/', 'doi: ', a['href'])
-                a.replace_with(rdoi)
-            for a in li.find_all('a'):
-                a.replace_with('')
+            for a2 in li.find_all('a', attrs = {'class' : 'cross-ref'}):
+                rdoi = re.sub('.*doi\.org\/', 'doi: ', a2['href'])
+                a2.replace_with(rdoi)
+            for a2 in li.find_all('a'):
+                a2.replace_with('')
             rec['refs'].append([('x', li.text.strip())])
     recs.append(rec)
 
