@@ -163,10 +163,16 @@ def datetodate(date):
     months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
     months2 = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
     parts = re.split(' +', date.strip())
-    try:
-        return '%4i-%02i-%02i' % (int(parts[2]), months.index(parts[1].upper())+1, int(parts[0]))
-    except:
-        return '%4i-%02i-%02i' % (int(parts[2]), months2.index(parts[1].upper())+1, int(parts[0]))
+    if len(parts) == 3:
+        try:
+            return '%4i-%02i-%02i' % (int(parts[2]), months.index(parts[1].upper())+1, int(parts[0]))
+        except:
+            return '%4i-%02i-%02i' % (int(parts[2]), months2.index(parts[1].upper())+1, int(parts[0]))
+    elif len(parts) == 2:
+        try:
+            return '%4i-%02i' % (int(parts[1]), months.index(parts[0].upper())+1)
+        except:
+            return '%4i-%02i' % (int(parts[1]), months2.index(parts[0].upper())+1)
 
 
 def writeXML(recs,dokfile,publisher):
@@ -274,7 +280,7 @@ def writeXML(recs,dokfile,publisher):
             elif type(rec['pages']) == type(999):
                 xmlstring += marcxml('300',[('a',str(rec['pages']))])
         if rec.has_key('date'):
-            if re.search('[a-z] ', rec['date']):
+            if re.search('[a-zA-Z] ', rec['date']):
                 rec['date'] = datetodate(rec['date'])
             recdate = re.sub('\/','-',rec['date'])
             parts = re.split('\-', recdate)
