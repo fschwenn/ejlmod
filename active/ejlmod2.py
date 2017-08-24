@@ -361,7 +361,10 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('autaff'):
             marc = '100'
             for autaff in rec['autaff']:
-                autlist = [('a',shapeaut(autaff[0]))]
+                if re.search('\([eE]d\.\)', autaff[0]):
+                    autlist = [('a', shapeaut(re.sub(' *\([eE]d\.\) *','',autaff[0]))), ('e','ed.')]
+                else:
+                    autlist = [('a',shapeaut(autaff[0]))]
                 for aff in autaff[1:]:
                     if re.search('ORCID', aff):
                         autlist.append(('j', aff))
@@ -400,7 +403,7 @@ def writeXML(recs,dokfile,publisher):
                     #print tempaffs
                 else:
                     if re.search('\([eE]d\.\)',entry):
-                        aut = [('a', re.sub(' *\([eE]d\.\) *','',shapeaut(entry))), ('e','ed.')]
+                        aut = [('a', shapeaut(re.sub(' *\([eE]d\.\) *','',entry))), ('e','ed.')]
                     else:
                         author = shapeaut(entry)
                         aut = []
