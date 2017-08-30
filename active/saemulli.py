@@ -42,6 +42,7 @@ except:
 recs = []
 recc = re.compile('http.*creativecommons.org')
 repacs = re.compile('PACS numbers:? *')
+doneartlinks = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'list'}):
     for table in div.find_all('table'):
         for tr in table.find_all('tr'):
@@ -51,6 +52,10 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'list'}):
                 for a in td.find_all('a'):
                     artlink = '%s/%s' % (urltrunk, a['href'])
                     rec['tit'] = a.text.strip()
+                if artlink in doneartlinks:
+                    continue
+                else:
+                    doneartlinks.append(artlink)
                 time.sleep(10)
                 try:
                     artpage = BeautifulSoup(urllib2.urlopen(artlink))
@@ -101,13 +106,17 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'list'}):
                 for diva in authorstructure.find_all('div', attrs = {'class' : 'j_text_size'}):
                     if 'bold' in diva['class']:
                         continue
+                    for br in diva.find_all('br'):
+                        br.replace_with(';;;')
                     for sup in diva.find_all('sup'):
                         aff = 'Aff%s= ' % (sup.text.strip())
                         sup.replace_with(aff)
                     for divb in diva.find_all('div'):
-                        rec['aff'].append(divb.text.strip())
+                        affi = divb.text.strip()
                     if not rec['aff']:
-                        rec['aff'].append(diva.text.strip())
+                        affi = diva.text.strip()
+                    for aff in re.split(';;;', affi):
+                        rec['aff'].append(aff)
                         
                 recs.append(rec)
                 print rec['doi'], rec['tit']
