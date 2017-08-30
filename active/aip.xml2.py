@@ -91,6 +91,11 @@ def getarticle(href, sec, subsec, p1):
             #date
             elif meta['name'] == 'dc.Date':
                 rec['date'] = meta['content'] 
+    #check whether older date exists
+    for meta in artpage.head.find_all('meta'):
+        if meta.has_attr('name') and meta['name'] == 'dc.onlineDate':
+            if not rec.has_key('date') or meta['content'] < rec['date']:
+                rec['date'] = meta['content'] 
     #title
     for header in artpage.body.find_all('header', attrs = {'class' : 'publicationContentTitle'}):
         for h2 in header.find_all('h2'):
