@@ -1,4 +1,4 @@
-# -*- coding: UTF-8 -*-
+z# -*- coding: UTF-8 -*-
 # converts IOP xml files into dok format
 
 import os
@@ -52,7 +52,8 @@ jnl = {'1538-3881': 'Astron.J.',
       '0256-307X': 'Chin.Phys.Lett.',
       '0253-6102': 'Commun.Theor.Phys.',
       '0143-0807': 'Eur.J.Phys.',
-      '0295-5075': 'Europhys.Lett.',
+#      '0295-5075': 'Europhys.Lett.',
+      '0295-5075': 'EPL',
       '1751-8121': 'J.Phys.',
       '1742-6596': 'J.Phys.Conf.Ser.',
       '0954-3899': 'J.Phys.',
