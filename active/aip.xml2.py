@@ -45,7 +45,6 @@ elif (jnl == 'ltp'):
 elif (jnl == 'aipconf') or (jnl == 'aipcp') or (jnl == 'apc'):
     jnlname = 'AIP Conf.Proc.'
     jnl = 'apc'
-    iss = '1'
     typecode = 'C'
 
     
