@@ -25,42 +25,43 @@ regexpdxdoi = re.compile('http...dx.doi.org.')
 #initialEnd = re.compile(r'([A-Z])\b')
 
 starturl = sys.argv[1]
-issn = re.sub('.*\/(\d\d\d\d\-\d\d\d\d)\/.*', r'\1', starturl)
+issn = re.sub('.*\/(\d\d\d\d\-\d\d\d.)\/.*', r'\1', starturl)
 
 jnls = {'1538-3881': 'Astron.J.',
-      '0004-637X': 'Astrophys.J.',
-      '1538-4357': 'Astrophys.J.',
-      '2041-8205': 'Astrophys.J.',
-      '0067-0049': 'Astrophys.J.Supp.',
-      '0264-9381': 'Class.Quant.Grav.',
-      '1009-9271': 'Chin.J.Astron.Astrophys.',
-      '1009-1963': 'Chin.Phys.',
-      '1674-1056': 'Chin.Phys.',
-      '1674-1137': 'Chin.Phys.',
-      '0256-307X': 'Chin.Phys.Lett.',
-      '0253-6102': 'Commun.Theor.Phys.',
-      '0143-0807': 'Eur.J.Phys.',
-      '0295-5075': 'Europhys.Lett.',
-      '1751-8121': 'J.Phys.',
-      '1742-6596': 'J.Phys.Conf.Ser.',
-      '0954-3899': 'J.Phys.',
-      '1475-7516': 'JCAP ',
-      '1126-6708': 'JHEP ',
-      '1748-0221': 'JINST ',
-      '1742-5468': 'JSTAT ',
-      '0957-0233': 'Measur.Sci.Tech.',
-      '1367-2630': 'New J.Phys.',
-      '0031-9120': 'Phys.Educ.',
-      '1063-7869': 'Phys.Usp.',
-      '0034-4885': 'Rep.Prog.Phys.',
-      '1674-4527': 'Res.Astron.Astrophys.',
-      '1402-4896': 'Phys.Scripta',
-      '2399-6528': 'J.Phys.Comm.'}
+        '0004-637X': 'Astrophys.J.',
+        '1538-4357': 'Astrophys.J.',
+        '2041-8205': 'Astrophys.J.',
+        '0067-0049': 'Astrophys.J.Supp.',
+        '0264-9381': 'Class.Quant.Grav.',
+        '1009-9271': 'Chin.J.Astron.Astrophys.',
+        '1009-1963': 'Chin.Phys.',
+        '1674-1056': 'Chin.Phys.',
+        '1674-1137': 'Chin.Phys.',
+        '0256-307X': 'Chin.Phys.Lett.',
+        '0253-6102': 'Commun.Theor.Phys.',
+        '0143-0807': 'Eur.J.Phys.',
+        '0295-5075': 'Europhys.Lett.',
+        '1757-899X': 'IOP Conf.Ser.Mater.Sci.Eng.',
+        '1751-8121': 'J.Phys.',
+        '1742-6596': 'J.Phys.Conf.Ser.',
+        '0954-3899': 'J.Phys.',
+        '1475-7516': 'JCAP ',
+        '1126-6708': 'JHEP ',
+        '1748-0221': 'JINST ',
+        '1742-5468': 'JSTAT ',
+        '0957-0233': 'Measur.Sci.Tech.',
+        '1367-2630': 'New J.Phys.',
+        '0031-9120': 'Phys.Educ.',
+        '1063-7869': 'Phys.Usp.',
+        '0034-4885': 'Rep.Prog.Phys.',
+        '1674-4527': 'Res.Astron.Astrophys.',
+        '1402-4896': 'Phys.Scripta',
+        '2399-6528': 'J.Phys.Comm.'}
 if jnls.has_key(issn):
     jnl = jnls[issn]
 else:
     print 'journal not known'
-    sys.sexit(0)
+    sys.exit(0)
 
 tocpage = BeautifulSoup(urllib2.urlopen(starturl))
 recs = []   
@@ -167,7 +168,7 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                     recs.append(rec)
 
 
-iopf = 'iopcrawl.%s.%s.%s' % (jnl, rec['vol'], rec['issue'])
+iopf = 'iopcrawl.%s.%s.%s' % (re.sub(' ', '', jnl), rec['vol'], rec['issue'])
 
 xmlf = os.path.join(xmldir,iopf+'.xml')
 #xmlfile = open(xmlf, 'w')
