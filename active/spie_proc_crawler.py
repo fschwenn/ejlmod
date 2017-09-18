@@ -44,18 +44,42 @@ def spie(volume):
                 for a in div.find_all('a', attrs = {'class' : 'TocLineItemAnchorText1'}):
                     rec['artlink'] = '%s%s' % (urltrunc, a['href'])
                     rec['tit'] = a.text.strip()
-                    recs.append(rec)
+                    if not rec['artlink'] in [r['artlink'] for r in recs]:
+                        recs.append(rec)
+    #get detailed article pages
+    i = 0
+    for rec in recs:
+        i += 1
+        print '  get [%i/%i] %s' % (i, len(recs), rec['artlink'])
+        try:
+            time.sleep(20)
+            articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=400))
+        except:
+            print 'retry %s in 5 minutes' % (rec['artlink'])
+            time.sleep(300)
+            articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=400))
+        for meta in articlepage.head.find_all('meta'):
+            if meta.has_attr('name'):
+                if meta['name'] == 'citation_author':
+                    rec['articlepage'] = articlepage
+                    print '    found proper articlepage'
+                    break
     #get detailed informations from article pages
     i = 0
     for rec in recs:
         i += 1
-        print '  open [%i/%i] %s' % (i, len(recs), rec['artlink'])
-        try:
-            time.sleep(20)
-            articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=300))
-        except:
-            print 'retry %s in 5 minutes' % (urltrunc +link)
-            time.sleep(300)
+        if rec.has_key('articlepage'):
+            print '  open [%i/%i] %s' % (i, len(recs), 'use article page in cache')
+            articlepage = rec['articlepage']
+        else:
+            print '  open [%i/%i] %s' % (i, len(recs), rec['artlink'])
+            try:
+                time.sleep(20)
+                articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=400))
+            except:
+                print 'retry %s in 5 minutes' % (rec['artlink'])
+                time.sleep(300)
+                articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=400))
         autaff = []
         for meta in articlepage.head.find_all('meta'):
             if meta.has_attr('name'):
@@ -96,6 +120,7 @@ def spie(volume):
                 rec['pages'] = pages[0]
         if len(args) > 1:
             rec['cnum'] = args[1]
+        del rec['articlepage']
         if rec.has_key('year'):
             print '  %s %s (%s) %s, %s' % (jnlname,volume,rec['year'],rec['p1'],rec['tit'])
         else:
