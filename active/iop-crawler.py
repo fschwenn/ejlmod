@@ -172,6 +172,8 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                     rec['refs'].append([('x', ref)])
                 if not rec['autaff']:
                     for span in artpage.body.find_all('span', attrs = {'itemprop' : 'author'}):
+                        for sup in span.find_all('sup'):
+                            sup.replace_with('')
                         rec['autaff'].append([span.text])
                 print '  - ', rec['doi']
                 if rec['autaff']:
