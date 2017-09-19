@@ -468,7 +468,9 @@ def writeXML(recs,dokfile,publisher):
 def shapeaut(author):
     if not re.search(',', author):
         author = re.sub('(.*) (.*)',r'\2, \1',author).strip()
-    author = re.sub('([A-Z] ?\.)[ \-]([A-Z] ?\.)',r'\1\2', author)
+    author = re.sub(' ([A-Z]) ',r' \1. ', author)
+    author = re.sub(' ?([A-Z])$',r'\1.', author)
+    author = re.sub('([A-Z] ?\.)[ \-]([A-Z] ?\.?)',r'\1\2', author)
     if not re.search('[a-z]', author):
         author = author.title()
     return author
