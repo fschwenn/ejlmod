@@ -471,6 +471,7 @@ def shapeaut(author):
     author = re.sub(' ([A-Z]) ',r' \1. ', author)
     author = re.sub(' ?([A-Z])$',r'\1.', author)
     author = re.sub('([A-Z] ?\.)[ \-]([A-Z] ?\.?)',r'\1\2', author)
+    author = re.sub(', *', ', ', author.strip())
     if not re.search('[a-z]', author):
         author = author.title()
     return author
