@@ -99,6 +99,13 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                 artlink = 'http://iopscience.iop.org' + a['href']
                 artpage = BeautifulSoup(urllib2.urlopen(artlink))
                 autaff = False
+                #licence
+                for divl in artpage.body.find_all('div', attrs = {'class' : 'col-no-break wd-jnl-art-license media'}):
+                    for a in divl.find_all('a'):
+                        if a.has_attr('href'):
+                            if re.search('creativecommons.org', a['href']):
+                                rec['licence'] = {'url' : a['href']}       
+                #metadata
                 for meta in artpage.find_all('meta'):
                     if meta.has_attr('name'):
                         if meta['name'] == 'citation_title':
@@ -113,8 +120,8 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                             rec['p1'] = meta['content']
                         elif meta['name'] == 'citation_doi':
                             rec['doi'] = meta['content']
-                        #elif meta['name'] == 'citation_pdf_url':
-                        #    rec['pdf'] = meta['content']
+                        elif meta['name'] == 'citation_pdf_url' and rec.has_key('licence'):
+                            rec['FFT'] = meta['content']
                         #autaff
                         elif meta['name'] == 'citation_author':
                             if autaff:
@@ -163,6 +170,9 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                     if regexpiopurl.search(ref):
                         ref = regexpiopurl.sub('DOI: 10.1088/', ref)
                     rec['refs'].append([('x', ref)])
+                if not rec['autaff']:
+                    for span in artpage.body.find_all('span', attrs = {'itemprop' : 'author'}):
+                        rec['autaff'].append([span.text])
                 print '  - ', rec['doi']
                 if rec['autaff']:
                     recs.append(rec)
