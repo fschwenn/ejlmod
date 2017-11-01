@@ -445,11 +445,17 @@ def xmlExtract():
     #references
     rec['refs'] = []
     for citation in artxml.getElementsByTagName('Citation'):
+        reftext = ''
         doitext = ''
-        for doi in citation.getElementsByTagName('Occurrence'):
-            if doi.hasAttribute('Type') and doi.getAttribute('Type') == 'DOI':
-                doitext = '; DOI: ' + getAllText(doi)
-        rec['refs'].append([('x', getAllText(citation) + doitext)])
+        for BibUnstructured in citation.getElementsByTagName('BibUnstructured'):
+            reftext = getAllText(BibUnstructured)
+        if len(reftext) < 20:
+            reftext = getAllText(citation)
+        if not re.search('10\.\d+\/', reftext):            
+            for doi in citation.getElementsByTagName('Occurrence'):
+                if doi.hasAttribute('Type') and doi.getAttribute('Type') == 'DOI':
+                    reftext = reftext + '; DOI: ' + getAllText(doi)
+        rec['refs'].append([('x', reftext)])
     
     #for citation in artxml.getElementsByTagName('BibUnstructured'):
 
