@@ -127,7 +127,8 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
        '5664': ['assl', 'Astrophys.Space Sci.Libr.'],
        '6316': ['mpstud', 'Math.Phys.Stud.'],
        '8431': ['gtip', 'Grad.Texts Math.'],
-      '11006': ['matnot', 'Math.Notes']}
+      '11006': ['matnot', 'Math.Notes'],
+      '41781': ['csbg', 'Comput.Softw.Big Sci.']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
@@ -733,7 +734,8 @@ for d1 in os.listdir(sprdir):
 		    if isbook: jrnl = jc[jnr][0] + vol #(FS) write a book completely in one file
                     jrnl = jrnl.replace("JournalOnlineFirst", "OF")
                     print jrnl
-                    if "OF" in jrnl and jnr not in ('10714', '10052', '13130'):
+                    #if "OF" in jrnl and jnr not in ('10714', '10052', '13130'):
+                    if "OF" in jrnl:
                         print "wait until print version for this journal."
                     else:
                         str(cday)
