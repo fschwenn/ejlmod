@@ -77,7 +77,7 @@ def getarticle(href, sec, subsec, p1):
     if sec:
         rec['note'].append(sec)
         if sec == 'NEW PRODUCTS':
-            return {}
+            return {'auts' : False}
         elif sec == 'CONTRIBUTED REVIEW ARTICLES':
             rec['tc'] = 'R'
     if subsec:
@@ -116,14 +116,21 @@ def getarticle(href, sec, subsec, p1):
             for sup in li.find_all('sup'):
                 affnr =  re.sub('\)', '', sup.text)
                 sup.replace_with('Aff%s= ' % affnr)
-            rec['aff'].append(li.text)
+            for a in li.find_all('a', attrs = {'class' : 'email'}):
+                emails[affnr] = re.sub('mailto:', '', a['href'])
+            if not emails.has_key(affnr):
+                rec['aff'].append(li.text)
     if not rec['aff']:
         for div in artpage.body.find_all('div', attrs = {'class' : 'affiliations-list list-unstyled hide'}):
             for li in div.find_all('li'):
+                affnr = False
                 for sup in li.find_all('sup'):
                     affnr =  re.sub('\)', '', sup.text)
                     sup.replace_with('Aff%s= ' % affnr)
-                rec['aff'].append(li.text)
+                for a in li.find_all('a', attrs = {'class' : 'email'}):
+                    emails[affnr] = re.sub('mailto:', '', a['href'])
+                if affnr and not emails.has_key(affnr):
+                    rec['aff'].append(li.text)
     #authors
     affnr = 2 + len(rec['aff'])
     for div in artpage.body.find_all('div', attrs = {'class' : 'entryAuthor'}):
