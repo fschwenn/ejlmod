@@ -120,7 +120,10 @@ def spie(volume):
                 rec['pages'] = pages[0]
         if len(args) > 1:
             rec['cnum'] = args[1]
-        del rec['articlepage']
+        try:
+            del rec['articlepage']
+        except:
+            pass
         if rec.has_key('year'):
             print '  %s %s (%s) %s, %s' % (jnlname,volume,rec['year'],rec['p1'],rec['tit'])
         else:
