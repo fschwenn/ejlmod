@@ -454,7 +454,7 @@ def xmlExtract():
         if not re.search('10\.\d+\/', reftext):            
             for doi in citation.getElementsByTagName('Occurrence'):
                 if doi.hasAttribute('Type') and doi.getAttribute('Type') == 'DOI':
-                    reftext = reftext + '; DOI: ' + getAllText(doi)
+                    reftext = reftext + ', DOI: ' + getAllText(doi)
         rec['refs'].append([('x', reftext)])
     
     #for citation in artxml.getElementsByTagName('BibUnstructured'):
