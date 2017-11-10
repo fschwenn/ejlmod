@@ -1,4 +1,4 @@
-z# -*- coding: UTF-8 -*-
+# -*- coding: UTF-8 -*-
 # converts IOP xml files into dok format
 
 import os
@@ -97,7 +97,9 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'International Workshop on Semiconductor Pixel Detectors for Particles and Imaging (Pixel 2016)' : 'C16-09-05.3',
             '14th Topical Seminar on Innovative Particle and Radiation Detectors (IPRD16)' : 'C16-10-03',
             'Topical Workshop on Electronics for Particle Physics (TWEPP2016)' : 'C16-09-26.4',
-            'International Conference on Instrumentation for Colliding Beam Physics (INSTR17)' : 'C17-02-27'}
+            'International Conference on Instrumentation for Colliding Beam Physics (INSTR17)' : 'C17-02-27',
+            'Precision Astronomy with Fully Depleted CCDS (PACCD2016)' : 'C16-12-01.1',
+            '19th International Workshop on Radiation Imaging Detectors (IWORID2017)' : 'C17-07-02.5'}
 
 
 
