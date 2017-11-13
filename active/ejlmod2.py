@@ -9,10 +9,28 @@ import platform
 from collclean_lib import coll_cleanforthe
 from collclean_lib import coll_clean710
 from collclean_lib import coll_split
-if not platform.node() in ['bib-pubdb2', 'bib-pubdb1', 'bib-pubdbvm2.desy.de', 'bib-pubdbvm1.desy.de']:
-    from invenio.refextract_api import extract_references_from_string
+from refextract import  extract_references_from_string
+
 
 #from collclean import clean710
+
+#mappings for refferences in JSON to MARC 
+mappings = [('doi', 'a'),
+            ('collaborations', 'c'),
+            ('document_type', 'd'),
+            ('author', 'h'),
+            ('isbn', 'i'),
+            ('texkey', 'k'),
+            ('misc', 'm'),
+            ('journal_issue', 'n'),
+            ('label', 'o'),
+            ('linemarker', 'o'),
+            ('reportnumber', 'r'),
+            ('journal_reference', 's'),
+            ('title', 't'),
+            ('urls', 'u'),
+            ('raw_ref', 'x'),
+            ('year', 'y')]
 
 #auxiliary function to strip lines
 def tgstrip(x): return x.strip()
@@ -430,15 +448,17 @@ def writeXML(recs,dokfile,publisher):
             for ref in rec['refs']:
                 #print '  ->  ', ref
                 if len(ref) == 1 and ref[0][0] == 'x':
-                    refrec = extract_references_from_string(ref[0][1])
-                    for entry in refrec['999']:
-                        if entry.ind2 == '5':
-                            entryaslist = [(se.code,se.value) for se in entry.subfields]
-                            entryaslist.append(('9','refextract'))
-                            try:
-                                xmlstring += marcxml('999C5',entryaslist)
-                            except:
-                                print 'UTF8 Problem in Referenzen'
+                    for ref in extract_references_from_string(ref[0][1], override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
+                        entryaslist = [('9','refextract')]
+                        for key in ref.keys():
+                            for mapping in mappings:
+                                if key == mapping[0]:
+                                    for entry in ref[key]:
+                                        entryaslist.append((mapping[1], entry))
+                        try:
+                            xmlstring += marcxml('999C5',entryaslist)
+                        except:
+                            print 'UTF8 Problem in Referenzen'
                 else:
                     xmlstring += marcxml('999C5',ref)
         xmlstring += marcxml('980',[('a','HEP')])
@@ -452,15 +472,12 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('typ'):
             xmlstring += marcxml('599',[('a',rec['typ'])])
         xmlstring += '</record>\n'
-        #xmlstring = xmlstring.replace(chr(0xa0), ' ')
-
-        #wrinting string-xmls
-        #dokfile.write(xmlstring.encode("utf8", "ignore"))
-        #wrinting unicode-xmls
         try:
-            dokfile.write(xmlstring.decode("utf8", "ignore"))
-        except:
+            print '[]write[]'
             dokfile.write(xmlstring)
+        except:
+            print '[]except[]'
+            dokfile.write(xmlstring.encode("utf8", "ignore"))
     dokfile.write('</collection>\n')
     return
 
