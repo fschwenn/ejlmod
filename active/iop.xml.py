@@ -1,25 +1,26 @@
 # -*- coding: UTF-8 -*-
-# converts IOP xml files into dok format
+# converts IOP xml files into INSPIRE-xml format
+# FS 2017-11-13
 
 import os
 import sys
-import xml.dom.minidom
-import xml.sax
-myParser = xml.sax.make_parser()
-import urllib
-#import Recode
-#reload(ejlmod)
-import ejlmod2
 import re
 import time
 import codecs
-from shutil import copyfile 
 from bs4 import BeautifulSoup
 import urllib2
 import urlparse
+import ejlmod2
+
+
+
+#import urllib
+#import xml.dom.minidom
+#import xml.sax
+#myParser = xml.sax.make_parser()
+#from shutil import copyfile 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-lproc = '/afs/desy.de/user/l/library/proc'
 publisher = 'IOP'
 
 try:
@@ -32,13 +33,12 @@ regexpiopurl = re.compile('http...iopscience.iop.org.')
 regexpdxdoi = re.compile('http...dx.doi.org.')
 
 file = "/afs/desy.de/group/library/publisherdata/iop/alert.stacks2_" + sys.argv[1]
-#xmlfile = open(os.path.join(xmldir,'TEST-FS-'+iopf+'.xml'), 'w')
 
 collapseWs = re.compile('[\n \t]+')
 #initialBlank = re.compile('([A-Z]) ')
 initialEnd = re.compile(r'([A-Z])\b')
 
-#INSPIRE convention instead of DPBN as in springer.py
+#ISSN to journal name
 jnl = {'1538-3881': 'Astron.J.',
       '0004-637X': 'Astrophys.J.',
       '1538-4357': 'Astrophys.J.',
@@ -52,7 +52,6 @@ jnl = {'1538-3881': 'Astron.J.',
       '0256-307X': 'Chin.Phys.Lett.',
       '0253-6102': 'Commun.Theor.Phys.',
       '0143-0807': 'Eur.J.Phys.',
-#      '0295-5075': 'Europhys.Lett.',
       '0295-5075': 'EPL',
       '1751-8121': 'J.Phys.',
       '1742-6596': 'J.Phys.Conf.Ser.',
@@ -71,6 +70,7 @@ jnl = {'1538-3881': 'Astron.J.',
       '2399-6528': 'J.Phys.Comm.',
 }
 
+#CNUMs for conferences in JINST
 cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RPC2014)': 'C14-02-23.2',
             '12th Workshop on Resistive Plate Chambers and Related Detectors': 'C14-02-23.2',
             'International Conference on Instrumentation for Colliding Beam Physics (INSTR14)': 'C14-02-24',
@@ -103,67 +103,66 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
 
 
 
+def fsunwrap(tag):
+    try: 
+        for sup in tag.find_all('SUP'):
+            cont = sup.string
+            sup.replace_with('^'+cont)
+    except:
+        print 'fsunwrap-sup-problem'
+    try: 
+        for sub in tag.find_all('SUB'):
+            cont = sub.string
+            sub.replace_with('_'+cont)
+    except:
+        print 'fsunwrap-sub-problem'
+    return tag
+
+
+
 #tocxml = xml.dom.minidom.parse(file)
 print file
-tocxml = xml.dom.minidom.parse(file,myParser)
-recs = {}                         # dictionary of all records, key: pubnote
-nr = 1
-refprog = 'python ' + os.path.join(lproc,"Ejl/ref.iop.py")
+tocfile = codecs.EncodedFile(codecs.open(file,mode='r'), 'ISO-8859-1')
+tocraw = ''.join(tocfile.readlines())
+tocfile.close()
 
-def getAllText(anynode):
-    text = []
-    def recursive(n):
-        if  n.parentNode.tagName in ('SUB', 'SUP'):
-            try:
-                text.append('(' + n.data + ')')
-            except: pass
+tocpage = BeautifulSoup(tocraw)
+
+recsunsrtd = []                         # dictionary of all records, key: pubnote
+for article in tocpage.find_all('stk_header'):
+    rec = {'note' : [], 'keyw' : [], 'aff' : []}
+    #journal
+    for issnnode in article.find_all('issn'):
+        issn = issnnode.text.strip()
+        if jnl.has_key(issn):
+            rec['jnl'] = jnl[issn]
+            if issn in ['1742-6596']:
+                tc = ['C']
+            else:
+                tc = ['P']
         else:
-            text.append((n.nodeType == n.TEXT_NODE and n.data) or "")
-        try:
-            text.append((n.tagName == 'IMG'  and n.attributes['ALT'].value) or "")
-        except: pass
-        for c in n.childNodes: recursive(c)
-    recursive(anynode)
-#    texts = ''.join(text)
-    texts = ''.join(text)
-#    texts = collapseWs.sub(' ', texts)
-    return texts
-
-        
-for node in tocxml.getElementsByTagName('stk_header'):
-    rec = {'note' : []}
-    tit = ''
-    issn = node.getElementsByTagName('issn')[0].firstChild.data
-    if jnl.has_key(issn):
-        rec['jnl'] = jnl[issn]
-        if issn in ['1742-6596']:
-            tc = ['C']
-        else:
-            tc = ['P']
-    else:
-        print 'unknown ISSN:', issn
-        
-
-    for attrnode in node.getElementsByTagName('attributes'):
-        art_type = attrnode.attributes['art_type'].value
-        if art_type == 'rev': tc = ['R']
-        elif art_type == 'misc': tc = ['']
-    for focusnode in node.getElementsByTagName('art_focus'):
-        if focusnode.attributes['alt'].value == 'Proceeding Article':
-            tc = ['C']
-        try:
-            rec['note'].append(focusnode.attributes['alt'].value)
-        except:
-            pass
-        try:
-            comm = focusnode.attributes['group'].value
+            print 'unknown ISSN:', issn
+    #article type
+    for attrnode in article.find_all('attributes'):        
+        if attrnode.has_attr('art_type'):
+            if attrnode['art_type'] == 'rev':
+                tc = ['R']
+            elif attrnode['art_type'] == 'misc': 
+                tc = ['']
+    #conference
+    for focusnode in article.find_all('art_focus'):
+        if focusnode.has_attr('alt'):
+            if focusnode['alt'] == 'Proceeding Article':
+                tc = ['C']
+            rec['note'].append(focusnode['alt'])
+        if focusnode.has_attr('group'):
+            comm = focusnode['group']
             rec['comments'] = [comm]
             if comm in cnumdict.keys():
                 rec['cnum'] = cnumdict[comm]
-        except:
-            pass
-    try:
-        rec['vol'] = node.getElementsByTagName('volume')[0].firstChild.data
+    #volume
+    for volumenode in article.find_all('volume'):
+        rec['vol'] = volumenode.text.strip()
         if issn == '1674-1056':
             rec['vol'] = 'B'+rec['vol']
         elif issn == '1674-1137':
@@ -172,196 +171,124 @@ for node in tocxml.getElementsByTagName('stk_header'):
             rec['vol'] = 'A'+rec['vol']
         elif issn == '0954-3899':
             rec['vol'] = 'G'+rec['vol']
-    except:
-        pass
-    try:
-        issue = node.getElementsByTagName('issue')[0].firstChild.data
+    #issue
+    for issuenode in article.find_all('issue'):
+        issue = issuenode.text.strip()
         if issn == '1402-4896' and issue[0] == 'T':
             rec['vol'] = issue
         else:
             rec['issue'] = issue
             if issue.startswith("S"): #we have a supplememnt 
-                rec['jnl'] += " Suppl."             
-    except:
-        pass
-
-    datecover = node.getElementsByTagName('date_cover')[0].firstChild.data
-    rec['year'] = datecover[0:4]
-    try:
+                rec['jnl'] += " Suppl."                     
+    #year
+    for datenode in article.find_all('date_cover'):
+        datecover = datenode.text.strip()
+        rec['year'] = datecover[0:4]
         if rec['jnl'] in ['JCAP ', 'JHEP ', 'JSTAT ']:
             rec['vol'] = datecover[2:4] + datecover[5:7]
-    except: pass
-
-    try:
-        rec['artnum'] = node.getElementsByTagName('artnum')[0].firstChild.data
+    #article number
+    for artnumnode in article.find_all('artnum'):
+        rec['artnum'] = artnumnode.text.strip()
         if issn == '1748-0221' and rec['artnum'][0] == 'C':
             rec['tc'] = ['C']
-    except:
-        pass
-    rec['doi'] = node.getElementsByTagName('doi')[0].firstChild.data
-
-    pag = node.getElementsByTagName('pages')[0]
-    try:
-        rec['pages'] = pag.attributes['extent'].value
-    except:
-        pass
-    rec['p1'] = pag.attributes['start'].value
-    try:
-        rec['p2'] = pag.attributes['end'].value
-    except KeyError: pass
-
-    for idnode in node.getElementsByTagName('external_id'):
-        try:
-            idnode.attributes['type'].value == 'arxive'
-            rec['arxiv'] = idnode.firstChild.data.split('v')[0]
-            print rec['arxiv']
-        except:
-            pass
-    
-    for datenode in node.getElementsByTagName('date_online'):
-        try:
-            rec['date'] = datenode.attributes['fulltext'].value 
-        except:
-            rec['date'] = datenode.attributes['header'].value 
-    
-    rec['tit'] = ''
-    for tnode in node.getElementsByTagName('title_full'):
-        for c in tnode.childNodes:
-            if c.nodeName == 'footnote':
-                footnote = tnode.removeChild(c)
-                try:
-                    rec['note'].append(footnote.firstChild.data)
-                except:
-                    pass
-        rec['tit'] += getAllText(tnode)
-    rec['tit']  = rec['tit'] 
-    rec['tit']  = collapseWs.sub(' ', rec['tit'])
-    rec['typ'] = ''
-
+    #DOI
+    for doinode in article.find_all('doi'):
+        rec['doi'] = doinode.text.strip()
+    #pages
+    for pagenode in article.find_all('pages'):
+        if pagenode.has_attr('extent'):
+            rec['pages'] = pagenode['extent']
+        if pagenode.has_attr('start'):
+            rec['p1'] = pagenode['start']
+        if pagenode.has_attr('end'):
+            rec['p2'] = pagenode['end']
+    #arXiv number
+    for idnode in article.find_all('external_id'):
+        if idnode.has_attr('type') and idnode['type'] == 'arxive':
+            rec['arxiv'] = re.sub('v.*', '', idnode.text.strip())
+    #date
+    for datenode in article.find_all('date_online'):
+        if datenode.has_attr('fulltext'):
+            rec['date'] = datenode['fulltext']
+        elif datenode.has_attr('header'):
+            rec['date'] = datenode['header']
+        else:
+            print 'no date for %s' % (rec['doi'])
+    #title
+    for titnode in article.find_all('title_full'):
+        for footnode in titnode.find_all('footnote'):
+            rec['note'].append(footnode.text.strip())
+            footnode.replace_with('')
+        fsunwrap(titnode)
+        rec['tit'] = titnode.text.strip()
+        rec['tit']  = collapseWs.sub(' ', rec['tit'])
+    #keywords
+    for kwnode in article.find_all('kwd_main'):
+        rec['keyw'].append(kwnode.text.strip())
+    #authors
     authors = []
     afid = ''
-    kwd_list = []
-    for kwds in node.getElementsByTagName('subjects'):
-        for kwd in kwds.getElementsByTagName('kwd_main'):
-            try:
-                kwd_list.append(kwd.firstChild.data)
-            except:
-                pass
-            
-    if kwd_list != []: rec["keyw"] = kwd_list   
-    
-    for au in node.getElementsByTagName('author_granular'):
-        nlfname = ''
-        nllname = ''
-        try:
-            #rec['col'] = au.getElementsByTagName('group')[0].firstChild.data
-            rec['col'] = getAllText(au.getElementsByTagName('group')[0])
-            continue
-        except:
-            try:
-                #rec['col'] = au.getElementsByTagName('group')[0].firstChild.firstChild.data
-                rec['col'] = getAllText(au.getElementsByTagName('group')[0].firstChild)
-                continue
-            except:
-                pass
-        try:
-            fname = au.getElementsByTagName('given')[0].firstChild.data
-            #fname = fname.encode('utf8..spidoc', 'replace')
-            fname = initialEnd.sub(r'\1.',fname)
-            fname = fname.replace('. ', '.')
-            fname = fname.replace('..', '.')
-            if 'non_latin' in au.getElementsByTagName('given')[0].attributes.keys():
-                nlfname = au.getElementsByTagName('given')[0].attributes['non_latin'].value
-        except:
-            fname = ''
-        try:
-            lname = getAllText(au.getElementsByTagName('surname')[0])            
-            if 'non_latin' in au.getElementsByTagName('surname')[0].attributes.keys():
-                nllname = au.getElementsByTagName('surname')[0].attributes['non_latin'].value
-#        lname = au.getElementsByTagName('surname')[0].firstChild.data
-            #lname = lname.encode('utf8..spidoc', 'replace')
-        except: 
-            continue
+    for aunode in article.find_all('author_granular'):
+        #name
+        (fname, nlfname, nllname) = ('', '', '')
+        for group in aunode.find_all('group'):
+            rec['col'] = group.text
+        for fnamenode in aunode.find_all('given'):
+            fname = initialEnd.sub(r'\1.', fnamenode.text)
+            if fnamenode.has_attr('non_latin'):
+                nlfname = fnamenode['non_latin']
+        for lnamenode in aunode.find_all('surname'):
+            lname = lnamenode.text
+            if lnamenode.has_attr('non_latin'):
+                nllname = lnamenode['non_latin']
+        #affiliation
         afido = afid
-        try:
-            afid = au.attributes["affil"].value
-            afid = afid.replace(',','; =')
-        except:
-            afid = ''
+        afi = ''
+        if aunode.has_attr('affil'):
+            afid = aunode['affil'].replace(',','; =')
         if (afid != afido) and afido:
-            authors.append('=' + afido)           
-        
-        if 'orcid' in au.attributes.keys():
-            orcid = 'ORCID:'+au.attributes['orcid'].value
+            authors.append('=' + afido)         
+        #ORCID and combine
+        if aunode.has_attr('orcid'):
+            orcid = 'ORCID:' + aunode['orcid']
             finalauthor = lname + ', ' + fname +  ', ' + orcid
         else:
             finalauthor = lname + ', ' + fname
         if nllname + nlfname != '':
             finalauthor += ', CHINESENAME: ' + nllname + ' ' +  nlfname
         authors.append(finalauthor)
-
-#    if afid and afido:
     if afid:
         authors.append('=' + afid)
     rec['auts'] = authors
-    afido = afid = ''
-
-    if not node.getElementsByTagName('author_granular'):
-        for au in node.getElementsByTagName('author'):
-            try:
-                aut = getAllText(au)
-#                aut = au.firstChild.data
-            except AttributeError:
-                continue
+    (afid, afido) = ('', '')
+    if not authors:
+        for aunode in article.find_all('author'):
+            aut = aunode.text.strip()
             if 'Collaboration' in aut:
                 rec['col'] = aut
                 continue
-            blank = aut.rfind(' ')
-            if blank > 0:
-                fname = aut[:blank].replace('. ', '.')
-                fname = initialEnd.sub(r'\1.',fname).replace('..', '.')
-                lname = aut[blank+1:]
-                authors.append(lname + ', ' + fname)
-            else:
-                authors.append(aut)
-            try:
-                afid = au.attributes["affil"].value
-                afid = afid.replace(',','; =')
+            authors.append(aut)
+            if aunode.has_attr('affil'):
+                afid = aunode['affil'].replace(',','; =')
                 authors.append('=' + afid)
-            except:
-                pass
         rec['auts'] = authors
-        
-    rec['aff'] = []
-    affid = ''
-    for afnode in node.getElementsByTagName('affil'):
-        try:
-            affid = afnode.attributes["id"].value
-        except:
-            pass
-        orgname = ''
-        for orgnode in afnode.childNodes:
-            if orgnode.nodeType == orgnode.TEXT_NODE:
-                orgname += orgnode.data
-#            orgname = afnode.firstChild.data
-        orgname = orgname.replace('\n', ' ')
-        orgname = orgname.replace('University', 'U.')
-        orgname = orgname.replace(',', ' -')
-        if affid:
-            orgname = affid + "= " + orgname
-        rec['aff'].append(orgname)
-        affid = ''
-#        except AttributeError:
-#            pass
-    for oanode in node.getElementsByTagName('open_access'):
-        rec['licence'] = {
-            'url' : oanode.attributes['url'].value,
-            'statement' : oanode.attributes['license_type'].value}
-        if issn in ['XXX1742-6596', 'XXX1367-2630']:
-            rec['FFT'] = 'http://iopscience.iop.org/%s/pdf/%s.pdf' % (rec['doi'][8:], re.sub('\/', '_', rec['doi'][8:]))
-            rec['FFT'] = 'http://iopscience.iop.org/article/%s/pdf' % (rec['doi'])
+    #affiliations
+    (affid, orgname) = ('', '')
+    for afnode in article.find_all('affil'):
+        if afnode.has_attr('id'):
+            affid = afnode['id']
+        rec['aff'].append('%s= %s' % (affid, collapseWs.sub(' ', afnode.text.strip())))
+    #Open Access
+    for oanode in article.find_all('open_access'):
+        rec['licence'] = {'url' : oanode['url']}
+        #if issn in ['1742-6596', '1367-2630']:
+        #    rec['FFT'] = 'http://iopscience.iop.org/article/%s/pdf' % (rec['doi'])
+    #typecode
     rec['tc'] = tc
-    abstxt = ''
+    #abstract
+    for absnode in article.find_all('header_text', attrs = {'heading' : 'Abstract'}):
+        fsunwrap(absnode)
+        rec['abs'] = collapseWs.sub(' ', absnode.text.strip())
     #references
     refurl = "http://iopscience.iop.org/article/%s/meta" % (rec['doi'])
     print '  lynx %s' % (refurl)
@@ -401,15 +328,6 @@ for node in tocxml.getElementsByTagName('stk_header'):
     except:
         print 'no references'
 
-    for absnode in node.getElementsByTagName('header_text'):
-        try:
-            if absnode.attributes['heading'].value.upper() == 'ABSTRACT':
-                abstxt = getAllText(absnode).encode('utf8')
-                abstxt = collapseWs.sub(' ', abstxt)
-        except KeyError: pass
-
-        abstxt = abstxt.replace(';', ',')
-        rec['abs'] = abstxt.replace('"', "'")
         try:            
             rec["pbn"] = rec['jnl'] + rec['vol'] + rec['p1']
             recs[nr] = rec
@@ -417,27 +335,22 @@ for node in tocxml.getElementsByTagName('stk_header'):
         except:
             pass
         #print rec
+    #publication note
+    try:
+        pbn = rec['jnl'] + rec['vol'] + rec['p1']
+    except:
+        pbn = ''
+    recsunsrtd.append((pbn, rec))
 
-    orgname = ''
-
-# FS brand neu (2014-07-18), schlampig geschrieben und nur duerftig  gecheckt!
-    #refprog = 'python ' + os.path.join(lproc,"Ejl/ref.iop.py") + ' "' + str(rec["doi"]) + '"'
-    #os.system(refprog)    #  extract and write refs (subscribed jnls)
-    refprog += ' "' + str(rec["doi"]) + '"'
-
-def sort_iop(recs):
-    """iop records unsorted in xml. sort them by the pbn"""
-    recs_sorted = []
-    sorted_list = sorted(recs.iteritems(), key=lambda x:x[1]["pbn"]) 
-    for entry in sorted_list: 
-        recs_sorted.append(recs[entry[0]])
-    return recs_sorted
-
+#sort articles by publication note
+recsunsrtd.sort()
+recs = [tupel[1] for tupel in recsunsrtd]
+ 
+        
 
 xmlf = os.path.join(xmldir,iopf+'.xml')
-#xmlfile = open(xmlf, 'w')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(sort_iop(recs) ,xmlfile,'IOP')
+ejlmod2.writeXML(recs ,xmlfile,'IOP')
 xmlfile.close()
 
 #retrival
@@ -448,8 +361,4 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
-
-#print "---REFERENCES---"
-#print refprog
-#os.system(refprog)    #  extract and write refs (subscribed jnls)
 
