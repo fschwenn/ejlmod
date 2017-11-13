@@ -377,7 +377,7 @@ def xmlExtract():
         abst = artxml.getElementsByTagName('Abstract')
         abstxt = getAllTextplusTeX(abst[0].getElementsByTagName('Para')[0])
         #print '[ABS]',abstxt
-        abstxt = abstxt.encode('utf8')
+        #abstxt = abstxt.encode('utf8')
         rec["abs"] = abstxt.replace(';', ',').replace('"', '\'')
     except:
         rec["abs"] = ''
