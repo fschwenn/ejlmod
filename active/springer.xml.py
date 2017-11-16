@@ -665,10 +665,9 @@ for d1 in os.listdir(sprdir):
         if jnr in jw:
             print jnr + ' uninteresting'
             continue
-	try:
-            jc[jnr]
-        except KeyError:
+        if not jc.has_key(jnr):
             print 'journal skipped: ' + jnr
+            os.system('echo "check www.springer.com/journal/%s" | mail -s "[SPRINGER] unknown journal" %s' % (jnr, 'florian.schwennsen@desy.de'))
             continue
    #     df2 = os.path.join(df, d1)
         for d2 in os.listdir(df2):                                   # volume
