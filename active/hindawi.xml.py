@@ -56,6 +56,8 @@ elif (jnl == 'gravity'):
 elif (jnl == 'jgrav'):
     issn = ''
     jnlname = 'J.Grav.'
+elif (jnl == 'aaa'):
+    jnlname = 'Abstr.Appl.Anal.'
 
 if re.search('isrn',jnl):
     if re.search('astro',jnl):
