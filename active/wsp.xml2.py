@@ -67,17 +67,8 @@ def getreferencesfromweb(doi):
         #refextract
         reftext = regexpcr.sub(' ', li.text.strip())
         #print '     ', reftext
-        try:
-            refrec = extract_references_from_string(reftext)
-            for entry in refrec['999']:
-                if entry.ind2 == '5':
-                    entryaslist = [(se.code,se.value) for se in entry.subfields]
-                    entryaslist.append(('9','refextract'))
-                    refs.append(entryaslist)
-        except:
-            refs.append([('x', reftext)])
-    print '     extracted %i references for %s' % (len(refs), doi)
-    time.sleep(60+50)
+        refs.append([('x', reftext)])
+    time.sleep(50)
     return refs
 
 
@@ -195,7 +186,8 @@ for datei in os.listdir(wspdir):
         continue
     elif datei in ['done']:
         continue
-    jnlfilename = 'WSP__'+datei
+    #jnlfilename = 'WSP__'+datei
+    jnlfilename = datei
     print jnlfilename
     rawrecs = []
     for datei2 in os.listdir(ordner):
