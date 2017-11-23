@@ -9,7 +9,12 @@ import platform
 from collclean_lib import coll_cleanforthe
 from collclean_lib import coll_clean710
 from collclean_lib import coll_split
-from refextract import  extract_references_from_string
+try:
+    # needed to remove the print-commands from /usr/lib/python2.6/site-packages/refextract/references/engine.py
+    from refextract import  extract_references_from_string
+except:
+    #for running on PubDB
+    print 'could not import extract_references_from_string'
 
 
 #from collclean import clean710
@@ -429,7 +434,7 @@ def writeXML(recs,dokfile,publisher):
                             aut.append(('q', re.sub('.*, CHINESENAME: ', '', author)))
                             author = re.sub(', CHINESENAME.*', '', author)
                         elif re.search('ORCID', author):
-                            aut.append(('j', re.sub('.*, ',  '', author)))
+                            aut.append(('j', re.sub('\.$', '', re.sub('.*, ',  '', author))))
                             author = re.sub(', ORCID.*', '', author)
                         elif re.search('EMAIL', author):
                             aut.append(('m', re.sub('.*, EMAIL:',  '', author)))
@@ -473,10 +478,8 @@ def writeXML(recs,dokfile,publisher):
             xmlstring += marcxml('599',[('a',rec['typ'])])
         xmlstring += '</record>\n'
         try:
-            print '[]write[]'
             dokfile.write(xmlstring)
         except:
-            print '[]except[]'
             dokfile.write(xmlstring.encode("utf8", "ignore"))
     dokfile.write('</collection>\n')
     return
