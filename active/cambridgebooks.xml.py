@@ -25,11 +25,9 @@ urltrunc = 'http://www.cambridge.org/de/academic/subjects'
 
 serieses = ['physics/particle-physics-and-nuclear-physics',
             'physics/history-philosophy-and-foundations-physics',
-            'physics/cosmology-relativity-and-gravitation',                        
             'physics/quantum-physics-quantum-information-and-quantum-computation',
             'physics/theoretical-physics-and-mathematical-physics',
             'physics/mathematical-methods',
-            'physics/theoretical-physics-and-mathematical-physics',
             'mathematics/mathematical-physics',
             'physics/astrophysics',
             'physics/cosmology-relativity-and-gravitation']
