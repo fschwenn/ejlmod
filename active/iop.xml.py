@@ -327,14 +327,6 @@ for article in tocpage.find_all('stk_header'):
             rec['refs'].append([('x', ref)])
     except:
         print 'no references'
-
-        try:            
-            rec["pbn"] = rec['jnl'] + rec['vol'] + rec['p1']
-            recs[nr] = rec
-            nr+=1
-        except:
-            pass
-        #print rec
     #publication note
     try:
         pbn = rec['jnl'] + rec['vol'] + rec['p1']
