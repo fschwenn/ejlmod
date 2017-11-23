@@ -31,8 +31,8 @@ serieses = ['physics/particle-physics-and-nuclear-physics',
             'physics/mathematical-methods',
             'physics/theoretical-physics-and-mathematical-physics',
             'mathematics/mathematical-physics',
-            'astronomy/astrophysics',
-            'astronomy/cosmology-and-relativity']
+            'physics/astrophysics',
+            'physics/cosmology-relativity-and-gravitation']
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
