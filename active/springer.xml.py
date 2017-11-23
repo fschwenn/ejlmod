@@ -26,7 +26,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 # uninteresting journals:
 
 
-jw = ['00153', '11105']
+jw = ['00153', '11105', '00426', '10853']
 
 
 #INSPIRE convention instead of DPBN as in springer.py
@@ -66,7 +66,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '10714': ['grg', 'Gen.Rel.Grav.'],
       '12267': ['gc', 'Grav.Cosmol.'],
       '10751': ['hypfin', 'Hyperfine Interact.'],
-#==      '10740': ['hite', 'High Temperature', 'Teplofizika Vysokikh Temperatur'],
+      '10740': ['hite', 'High Temperature', 'Teplofizika Vysokikh Temperatur'],
       '12648': ['ijp', 'Indian J.Phys.'],
       '10786': ['iet', 'Instrum.Exp.Tech.'],
       '10773': ['ijtp', 'Int.J.Theor.Phys.'],
@@ -78,8 +78,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '13130': ['jhep', 'JHEP'],
       '40042': ['jkps', 'J.Korean Phys.Soc.'],
       '10958': ['jms', 'J.Math.Sci.', 'Zap.Nauchn.Semin.'],
-#==      '10853': ['jmsme', 'J.Mater.Sci.'],
-#==      '10967' : ['jrnc', 'J.Radioanal.Nucl.Chem.'],
+      '10853': ['jmsme', 'J.Mater.Sci.'],
       '11490': ['lasp', 'Laser Phys.'], # stopped 2012
       '11005': ['lmp', 'Lett.Math.Phys.'],
       '11040': ['mpag', 'Math.Phys.Anal.Geom.'],
@@ -128,7 +127,9 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
        '6316': ['mpstud', 'Math.Phys.Stud.'],
        '8431': ['gtip', 'Grad.Texts Math.'],
       '11006': ['matnot', 'Math.Notes'],
-      '41781': ['csbg', 'Comput.Softw.Big Sci.']}
+      '41781': ['csbg', 'Comput.Softw.Big Sci.'],
+      '10967': ['jrnc', 'J.Radioanal.Nucl.Chem.'],
+      '40485': ['epjti', 'EPJ Tech.Instrum.']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
