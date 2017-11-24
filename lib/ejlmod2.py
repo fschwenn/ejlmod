@@ -9,10 +9,33 @@ import platform
 from collclean_lib import coll_cleanforthe
 from collclean_lib import coll_clean710
 from collclean_lib import coll_split
-if not platform.node() in ['bib-pubdb2', 'bib-pubdb1', 'bib-pubdbvm2.desy.de', 'bib-pubdbvm1.desy.de']:
-    from invenio.refextract_api import extract_references_from_string
+try:
+    # needed to remove the print-commands from /usr/lib/python2.6/site-packages/refextract/references/engine.py
+    from refextract import  extract_references_from_string
+except:
+    #for running on PubDB
+    print 'could not import extract_references_from_string'
+
 
 #from collclean import clean710
+
+#mappings for refferences in JSON to MARC 
+mappings = [('doi', 'a'),
+            ('collaborations', 'c'),
+            ('document_type', 'd'),
+            ('author', 'h'),
+            ('isbn', 'i'),
+            ('texkey', 'k'),
+            ('misc', 'm'),
+            ('journal_issue', 'n'),
+            ('label', 'o'),
+            ('linemarker', 'o'),
+            ('reportnumber', 'r'),
+            ('journal_reference', 's'),
+            ('title', 't'),
+            ('urls', 'u'),
+            ('raw_ref', 'x'),
+            ('year', 'y')]
 
 #auxiliary function to strip lines
 def tgstrip(x): return x.strip()
@@ -112,6 +135,15 @@ inspiretc = {'P':'Published', 'C':'ConferencePaper',
              'K': 'Proceedings', 'O': 'Note', 
              'L' : 'Lectures', 'I':'Introductory'}
 
+
+#translating HTML entities
+htmlentity = re.compile(r'&#x.*?;')
+def lam(x):                                                
+    x  = x.group()
+    return unichr(int(x[3:-1], 16))
+
+
+
 def validxml(string):
     if type(string) == type(()):
         return tuple([validxml(part) for part in string])
@@ -119,6 +151,7 @@ def validxml(string):
         return [validxml(part) for part in string]
     else:
         #print '--->',string
+        string = htmlentity.sub(lam, string)
         string = re.sub('&','&amp;',string)
         string = re.sub('>','&gt;',string)
         string = re.sub('<','&lt;',string)
@@ -153,10 +186,16 @@ def datetodate(date):
     months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
     months2 = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
     parts = re.split(' +', date.strip())
-    try:
-        return '%4i-%02i-%02i' % (int(parts[2]), months.index(parts[1].upper())+1, int(parts[0]))
-    except:
-        return '%4i-%02i-%02i' % (int(parts[2]), months2.index(parts[1].upper())+1, int(parts[0]))
+    if len(parts) == 3:
+        try:
+            return '%4i-%02i-%02i' % (int(parts[2]), months.index(parts[1].upper())+1, int(parts[0]))
+        except:
+            return '%4i-%02i-%02i' % (int(parts[2]), months2.index(parts[1].upper())+1, int(parts[0]))
+    elif len(parts) == 2:
+        try:
+            return '%4i-%02i' % (int(parts[1]), months.index(parts[0].upper())+1)
+        except:
+            return '%4i-%02i' % (int(parts[1]), months2.index(parts[0].upper())+1)
 
 
 def writeXML(recs,dokfile,publisher):
@@ -241,9 +280,11 @@ def writeXML(recs,dokfile,publisher):
             if rec.has_key('issue2'): liste.append(('n',rec['issue2']))
             if rec.has_key('cnum'): liste.append(('w',rec['cnum']))
             xmlstring += marcxml('773',liste)
+        if rec.has_key('bookseries'):
+            xmlstring += marcxml('490', rec['bookseries'])
         if rec.has_key('isbns'):
             for isbn in rec['isbns']:
-                xmlstring += marcxml('020', re.sub('\-', '', isbn))
+                xmlstring += marcxml('020', isbn)
         elif rec.has_key('isbn'):
             xmlstring += marcxml('020',[('a', re.sub('\-', '', rec['isbn']))])
         if rec.has_key('doi'):
@@ -251,10 +292,14 @@ def writeXML(recs,dokfile,publisher):
             #special euclid:
             if re.search('^20.2000\/euclid\.', rec['doi']):
                 xmlstring += marcxml('035', [('9', 'EUCLID'), ('a', rec['doi'][8:])])
-        elif len(liste) > 2 or rec.has_key('isbn'):
+        elif len(liste) > 2 or rec.has_key('isbn') or rec.has_key('isbns'):
             pseudodoi = '20.2000/'+re.sub(' ','_','-'.join([tup[1] for tup in liste]))
             if rec.has_key('isbn'):
                 pseudodoi += '_' + rec['isbn']
+            elif rec.has_key('isbns'):
+                for tupel in rec['isbns'][0]:
+                    if tupel[0] == 'a':
+                        pseudodoi += '_' + tupel[1]
             xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
         if rec.has_key('pages'):
             if type(rec['pages']) == type('999'):
@@ -264,7 +309,7 @@ def writeXML(recs,dokfile,publisher):
             elif type(rec['pages']) == type(999):
                 xmlstring += marcxml('300',[('a',str(rec['pages']))])
         if rec.has_key('date'):
-            if re.search('[a-z] ', rec['date']):
+            if re.search('[a-zA-Z] ', rec['date']):
                 rec['date'] = datetodate(rec['date'])
             recdate = re.sub('\/','-',rec['date'])
             parts = re.split('\-', recdate)
@@ -345,7 +390,10 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('autaff'):
             marc = '100'
             for autaff in rec['autaff']:
-                autlist = [('a',shapeaut(autaff[0]))]
+                if re.search('\([eE]d\.\)', autaff[0]):
+                    autlist = [('a', shapeaut(re.sub(' *\([eE]d\.\) *','',autaff[0]))), ('e','ed.')]
+                else:
+                    autlist = [('a',shapeaut(autaff[0]))]
                 for aff in autaff[1:]:
                     if re.search('ORCID', aff):
                         autlist.append(('j', aff))
@@ -384,7 +432,7 @@ def writeXML(recs,dokfile,publisher):
                     #print tempaffs
                 else:
                     if re.search('\([eE]d\.\)',entry):
-                        aut = [('a', re.sub(' *\([eE]d\.\) *','',shapeaut(entry))), ('e','ed.')]
+                        aut = [('a', shapeaut(re.sub(' *\([eE]d\.\) *','',entry))), ('e','ed.')]
                     else:
                         author = shapeaut(entry)
                         aut = []
@@ -392,7 +440,7 @@ def writeXML(recs,dokfile,publisher):
                             aut.append(('q', re.sub('.*, CHINESENAME: ', '', author)))
                             author = re.sub(', CHINESENAME.*', '', author)
                         elif re.search('ORCID', author):
-                            aut.append(('j', re.sub('.*, ',  '', author)))
+                            aut.append(('j', re.sub('\.$', '', re.sub('.*, ',  '', author))))
                             author = re.sub(', ORCID.*', '', author)
                         elif re.search('EMAIL', author):
                             aut.append(('m', re.sub('.*, EMAIL:',  '', author)))
@@ -411,15 +459,17 @@ def writeXML(recs,dokfile,publisher):
             for ref in rec['refs']:
                 #print '  ->  ', ref
                 if len(ref) == 1 and ref[0][0] == 'x':
-                    refrec = extract_references_from_string(ref[0][1])
-                    for entry in refrec['999']:
-                        if entry.ind2 == '5':
-                            entryaslist = [(se.code,se.value) for se in entry.subfields]
-                            entryaslist.append(('9','refextract'))
-                            try:
-                                xmlstring += marcxml('999C5',entryaslist)
-                            except:
-                                print 'UTF8 Problem in Referenzen'
+                    for ref in extract_references_from_string(ref[0][1], override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
+                        entryaslist = [('9','refextract')]
+                        for key in ref.keys():
+                            for mapping in mappings:
+                                if key == mapping[0]:
+                                    for entry in ref[key]:
+                                        entryaslist.append((mapping[1], entry))
+                        try:
+                            xmlstring += marcxml('999C5',entryaslist)
+                        except:
+                            print 'UTF8 Problem in Referenzen'
                 else:
                     xmlstring += marcxml('999C5',ref)
         xmlstring += marcxml('980',[('a','HEP')])
@@ -433,15 +483,10 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('typ'):
             xmlstring += marcxml('599',[('a',rec['typ'])])
         xmlstring += '</record>\n'
-        #xmlstring = xmlstring.replace(chr(0xa0), ' ')
-
-        #wrinting string-xmls
-        #dokfile.write(xmlstring.encode("utf8", "ignore"))
-        #wrinting unicode-xmls
         try:
-            dokfile.write(xmlstring.decode("utf8", "ignore"))
-        except:
             dokfile.write(xmlstring)
+        except:
+            dokfile.write(xmlstring.encode("utf8", "ignore"))
     dokfile.write('</collection>\n')
     return
 
@@ -449,7 +494,10 @@ def writeXML(recs,dokfile,publisher):
 def shapeaut(author):
     if not re.search(',', author):
         author = re.sub('(.*) (.*)',r'\2, \1',author).strip()
-    author = re.sub('([A-Z] ?\.)[ \-]([A-Z] ?\.)',r'\1\2', author)
+    author = re.sub(' ([A-Z]) ',r' \1. ', author)
+    author = re.sub(' ?([A-Z])$',r'\1.', author)
+    author = re.sub('([A-Z] ?\.)[ \-]([A-Z] ?\.?)',r'\1\2', author)
+    author = re.sub(', *', ', ', author.strip())
     if not re.search('[a-z]', author):
         author = author.title()
     return author
