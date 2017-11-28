@@ -187,7 +187,7 @@ def getarticle(href, sec, subsec, p1):
                             if a.has_attr('href') and re.search('doi.org', a['href']):
                                 rdoi = re.sub('htt.*doi.org.', ', DOI: ', a['href'])
                                 a.replace_with(rdoi)
-                            else:
+                            elif not re.search('arxiv.org', a['href']):
                                 a.replace_with('')
                     rec['refs'].append([('x', regexpref.sub(' ', li.text.strip()))])
     return rec
