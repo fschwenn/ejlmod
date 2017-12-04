@@ -99,7 +99,8 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'Topical Workshop on Electronics for Particle Physics (TWEPP2016)' : 'C16-09-26.4',
             'International Conference on Instrumentation for Colliding Beam Physics (INSTR17)' : 'C17-02-27',
             'Precision Astronomy with Fully Depleted CCDS (PACCD2016)' : 'C16-12-01.1',
-            '19th International Workshop on Radiation Imaging Detectors (IWORID2017)' : 'C17-07-02.5'}
+            '19th International Workshop on Radiation Imaging Detectors (IWORID2017)' : 'C17-07-02.5',
+            '11th International Conference on Position Sensitive Detectors (PSD11)' : 'C17-09-03.2'}
 
 
 
@@ -281,8 +282,7 @@ for article in tocpage.find_all('stk_header'):
     #Open Access
     for oanode in article.find_all('open_access'):
         rec['licence'] = {'url' : oanode['url']}
-        #if issn in ['1742-6596', '1367-2630']:
-        #    rec['FFT'] = 'http://iopscience.iop.org/article/%s/pdf' % (rec['doi'])
+        rec['FFT'] = 'http://iopscience.iop.org/article/%s/pdf' % (rec['doi'])
     #typecode
     rec['tc'] = tc
     #abstract
