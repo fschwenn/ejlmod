@@ -150,12 +150,17 @@ for h3 in tocpage.find_all('h3'):
                 del rec['auts']
                 rec['autaff'] = []
                 for span in artpage.find_all('span', attrs = {'class' : 'contrib'}):
-                    aff = ''
+                    (aff, email) = ('', '')
                     for li in span.find_all('li'):
                         if not re.search('(De Gruyter Online|Other articles by this author)', li.text):
                             aff += re.sub('Corresponding author', '', li.text.strip()) + ', '
-                    span.replace_with('')
-                    rec['autaff'].append([span.text.strip(), aff])
+                        li.replace_with('')
+                    for a in span.find_all('a', attrs = {'class' : 'contrib-corresp'}):
+                        email = re.sub('mailto.(.*?)\?.*', r'\1', a['href'])
+                    if email:
+                        rec['autaff'].append([span.text.strip(), aff, 'EMAIL:'+email])
+                    else:
+                        rec['autaff'].append([span.text.strip(), aff])
                                                     
             recs.append(rec)
 
