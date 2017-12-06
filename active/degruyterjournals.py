@@ -49,7 +49,7 @@ for h3 in tocpage.find_all('h3'):
             vollink = urltrunc + a['href']
             print vollink
             rec = {'tc' : 'P', 'jnl' : jnl, 'year' : year, 'vol' : vol, 'issue' : iss,
-                   'auts' : [], 'aff' : []}
+                   'auts' : [], 'aff' : [], 'keyw' : [], 'pacs' : []}
             #title
             rec['tit'] = a.text.strip()
             #get details
@@ -58,6 +58,22 @@ for h3 in tocpage.find_all('h3'):
             inf = open('/tmp/dg%s.%i' % (jnlfilename, i), 'r')
             artpage = BeautifulSoup(''.join(inf.readlines()))
             inf.close()
+            for meta in  artpage.find_all('meta'):
+                if meta.has_attr('name'):
+                    #pages
+                    if meta['name'] == 'citation_firstpage':
+                        rec['p1'] = meta['content']
+                    elif meta['name'] == 'citation_lastpage':
+                        rec['p2'] = meta['content']
+                    #DOI
+                    elif meta['name'] == 'citation_doi':
+                        rec['doi'] = meta['content']
+                    #keywords
+                    elif meta['name'] == 'citation_keywords':
+                        if re.search('^\d\d\.\d\d...$', meta['content']):
+                            rec['pacs'].append(meta['content'])
+                        else:
+                            rec['keyw'].append(meta['content'])
             #abstract
             for div in artpage.find_all('div', attrs = {'class' : 'articleBody_abstract'}):
                 for p in div.find_all('p'):
@@ -81,16 +97,17 @@ for h3 in tocpage.find_all('h3'):
                         sup.replace_with('Aff%s= ' % (cont))
                     rec['aff'].append(p.text)
             #keywords / PACS
-            for p in artpage.find_all('p', attrs = {'class' : 'articleBody_keywords'}):
-                for span in p.find_all('span'):
-                    if re.search('PACS', span.text):
-                        key = 'pacs'                        
-                    else:
-                        key = 'keyw'
-                    rec[key] = []
-                for a in p.find_all('a'):
-                    if a.text and not a.text in rec[key]:
-                        rec[key].append(a.text)
+            if not rec['keyw']:
+                for p in artpage.find_all('p', attrs = {'class' : 'articleBody_keywords'}):
+                    for span in p.find_all('span'):
+                        if re.search('PACS', span.text):
+                            key = 'pacs'                        
+                        else:
+                            key = 'keyw'
+                        rec[key] = []
+                    for a in p.find_all('a'):
+                        if a.text and not a.text in rec[key]:
+                            rec[key].append(a.text)
             #references
             referencesection = artpage.find_all('div', attrs = {'class' : 'moduleDetail refList'})
             if not referencesection:
@@ -108,9 +125,6 @@ for h3 in tocpage.find_all('h3'):
                 for dl in div.find_all('dl', attrs = {'id' : 'date-epub'}):
                     for dd in dl.find_all('dd', attrs = {'class' : 'fieldValue'}):
                         rec['date'] = dd.text
-            #DOI
-            for meta in artpage.find_all('meta', attrs = {'name' : 'citation_doi'}):
-                rec['doi'] = meta['content']
             #licence
             for div in artpage.find_all('div', attrs = {'class' : 'permissions'}):
                 for a in div.find_all('a'):
@@ -118,13 +132,36 @@ for h3 in tocpage.find_all('h3'):
                     #fulltext pdf
                     for meta in artpage.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
                         rec['FFT'] = meta['content']
+            if not rec.has_key('licence'):
+                for a in  artpage.find_all('a', attrs = {'class' : 'ccLink'}):
+                    rec['licence'] = {'url' : a['href']}
+                    #fulltext pdf
+                    for meta in artpage.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
+                        rec['FFT'] = meta['content']
             #pages 
-            for div in artpage.find_all('div', attrs = {'class' : 'citationInfo'}):
-                pages = re.sub('.*Volume \d*(.*)DOI:.*', r'\1', div.text.strip())
-                if re.search('[pP]ages \d+\D\d+', pages):
-                    rec['p1'] = re.sub('.*[pP]ages (\d+).*', r'\1', pages)
-                    rec['p2'] = re.sub('.*[pP]ages \d+\D(\d+).*', r'\1', pages)
+            if not rec.has_key('p1'):
+                for div in artpage.find_all('div', attrs = {'class' : 'citationInfo'}):
+                    pages = re.sub('.*Volume \d*(.*)DOI:.*', r'\1', div.text.strip())
+                    if re.search('[pP]ages \d+\D\d+', pages):
+                        rec['p1'] = re.sub('.*[pP]ages (\d+).*', r'\1', pages)
+                        rec['p2'] = re.sub('.*[pP]ages \d+\D(\d+).*', r'\1', pages)
+            #authors
+            if not rec['aff']:
+                del rec['auts']
+                rec['autaff'] = []
+                for span in artpage.find_all('span', attrs = {'class' : 'contrib'}):
+                    aff = ''
+                    for li in span.find_all('li'):
+                        if not re.search('(De Gruyter Online|Other articles by this author)', li.text):
+                            aff += re.sub('Corresponding author', '', li.text.strip()) + ', '
+                    span.replace_with('')
+                    rec['autaff'].append([span.text.strip(), aff])
+                                                    
             recs.append(rec)
+
+
+
+            print rec
 
 
 #write xml
