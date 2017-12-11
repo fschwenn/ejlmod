@@ -156,10 +156,13 @@ for a in tocpage.find_all('a', attrs = {'class' : 'article_title'}):
         rec['licence'] = {'url' : a['href']}
         if re.search('creativecommons', a['href']):
             #look for fulltext
-            for a2 in artpage.body.find_all('a'):
-                if a2.has_key('title') and re.search('^PDF', a2['title']):
-                    if a2.has_key('href') and re.search('pdf$', a2['href']):
-                        rec['FFT'] = a2['href']
+            for meta in artpage.head.find_all('meta', attrs = {'name': 'citation_pdf_url'}):
+                rec['FFT'] = meta['content']
+            if not rec.has_key('FFT'):
+                for a2 in artpage.body.find_all('a'):
+                    if a2.has_key('title') and re.search('^PDF', a2['title']):
+                        if a2.has_key('href') and re.search('pdf$', a2['href']):
+                            rec['FFT'] = a2['href']
     #references
     for a in artpage.body.find_all('a', attrs = {'title' : 'References'}):
         reflink = re.sub('(.*\.org)\/.*', r'\1', toclink) + a['href']
