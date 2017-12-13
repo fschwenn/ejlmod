@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python
-#program to harvest Papers in Physics
+#program to harvest Communications/Papers in Physics
 # FS 2017-12-13
 
 import sys
@@ -20,15 +20,21 @@ tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
 regexpref = re.compile('[\n\r\t]')
 
-publisher = 'Papers in Physics'
 typecode = 'P'
 
-vol = sys.argv[1]
+jnl = sys.argv[1]
+vol = sys.argv[2]
 
-jnlfilename = 'pip%s' % (vol)
+if jnl == 'pip':
+    publisher = 'Papers in Physics'
+    urltrunk = 'http://www.papersinphysics.org/papersinphysics/issue/view/%s' % (vol)
+elif jnl == 'cip':
+    publisher = 'Publishing House for Science and Technology, Vietnam Academy of Science and Technology'
+    jnlname = 'Commun.Phys.'
+    urltrunk = 'http://vjs.ac.vn/index.php/cip/issue/view/%s' % (vol)
+jnlfilename = '%s%s' % (jnl, vol)
 
     
-urltrunk = 'http://www.papersinphysics.org/papersinphysics/issue/view/%s' % (vol)
 print urltrunk
 try:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
@@ -40,7 +46,7 @@ except:
 
 recs = []
 for table in tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'}):
-    rec = {'jnl' : 'Papers Phys.', 'tc' : typecode, 'vol' : vol, 'keyw' : [], 'autaff' : []}
+    rec = {'jnl' : jnlname, 'tc' : typecode, 'vol' : vol, 'keyw' : [], 'autaff' : []}
     #PDF
     for a in table.find_all('a'):
         if a.text.strip() == 'PDF':
@@ -77,6 +83,15 @@ for rec in recs:
                 rec['autaff'].append([ meta['content'] ])
             elif meta['name'] == 'citation_author_institution':
                 rec['autaff'][-1].append(meta['content'])
+            #volume and issue
+            if jnl in ['cip']:
+                if meta['name'] == 'citation_volume':
+                    rec['vol'] = meta['content']
+                elif meta['name'] == 'citation_issue':
+                    rec['issue'] = meta['content']
+    #keywords aftermath
+    if len(rec['keyw']) == 1:
+        rec['keyw'] = re.split(', ', rec['keyw'][0])
     #abstract
     for div in artpage.body.find_all('div', attrs = {'id' : 'articleAbstract'}):
         for p in div.find_all('p'):
@@ -86,7 +101,11 @@ for rec in recs:
     #license
     for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
         rec['licence'] = {'url' : a['href']}
-
+    #references
+    for div in artpage.body.find_all('div', attrs = {'id' : 'articleCitations'}):
+        rec['refs'] = []
+        for p in div.find_all('p'):
+            rec['refs'].append([('x', p.text)])
 
                                        
 #closing of files and printing
