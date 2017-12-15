@@ -50,7 +50,7 @@ for table in tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'}):
     #PDF
     for a in table.find_all('a'):
         if a.text.strip() == 'PDF':
-            rec['FFT'] = a['href']
+            rec['FFT'] = re.sub('\/view\/', '/download/', a['href'])
     #article link
     for td in table.find_all('td', attrs = {'class' : 'tocTitle'}):
         rec['tit'] = td.text.strip()
@@ -89,6 +89,16 @@ for rec in recs:
                     rec['vol'] = meta['content']
                 elif meta['name'] == 'citation_issue':
                     rec['issue'] = meta['content']
+    #authors, 2nd possibility
+    if not rec['autaff']:
+        for div in artpage.body.find_all('div', attrs = {'id' : 'authorBio'}):
+            for p in div.find_all('p'):
+                for em in p.find_all('em'):
+                    rec['autaff'].append([ em.text ])
+                    em.replace_with('')
+                aff = p.text.strip()
+                if aff != 'normally':
+                    rec['autaff'][-1].append(re.sub('[\n\t\r]', ' ', aff))
     #keywords aftermath
     if len(rec['keyw']) == 1:
         rec['keyw'] = re.split(', ', rec['keyw'][0])
@@ -98,6 +108,9 @@ for rec in recs:
             if not rec.has_key('abs'):
                 rec['abs'] = p.text
                 break
+        if not rec.has_key('abs'):
+            for div2 in div.find_all('div'):
+                rec['abs'] = div2.text
     #license
     for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
         rec['licence'] = {'url' : a['href']}
