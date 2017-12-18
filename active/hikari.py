@@ -79,8 +79,8 @@ for tline in re.split(' *<p> *',tocline):
         else:
             rec['p1'] = rec['p2'] =  re.sub('(\d+).*',r'\1',pages)
         print "%s%s (%s) %s-%s" % (rec['jnl'],vol,year,rec['p1'],rec['p2'])
-        if len(parts) > 3 and re.search('dx.doi.org',parts[3]):
-            rec['doi'] = re.sub('.*dx.doi.org.(10.*?)".*',r'\1',parts[3])
+        if len(parts) > 3 and re.search('http.*doi.org',parts[3]):
+            rec['doi'] = re.sub('.*doi.org.(10.*?)".*',r'\1',parts[3])
         else:
             rec['doi'] = '40.4000/%s%i' % (jnlfilename, recnr)
         recs.append(rec)
