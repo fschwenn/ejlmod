@@ -173,7 +173,11 @@ def marcxml(marc,liste):
                         xmlstring += '  <subfield code="%s">%s</subfield>\n' % (tupel[0], validxml(element).strip())
             else:
                 if tupel[1] != '':
-                    xmlstring += '  <subfield code="%s">%s</subfield>\n' % (tupel[0],validxml(tupel[1]).strip())
+                    try:
+                        xmlstring += '  <subfield code="%s">%s</subfield>\n' % (tupel[0],validxml(tupel[1]).strip())
+                    except:
+                        print 'ERROR in function "marcxml"'
+                        print marc, liste
     xmlstring += ' </datafield>\n'
     #avoid empty xml entries
     if re.search('<subfield code="[a-z]">',xmlstring):
@@ -202,7 +206,8 @@ def writeXML(recs,dokfile,publisher):
     dokfile.write('<collection>\n')
     i = 0
     for rec in recs:
-        if rec['jnl'] in ['Astron.Astrophys.', 'Mon.Not.Roy.Astron.Soc.']:
+        if rec['jnl'] in ['Astron.Astrophys.', 'Mon.Not.Roy.Astron.Soc.', 
+                          'Astronom.J.', 'Adv.Astron.', 'Astron.Nachr.']:
             arXivfromADS(rec)
 
         liste = []
@@ -241,7 +246,7 @@ def writeXML(recs,dokfile,publisher):
             if rec.has_key('year'):
                 liste.append(('y',rec['year']))
             elif rec.has_key('date'):
-                liste.append(('y',re.sub('[\-\/].*', '', rec['date'])))
+                liste.append(('y',re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])))
             if rec.has_key('p1'):
                 if rec.has_key('p2'):
                     if rec['p1'] != rec['p2']:
@@ -272,7 +277,7 @@ def writeXML(recs,dokfile,publisher):
             if rec.has_key('year2'):
                 liste.append(('y',rec['year2']))
             elif rec.has_key('date'):
-                liste.append(('y',re.sub('[\-\/].*', '', rec['date'])))
+                liste.append(('y',re.sub('.*([12]\d\d\d.*', r'\1', rec['date'])))
             if rec.has_key('p1p22'):
                 rec['p1p22'] = re.sub('–', '-', rec['p1p22'])
                 liste.append(('c',rec['p1p22']))
@@ -312,6 +317,9 @@ def writeXML(recs,dokfile,publisher):
             if re.search('[a-zA-Z] ', rec['date']):
                 rec['date'] = datetodate(rec['date'])
             recdate = re.sub('\/','-',rec['date'])
+            if re.search('\d\d\-\d\d\-\d\d\d\d', recdate):
+                parts = re.split('\-', recdate)
+                recdate = '%s-%s-%s' % (parts[2], parts[1], parts[0])
             parts = re.split('\-', recdate)
             if len(parts) > 1:
                 if len(parts[1]) == 1:
