@@ -1,5 +1,5 @@
 # -*- coding: UTF-8 -*-
-#program to harvest journals from the Royal Society
+#program to harvest journals from SciPost
 # FS 2016-09-27
 
 
@@ -27,7 +27,8 @@ vol = sys.argv[2]
 issue = sys.argv[3]
 if   (jnl == 'sps'): 
     jnlname = 'SciPost Phys.'
-    urltrunk = 'https://scipost.org/10.21468/SciPostPhys'
+    #urltrunk = 'https://scipost.org/10.21468/SciPostPhys'
+    urltrunk = 'https://scipost.org/SciPostPhys'
 
 jnlfilename = "%s%s.%s" % (jnl, vol, issue)
 toclink = "%s.%s.%s" % (urltrunk, vol, issue)
@@ -38,7 +39,8 @@ print "get table of content... from %s" % (toclink)
 tocpage = BeautifulSoup(urllib2.urlopen(toclink))
 
 recs = []
-for div  in tocpage.body.find_all('div', attrs = {'class' : 'publicationHeader'}):
+#for div  in tocpage.body.find_all('div', attrs = {'class' : 'publicationHeader'}):
+for div  in tocpage.body.find_all('div', attrs = {'class' : 'card card-grey card-publication'}):
     rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'auts' : []}
     for h3 in div.find_all('h3'):
         for a in h3.find_all('a'):
@@ -46,11 +48,14 @@ for div  in tocpage.body.find_all('div', attrs = {'class' : 'publicationHeader'}
             #title
             rec['tit'] = h3.text.strip()
     #abstract
-    for p in div.find_all('p', attrs = {'class' : 'publicationAbstract'}):
+    #for p in div.find_all('p', attrs = {'class' : 'publicationAbstract'}):
+    #for p in div.find_all('p', attrs = {'class' : 'abstract mb-0 py-2'}):
+    for p in div.find_all('p', attrs = {'class' : 'abstract'}):
         rec['abs'] = p.text.strip()
     #year
-    for p in div.find_all('p', attrs = {'class' : 'publicationReference'}):
-        rec['year'] = re.sub('.*\((20\d\d)\).*', r'\1', p.text)
+    #for p in div.find_all('p', attrs = {'class' : 'publicationReference'}):
+    for p in div.find_all('p', attrs = {'class' : 'card-text text-muted'}):
+        rec['year'] = re.sub('.*\((20\d\d)\).*', r'\1', re.sub('[\n\t]', '', p.text.strip()))
     #article page
     print artlink
     artpage = BeautifulSoup(urllib2.urlopen(artlink))  
