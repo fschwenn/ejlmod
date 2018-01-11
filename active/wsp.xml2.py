@@ -97,6 +97,7 @@ def concert(rawrecs):
             rec['tit'] = title.text
         for aid in wsprecord.find_all('article-id', attrs = {'pub-id-type' : 'doi'}):
             rec['doi'] = aid.text
+            print '    . ', rec['doi']
         for sg in wsprecord.find_all('subj-group', attrs = {'subj-group-type' : 'heading'}):
             for s in sg.find_all('subject'):
                 rec['note'].append(s.text)
@@ -105,7 +106,8 @@ def concert(rawrecs):
         for aff in wsprecord.find_all('aff'):
             for sup in aff.find_all('sup'):
                 sup.replace_with('')
-            affdict[aff['id']] = aff.text
+            if aff.has_attr('id'):
+                affdict[aff['id']] = aff.text
         #print affdict
         for c in wsprecord.find_all('contrib', attrs = {'contrib-type' : 'author'}):
             for sn in c.find_all('string-name'):
