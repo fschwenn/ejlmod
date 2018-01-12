@@ -40,35 +40,36 @@ initialEnd = re.compile(r'([A-Z])\b')
 
 #ISSN to journal name
 jnl = {'1538-3881': 'Astron.J.',
-      '0004-637X': 'Astrophys.J.',
-      '1538-4357': 'Astrophys.J.',
-      '2041-8205': 'Astrophys.J.',
-      '0067-0049': 'Astrophys.J.Supp.',
-      '0264-9381': 'Class.Quant.Grav.',
-      '1009-9271': 'Chin.J.Astron.Astrophys.',
-      '1009-1963': 'Chin.Phys.',
-      '1674-1056': 'Chin.Phys.',
-      '1674-1137': 'Chin.Phys.',
-      '0256-307X': 'Chin.Phys.Lett.',
-      '0253-6102': 'Commun.Theor.Phys.',
-      '0143-0807': 'Eur.J.Phys.',
-      '0295-5075': 'EPL',
-      '1751-8121': 'J.Phys.',
-      '1742-6596': 'J.Phys.Conf.Ser.',
-      '0954-3899': 'J.Phys.',
-      '1475-7516': 'JCAP ',
-      '1126-6708': 'JHEP ',
-      '1748-0221': 'JINST ',
-      '1742-5468': 'JSTAT ',
-      '0957-0233': 'Measur.Sci.Tech.',
-      '1367-2630': 'New J.Phys.',
-      '0031-9120': 'Phys.Educ.',
-      '1063-7869': 'Phys.Usp.',
-      '0034-4885': 'Rep.Prog.Phys.',
-      '1674-4527': 'Res.Astron.Astrophys.',
-      '1402-4896': 'Phys.Scripta',
-      '2399-6528': 'J.Phys.Comm.',
-}
+       '0004-637X': 'Astrophys.J.',
+       '1538-4357': 'Astrophys.J.',
+       '2041-8205': 'Astrophys.J.',
+       '0067-0049': 'Astrophys.J.Supp.',
+       '1538-3881': 'Astronom.J.',
+       '0264-9381': 'Class.Quant.Grav.',
+       '1009-9271': 'Chin.J.Astron.Astrophys.',
+       '1009-1963': 'Chin.Phys.',
+       '1674-1056': 'Chin.Phys.',
+       '1674-1137': 'Chin.Phys.',
+       '0256-307X': 'Chin.Phys.Lett.',
+       '0253-6102': 'Commun.Theor.Phys.',
+       '0143-0807': 'Eur.J.Phys.',
+       '0295-5075': 'EPL',
+       '1751-8121': 'J.Phys.',
+       '1742-6596': 'J.Phys.Conf.Ser.',
+       '0954-3899': 'J.Phys.',
+       '1475-7516': 'JCAP ',
+       '1126-6708': 'JHEP ',
+       '1748-0221': 'JINST ',
+       '1742-5468': 'JSTAT ',
+       '0957-0233': 'Measur.Sci.Tech.',
+       '1367-2630': 'New J.Phys.',
+       '0031-9120': 'Phys.Educ.',
+       '1063-7869': 'Phys.Usp.',
+       '0034-4885': 'Rep.Prog.Phys.',
+       '1674-4527': 'Res.Astron.Astrophys.',
+       '1402-4896': 'Phys.Scripta',
+       '2399-6528': 'J.Phys.Comm.',
+       }
 
 #CNUMs for conferences in JINST
 cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RPC2014)': 'C14-02-23.2',
@@ -235,7 +236,7 @@ for article in tocpage.find_all('stk_header'):
         for group in aunode.find_all('group'):
             rec['col'] = group.text
         for fnamenode in aunode.find_all('given'):
-            fname = initialEnd.sub(r'\1.', fnamenode.text)
+            fname = re.sub('\.\.', '.', initialEnd.sub(r'\1.', fnamenode.text))
             if fnamenode.has_attr('non_latin'):
                 nlfname = fnamenode['non_latin']
         for lnamenode in aunode.find_all('surname'):
