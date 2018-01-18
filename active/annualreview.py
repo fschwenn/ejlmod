@@ -1,6 +1,6 @@
 #!/usr/bin/python
 #program to harvest Annual Reviews
-# FS 2012-06-01
+# FS 2017-01-18
 
 import os
 import ejlmod2
@@ -35,54 +35,103 @@ elif (jnl == 'araa'):
 print "get table of content of %s%s ... via %s" %(jnlname,vol, urltrunk)
 tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
 
-for title in tocpage.find_all('title'):
-    year = re.sub('.*(20\d\d)$', r'\1', title.text.strip())
-
 recs = []
-for div in tocpage.find_all('div', attrs = {'class' : 'articleBox'}):
-    rec = {'year' : year, 'vol' : vol, 'tc' : 'R', 'jnl' : jnlname, 'auts' : [], 'aff' : []}
+doisdone = []
+for div in tocpage.find_all('article', attrs = {'class' : 'teaser'}):
+    #right colume??
+    volume = re.sub('.*Vol\. (\d+).*', r'\1', re.sub('[\n\t]', ' ', div.text.strip()))
+    print volume, vol
+    if volume != vol:
+        continue
+    rec = {'vol' : vol, 'tc' : 'R', 'jnl' : jnlname, 'auts' : [], 'aff' : []}
     #doi
-    for inp in div.find_all('input', attrs = {'name' : 'doi'}):
-        rec['doi'] = inp['value']
-    #title
-    for h2 in div.find_all('h2'):
-        rec['tit'] = h2.text.strip()
-        #details
-        for a in h2.find_all('a'):
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.annualreviews.org' + a['href']))
-            #remove disturbiung stuff
-            for div2 in artpage.find_all('div', attrs = {'class' : 'accordionContentWrapper'}):
-                div2.replace_with('')
-            #pages 
-            for div2 in artpage.find_all('div', attrs = {'class' : 'issueInfo'}):
-                if re.search('Vol\.', div2.text.strip()):
-                    pages = re.sub('.*?: *([\d\-]+).*', r'\1', re.sub('\n', ' ', div2.text.strip()))
-                    rec['p1'] = re.sub('\-.*', '', pages)
-                    if re.search('\-', pages):
-                        rec['p2'] = re.sub('.*\-', '', pages)
-            #affiliations
-            for div2 in artpage.find_all('div', attrs = {'class' : 'fulltext'}):
-                for sup in div2.find_all('sup'):
-                    affno = sup.text.strip()
-                    sup.replace_with('Aff%s= ' % (affno))
-                rec['aff'].append(re.sub('[;,]? email.*', '', div2.text.strip()))
-                div2.replace_with('')
-            #authors
-            for div2 in artpage.find_all('div', attrs = {'class' : 'artAuthors'}):
-                for sup in div2.find_all('sup'):
-                    affno = sup.text.strip()
-                    sup.replace_with(', =Aff' + ', =Aff'.join(re.split(' *, *', affno)) + ', ')
-                authors = re.sub(' and ', ', ', div2.text.strip())
-                for aut in re.split(' *, *', authors):
-                    aut = re.sub('\. ([A-Z])\.', r'.\1.',aut)
-                    aut = re.sub('\. ([A-Z])\.', r'.\1.',aut)
-                    aut = re.sub('\.\-([A-Z])\.', r'.\1.',aut)
-                    if aut:
-                        rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', aut))
-            #abstract
-            for div2 in artpage.find_all('div', attrs = {'class' : 'abstractSection'}):
-                rec['abs'] = div2.text.strip()
+    for a in div.find_all('a'):
+        if a.has_attr('href'):
+            ahref= a['href']
+            if re.search('doi.*10', ahref):
+                doi = re.sub('.*?(10\..*)', r'\1', a['href'])
+                if not re.search('#', doi):
+                    rec['doi'] = doi
+                    rec['artlink'] = 'http://www.annualreviews.org/doi/full/' + rec['doi']
+    if rec['doi'] in doisdone:
+        continue
+    else:
+        doisdone.append(rec['doi'])
+    print rec['doi']
+    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    for meta in artpage.head.find_all('meta'):
+        if meta.has_attr('name'):
+            #Title
+            if meta['name'] == 'dc.Title':
+                rec['tit'] = meta['content']
+            #Keywords
+            elif meta['name'] == 'dc.Subject':
+                rec['keyw'] = re.split('; ', meta['content'])
+            elif meta['name'] == 'keywords':
+                rec['keyw'] = re.split(', ', meta['content'])
+            #Abstract
+            elif meta['name'] == 'dc.Description':
+                rec['abs'] = meta['content']
+    #Abstract
+    for div in artpage.body.find_all('div', attrs = {'class' : 'abstractInFull'}):
+        rec['abs'] = div.text.strip() 
+    #pubnote
+    for div in artpage.body.find_all('div', attrs = {'class' : 'article-header'}):
+        divtext = re.sub('[\n\t]', ' ', div.text.strip())
+        if re.search('.*?Vol. \d+:\d+\-\d+', divtext):
+            rec['p1'] = re.sub('.*?Vol. \d+:(\d+)\-.*', r'\1', divtext)
+            rec['p2'] = re.sub('.*?Vol. \d+:\d+\-(\d+).*', r'\1', divtext)
+        rec['year'] = re.sub('.*Volume.*? (20\d\d).*', r'\1', divtext)
+        if re.search('Advance', divtext):
+            if re.search('Advance on [A-Za-z]+ \d+, \d+', divtext):
+                rec['date'] = re.sub('.*Advance on ([A-Za-z]+) (\d+), (\d+).*', r'\2 \1 \3', divtext)
+            else:
+                rec['date'] = re.sub('.*Advance.* (20\d\d).*', r'\1', divtext)
+    for div in artpage.body.find_all('div', attrs = {'class' : 'hlFld-ContribAuthor'}):
+        #Authors
+        for p in div.find_all('p', attrs = {'class' : 'name'}):
+            for sup in p.find_all('sup'):
+                afftext = ''
+                for aff in re.split(',', sup.text):
+                    afftext += '; =Aff%s' % (aff)
+                sup.replace_with(afftext + '; ')
+            ptext = re.sub(',', '', p.text.strip())
+            ptext = re.sub(' and ', '; ', ptext)
+            for aut in re.split('; ', ptext):
+                if len(aut.strip()) > 2:
+                    rec['auts'].append(aut.strip())
+        #Affiliations
+        for p in div.find_all('p'):
+            if p.has_attr('class'): continue
+            for sup in p.find_all('sup'):
+                afftext = 'Aff%s= ' % (sup.text)
+                sup.replace_with(afftext)
+            rec['aff'].append(re.sub(' email.*', '', p.text.strip()))
+    #Reference
+    for div in artpage.body.find_all('div', attrs = {'class' : 'lit-cited'}):
+        for ul in div.find_all('ul', attrs = {'class' : 'otherReviewsList'}):
+            ul.replace_with('')
+        rec['refs'] = []
+        for li in div.find_all('li'):
+            if not li.has_attr('refid'): continue
+            refdoi = False
+            for a in li.find_all('a'):
+                if re.search('Crossref', a.text):
+                    refdoi = re.sub('.*key=', '', a['href'])
+                    refdoi = re.sub('%2F', '/', refdoi)
+                    refdoi = re.sub('%28', '(', refdoi)
+                    refdoi = re.sub('%29', ')', refdoi)
+                    refdoi = re.sub('%3A', ':', refdoi)
+                    refdoi = re.sub('%5B', '[', refdoi)
+                    refdoi = re.sub('%5D', ']', refdoi)
+                a.replace_with('')
+            reftext = li.text.strip()
+            if refdoi:
+                reftext = '%s, DOI: %s' % (reftext, refdoi)
+            rec['refs'].append([('x', reftext)])
+    print rec['tit']
     recs.append(rec)
+
 
                                        
 #closing of files and printing
