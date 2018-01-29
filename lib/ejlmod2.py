@@ -5,6 +5,7 @@ import os
 import subprocess
 import datetime
 import platform
+import unicodedata
 
 from collclean_lib import coll_cleanforthe
 from collclean_lib import coll_clean710
@@ -199,7 +200,10 @@ def datetodate(date):
         try:
             return '%4i-%02i' % (int(parts[1]), months.index(parts[0].upper())+1)
         except:
-            return '%4i-%02i' % (int(parts[1]), months2.index(parts[0].upper())+1)
+            try:
+                return '%4i-%02i' % (int(parts[1]), months2.index(parts[0].upper())+1)
+            except:
+                return '%4i' % (int(parts[1]))
 
 
 def writeXML(recs,dokfile,publisher):
@@ -229,9 +233,8 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('transtit'):
             xmlstring += marcxml('242',[('a',kapitalisiere(rec['transtit'])), ('9',publisher)])
         if rec.has_key('langauge'):
+            print rec
             xmlstring += marcxml('041',[('a',rec['langauge'])])
-        if rec.has_key('language'):
-            xmlstring += marcxml('041',[('a',rec['language'])])
         if rec.has_key('abs'):
             xmlstring += marcxml('520',[('a',rec['abs']), ('9',publisher)])
         if rec.has_key('keyw'):
@@ -467,17 +470,26 @@ def writeXML(recs,dokfile,publisher):
             for ref in rec['refs']:
                 #print '  ->  ', ref
                 if len(ref) == 1 and ref[0][0] == 'x':
-                    for ref in extract_references_from_string(ref[0][1], override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
-                        entryaslist = [('9','refextract')]
-                        for key in ref.keys():
-                            for mapping in mappings:
-                                if key == mapping[0]:
-                                    for entry in ref[key]:
-                                        entryaslist.append((mapping[1], entry))
-                        try:
+                    try:
+                        for ref2 in extract_references_from_string(ref[0][1], override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
+                            entryaslist = [('9','refextract')]
+                            for key in ref2.keys():
+                                for mapping in mappings:
+                                    if key == mapping[0]:
+                                        for entry in ref2[key]:
+                                            entryaslist.append((mapping[1], entry))
                             xmlstring += marcxml('999C5',entryaslist)
-                        except:
-                            print 'UTF8 Problem in Referenzen'
+                    except:
+                        print 'UTF8 Problem in Referenzen'
+                        ref01 = unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', ref[0][1])).encode('ascii','ignore'),'utf-8')
+                        for ref2 in extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
+                            entryaslist = [('9','refextract')]
+                            for key in ref2.keys():
+                                for mapping in mappings:
+                                    if key == mapping[0]:
+                                        for entry in ref2[key]:
+                                            entryaslist.append((mapping[1], entry))
+                            xmlstring += marcxml('999C5',entryaslist)
                 else:
                     xmlstring += marcxml('999C5',ref)
         xmlstring += marcxml('980',[('a','HEP')])
