@@ -62,7 +62,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '11467': ['fpc', 'Front.Phys.(Beijing)'],
       '10686': ['ea', 'Exper.Astron.'],
       '10701': ['fp', 'Found.Phys.'],
-      '10702': ['fpl', 'Found.Phys.Lett.'],
+      '10702': ['fpl', 'Found.Phys.Lett.'], # stopped 2006
       '10714': ['grg', 'Gen.Rel.Grav.'],
       '12267': ['gc', 'Grav.Cosmol.'],
       '10751': ['hypfin', 'Hyperfine Interact.'],
@@ -129,7 +129,8 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '11006': ['matnot', 'Math.Notes'],
       '41781': ['csbg', 'Comput.Softw.Big Sci.'],
       '10967': ['jrnc', 'J.Radioanal.Nucl.Chem.'],
-      '40485': ['epjti', 'EPJ Tech.Instrum.']}
+      '40485': ['epjti', 'EPJ Tech.Instrum.'],
+      '41114': ['lrr', 'Living Rev.Rel.']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
@@ -201,6 +202,8 @@ def xmlExtract():
         except:
             pass
     rec['jnl'] = jc[jnr][1]
+    if rec['jnl'] == '41114':
+        rec['tc'] = 'R'
     if len(jc[jnr]) > 2:
         rec['jnl2'] = jc[jnr][2]
 	
