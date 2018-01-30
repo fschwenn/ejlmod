@@ -54,18 +54,20 @@ for div in tocpage.body.find_all('div', attrs = {'id' : 'main'}):
                 rec['doi'] = '20.2000/' + re.sub('.*\/', '', rec['link']) + '_' + re.sub('\W', '', rec['auts'][0])
                 if re.search('pdf$', rec['link']):
                     rec['FFT'] = a['href']
-            if rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_R_Aben.pdf':
-                rec['date'] = '2015-06-17'
-                recs.append(rec)
-            elif rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_C_Galea.pdf':
-                rec['date'] = '2008-06-16'
-                recs.append(rec)
-            elif rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_J_Uiterwijk.pdf':
-                rec['date'] = '2007-06-12'
-                recs.append(rec)
-            elif len(parts) > 1:
+            #if rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_R_Aben.pdf':
+            #    rec['date'] = '2015-06-17'
+            #    recs.append(rec)
+            #elif rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_C_Galea.pdf':
+            #    rec['date'] = '2008-06-16'
+            #    recs.append(rec)
+            #elif rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_J_Uiterwijk.pdf':
+            #    rec['date'] = '2007-06-12'
+            #    recs.append(rec)
+            if len(parts) > 1:
                 rec['date'] = re.sub('Okt', 'Oct', re.sub('\.', '', parts[1].strip()))
-                recs.append(rec)
+                year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
+                if year >= now.year - 1:
+                    recs.append(rec)
             else:
                 print rec
 
