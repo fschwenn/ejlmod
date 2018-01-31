@@ -130,7 +130,8 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '41781': ['csbg', 'Comput.Softw.Big Sci.'],
       '10967': ['jrnc', 'J.Radioanal.Nucl.Chem.'],
       '40485': ['epjti', 'EPJ Tech.Instrum.'],
-      '41114': ['lrr', 'Living Rev.Rel.']}
+      '41114': ['lrr', 'Living Rev.Rel.'],
+      '8790' : ['sprthe', 'BOOK']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
@@ -204,6 +205,8 @@ def xmlExtract():
     rec['jnl'] = jc[jnr][1]
     if rec['jnl'] == '41114':
         rec['tc'] = 'R'
+    if rec['jnl'] == '8790':
+        rec['tc'] = 'T'
     if len(jc[jnr]) > 2:
         rec['jnl2'] = jc[jnr][2]
 	
