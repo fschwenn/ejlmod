@@ -300,6 +300,8 @@ def writeXML(recs,dokfile,publisher):
             #special euclid:
             if re.search('^20.2000\/euclid\.', rec['doi']):
                 xmlstring += marcxml('035', [('9', 'EUCLID'), ('a', rec['doi'][8:])])
+        if rec.has_key('hdl'):
+            xmlstring += marcxml('0247',[('a',rec['hdl']), ('2','HDL'), ('9',publisher)])
         elif len(liste) > 2 or rec.has_key('isbn') or rec.has_key('isbns'):
             pseudodoi = '20.2000/'+re.sub(' ','_','-'.join([tup[1] for tup in liste]))
             if rec.has_key('isbn'):
@@ -398,6 +400,18 @@ def writeXML(recs,dokfile,publisher):
             if rec['licence'].has_key('material'):
                 entry.append(('3',rec['licence']['material']))
             xmlstring += marcxml('540', entry)
+        if rec.has_key('supervisor'):
+            marc = '701'
+            for autaff in rec['supervisor']:
+                autlist = [('a',shapeaut(autaff[0]))]
+                for aff in autaff[1:]:
+                    if re.search('ORCID', aff):
+                        autlist.append(('j', aff))
+                    elif re.search('EMAIL', aff):
+                        autlist.append(('m', re.sub('EMAIL:', '', aff)))
+                    else:
+                        autlist.append(('u', aff))
+                xmlstring += marcxml(marc, autlist)
         if rec.has_key('autaff'):
             marc = '100'
             for autaff in rec['autaff']:
@@ -513,7 +527,12 @@ def writeXML(recs,dokfile,publisher):
 
 def shapeaut(author):
     if not re.search(',', author):
-        author = re.sub('(.*) (.*)',r'\2, \1',author).strip()
+        if re.search('(.*) (van den|van der|van de|de la) (.*)', author):
+            author = re.sub('(.*) (van den|van der|van de|de la) (.*)',r'\2 \3, \1',author).strip()
+        elif re.search('(.*) (van|van|de|von|del|du) (.*)', author):
+            author = re.sub('(.*) (van|van|de|von|del|du) (.*)',r'\2 \3, \1',author).strip()
+        else:
+            author = re.sub('(.*) (.*)',r'\2, \1',author).strip()
     author = re.sub(' ([A-Z]) ',r' \1. ', author)
     author = re.sub(' ?([A-Z])$',r'\1.', author)
     author = re.sub('([A-Z] ?\.)[ \-]([A-Z] ?\.?)',r'\1\2', author)
