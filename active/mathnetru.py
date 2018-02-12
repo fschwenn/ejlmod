@@ -211,9 +211,31 @@ for artlink in artlinks:
     #fulltext
     for a in articlepage.body.find_all('a'):
         if a.has_attr('href') and a.text == 'PDF file':
-            rec['pdf'] = 'http://www.mathnet.ru' + a['href']
-            if jnldict[jrnid].has_key('oa') and jnldict[jrnid]['oa']:
-                rec['FFT'] =  rec['pdf']
+            pdflink = False
+            try:
+                if re.search('[fF]ull.*[Tt]ext', a.previous_sibling.text):
+                    pdflink = 'http://www.mathnet.ru' + a['href']
+            except:
+                try:
+                    if re.search('[fF]ull.*[Tt]ext', a.previous_sibling.previous_sibling.text):
+                        pdflink = 'http://www.mathnet.ru' + a['href']
+                except:
+                    pass
+            if pdflink:
+                rec['pdf'] = 'http://www.mathnet.ru' + a['href']
+                if jnldict[jrnid].has_key('oa') and jnldict[jrnid]['oa']:
+                    rec['FFT'] =  rec['pdf']
+    #references
+    for a in articlepage.body.find_all('a'):
+        if a.has_attr('href') and a.text == 'HTML file':
+            reflink = 'http://www.mathnet.ru' + a['href']
+            refpage = BeautifulSoup(urllib2.urlopen(reflink))
+            rec['refs'] = []
+            for tr in refpage.body.find_all('tr'):
+                trt = tr.text.strip()
+                if len(trt) > 10:
+                    rec['refs'].append([('x', trt)])
+            print ' %i references found' % (len(rec['refs']))
     print rec
     recs.append(rec)
 
