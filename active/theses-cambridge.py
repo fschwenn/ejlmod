@@ -22,9 +22,9 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-startyear = now.year - 10
+startyear = now.year - 1
 
-publisher = 'Cambriudge U.'
+publisher = 'Cambridge U.'
 
 typecode = 'T'
 
