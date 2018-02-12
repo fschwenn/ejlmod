@@ -163,6 +163,10 @@ for a in tocpage.find_all('a', attrs = {'class' : 'article_title'}):
                     if a2.has_key('title') and re.search('^PDF', a2['title']):
                         if a2.has_key('href') and re.search('pdf$', a2['href']):
                             rec['FFT'] = a2['href']
+        #edpj gives incomplete links to PDF
+        if not re.search('www', rec['FFT']):
+            pdflink = re.sub('.*articles', '/articles', rec['FFT'])
+            rec['FFT'] = re.sub('(.*?www.*?)\/.*', r'\1', urltrunk) + pdflink            
     #references
     for a in artpage.body.find_all('a', attrs = {'title' : 'References'}):
         reflink = re.sub('(.*\.org)\/.*', r'\1', toclink) + a['href']
