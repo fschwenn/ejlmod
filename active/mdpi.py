@@ -21,19 +21,27 @@ def tfstrip(x): return x.strip()
 
 publisher = 'MDPI'
 jnl = sys.argv[1]
-
+if jnl == 'proceedings':
+    vol = sys.argv[2]
+    iss = sys.argv[3]
+    cnum = sys.argv[4]
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-jnlfilename = '%s.%s' % (jnl, stampoftoday)
 
-done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
-done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
-done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
 
-print 'already done:', done
 
-starturl = 'http://www.mdpi.com/search?journal=%s&year_from=1996&year_to=2025&page_count=100&sort=pubdate&view=default' % (jnl)
+if jnl == 'proceedings':
+    starturl = 'http://www.mdpi.com/2504-3900/%s/%s' % (vol, iss)
+    jnlfilename = 'mdpi_proc%s.%s_%s' % (vol, iss, cnum)
+    done = []
+else:
+    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=1996&year_to=2025&page_count=100&sort=pubdate&view=default' % (jnl)
+    jnlfilename = '%s.%s' % (jnl, stampoftoday)
+    done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
+    done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
+    done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
+    print 'already done:', done
 tocpage = BeautifulSoup(urllib2.urlopen(starturl))
 
 recs = []
@@ -42,6 +50,10 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
     for a in div.find_all('a', attrs = {'class' : 'title-link'}):
         rec = {'jnl' : jnl.title(), 'tc' : 'P', 'keyw' : [], 'aff' : [], 'auts' : [],
                'note' : [], 'refs' : []}
+        if jnl == 'proceedings':
+            rec['jnl'] = 'MDPI Proc.'
+            rec['tc'] = 'C'
+            rec['cnum'] = cnum
         link = 'http://www.mdpi.com' + a['href']
         rec['FFT'] = 'http://www.mdpi.com' + a['href']  + '/pdf'
         rec['tit'] = a.text
@@ -86,28 +98,30 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
                 for a2 in div.find_all('a'):
                     rec['note'].append([ a2.text ])
         ##authors and affiliations
-        for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):
-            for sup in div.find_all('sup'):
-                newcont = ''
-                for cont in re.split(' *, *', sup.text):
-                    if re.search('\d', cont):
-                        newcont += ' , =Aff%s, ' % (cont.strip())
-                sup.replace_with(newcont)
-            for script in page.body.find_all('script'):
-                script.replace_with('')
-            authors = re.sub(' and ', ' , ', re.sub('\xa0', ' ', div.text))
-            authors = re.sub('&nbsp;', ' ', authors)
-            authors = re.sub('\*', ' ', authors)
-            for author in re.split(' *, *', re.sub('[\n\t]', '', authors)):
-                if len(author.strip()) > 2:
-                    rec['auts'].append(author.strip())        
-        for div in page.body.find_all('div', attrs = {'class' : 'art-affiliations'}):
-            for sup in div.find_all('sup'):
-                sup.replace_with('Aff%s= ' % (sup.text))
-            for span in div.find_all('span'):
-                span.replace_with(';;;')
-            for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
-                rec['aff'].append(aff.strip())
+        for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):                    
+#            for div in diva.find_all('div', attrs = {'class' : 'author'}):
+                for sup in div.find_all('sup'):
+                    newcont = ''
+                    for cont in re.split(' *, *', sup.text):
+                        if re.search('\d', cont):
+                            newcont += ' , =Aff%s, ' % (cont.strip())
+                    sup.replace_with(newcont)
+                for script in page.body.find_all('script'):
+                    script.replace_with('')
+                authors = re.sub(' and ', ' , ', re.sub('\xa0', ' ', div.text))
+                authors = re.sub('&nbsp;', ' ', authors)
+                authors = re.sub('\*', ' ', authors)
+                for author in re.split(' *, *', re.sub('[\n\t]', '', authors)):
+                    if len(author.strip()) > 2:
+                        rec['auts'].append(author.strip())        
+        for diva in page.body.find_all('div', attrs = {'class' : 'art-affiliations'}):
+            for div in diva.find_all('div', attrs = {'class' : 'affiliation'}):
+                for sup in div.find_all('sup'):
+                    sup.replace_with('Aff%s= ' % (sup.text))
+                for span in div.find_all('span'):
+                    span.replace_with(';;;')
+                for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
+                    rec['aff'].append(aff.strip())
         #references 
         reflink = 'http://www.mdpi.com' + a['href']  + '/htm'
         refpage = BeautifulSoup(urllib2.urlopen(reflink))
