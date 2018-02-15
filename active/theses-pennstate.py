@@ -30,7 +30,8 @@ typecode = 'T'
 jnlfilename = 'THESES-PENNSTATE-%s' % (stampoftoday)
 
 tocurl = 'https://etda.libraries.psu.edu/catalog?f%5Bdegree_name_ssi%5D%5B%5D=PHD&f%5Bprogram_name_ssi%5D%5B%5D=Physics&per_page=100&sort=year_isi+desc%2C+title_ssi+asc'
-
+#tocurl = 'https://etda.libraries.psu.edu/catalog?f%5Bdegree_name_ssi%5D%5B%5D=PHD&f%5Bprogram_name_ssi%5D%5B%5D=Physics&page=2&per_page=100&sort=year_isi+desc%2C+title_ssi+asc'
+#tocurl = 'https://etda.libraries.psu.edu/catalog?f%5Bdegree_name_ssi%5D%5B%5D=PHD&f%5Bprogram_name_ssi%5D%5B%5D=Physics&page=3&per_page=100&sort=year_isi+desc%2C+title_ssi+asc'
 
 try:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
@@ -63,7 +64,7 @@ for rec in prerecs:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
     for li in artpage.body.find_all('li', attrs = {'class' : 'download'}):
         for a in li.find_all('a'):
-            if not a['href'] == '/login':
+            if not a['href'] == '/login' and not re.search('feedback', a['href']):
                 rec['FFT'] = 'https://etda.libraries.psu.edu' + a['href']
     for dd in artpage.body.find_all('dd', attrs = {'class' : 'blacklight-author_name_tesi'}):
         rec['auts'] = [ dd.text.strip() ]
