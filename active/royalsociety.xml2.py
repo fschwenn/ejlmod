@@ -44,47 +44,48 @@ print "get table of content... from %s" % (toclink)
 tocpage = BeautifulSoup(urllib2.urlopen(toclink))
 
 recs = []
-for a in tocpage.body.find_all('a', attrs = {'class' : 'highwire-cite-linked-title'}):
-    artlink = "%s%s" % (urltrunk, a['href'])
-    print artlink
-    artpage = BeautifulSoup(urllib2.urlopen(artlink))
-    rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'autaff' : [], 'refs' : []}
+for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-toc'}):
+    for a in div.find_all('a', attrs = {'class' : 'highwire-cite-linked-title'}):
+        artlink = "%s%s" % (urltrunk, a['href'])
+        print artlink
+        artpage = BeautifulSoup(urllib2.urlopen(artlink))
+        rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'autaff' : [], 'refs' : []}
     #meta
-    autaff = False
-    for meta in artpage.head.find_all('meta'):
-        if meta.has_attr('name'):
-            if meta['name'] == 'citation_firstpage':
-                rec['p1'] = meta['content']
-            if meta['name'] == 'citation_lastpage':
-                rec['p2'] = meta['content']
-            elif meta['name'] == 'citation_doi':
-                rec['doi'] = meta['content']
-            elif meta['name'] == 'article:section':
-                rec['note'] = [ meta['content'] ]
-            elif meta['name'] == 'citation_publication_date':
-                rec['date'] = meta['content']
-            elif meta['name'] == 'citation_title':
-                rec['tit'] = meta['content']
-            elif meta['name'] == 'citation_author':
-                if autaff:
-                    rec['autaff'].append(autaff)
-                autaff = [ meta['content'] ]
-            elif meta['name'] == 'citation_author_institution':
-                autaff.append(meta['content'])
-            elif meta['name'] == 'citation_author_orcid':
-                orcid = re.sub('.*\/', '', meta['content'])
-                autaff.append('ORCID:%s' % (orcid))
-            elif meta['name'] == 'citation_author_email':
-                email = meta['content']
-                autaff.append('EMAIL:%s' % (email))
-            elif meta['name'] == 'DC.Description':
-                rec['abs'] = meta['content']
-    rec['autaff'].append(autaff)
-    #ref
-    for ol in artpage.body.find_all('ol', attrs = {'class' : 'cit-list'}):
-        for li in ol.find_all('li', recursive=False):
-            rec['refs'].append([('x', re.sub('\)OpenUrl', ' ) ', li.text.strip()))])
-    recs.append(rec)
+        autaff = False
+        for meta in artpage.head.find_all('meta'):
+            if meta.has_attr('name'):
+                if meta['name'] == 'citation_firstpage':
+                    rec['p1'] = meta['content']
+                if meta['name'] == 'citation_lastpage':
+                    rec['p2'] = meta['content']
+                elif meta['name'] == 'citation_doi':
+                    rec['doi'] = meta['content']
+                elif meta['name'] == 'article:section':
+                    rec['note'] = [ meta['content'] ]
+                elif meta['name'] == 'citation_publication_date':
+                    rec['date'] = meta['content']
+                elif meta['name'] == 'citation_title':
+                    rec['tit'] = meta['content']
+                elif meta['name'] == 'citation_author':
+                    if autaff:
+                        rec['autaff'].append(autaff)
+                    autaff = [ meta['content'] ]
+                elif meta['name'] == 'citation_author_institution':
+                    autaff.append(meta['content'])
+                elif meta['name'] == 'citation_author_orcid':
+                    orcid = re.sub('.*\/', '', meta['content'])
+                    autaff.append('ORCID:%s' % (orcid))
+                elif meta['name'] == 'citation_author_email':
+                    email = meta['content']
+                    autaff.append('EMAIL:%s' % (email))
+                elif meta['name'] == 'DC.Description':
+                    rec['abs'] = meta['content']
+        rec['autaff'].append(autaff)
+        #ref
+        for ol in artpage.body.find_all('ol', attrs = {'class' : 'cit-list'}):
+            for li in ol.find_all('li', recursive=False):
+                rec['refs'].append([('x', re.sub('\)OpenUrl', ' ) ', li.text.strip()))])
+        recs.append(rec)
 
 
   
