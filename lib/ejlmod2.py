@@ -300,7 +300,7 @@ def writeXML(recs,dokfile,publisher):
             #special euclid:
             if re.search('^20.2000\/euclid\.', rec['doi']):
                 xmlstring += marcxml('035', [('9', 'EUCLID'), ('a', rec['doi'][8:])])
-        if rec.has_key('hdl'):
+        elif rec.has_key('hdl'):
             xmlstring += marcxml('0247',[('a',rec['hdl']), ('2','HDL'), ('9',publisher)])
         elif len(liste) > 2 or rec.has_key('isbn') or rec.has_key('isbns'):
             pseudodoi = '20.2000/'+re.sub(' ','_','-'.join([tup[1] for tup in liste]))
@@ -495,15 +495,18 @@ def writeXML(recs,dokfile,publisher):
                             xmlstring += marcxml('999C5',entryaslist)
                     except:
                         print 'UTF8 Problem in Referenzen'
-                        ref01 = unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', ref[0][1])).encode('ascii','ignore'),'utf-8')
-                        for ref2 in extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
-                            entryaslist = [('9','refextract')]
-                            for key in ref2.keys():
-                                for mapping in mappings:
-                                    if key == mapping[0]:
-                                        for entry in ref2[key]:
-                                            entryaslist.append((mapping[1], entry))
-                            xmlstring += marcxml('999C5',entryaslist)
+                        try:
+                            ref01 = unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', ref[0][1])).encode('ascii','ignore'),'utf-8')
+                            for ref2 in extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
+                                entryaslist = [('9','refextract')]
+                                for key in ref2.keys():
+                                    for mapping in mappings:
+                                        if key == mapping[0]:
+                                            for entry in ref2[key]:
+                                                entryaslist.append((mapping[1], entry))
+                                xmlstring += marcxml('999C5',entryaslist)
+                        except:
+                            print 'real UTF8 Problem in Referenzen'
                 else:
                     xmlstring += marcxml('999C5',ref)
         xmlstring += marcxml('980',[('a','HEP')])
