@@ -101,7 +101,9 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'International Conference on Instrumentation for Colliding Beam Physics (INSTR17)' : 'C17-02-27',
             'Precision Astronomy with Fully Depleted CCDS (PACCD2016)' : 'C16-12-01.1',
             '19th International Workshop on Radiation Imaging Detectors (IWORID2017)' : 'C17-07-02.5',
-            '11th International Conference on Position Sensitive Detectors (PSD11)' : 'C17-09-03.2'}
+            '11th International Conference on Position Sensitive Detectors (PSD11)' : 'C17-09-03.2',
+            'Calorimetry for the High Energy Frontier (CHEF2017)' : 'C17-10-02.3',
+            'Light Detection in Noble Elements (LIDINE2017)' : 'C17-09-22'}
 
 
 
