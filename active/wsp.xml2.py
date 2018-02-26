@@ -81,23 +81,49 @@ def concert(rawrecs):
         wsprecord = BeautifulSoup(''.join(xmlrec.readlines()))
         xmlrec.close()
         rec = {'tc' : 'P', 'note' : [], 'autaff' : [], 'keyw' : []}
+        #Journal
         for jt in wsprecord.find_all('journal-title'):
             rec['jnl'] = jt.text
-        for volume in wsprecord.find_all('volume'):
-            rec['vol'] = volume.text
-        for issue in wsprecord.find_all('issue'):
-            rec['issue'] = issue.text
+        if not rec.has_key('jnl'):
+            rec['jnl'] = 'BOOK'
+            rec['tc'] = 'S'
+            if re.search('fmatter', rawrec):
+                rec['tc'] = 'B'
+                rec['note'].append('Hauptaufnahme')
+        for series in wsprecord.find_all('series'):
+            if re.search('^Advanced series on directions in high energy physics', series.text):
+                rec['jnl'] = 'Adv.Ser.Direct.High Energy Phys.'
+                if re.search('\d', series.text):
+                    rec['vol'] = re.sub('.*?(\d+).*', r'\1', series.text.strip())
+        else:
+            for volume in wsprecord.find_all('volume'):
+                rec['vol'] = volume.text
+            for issue in wsprecord.find_all('issue'):
+                rec['issue'] = issue.text
         for p1 in wsprecord.find_all('fpage'):
             rec['p1'] = p1.text
         for p2 in wsprecord.find_all('lpage'):
             rec['p2'] = p2.text
         for eid in wsprecord.find_all('elocation-id'):
             rec['p1'] = eid.text
+        for pc in wsprecord.find_all('page-count'):
+            rec['pages'] = pc['count']
+        #title
         for title in wsprecord.find_all('article-title'):
             rec['tit'] = title.text
-        for aid in wsprecord.find_all('article-id', attrs = {'pub-id-type' : 'doi'}):
-            rec['doi'] = aid.text
-            print '    . ', rec['doi']
+        if not rec.has_key('tit'):
+            for title in wsprecord.find_all('title'):
+                rec['tit'] = title.text
+        #DOI
+        if rec['tc'] == 'B':
+            for bid in wsprecord.find_all('book-id', attrs = {'pub-id-type' : 'doi'}):
+                rec['doi'] = bid.text
+                print '    . ', rec['doi']
+        else:
+            for aid in wsprecord.find_all(['article-id', 'book-part-id'], attrs = {'pub-id-type' : 'doi'}):
+                rec['doi'] = aid.text
+                print '    . ', rec['doi']
+        #Note
         for sg in wsprecord.find_all('subj-group', attrs = {'subj-group-type' : 'heading'}):
             for s in sg.find_all('subject'):
                 rec['note'].append(s.text)
@@ -125,6 +151,23 @@ def concert(rawrecs):
                 if affdict.has_key(xref['rid']):
                     autaff.append(affdict[xref['rid']])
             rec['autaff'].append(autaff)
+        if not rec['autaff']:
+            for c in wsprecord.find_all('contrib', attrs = {'contrib-type' : 'editor'}):
+                for sn in c.find_all('string-name'):
+                    author = ''
+                    for surn in sn.find_all('surname'):
+                        author += surn.text
+                    author += ', '
+                    for givenn in sn.find_all('given-names'):
+                        author += givenn.text + ' (ed.)'
+                #no emails
+                autaff = [author]
+                for aff in c.find_all('aff'):
+                    autaff.append(aff.text)
+                for xref in c.find_all('xref', attrs = {'ref-type' : 'aff'}):
+                    if affdict.has_key(xref['rid']):
+                        autaff.append(affdict[xref['rid']])
+                rec['autaff'].append(autaff)
         #date
         for date in wsprecord.find_all('date', attrs = {'date-type' : 'published'}):
             try:
@@ -147,6 +190,18 @@ def concert(rawrecs):
                         rec['date'] = '%s-%s' % (date.year.text, date.month.text)
                     except:
                         rec['date'] = date.year.text
+        if not rec.has_key('date'):
+            for cry in wsprecord.find_all('copyright-year'):
+                rec['date'] = cry.text.strip()
+        #license
+        for lic in wsprecord.find_all('license'):
+            lict = lic.text.strip()
+            if re.search('CC', lict):
+                stat = re.sub('.*(CC.*\d).*', r'\1', lict)
+                stat = re.sub('\)', '', stat)
+                stat = re.sub(' ', '-', stat)
+                rec['licence'] = {'statement' : stat}
+                rec['FFT'] = 'http://www.worldscientific.com/doi/pdf/' + rec['doi']
         #abstract
         for abstract in wsprecord.find_all('abstract'):
             rec['abs'] = ''
@@ -160,7 +215,11 @@ def concert(rawrecs):
         for pagecount in wsprecord.find_all('page-count'):
             rec['pages'] = pagecount['count']
         #references
-        rec['refs'] = getreferencesfromweb(rec['doi'])
+        if not rec.has_key('refs'):
+            try:
+                rec['refs'] = getreferencesfromweb(rec['doi'])
+            except:
+                print 'could not get references from the web'
         recs.append(rec)                                   
     return recs
 
@@ -188,14 +247,16 @@ for datei in os.listdir(wspdir):
         continue
     elif datei in ['done']:
         continue
-    #jnlfilename = 'WSP__'+datei
-    jnlfilename = datei
+    jnlfilename = 'WSP__'+datei
+    #jnlfilename = datei
     print jnlfilename
     rawrecs = []
     for datei2 in os.listdir(ordner):
-        ordner2 = os.path.join(ordner, datei2)
-        for datei3 in os.listdir(ordner2):
-            rawrecs.append(os.path.join(ordner2, datei3))
+        if not datei == datei2:
+            ordner2 = os.path.join(ordner, datei2)
+            if not re.search('bmatter', datei2):
+                for datei3 in os.listdir(ordner2):
+                    rawrecs.append(os.path.join(ordner2, datei3))
     print rawrecs
     recs = concert(rawrecs)
     #save them
