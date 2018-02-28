@@ -195,8 +195,6 @@ for article in tocpage.find_all('stk_header'):
     #article number
     for artnumnode in article.find_all('artnum'):
         rec['artnum'] = artnumnode.text.strip()
-        if issn == '1748-0221' and rec['artnum'][0] == 'C':
-            rec['tc'] = ['C']
     #DOI
     for doinode in article.find_all('doi'):
         rec['doi'] = doinode.text.strip()
@@ -332,6 +330,11 @@ for article in tocpage.find_all('stk_header'):
             rec['refs'].append([('x', ref)])
     except:
         print 'no references'
+    try:
+        if issn == '1748-0221' and rec['p1'][0] == 'C':
+            rec['tc'] = ['C']
+    except:
+        pass
     #publication note
     try:
         pbn = rec['jnl'] + rec['vol'] + rec['p1']
