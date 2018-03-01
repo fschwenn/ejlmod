@@ -32,6 +32,7 @@ if   (jnl == 'prs'):
 elif (jnl == 'prts'): 
     issn = '1364-503x'
     url = 'PTRSA'
+    vol = 'A' + vol
     jnlname = 'Phil.Trans.Roy.Soc.Lond.'
     urltrunk = 'http://rsta.royalsocietypublishing.org'
 
