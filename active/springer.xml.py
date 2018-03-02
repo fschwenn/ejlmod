@@ -788,7 +788,7 @@ for d1 in os.listdir(sprdir):
                                     #proceedings:
                                     if jnr in ['7395','0361', '10533']: 
                                         rec['tc'] = 'C'
-                                    elif jnr in ['5304']:
+                                    elif jnr in ['5304', '0304']:
                                         rec['tc'] = 'PS'
                                 if not editordoesexist:
                                     rec['note'] = [ 'NUR HAUPTAUFNAHME - KEINE EINZELAUFNAHMEN' ]
