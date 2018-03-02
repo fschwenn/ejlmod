@@ -786,7 +786,10 @@ for d1 in os.listdir(sprdir):
                                 if isbook: 
                                     rec['tc'] = 'S'
                                     #proceedings:
-                                    if jnr in ['7395','0361', '10533']: rec['tc'] = 'C'
+                                    if jnr in ['7395','0361', '10533']: 
+                                        rec['tc'] = 'C'
+                                    elif jnr in ['5304']:
+                                        rec['tc'] = 'PS'
                                 if not editordoesexist:
                                     rec['note'] = [ 'NUR HAUPTAUFNAHME - KEINE EINZELAUFNAHMEN' ]
                                 #known conference?
