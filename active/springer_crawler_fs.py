@@ -26,7 +26,7 @@ vol = sys.argv[3]
 issue = sys.argv[4]
 
 jnlfilename = re.sub(' ', '_', "%s%s.%s" % (jnl,vol,issue))
-if len(sys.argv) > 4:
+if len(sys.argv) > 5:
     cnum = sys.argv[5]
     jnlfilename += '_' + cnum
 
