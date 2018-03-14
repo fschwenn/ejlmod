@@ -147,6 +147,7 @@ def ieee(number):
                 rec['p1'] = gdm['startPage']
                 rec['p2'] = gdm['endPage']
         else:
+            #if gdm.has_key('endPageXXX'):
             if gdm.has_key('endPage'):
                 rec['p1'] = gdm['startPage']
                 rec['p2'] = gdm['endPage']
@@ -164,7 +165,10 @@ def ieee(number):
             rec['pages'] = re.sub(' .*', '', gdm['startPage'])
             rec['p1'] = str(int(gdm['endPage']) - int(rec['pages']) + 1)            
         else:
-            rec['pages'] = int(re.sub(' .*', '', gdm['endPage'])) - int(gdm['startPage']) + 1
+            try:
+                rec['pages'] = int(re.sub(' .*', '', gdm['endPage'])) - int(gdm['startPage']) + 1
+            except:
+                pass
         rec['doi'] = gdm['doi']
         if gdm.has_key('keywords'):
             for kws in gdm['keywords']:
@@ -189,7 +193,6 @@ def ieee(number):
         #references
         #now hidden in JavaScript
                     
-        #print rec
         if jnlname == 'IEEE Nucl.Sci.Symp.Conf.Rec.':
             try:
                 print '%3i/%3i %s (%s) %s, %s' % (i,len(articlelinks),rec['conftitle'],rec['year'],rec['doi'],rec['tit'])
