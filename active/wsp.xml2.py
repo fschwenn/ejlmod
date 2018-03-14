@@ -100,6 +100,11 @@ def concert(rawrecs):
                 rec['vol'] = volume.text
             for issue in wsprecord.find_all('issue'):
                 rec['issue'] = issue.text
+        #book without individual records
+        rawrecparts = re.split('\/', rawrec)
+        if len(rawrecparts) > 3 and (rawrecparts[-2] == rawrecparts[-3]):
+            rec['note'].append('no metatdata for individual chapters!') 
+            rec['tc'] = 'B'
         for p1 in wsprecord.find_all('fpage'):
             rec['p1'] = p1.text
         for p2 in wsprecord.find_all('lpage'):
@@ -114,6 +119,9 @@ def concert(rawrecs):
         if not rec.has_key('tit'):
             for title in wsprecord.find_all('title'):
                 rec['tit'] = title.text
+        if rec['tc'] == 'B':
+            for title in wsprecord.find_all('book-title'):
+                rec['tit'] = title.text
         #DOI
         if rec['tc'] == 'B':
             for bid in wsprecord.find_all('book-id', attrs = {'pub-id-type' : 'doi'}):
@@ -126,7 +134,7 @@ def concert(rawrecs):
         #Note
         for sg in wsprecord.find_all('subj-group', attrs = {'subj-group-type' : 'heading'}):
             for s in sg.find_all('subject'):
-                rec['note'].append(s.text)
+                rec['note'].append(s.text)        
         #affiliations
         affdict = {}
         for aff in wsprecord.find_all('aff'):
@@ -134,7 +142,7 @@ def concert(rawrecs):
                 sup.replace_with('')
             if aff.has_attr('id'):
                 affdict[aff['id']] = aff.text
-        #print affdict
+        #authors
         for c in wsprecord.find_all('contrib', attrs = {'contrib-type' : 'author'}):
             for sn in c.find_all('string-name'):
                 author = ''
@@ -168,6 +176,23 @@ def concert(rawrecs):
                     if affdict.has_key(xref['rid']):
                         autaff.append(affdict[xref['rid']])
                 rec['autaff'].append(autaff)
+        if not rec['autaff']:
+            for c in wsprecord.find_all('contrib'):
+                for sn in c.find_all('string-name'):
+                    author = ''
+                    for surn in sn.find_all('surname'):
+                        author += surn.text
+                    author += ', '
+                    for givenn in sn.find_all('given-names'):
+                        author += givenn.text 
+                #no emails
+                autaff = [author]
+                for aff in c.find_all('aff'):
+                    autaff.append(aff.text)
+                for xref in c.find_all('xref', attrs = {'ref-type' : 'aff'}):
+                    if affdict.has_key(xref['rid']):
+                        autaff.append(affdict[xref['rid']])
+                rec['autaff'].append(autaff)
         #date
         for date in wsprecord.find_all('date', attrs = {'date-type' : 'published'}):
             try:
@@ -192,7 +217,17 @@ def concert(rawrecs):
                         rec['date'] = date.year.text
         if not rec.has_key('date'):
             for cry in wsprecord.find_all('copyright-year'):
-                rec['date'] = cry.text.strip()
+                if cry.text.strip():
+                    rec['date'] = cry.text.strip()
+        if not rec.has_key('date'):
+            for date in wsprecord.find_all('pub-date'):
+                try:
+                    rec['date'] = '%s-%s-%s' % (date.year.text, date.month.text, date.day.text)
+                except:
+                    try:
+                        rec['date'] = '%s-%s' % (date.year.text, date.month.text)
+                    except:
+                        rec['date'] = date.year.text
         #license
         for lic in wsprecord.find_all('license'):
             lict = lic.text.strip()
@@ -217,9 +252,13 @@ def concert(rawrecs):
         #references
         if not rec.has_key('refs'):
             try:
-                rec['refs'] = getreferencesfromweb(rec['doi'])
+                if not rec['tc'] in ['B', 'S']:
+                    rec['refs'] = getreferencesfromweb(rec['doi'])
             except:
                 print 'could not get references from the web'
+        #OF?
+        if 'no metatdata for individual chapters!' in rec['note']:
+            rec['note'].append(rec['date'])
         recs.append(rec)                                   
     return recs
 
@@ -234,6 +273,7 @@ for zipdatei in os.listdir(feeddir):
     if not zipdatei in done and re.search('.zip$', zipdatei):
         filestodo.append(zipdatei)
 print 'found %i new WSP zip-files to digest' % (len(filestodo))
+
 
 #unzip new files
 for zipdatei in filestodo:
@@ -258,20 +298,29 @@ for datei in os.listdir(wspdir):
                 for datei3 in os.listdir(ordner2):
                     rawrecs.append(os.path.join(ordner2, datei3))
     print rawrecs
-    recs = concert(rawrecs)
-    #save them
-    xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-    xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-    ejlmod2.writeXML(recs,xmlfile,publisher)
-    xmlfile.close()
-    #retrival
-    retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-    retfiles_text = open(retfiles_path,"r").read()
-    line = jnlfilename+'.xml'+ "\n"
-    if not line in retfiles_text: 
-        retfiles = open(retfiles_path,"a")
-        retfiles.write(line)
-        retfiles.close()
+    if not rawrecs:
+        for datei2 in os.listdir(ordner):
+            ordner2 = os.path.join(ordner, datei2)
+            if not re.search('bmatter', datei2):
+                for datei3 in os.listdir(ordner2):
+                    rawrecs.append(os.path.join(ordner2, datei3))    
+    if rawrecs:
+        recs = concert(rawrecs)
+        #save them
+        xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
+        xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+        ejlmod2.writeXML(recs,xmlfile,publisher)
+        xmlfile.close()
+        #retrival
+        retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+        retfiles_text = open(retfiles_path,"r").read()
+        line = jnlfilename+'.xml'+ "\n"
+        if not line in retfiles_text: 
+            retfiles = open(retfiles_path,"a")
+            retfiles.write(line)
+            retfiles.close()
+
+
 
 #move to 'done'
 for zipdatei in filestodo:
