@@ -131,7 +131,13 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '10967': ['jrnc', 'J.Radioanal.Nucl.Chem.'],
       '40485': ['epjti', 'EPJ Tech.Instrum.'],
       '41114': ['lrr', 'Living Rev.Rel.'],
-      '8790' : ['sprthe', 'BOOK']}
+      '8790' : ['sprthe', 'BOOK'],
+      '41467': ['natcomm', 'Nature Commun.'],
+      '41598': ['scirep', 'Sci.Rep.'],
+      '41550': ['natastr', 'Nat.Astron.'],
+      '41566': ['natphoton', 'Nature Photon.'],
+      '41567': ['natphys', 'Nature Phys.'],
+      '41586': ['nature', 'Nature']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
@@ -805,19 +811,11 @@ for d1 in os.listdir(sprdir):
 			        #JHEP does provide page numbers which could act as keys
                                 #if jnr in ['13130', '10052', '10050', '10053', '13360', '00159', '10053']:
                                 recs[rec['doi']] = rec
-                                #else:
-                                #    recs[rec['p1']] = rec
-                                if d2 == 'JournalOnlineFirst':
-                                    if rec.has_key('p2'):
-                                        rec['pages'] = rec['p2']
-                                        del rec['p2']
-                                    if rec.has_key('p1'):
-                                        del rec['p1']
-                                    nr += 1
-                            #except xml.parsers.expat.ExpatError:
-                            #    print 'artfile:'+artfile
-#                           #     print rec
-                            #    continue
+                                if rec.has_key('note'):
+                                    for note in rec['note']:
+                                        if note in ['News & Views', 'Books & Arts', 'Meeting Report', 
+                                                    'Mission Control', 'Editorial', 'Q&A']:
+                                            del recs[rec['doi']]
 
                             print ' doi: '+rec['doi']
                         keys =  recs.keys()
