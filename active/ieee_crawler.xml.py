@@ -121,9 +121,14 @@ def ieee(number):
         try:
             articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))
         except:
-            print "retry in 60 seconds"
-            time.sleep(60)
-            articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))
+            try:
+                print "retry in 60 seconds"
+                time.sleep(60)
+                articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))
+            except:
+                print "retry in 600 seconds"
+                time.sleep(600)
+                articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))                
         #metadata now in javascript
         for script in articlepage.find_all('script', attrs = {'type' : 'text/javascript'}):
             if re.search('global.document.metadata', script.text):
