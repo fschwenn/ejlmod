@@ -42,6 +42,8 @@ elif (jnl == 'ajp'):
 elif (jnl == 'ltp'):
     jnlname = 'Low Temp.Phys.'
     jnlname2 = 'Fiz.Nizk.Temp.'
+elif (jnl == 'php'):
+    jnlname = 'Phys.Plasmas'
 elif (jnl == 'aipconf') or (jnl == 'aipcp') or (jnl == 'apc'):
     jnlname = 'AIP Conf.Proc.'
     jnl = 'apc'
@@ -132,7 +134,10 @@ def getarticle(href, sec, subsec, p1):
                     sup.replace_with('Aff%s= ' % affnr)
                 for a in li.find_all('a', attrs = {'class' : 'email'}):
                     emails[affnr] = re.sub('mailto:', '', a['href'])
-                if affnr and not emails.has_key(affnr):
+                if affnr:
+                    if not emails.has_key(affnr):
+                        rec['aff'].append(li.text)
+                else:
                     rec['aff'].append(li.text)
     #authors
     affnr = 2 + len(rec['aff'])
@@ -158,10 +163,11 @@ def getarticle(href, sec, subsec, p1):
             author = re.sub('(.*) (.*)', r'\2, \1', author)
             for a in span.find_all('a'):
                 if a.has_attr('href') and re.search('orcid.org', a['href']):
-                    re.sub('http...orcid.org.', ', ORCID:', a['href'])
+                    author += re.sub('http.*orcid.org.', ', ORCID:', a['href'])
             for affi in range(len(affs)):
                 if emails.has_key(affs[affi]):
-                    author += ', EMAIL:%s' % (emails[affs[affi]])
+                    if not re.search('ORCID', author):
+                        author += ', EMAIL:%s' % (emails[affs[affi]])
                     affs[affi] = ''
             rec['auts'].append(author)                    
             for aff in affs:
@@ -206,7 +212,6 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'sub-section'}):
                     elif child2.name == 'section':
                         for article in child2.find_all('article'):
                             for div2 in article.find_all('div', attrs = {'class' : 'art_title linkable'}):
-                                print '    div2'
                                 (href, p1) = (False, False)
                                 for a in article.find_all('a', attrs = {'class' : 'ref nowrap'}):
                                     href = a['href']
