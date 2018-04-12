@@ -31,6 +31,7 @@ jnls = {'1538-3881': 'Astron.J.',
         '0004-637X': 'Astrophys.J.',
         '1538-4357': 'Astrophys.J.',
         '2041-8205': 'Astrophys.J.',
+        '1538-3881': 'Astronom.J.',
         '0067-0049': 'Astrophys.J.Supp.',
         '0264-9381': 'Class.Quant.Grav.',
         '1009-9271': 'Chin.J.Astron.Astrophys.',
@@ -56,6 +57,7 @@ jnls = {'1538-3881': 'Astron.J.',
         '0034-4885': 'Rep.Prog.Phys.',
         '1674-4527': 'Res.Astron.Astrophys.',
         '1402-4896': 'Phys.Scripta',
+        '0953-2048': 'Supercond.Sci.Technol.',
         '2399-6528': 'J.Phys.Comm.'}
 if jnls.has_key(issn):
     jnl = jnls[issn]
@@ -63,7 +65,7 @@ else:
     print 'journal not known'
     sys.exit(0)
 
-tocpage = BeautifulSoup(urllib2.urlopen(starturl))
+tocpage = BeautifulSoup(urllib2.urlopen(starturl, timeout=300))
 recs = []   
 issnote = False
 h3note = False
@@ -88,6 +90,7 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
             for a in child.find_all('a', attrs = {'class' : 'art-list-item-title'}):
                 time.sleep(20)
                 rec = {'jnl' : jnl, 'note' : [], 'tc' : 'P', 'autaff' : [], 'refs' : []}
+                orcidsfound = False
                 if len(sys.argv) > 2:
                     rec['cnum'] = sys.argv[2]
                     rec['tc'] = 'C'
@@ -97,7 +100,7 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                 if h3note: rec['note'].append(h3note)
                 if h4note: rec['note'].append(h4note)
                 artlink = 'http://iopscience.iop.org' + a['href']
-                artpage = BeautifulSoup(urllib2.urlopen(artlink))
+                artpage = BeautifulSoup(urllib2.urlopen(artlink, timeout=300))
                 autaff = False
                 #licence
                 for divl in artpage.body.find_all('div', attrs = {'class' : 'col-no-break wd-jnl-art-license media'}):
@@ -132,14 +135,52 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                         elif meta['name'] == 'citation_author_orcid':
                             orcid = re.sub('.*\/', '', meta['content'])
                             autaff.append('ORCID:%s' % (orcid))
+                            orcidsfound = True
                         elif meta['name'] == 'citation_author_email':
                             email = meta['content']
                             autaff.append('EMAIL:%s' % (email))    
                 if autaff:
                     rec['autaff'].append(autaff)
+                #authors if no ORCIDs in meta-section
+                if not orcidsfound or not rec['autaff']:
+                    (auts, aff) = ([], [])
+                    for authorsection in artpage.body.find_all('span'):
+                        if authorsection.has_attr('data-authors'):
+                            break
+                    for span in authorsection.find_all('span', attrs = {'itemprop' : 'author'}):
+                        orcid = False
+                        affis = []
+                        for sup in span.find_all('sup'):
+                            affis = re.split(' *, *', sup.text)
+                            sup.replace_with('')
+                        author = re.sub('(.*) (.*)', r'\2, \1', span.text.strip())
+                        for a in span.find_all('a'):
+                            if a.has_attr('href') and re.search('orcid.org', a['href']):
+                                orcid = re.sub('.*orcid.org\/(\d.*[\dX])', r'\1', a['href'])
+                        if orcid:
+                            auts.append('%s, ORCID:%s' % (author, orcid))
+                        else:
+                            auts.append(author)
+                        for affi in affis:
+                            auts.append('=Aff%s' % (affi))
+                    for diva in artpage.body.find_all('div', attrs = {'class' : 'wd-jnl-art-author-affiliations'}):
+                        for p in diva.find_all('p'):
+                            for sup in p.find_all('sup'):
+                                affi = sup.text
+                                sup.replace_with('Aff%s= ' % (affi))
+                            aff.append(p.text)
+                    if len(auts) >= len(rec['autaff']):
+                        del rec['autaff']
+                        rec['auts'] = auts
+                        rec['aff'] = aff
                 #abstract
                 for abstr in artpage.body.find_all('div', attrs = {'class' : 'article-text wd-jnl-art-abstract cf'}):
                     rec['abs'] = abstr.text.strip()
+                #keywords:
+                for divk in artpage.body.find_all('div', attrs = {'class' : 'wd-jnl-aas-keywords'}):
+                    rec['keyw'] = []
+                    for a in divk.find_all('a'):
+                        rec['keyw'].append(a.text)
                 #get rid of footnotes
                 for ul in artpage.body.find_all('ul', attrs = {'class' : 'clear-list wd-content-footnotes'}):
                     ul.replace_with('')      
@@ -170,14 +211,17 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                     if regexpiopurl.search(ref):
                         ref = regexpiopurl.sub('DOI: 10.1088/', ref)
                     rec['refs'].append([('x', ref)])
-                if not rec['autaff']:
-                    for span in artpage.body.find_all('span', attrs = {'itemprop' : 'author'}):
-                        for sup in span.find_all('sup'):
-                            sup.replace_with('')
-                        rec['autaff'].append([span.text])
-                print '  - ', rec['doi']
-                if rec['autaff']:
-                    recs.append(rec)
+                print '  - ', rec['doi'], ' orcidfound:', orcidsfound
+                print '    ', rec.keys()
+                if rec.has_key('autaff'):
+                    if rec['autaff']:
+                        recs.append(rec)
+                else:
+                    if rec['auts']:
+                        recs.append(rec)
+
+
+
 
 
 iopf = 'iopcrawl.%s.%s.%s' % (re.sub(' ', '', jnl), rec['vol'], rec['issue'])
