@@ -79,6 +79,12 @@ except:
     time.sleep(180)
     toc = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
 
+#check licence
+licenseurl =False
+for a in toc.body.find_all('a'):
+    if a.has_attr('href') and re.search('creativecommons.org', a['href']):
+        licenseurl = a['href']
+
 recs = []
 (noteA, noteB) = ('', '')
 for tag in toc.body.find_all():
@@ -107,7 +113,10 @@ for tag in toc.body.find_all():
                 rec['vol'] = re.sub('.*\/.*?\.(\d+)\..*', r'\1', rec['doi'])
                 if len(sys.argv) > 3:
                     rec['cnum'] = sys.argv[3]
-                    if len(sys.argv) > 4:
+                    if licenseurl:
+                        rec['licence'] = {'url' : licenseurl}
+                        rec['FFT'] = 'http://journals.jps.jp/doi/pdf/%s' % (rec['doi'])
+                    elif len(sys.argv) > 4:
                         rec['licence'] = {'statement' : sys.argv[4]}
                         rec['FFT'] = 'http://journals.jps.jp/doi/pdf/%s' % (rec['doi'])
             rec['p1'] = re.sub('.*\.', '', rec['doi'])\
