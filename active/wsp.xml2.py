@@ -81,6 +81,12 @@ def concert(rawrecs):
         wsprecord = BeautifulSoup(''.join(xmlrec.readlines()))
         xmlrec.close()
         rec = {'tc' : 'P', 'note' : [], 'autaff' : [], 'keyw' : []}
+        #references !!!!!!!!!!!!
+        for reflist in wsprecord.find_all('ref-list'):
+            for ref in reflist.find_all('ref'):
+                x = re.sub('[\n\t]', ' ', ref.text.strip())
+                #print '\n\n--->', x
+            reflist.replace_with('')
         #Journal
         for jt in wsprecord.find_all('journal-title'):
             rec['jnl'] = jt.text
@@ -144,6 +150,7 @@ def concert(rawrecs):
                 affdict[aff['id']] = aff.text
         #authors
         for c in wsprecord.find_all('contrib', attrs = {'contrib-type' : 'author'}):
+            author = ''
             for sn in c.find_all('string-name'):
                 author = ''
                 for surn in sn.find_all('surname'):
@@ -160,7 +167,8 @@ def concert(rawrecs):
                     autaff.append(affdict[xref['rid']])
             rec['autaff'].append(autaff)
         if not rec['autaff']:
-            for c in wsprecord.find_all('contrib', attrs = {'contrib-type' : 'editor'}):
+            for c in wsprecord.find_all('contrib', attrs = {'contrib-type' : 'editor'}):                
+                author = ''
                 for sn in c.find_all('string-name'):
                     author = ''
                     for surn in sn.find_all('surname'):
@@ -178,6 +186,7 @@ def concert(rawrecs):
                 rec['autaff'].append(autaff)
         if not rec['autaff']:
             for c in wsprecord.find_all('contrib'):
+                author = ''
                 for sn in c.find_all('string-name'):
                     author = ''
                     for surn in sn.find_all('surname'):
