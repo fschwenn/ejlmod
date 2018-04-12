@@ -91,20 +91,20 @@ def get_records(url):
         newlinks += page.body.findAll('p', attrs={'class': 'title'})
         newlinks += page.body.findAll('h3', attrs={'class': 'title'})
         links += newlinks
-        print('%i potential links in %s' % (len(newlinks), tocurl))
+        print('a) %i potential links in %s' % (len(newlinks), tocurl))
     if not links:
         for tocurl in pages.keys():
-            if tocurl == url: continue
+            if tocurl == url and len(pages) > 1: continue
             page = pages[tocurl]
             newlinks = page.body.findAll('div', attrs={'class': 'content-type-list__title'})        
             links += newlinks
-            print('%i potential links in %s' % (len(newlinks), tocurl))
+            print('b) %i potential links in %s' % (len(newlinks), tocurl))
     artlinks = []
     for link in links:
         rec = {'jnl' : jnl, 'vol' : vol, 'autaff' : []}
         if issue != '0':
             rec['issue'] = issue
-        if len(sys.argv) > 4:
+        if len(sys.argv) > 5:
             rec['cnum'] = cnum
             rec['tc'] = 'C'
         else:
