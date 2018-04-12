@@ -70,6 +70,7 @@ for tline in re.split(' *<p> *',tocline):
             rec['auts'].append(re.sub('^(.*) (.*?)$', r'\2, \1', aut))            
         rec['tit'] = re.sub('.*?<a.*?> *(.*?) *<\/a>.*',r'\1',parts[1])
         rec['pdf'] = urltrunk+"/"+re.sub('.*?<a href=\"(.*?pdf)\".*',r'\1',parts[1])            
+        rec['pdf'] = "http://www.m-hikari.com/"+re.sub('.*?<a href=\"(.*?pdf)\".*',r'\1',parts[1])            
         rec['licence'] = {'a' : 'CC-BY-4.0', 'u' : 'http://creativecommons.org/licenses/by/4.0/', 'b' : 'Hikari'}
         rec['FFT'] = rec['pdf']
         pages = re.sub('.*, *','',parts[2])
@@ -81,6 +82,7 @@ for tline in re.split(' *<p> *',tocline):
         print "%s%s (%s) %s-%s" % (rec['jnl'],vol,year,rec['p1'],rec['p2'])
         if len(parts) > 3 and re.search('http.*doi.org',parts[3]):
             rec['doi'] = re.sub('.*doi.org.(10.*?)".*',r'\1',parts[3])
+            rec['doi'] = re.sub('<\/a>.*', '', rec['doi'])
         else:
             rec['doi'] = '40.4000/%s%i' % (jnlfilename, recnr)
         recs.append(rec)
