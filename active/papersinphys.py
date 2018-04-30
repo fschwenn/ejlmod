@@ -27,6 +27,7 @@ vol = sys.argv[2]
 
 if jnl == 'pip':
     publisher = 'Papers in Physics'
+    jnlname = 'Papers Phys.'
     urltrunk = 'http://www.papersinphysics.org/papersinphysics/issue/view/%s' % (vol)
 elif jnl == 'cip':
     publisher = 'Publishing House for Science and Technology, Vietnam Academy of Science and Technology'
@@ -56,7 +57,13 @@ for table in tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'}):
         rec['tit'] = td.text.strip()
         for a in td.find_all('a'):
             rec['artlink'] = a['href']
+    if not rec.has_key('tit'):
+        for div in table.find_all('div', attrs = {'class' : 'tocTitle'}):
+            rec['tit'] = div.text.strip()
+            for a in div.find_all('a'):
+                rec['artlink'] = a['href']
     recs.append(rec)
+
 
 i = 0
 for rec in recs:
