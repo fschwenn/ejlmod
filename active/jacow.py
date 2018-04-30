@@ -3,13 +3,15 @@
 import re
 import os
 import sys
-import six
 import getopt
 import codecs
 import urllib
 from invenio.bibrecord import *
 from invenio.search_engine import perform_request_search
 from invenio.search_engine import get_record
+#from invenio.bibcheck_task import AmendableRecord
+
+##from correct_utf8 import check_record
 
 ## http://invenio-software.org/code-browser/invenio.bibrecord-module.html
 
@@ -86,6 +88,12 @@ def convertToInspire(argv):
             print recordtuple
             continue
         
+##        record = AmendableRecord(record)
+##        # try to fix UTF8 problems
+##        message = check_record(record, ['100__a', '700__a'])
+##        if message:
+##            print message
+            
         nrec +=1
         
         if record_get_field_value(record, '245', ' ', ' ', 'a').startswith('Proceedings'):
@@ -270,13 +278,6 @@ def convertToInspire(argv):
                 afile = incompleteAuthorsfile
             if name:
                 afile.write('NAME='+name+';\n')
-                if isinstance(name, six.text_type):
-                    author = name
-                else:
-                    author = name.decode('utf-8')
-                if re_non_char.search(author):
-                    print 'UTF8 ', name
-                    authorproblems.write("%s  ---   %s  --  %s\n" % (name, cnum, article_id))
             if aff:
                 afile.write('AFFILIATION='+aff+';\n')
             if rawaff:
