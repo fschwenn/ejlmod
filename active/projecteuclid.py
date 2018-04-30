@@ -16,17 +16,19 @@ import time
 from bs4 import BeautifulSoup
 import datetime
 
-lastyear = datetime.datetime.now().year - 1
-llastyear = datetime.datetime.now().year - 2
+now = datetime.datetime.now()
+lastyear = now.year - 1
+llastyear = now.year - 2
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
 
-volumestodo = 3+7
+volumestodo = 5
 journals = {#'aaa'   : ('Abstr.Appl.Anal. ', 'Hindawi'),
-            'aihp'  : ('Ann.Inst.H.Poincare Probab.Statist.', 'Institut Henri Poincaré'),
+            'aihp'  : ('Ann.Inst.H.Poincare Probab.Statist.', 'Institut Henri Poincare'),
             'ajm'   : ('Asian J.Math.', 'International Press'),
-            'aop'   : ('Annals Probab.', 'The Institute of Mathematical Statistics'),
+            'aop'   : ('Annals Probab.', 'The Institute of Mathematical Statistics'),            
             #'atmp'  : ('Adv.Theor.Math.Phys.', 'International Press'),
+            'ba'    : ('Bayesian Anal.', 'International Society for Bayesian Analysis'),
             'bjps'  : ('Braz.J.Probab.Statist.', 'Brazilian Statistical Association'),
             #'cdm'   : ('Curr.Dev.Math.', 'International Press'),
             'dmj'   : ('Duke Math.J.', 'Duke University Press'),
@@ -103,7 +105,12 @@ for jnl in journals.keys():
             #rec = {'jnl' : jnlname, 'link' : 'http://projecteuclid.org'+article, 'auts' : [], 'tc' : 'P'}
             rec = {'jnl' : jnlname, 'auts' : [], 'tc' : 'P'}
             rec['note'] = [ note ]
-            articlepage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org' + article))
+            try:
+                articlepage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org' + article))
+            except:
+                print "retry '%s' in 180 seconds" % ('http://projecteuclid.org' + article)
+                time.sleep(180)
+                articlepage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org' + article))
             #pages
             for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_date'}):
                 rec['date'] = meta['content']
@@ -125,7 +132,7 @@ for jnl in journals.keys():
                 for p in div.find_all('p'):
                     ptext = p.text.strip()
                     if re.search('Digital Object Identifier.*10\.....\/', ptext):
-                        rec['doi'] = re.sub('.*doi:(10\..*)', r'\1', ptext)
+                        rec['doi'] = re.sub('.*doi: *(10\..*)', r'\1', ptext)
             #title
             for section in articlepage.body.find_all('section', attrs = {'class' : 'publication-content'}):
                 rec['tit'] = section.find('h3').text
@@ -138,18 +145,21 @@ for jnl in journals.keys():
                 for li in ul.find_all('li'):
                     rec['refs'].append([('x', li.text)])
             print '        ', rec['doi']
-            recs.append(rec)
+            year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
+            if year >= now.year - 1:
+                recs.append(rec)
         #write xml
-        xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-        xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-        ejlmod2.writeXML(recs,xmlfile,publisher)
-        xmlfile.close()
-        #retrival
-        retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-        retfiles_text = open(retfiles_path,"r").read()
-        line = jnlfilename+'.xml'+ "\n"
-        if not line in retfiles_text: 
-            retfiles = open(retfiles_path,"a")
-            retfiles.write(line)
-            retfiles.close()
+        if recs:
+            xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
+            xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+            ejlmod2.writeXML(recs,xmlfile,publisher)
+            xmlfile.close()
+            #retrival
+            retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+            retfiles_text = open(retfiles_path,"r").read()
+            line = jnlfilename+'.xml'+ "\n"
+            if not line in retfiles_text: 
+                retfiles = open(retfiles_path,"a")
+                retfiles.write(line)
+                retfiles.close()
 
