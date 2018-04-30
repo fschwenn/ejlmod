@@ -105,7 +105,9 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'Calorimetry for the High Energy Frontier (CHEF2017)' : 'C17-10-02.3',
             'XII International Symposium on Radiation from Relativistic Electrons in Periodic Structures (RREPS-17)' : 'C17-09-18.6',
             'International Workshop on Fast Cherenkov Detectors - Photon detection, DIRC design and DAQ (DIRC2017)' : 'C17-08-07.6',
-            'Light Detection in Noble Elements (LIDINE2017)' : 'C17-09-22'}
+            'Light Detection in Noble Elements (LIDINE2017)' : 'C17-09-22',
+            'XII International Symposium on Radiation from Relativistic Electrons in Periodic Structures (RREPS-17)' : 'C17-09-18.6',
+            '24th International congress on x-ray optics and microanalysis (ICXOM24)' : 'C17-09-25.6'}
 
 
 
