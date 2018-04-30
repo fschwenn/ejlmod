@@ -81,6 +81,11 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article_result_list_
     #fulltext
     for meta in page.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
         rec['FFT'] = meta['content']
+    #license
+    if journal in ['jass']:
+        rec['licence'] = {'statement' : 'CC-BY-3.0'}
+    elif journal in ['jkms']:
+        rec['licence'] = {'statement' : 'CC-BY-NC'}
     #kewyords
     for meta in page.head.find_all('meta', attrs = {'name' : 'citation_keywords'}):
         for keyw in re.split(';', meta['content']):
