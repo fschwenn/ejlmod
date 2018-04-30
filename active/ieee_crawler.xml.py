@@ -114,21 +114,32 @@ def ieee(number):
     recs = []
     i = 0
     for articlelink in articlelinks:
-        time.sleep(5)
         i += 1
         print 'articlelink:', articlelink
         rec = {'keyw' : [], 'jnl' : jnlname, 'autaff' : [], 'tc' : tc}
-        try:
-            articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))
-        except:
+        #rec['note'] = ['Konferenz ?']
+        artfilename = '/tmp/ieee_%s.%i' % (number, i)
+        if not os.path.isfile(artfilename):
+            time.sleep(10)
             try:
-                print "retry in 60 seconds"
-                time.sleep(60)
-                articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))
+                os.system("wget -T 300 -t 3 -q -O %s %s" % (artfilename, articlelink))
             except:
                 print "retry in 600 seconds"
-                time.sleep(600)
-                articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))                
+                time.sleep(60)
+        inf = open(artfilename, 'r')
+        articlepage = BeautifulSoup(''.join(inf.readlines()))
+
+#        try:
+#            articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))
+#        except:
+#            try:
+#                print "retry in 60 seconds"
+#                time.sleep(60)
+#                articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))
+#            except:
+#                print "retry in 600 seconds"
+#                time.sleep(600)
+#                articlepage = BeautifulSoup(urllib2.urlopen(articlelink,timeout=300))                
         #metadata now in javascript
         for script in articlepage.find_all('script', attrs = {'type' : 'text/javascript'}):
             if re.search('global.document.metadata', script.text):
@@ -234,20 +245,12 @@ if __name__ == '__main__':
     number = args[0]
     publisher = 'IEEE'
 
-
-
-
-    #test = BeautifulSoup('<test><test>A <formula formulatype="inline"> <img src="/images/tex/21356.gif" alt="780 \times 800~{\mu}\hbox {m}^2"> </formula> Multichannel Digital Silicon Photomultiplier With Column-Parallel Time-to-Digital Converter and Basic Characterization</test></test>')
-    #fsunwrap(test)
-    #print test
-
     (recs,outfile) = ieee(number)
-    #print  (recs,outfile)
     dokf = open(os.path.join(xmldir,outfile),'w')
     ejlmod2.writeXML(recs,dokf,publisher)
     dokf.close()
 
-
+#os.system('rm /tmp/ieee_%s*' % (number))
 
 #retrival
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
