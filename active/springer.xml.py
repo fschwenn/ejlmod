@@ -208,6 +208,12 @@ def xmlExtract():
                 rec['tc'] = 'R'
         except:
             pass
+    for node in artxml.getElementsByTagName('ArticleInfo'):
+        if node.attributes.has_key('ArticleType'):
+            if not rec.has_key('note'): 
+                rec['note'] = [ node.attributes['ArticleType'].value ]
+            else:
+                rec['note'].append(node.attributes['ArticleType'].value)
     rec['jnl'] = jc[jnr][1]
     if rec['jnl'] == '41114':
         rec['tc'] = 'R'
@@ -455,6 +461,66 @@ def xmlExtract():
                 if not rec.has_key('note'): 
                     rec['note'] = []
                 rec['note'].append(snotedata)
+    #license
+    for grant in artxml.getElementsByTagName('ArticleGrants'):
+#        try:
+            if rec.has_key('note'):
+                rec['note'].append(grant.attributes['Type'].value)
+            else:
+               rec['note'] = [ grant.attributes['Type'].value ]
+            if grant.attributes['Type'].value == 'OpenChoice':                
+                for lic in artxml.getElementsByTagName('License'):
+                    try:
+                        if lic.attributes.has_key('Version'):
+                            statement = '%s-%s' % (lic.attributes['SubType'].value, lic.attributes['Version'].value)
+                        else:
+                            statement = lic.attributes['SubType'].value
+                        rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
+                        rec['note'].append(statement)                        
+                    except:
+                        for rs in lic.getElementsByTagName('RefSource'):
+                            rec['licence'] = {'url' : rs.firstChild.data}
+                            rec['note'].append(rs.firstChild.data)
+                if not rec.has_key('licence'):
+                    for para in artxml.getElementsByTagName('Para'):
+                        for rs in para.getElementsByTagName('RefSource'):
+                            if re.search('creativecommons.org', rs.firstChild.data):
+                                rec['licence'] = {'url' : rs.firstChild.data}
+                                rec['note'].append(rs.firstChild.data)
+                        if not rec.has_key('licence'):
+                            try:
+                                paratext = para.firstChild.data
+                                if re.search('CC.BY.\d', paratext):
+                                    statement = re.sub('.*(CC.BY.\d.0).*', r'\1', paratext.strip())
+                                    rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
+                                    rec['note'].append(statement)
+                                elif re.search('CC.BY', paratext):
+                                    statement = re.sub('.*(CC.[A-Z\- \.\d]*).*', r'\1', paratext.strip())
+                                    rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
+                                    rec['note'].append(statement)
+                            except:
+                                pass
+                if not rec.has_key('licence'):
+                    for simplepara in artxml.getElementsByTagName('SimplePara'):
+                        for rs in simplepara.getElementsByTagName('RefSource'):
+                            rec['licence'] = {'url' : rs.firstChild.data}
+                            rec['note'].append(rs.firstChild.data)
+                        if not rec.has_key('licence'):
+                            try:
+                                paratext = simplepara.firstChild.data
+                                if re.search('CC.BY.\d', paratext):
+                                    statement = re.sub('.*(CC.BY.\d.0).*', r'\1', paratext.strip())
+                                    rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
+                                    rec['note'].append(statement)
+                                elif re.search('CC.BY', paratext):
+                                    statement = re.sub('.*(CC.[A-Z\- \.\d]*).*', r'\1', paratext.strip())
+                                    rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
+                                    rec['note'].append(statement)
+                            except:
+                                pass
+#        except:
+#            print 'GRANT?'
+#            print grant
     #references
     rec['refs'] = []
     for citation in artxml.getElementsByTagName('Citation'):
@@ -720,6 +786,7 @@ for d1 in os.listdir(sprdir):
                         #(FS): workaround to only work on xml-files
                         if not re.search('xml$',artfile): artfile = os.path.join(df4, os.listdir(df4)[1])
                         if not re.search('xml$',artfile): artfile = os.path.join(d4, os.listdir(d4)[2])
+                        print '-[%s]=' % (artfile)
                         artxml = xml.dom.minidom.parse(artfile)
                         rec = xmlExtractBook()
                         vol = rec['vol']
@@ -786,7 +853,7 @@ for d1 in os.listdir(sprdir):
                             rec = {}
                             #try:
                             if True:    
-                                print artfile 
+                                print '-[%s]=' % (artfile)
                                 artxml = xml.dom.minidom.parse(artfile)
                                 rec = xmlExtract()
                                 if isbook: 
