@@ -108,7 +108,7 @@ for rec in recs:
                     rec['auts'].append(re.sub('[ \(]for .*', '', auth).strip())
                 elif recoll2.search(auth):
                     rec['col'] = recoll2.sub(r'\1', auth).strip()
-                    rec['auts'].append(re.sub('[ \(]for .*', '', auth).strip())
+                    rec['auts'].append(re.sub('\W*on behalf .*', '', auth).strip())
                 else:
                     rec['auts'].append(auth)
     #abstract
