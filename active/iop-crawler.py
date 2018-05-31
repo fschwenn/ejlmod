@@ -58,7 +58,8 @@ jnls = {'1538-3881': 'Astron.J.',
         '1674-4527': 'Res.Astron.Astrophys.',
         '1402-4896': 'Phys.Scripta',
         '0953-2048': 'Supercond.Sci.Technol.',
-        '2399-6528': 'J.Phys.Comm.'}
+        '2399-6528': 'J.Phys.Comm.',
+        '1757-899X': 'IOP Conf.Ser.Mater.Sci.Eng.'}
 if jnls.has_key(issn):
     jnl = jnls[issn]
 else:
@@ -94,7 +95,7 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                 if len(sys.argv) > 2:
                     rec['cnum'] = sys.argv[2]
                     rec['tc'] = 'C'
-                elif issn == '1742-6596':
+                elif issn in ['1742-6596', '1757-899X']:
                     rec['tc'] = 'C'
                 if issnote: rec['note'].append(issnote)
                 if h3note: rec['note'].append(h3note)
