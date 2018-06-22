@@ -37,8 +37,10 @@ elif re.search('mpl',url):
     jnlname = 'Mod.Phys.Lett.'
 elif re.search('rast',url):
     jnlname = 'Rev.Accel.Sci.Tech.'
-elif re.search('ijqi',url):
+elif re.search('\/ijqi\/',url):
     jnlname = 'Int.J.Quant.Inf.'
+elif re.search('\/ijgmmp\/',url):
+    jnlname = 'Int.J.Geom.Meth.Mod.Phys.'
 elif re.search('^saqmbt', jnlfilename):
     jnlname = 'Ser.Adv.Quant.Many Body Theor.'
     typecode = 'S'
@@ -213,6 +215,14 @@ for tline in trl:
             if re.search('This is an Open Access article', aline) and re.search('https...creativecommons.org', aline):
                 rec['licence'] = {'link' : re.sub('.*(https...creativecommons.org.*?)".*', r'\1', aline.strip())}
                 rec['FFT'] = 'http://www.worldscientific.com/doi/pdf/%s' % (rec['doi'])
+            elif re.search('This is an Open Access .*Creative Commons.*CC', aline):
+                licence = re.sub('.*(CC\-[A-Z0\-]+).*', r'\1', aline)
+                if re.search(' [23456]\.0 ',  aline):
+                    ccversion = re.sub('.* ([23456]\.0) .*', r'\1',  aline)
+                    rec['licence'] = {'statement' : '%s-%s' % (licence, ccversion)}
+                else:
+                    rec['licence'] = {'statement' : licence}
+                rec['FFT'] = 'http://www.worldscientific.com/doi/pdf/%s' % (rec['doi'])
             if re.search('copyrightYear',aline):
                 rec['p1'] = re.sub('.*<\/b>, *(\d+) .*',r'\1',aline.strip())
                 rec['p2'] = rec['p1']
@@ -247,7 +257,7 @@ for tline in trl:
 #                            #print ' A',aff
                 if re.search('<div class="artAuthors"><\/div>',aline):
                     rec['auts'] = ['???']
-                else:
+                elif re.search('<div class="artAuthors">.*<p class="fulltext affiliation">', aline):
                     authoraff = re.sub('.*<div class="artAuthors">(.*?)<p class="fulltext affiliation">.*',r'\1', removehtmlgesocks(aline).strip())
                     if re.search('on.behalf.of', authoraff):
                         rec['col'] = re.sub('.*.on.behalf.of (the )?', '', authoraff)
