@@ -72,6 +72,9 @@ else:
     if len(sys.argv) > 3:
         toclink += '&issueId=%s' % (iss)
         print toclink
+
+
+#toclink = "https://www.cambridge.org/core/journals/compositio-mathematica/issue/9AB804B5DBC553D5DD4916D1B7BDAA72"
         
 if not os.path.isfile('/tmp/%s.0.toc' % (jnlfilename)):
     os.system('wget -O /tmp/%s.0.toc "%s"' % (jnlfilename, toclink))
@@ -111,14 +114,23 @@ for i in range(numpages):
                         note = child.text.strip()
                     elif child.name == 'div':
                         for a in child.find_all('a', attrs = {'class' : 'url doi'}):
-                            rec = {'artlink' : a['href'], 'refs' : [], 'tc' : tc,
+                            rec = {'artlink2' : a['href'], 'refs' : [], 'tc' : tc,
                                    'autaff' : [], 'keyw' : [], 'jnl' : jnlname}
                             rec['note'] = [ note ]
                             rec['doi'] = re.sub('.*doi.org.', '', a['href'])
+                            if rec['doi'] in ['10.4208/cicp.060515.161115b', 
+                                              '10.1017/S0022377818000430',
+                                              '10.1112/S0025579318000232',
+                                              '10.1112/S0025579318000244',
+                                              '10.1112/S0025579318000256']:
+                                continue
                             if not note in ['Front Cover (OFC, IFC) and matter', 
                                         'Back Cover (OBC, IBC) and matter']:
                                 recs.append(rec)
                                 print rec['doi'], rec['note']
+                        #real article link
+                        for a2 in child.find_all('a', attrs = {'class' : 'part-link'}):
+                            rec['artlink'] = 'https://www.cambridge.org' + a2['href']
 
 
 #2nd run to get details for individual articles
@@ -136,8 +148,9 @@ for rec in recs:
         artpage = BeautifulSoup(urllib2.urlopen(req))
         time.sleep(10)
     except:
-        print 'wait 3 minutes'
+        print 'wait 3 minutes befor trying %s instead of %s' % (rec['artlink2'], rec['artlink'])
         time.sleep(180)
+        req = urllib2.Request(rec['artlink2'], headers=hdr)
         artpage = BeautifulSoup(urllib2.urlopen(req))
         time.sleep(2)
     print '------{ %s }------{ %i/%i }------' % (rec['doi'], i, len(recs))
