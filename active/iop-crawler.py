@@ -160,6 +160,7 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                                 orcid = re.sub('.*orcid.org\/(\d.*[\dX])', r'\1', a['href'])
                         if orcid:
                             auts.append('%s, ORCID:%s' % (author, orcid))
+                            orcidsfound = True
                         else:
                             auts.append(author)
                         for affi in affis:
