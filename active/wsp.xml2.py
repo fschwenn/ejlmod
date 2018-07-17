@@ -31,7 +31,7 @@ regexpdoihtml5 = re.compile('%253C') #<
 regexpdoihtml6 = re.compile('%253E') #>
 regexpabs = re.compile('.*worldscientific.com\/doi\/(10.*?)\'.*')
 regexpcr = re.compile('[\n\t\r]')
-
+regexpdoi2 = re.compile('.*servlet.*doi=(10\.\d\d.*)&.*')
 
 
 def getreferencesfromweb(doi):
@@ -39,35 +39,41 @@ def getreferencesfromweb(doi):
     print '   ', link
     refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(link))
     refs = []
-    for li in refpage.body.find_all('li', attrs = {'class' : 'reference'}):
-        for a in li.find_all('a'):
-            if a.has_attr('href'):
-                #arXiv-links
-                if a.text in ['arXiv', 'arxiv', 'ARXIV']:
-                    rn = regexparx.sub(',  arXiv: ', a['href']) + ', '
-                    a.replace_with(rn)
-                #WSP-DOI
-                elif regexpabs.search(a['href']):
-                    rdoi = regexpabs.sub(r', DOI: \1 , ', a['href'])
-                    a.replace_with(rdoi)
-        #Crossref-DOI
-        for script in li.find_all('script'):
-            scriptt = script.text
-            if regexpdoi.search(scriptt):
-                rdoi = regexpdoi.sub(r', DOI: \1 , ', scriptt)
-                rdoi = regexpdoihtml.sub('/', rdoi)
-                rdoi = regexpdoihtml2.sub(':', rdoi)
-                rdoi = regexpdoihtml3.sub(')', rdoi)
-                rdoi = regexpdoihtml4.sub('(', rdoi)
-                rdoi = regexpdoihtml5.sub('<', rdoi)
-                rdoi = regexpdoihtml6.sub('>', rdoi)
-                script.replace_with(rdoi)
-            else:
-                script.replace_with(' ')
-        #refextract
-        reftext = regexpcr.sub(' ', li.text.strip())
-        #print '     ', reftext
-        refs.append([('x', reftext)])
+    for ul in refpage.body.find_all('ul', attrs = {'class' : 'rlist separator'}):
+        print '      %i references' % (len(ul))
+        for li in ul.find_all('li'):
+            for a in li.find_all('a'):
+                if a.has_attr('href'):
+                    #arXiv-links
+                    if a.text in ['arXiv', 'arxiv', 'ARXIV']:
+                        rn = regexparx.sub(',  arXiv: ', a['href']) + ', '
+                        a.replace_with(rn)
+                    #WSP-DOI
+                    elif regexpabs.search(a['href']):
+                        rdoi = regexpabs.sub(r', DOI: \1 , ', a['href'])
+                        a.replace_with(rdoi)
+                    #Crossref
+                    elif regexpdoi2.search(a['href']):
+                        rdoi = regexpdoi2.sub(r', DOI: \1 , ', a['href'])
+                        a.replace_with(rdoi)
+            #Crossref-DOI
+            for script in li.find_all('script'):
+                scriptt = script.text
+                if regexpdoi.search(scriptt):
+                    rdoi = regexpdoi.sub(r', DOI: \1 , ', scriptt)
+                    rdoi = regexpdoihtml.sub('/', rdoi)
+                    rdoi = regexpdoihtml2.sub(':', rdoi)
+                    rdoi = regexpdoihtml3.sub(')', rdoi)
+                    rdoi = regexpdoihtml4.sub('(', rdoi)
+                    rdoi = regexpdoihtml5.sub('<', rdoi)
+                    rdoi = regexpdoihtml6.sub('>', rdoi)
+                    script.replace_with(rdoi)
+                else:
+                    script.replace_with(' ')
+            #refextract
+            reftext = regexpcr.sub(' ', li.text.strip())
+            #print '     ', reftext
+            refs.append([('x', reftext)])
     time.sleep(50)
     return refs
 
@@ -90,6 +96,8 @@ def concert(rawrecs):
         #Journal
         for jt in wsprecord.find_all('journal-title'):
             rec['jnl'] = jt.text
+            if jt.text == 'International Journal of Modern Physics: Conference Series':
+                rec['tc'] = 'C'
         if not rec.has_key('jnl'):
             rec['jnl'] = 'BOOK'
             rec['tc'] = 'S'
@@ -268,7 +276,8 @@ def concert(rawrecs):
         #OF?
         if 'no metatdata for individual chapters!' in rec['note']:
             rec['note'].append(rec['date'])
-        recs.append(rec)                                   
+        else:
+            recs.append(rec)                                   
     return recs
 
 
@@ -315,19 +324,22 @@ for datei in os.listdir(wspdir):
                     rawrecs.append(os.path.join(ordner2, datei3))    
     if rawrecs:
         recs = concert(rawrecs)
-        #save them
-        xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-        xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-        ejlmod2.writeXML(recs,xmlfile,publisher)
-        xmlfile.close()
-        #retrival
-        retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-        retfiles_text = open(retfiles_path,"r").read()
-        line = jnlfilename+'.xml'+ "\n"
-        if not line in retfiles_text: 
-            retfiles = open(retfiles_path,"a")
-            retfiles.write(line)
-            retfiles.close()
+        if len(recs) > 0:
+            #save them
+            xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
+            xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+            ejlmod2.writeXML(recs,xmlfile,publisher)
+            xmlfile.close()
+            #retrival
+            retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+            retfiles_text = open(retfiles_path,"r").read()
+            line = jnlfilename+'.xml'+ "\n"
+            if not line in retfiles_text: 
+                retfiles = open(retfiles_path,"a")
+                retfiles.write(line)
+                retfiles.close()
+        else:
+            print "no records for %s" % (jnlfilename)
 
 
 
