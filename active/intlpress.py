@@ -113,7 +113,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'list_item'}):
                     email = meta['content']
                     rec['autaff'][-1].append('EMAIL:%s' % (email)) 
                 elif meta['name'] == 'citation_pdf_url':
-                    rec['pdf'] = meta['content']
+                    if not rec.has_key('doi'):
+                        rec['pdf'] = meta['content']
         for p in artpage.body.find_all('p', attrs = {'class' : 'contentitem_abstract'}):
             rec['abs'] += p.text
         for p in artpage.body.find_all('p', attrs = {'class' : 'contentitem_keywords'}):
