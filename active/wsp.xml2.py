@@ -31,7 +31,7 @@ regexpdoihtml5 = re.compile('%253C') #<
 regexpdoihtml6 = re.compile('%253E') #>
 regexpabs = re.compile('.*worldscientific.com\/doi\/(10.*?)\'.*')
 regexpcr = re.compile('[\n\t\r]')
-regexpdoi2 = re.compile('.*servlet.*doi=(10\.\d\d.*)&.*')
+regexpdoi2 = re.compile('.*servlet.*key=(10\.\d\d.*).*')
 
 
 def getreferencesfromweb(doi):
