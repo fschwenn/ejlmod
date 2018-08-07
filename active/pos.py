@@ -99,21 +99,22 @@ def pos_harvesting(conf_acronym,cnum):
                 continue
             posfile = '%s%s' % (pdftmpdir, re.sub('.*\/', '', pdflink[:-4]))
             if not os.path.isfile(posfile + '.pdf'):
+                print ' download %s to %s.pdf' % (pdflink, posfile)
                 os.system('wget -O %s.pdf %s' % (posfile, pdflink))
                 os.system('pdftotext %s.pdf' % (posfile))
-            inf = open('%s.txt' % (posfile), 'r')
-            lines = inf.readlines()
-            inf.close()
             try:
+                inf = open('%s.txt' % (posfile), 'r')
+                lines = inf.readlines()
+                inf.close()
                 pdftitle = lines[0].strip()
                 if pdftitle[:3] == 'PoS':
                     pdftitle = lines[2].strip()
-            except:
-                pdftitle = ''
-            title = record['245'][0][0][0][1]
-            if pdftitle and title != pdftitle:
-                record_add_field(record, '246', ' ', ' ', '', [('a', pdftitle), ('9', 'SISSA')]) 
+                title = record['245'][0][0][0][1]
+                if pdftitle and title != pdftitle:
+                    record_add_field(record, '246', ' ', ' ', '', [('a', pdftitle), ('9', 'SISSA')]) 
                 #record_add_field(record, '246', ' ', ' ', '', [('a', title), ('9', 'SISSA')]) 
+            except:
+                print 'could not extract informations from PDF'
             #get more information from the web page
             (doi, abstract) = (False, False)
             metaurl = re.sub('.*\/(\d+\/\d+).*', r'https://pos.sissa.it/\1', pdflink)
