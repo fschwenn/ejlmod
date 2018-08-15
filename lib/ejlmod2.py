@@ -64,6 +64,7 @@ def arXivfromADS(rec):
     for adsline in os.popen("lynx -source \"%s\"|grep citation_arxiv_id" % (adslink)).readlines():
         if re.search('arxiv',adsline):
             rec['arxiv'] = re.sub('.*content="(.*)".*', r'\1', adsline).strip()
+            print '---[ ADS: %s -> %s ]---' % (rec['doi'], rec['arxiv'])
             if rec.has_key('note'):
                 if type(rec['note']) == type(['Liste']):
                     rec['note'].append('arXiv number from ADS (not from publisher!)')
@@ -232,11 +233,14 @@ def writeXML(recs,dokfile,publisher):
                 xmlstring += marcxml('246', [('a',kapitalisiere(otit)), ('9',publisher)])
         if rec.has_key('transtit'):
             xmlstring += marcxml('242',[('a',kapitalisiere(rec['transtit'])), ('9',publisher)])
-        if rec.has_key('langauge'):
+        if rec.has_key('language'):
             print rec
-            xmlstring += marcxml('041',[('a',rec['langauge'])])
+            xmlstring += marcxml('041',[('a',rec['language'])])
         if rec.has_key('abs'):
-            xmlstring += marcxml('520',[('a',rec['abs']), ('9',publisher)])
+            if len(rec['abs']) > 5:
+                xmlstring += marcxml('520',[('a',rec['abs']), ('9',publisher)])
+            else:
+                print 'abstract "%s" too short' % (rec['abs'])
         if rec.has_key('keyw'):
             for kw in rec['keyw']:
                 #xmlstring += marcxml('6531',[('a',kw), ('9','publisher')])
@@ -397,6 +401,8 @@ def writeXML(recs,dokfile,publisher):
                 entry.append(('u',rec['licence']['url']))
             if rec['licence'].has_key('organization'):
                 entry.append(('b',rec['licence']['organization']))
+            else:
+                entry.append(('b', publisher))
             if rec['licence'].has_key('material'):
                 entry.append(('3',rec['licence']['material']))
             xmlstring += marcxml('540', entry)
