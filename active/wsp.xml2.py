@@ -148,7 +148,13 @@ def concert(rawrecs):
         #Note
         for sg in wsprecord.find_all('subj-group', attrs = {'subj-group-type' : 'heading'}):
             for s in sg.find_all('subject'):
-                rec['note'].append(s.text)        
+                rec['note'].append(s.text)      
+        #PACS
+        for sg in wsprecord.find_all('subj-group', attrs = {'subj-group-type' : 'PACS'}):
+            rec['pacs'] = []
+            for s in sg.find_all('subject'):
+                rec['pacs'].append(s.text)      
+        #PACS
         #affiliations
         affdict = {}
         for aff in wsprecord.find_all('aff'):
@@ -271,6 +277,7 @@ def concert(rawrecs):
             try:
                 if not rec['tc'] in ['B', 'S']:
                     rec['refs'] = getreferencesfromweb(rec['doi'])
+                #print 'referenzen ausgeschaltet'
             except:
                 print 'could not get references from the web'
         #OF?
