@@ -121,10 +121,12 @@ for a in tocpage.find_all('a', attrs = {'class' : 'article_title'}):
                 autaff.append('EMAIL:%s' % (email))    
     if autaff:
         rec['autaff'].append(autaff)
-    if rec.has_key(issue):
+    if rec.has_key('issue'):
         print '-- %s %s (%s), no. %s, %s' % (jnlname, rec['vol'], rec['year'], rec['issue'], rec['p1'])
-    else:
+    elif rec.has_key('vol'):
         print '-- %s %s (%s), %s' % (jnlname, rec['vol'], rec['year'], rec['p1'])
+    else:
+        print '-- %s (%s), %s' % (jnlname, rec['year'], rec['p1'])
     #abstract 
     for div in artpage.body.find_all('div', attrs = {'id' : 'article'}):
         for p in div.find_all('p', attrs = {'align' : 'LEFT'}):
