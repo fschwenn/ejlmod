@@ -72,6 +72,7 @@ for span in tocpage.body.find_all('span', attrs = {'class' : 'cover-date'}):
         year = re.sub('.*?(\d\d\d\d).*', r'\1', span.text)
 
 
+
 recs = []
 typecode = 'P'
 for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
@@ -124,7 +125,6 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
 
 
 
-
 for i in range(len(recs)):
     print '---{ %i/%i}---{ %s }---' % (i, len(recs), recs[i]['artlink'])
     if not os.path.isfile("/tmp/%s.%i" % (jnlfilename, i)):
@@ -141,9 +141,25 @@ for i in range(len(recs)):
         if 'accordion-tabbed__tab-mobile' in div['class'] or \
                 'accordion-tabbed__tab-mobile accordion__closed' in div['class']:
             autaff = []
+            #first clean affiliation from links
+            for p in div.find_all('p'):
+                for a in p.find_all('a'):
+                    at = a.text
+                    a.replace_with(at)
             for div2 in div.find_all('div', attrs = {'class' : 'bottom-info'}):
                 div2.replace_with('')
                 for a in div.find_all('a'):
+                    at = a.text.strip()
+                if re.search(r'(?i)COLLABORATION', at):
+                    at = re.sub(r'(?i)FOR THE ', '', at)
+                    at = re.sub(r'(?i)ON BEHALF OF THE ', '', at)
+                    at = re.sub(r'(?i) COLLABORATION.*', '', at)
+                    recs[i]['col'] = at
+                    continue
+                else:                
+                    autaff.append(at)
+            if not autaff:
+                for a in div.find_all('a', attrs = {'class' : 'author-name'}):
                     at = a.text.strip()
                 if re.search(r'(?i)COLLABORATION', at):
                     at = re.sub(r'(?i)FOR THE ', '', at)
@@ -164,6 +180,13 @@ for i in range(len(recs)):
     for div in artpage.body.find_all('div', attrs = {'class' : 'NLM_abstract'}):
         for p in div.find_all('p'): 
             recs[i]['abs'] = p.text.strip()    
+    #keywords
+    for div in artpage.body.find_all('div', attrs = {'class' : 'hlFld-keywords'}):
+        recs[i]['keyw'] = []
+        for li in div.find_all('li'):
+            recs[i]['keyw'].append(li.text.strip())
+            
+            
 
     print recs[i]
         
