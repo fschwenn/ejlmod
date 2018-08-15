@@ -556,12 +556,17 @@ def xmlExtractBook(): # (FS) extract book information. Just slightly different t
     rec['tc'] = 'B'
     #proceedings: 
     if jnr in ['7395','0361']: rec['tc'] = 'K'
-    rec['jnl'] = jc[jnr][1]
+    if jnr in ['8431']:
+        rec['bookseries'] = [('a', jc[jnr][1])]
+        rec['jnl'] = 'BOOK'
+    else:
+        rec['jnl'] = jc[jnr][1]
     try:
         rec['vol'] = getAllText(artxml.getElementsByTagName('BookVolumeNumber')[0]) # get Volumbenumber from XML-file for books(FS)
     except:
         rec['vol'] = ''
         rec['vol'] = re.sub('\-','',getAllText(artxml.getElementsByTagName('BookElectronicISBN')[0])) # get Volumbenumber from XML-file for books(FS)
+    authorshavenoaffiliations = True
     for node in artxml.getElementsByTagName('AuthorGroup'):
         auths = node.getElementsByTagName('Author')
         authors = []
@@ -652,10 +657,10 @@ def xmlExtractBook(): # (FS) extract book information. Just slightly different t
         rec['aff'] = affil = []
         for node in artxml.getElementsByTagName('Affiliation'):
             affid = node.attributes["ID"].value
-	    print '----> ' + affid
-	    if ("ID" not in affid):
-	        continue # (FS) Editor has AffIDxx but 'real' author has Affxx
-	        print '      skipped'
+            print '----> ' + affid
+            if ("ID" not in affid):
+                continue # (FS) Editor has AffIDxx but 'real' author has Affxx
+            print '      skipped'
             orgname = ''
             try:
                 orgname = node.getElementsByTagName('OrgDivision')[0].firstChild.data + ' - '
@@ -881,8 +886,12 @@ for d1 in os.listdir(sprdir):
                                 if rec.has_key('note'):
                                     for note in rec['note']:
                                         if note in ['News & Views', 'Books & Arts', 'Meeting Report', 
-                                                    'Mission Control', 'Editorial', 'Q&A']:
+                                                    'Mission Control', 'Editorial', 'Q&A',
+                                                    'Books and Arts', 'Thesis', 'Meeting Report',
+                                                    'Research Highlights', 'Research Highlight',
+                                                    'News', 'BriefCommunication']:
                                             del recs[rec['doi']]
+                                            break
 
                             print ' doi: '+rec['doi']
                         keys =  recs.keys()
