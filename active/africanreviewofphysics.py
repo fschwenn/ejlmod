@@ -10,14 +10,18 @@ import re
 import sys
 import unicodedata
 import string
-from removehtmlgesocks import removehtmlgesocks
+import urllib2
+import urlparse
+import codecs
+from bs4 import BeautifulSoup
+import time
 
 
 
 tmpdir = '/tmp'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
-def tfstrip(x): return x.strip()
 
 publisher = 'The Abdus Salam International Centre for Theoretical Physics'
 jnl = 'arp'
@@ -27,41 +31,47 @@ year = sys.argv[2]
 jnlfilename = jnl+vol
 jnlname = 'Afr.Rev.Phys.'
 
-urltrunk = 'http://www.aphysrev.org/index.php/aphysrev/issue/view' 
+urltrunk = 'http://aphysrev.ictp.it/index.php/aphysrev/issue/view/%i' % (int(vol)+22)
 
 
 recs = []
 recnr = 1
 print "get table of content of %s%s ..." %(jnlname,vol)
-os.system("lynx -source \"%s/%i/showToc\" > %s/%s.toc" % (urltrunk,int(vol)+21,tmpdir,jnlfilename))
-    
-tocfil = open("%s/%s.toc" % (tmpdir,jnlfilename),'r')
-#for tline in  map(tfstrip,tocfil.readlines()):
-tocline = re.sub('\s\s+',' ',' '.join(map(tfstrip,tocfil.readlines())))
-for tline in re.split(' *<\/table> *',tocline):
-    tline = removehtmlgesocks(re.sub('.*<table ','',tline))
-    if re.search('tocArticle',tline):
-        print tline
-        rec = {}
-        rec['auts'] = []
-        rec['aff'] = []
-        rec['year'] = year
-        rec['vol'] = vol
-        rec['typ'] = ''
-        rec['jnl'] = jnlname        
-        rec['note'] = []
-        rec['tc'] = "P"
-        rec['tit'] = re.sub('.*?<td class=\"tocTitle\"> *(.*?) *<\/td>.*',r'\1',tline)
-        for aut in re.split(' *, *',  re.sub('.*?<td class=\"tocAuthors\"> *(.*?) *<\/td>.*',r'\1',tline)):
-            aut = re.sub('\. ([A-Z])\.', r'.\1.',aut)
-            aut = re.sub('\.\-([A-Z])\.', r'.\1.',aut)
-            rec['auts'].append(re.sub('^(.*) (.*?)$', r'\2, \1', aut))            
-        rec['pdf'] = re.sub('.*?<a href=\"(.*?)\".*',r'\1',tline)+'.pdf'
-        rec['p1'] = rec['p2'] = "%04i" % (recnr)
-        print "%s%s (%s) %s" % (rec['jnl'],vol,year,rec['p1'])
-        #write record
-        recs.append(rec)
-        recnr += 1
+print urltrunk
+try:
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+    time.sleep(3)
+except:
+    print "retry %s in 180 seconds" % (urltrunk)
+    time.sleep(180)
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+
+
+i = 0
+for table in tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'}):
+    i += 1
+    print i
+    rec = {'year' : year, 'jnl' : jnlname, 'vol' : vol, 'tc' : 'P',
+           'auts' : []}
+    for td in table.find_all('td'):
+        if td.has_attr('class'):
+            if  'tocTitle' in td['class']:
+                rec['tit'] = td.text.strip()
+            elif 'tocPages' in td['class']:
+                rec['p1'] = td.text.strip()
+            elif 'tocGalleys' in td['class']:
+                for a in td.find_all('a'):
+                    rec['FFT'] = a['href']
+                    rec['pdf'] = a['href']
+            elif 'tocAuthors' in td['class']:
+                for aut in re.split(' *, *', td.text.strip()):
+                    rec['auts'].append(re.sub('\t', '', aut))
+    if not rec.has_key('p1') or not rec['p1']:
+        rec['p1'] = 'dummy%03i' % (i)
+    recs.append(rec)
+
+
+
 
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
