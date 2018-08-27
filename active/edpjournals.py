@@ -55,8 +55,9 @@ print "get table of content..."
 try:
     tocpage = BeautifulSoup(urllib2.urlopen(toclink))
 except:
-    print '%s not found' % (toclink)
-    sys.exit(0)
+    print "wait 5 minutes, retry %s" % (toclink)
+    time.sleep(300)
+    tocpage = BeautifulSoup(urllib2.urlopen(toclink))
 
 
 recs = []
@@ -73,8 +74,9 @@ for a in tocpage.find_all('a', attrs = {'class' : 'article_title'}):
     try:
         artpage = BeautifulSoup(urllib2.urlopen(artlink))
     except:
-        print '%s not found' % (artlink)
-        sys.exit(0)
+        print "wait 5 minutes, retry %s" % (artlink)
+        time.sleep(300)
+        artpage = BeautifulSoup(urllib2.urlopen(artlink))
     autaff = False
     #check metatags
     for meta in artpage.head.find_all('meta'):
