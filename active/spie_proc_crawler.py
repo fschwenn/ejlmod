@@ -46,9 +46,6 @@ def spie(volume):
                     rec['tit'] = a.text.strip()
                     if not rec['artlink'] in [r['artlink'] for r in recs]:
                         recs.append(rec)
-    #presentation only
-    for tag in articlepage.body.find_all('text', attrs = {'class' : 'ProceedingsArticleSmallFont'}):
-        rec['note'].append(tag.text.strip())
     #get detailed article pages
     i = 0
     for rec in recs:
@@ -116,6 +113,9 @@ def spie(volume):
                     email = meta['content']
                     autaff.append('EMAIL:%s' % (email))   
         rec['autaff'].append(autaff)
+        #presentation only
+        for tag in articlepage.body.find_all('text', attrs = {'class' : 'ProceedingsArticleSmallFont'}):
+            rec['note'].append(tag.text.strip())
         #number of pages
         for div in articlepage.body.find_all('text', attrs = {'class' : 'ProceedingsArticleSmallFont'}):
             pages = re.split(' *', div.text.strip())
