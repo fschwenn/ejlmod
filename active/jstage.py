@@ -51,7 +51,7 @@ recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'searchlist-title'}):
     rec = {'jnl' : jnlname, 'vol' : vol, 'tc' : typecode, 'autaff' : []}
     if len(sys.argv) > 3: 
-        rec['iss'] = iss
+        rec['issue'] = iss
     if len(sys.argv) > 4:
         rec['cnum'] = cnum
     for a in div.find_all('a'):
