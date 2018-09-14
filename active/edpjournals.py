@@ -45,6 +45,10 @@ elif (jnl == 'aanda'):
     jnlname = 'Astron.Astrophys.'
     urltrunk = 'http://www.aanda.org/index.php?option=com_toc&url=/articles/aa/abs/'
     tc = 'P'
+elif (jnl == 'aandas'):
+    jnlname = 'Astron.Astrophys.Suppl.Ser.'
+    urltrunk = 'https://aas.aanda.org/articles/aas/abs/'
+    tc = 'P'
 
 
 jnlfilename = "%s%s.%s" % (jnl, year, issue)
