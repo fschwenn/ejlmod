@@ -476,7 +476,7 @@ def xmlExtract():
                         else:
                             statement = lic.attributes['SubType'].value
                         rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
-                        rec['note'].append(statement)                        
+                        #rec['note'].append(statement)                        
                     except:
                         for rs in lic.getElementsByTagName('RefSource'):
                             rec['licence'] = {'url' : rs.firstChild.data}
@@ -493,29 +493,29 @@ def xmlExtract():
                                 if re.search('CC.BY.\d', paratext):
                                     statement = re.sub('.*(CC.BY.\d.0).*', r'\1', paratext.strip())
                                     rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
-                                    rec['note'].append(statement)
+                                    #rec['note'].append(statement)
                                 elif re.search('CC.BY', paratext):
                                     statement = re.sub('.*(CC.[A-Z\- \.\d]*).*', r'\1', paratext.strip())
                                     rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
-                                    rec['note'].append(statement)
+                                    #rec['note'].append(statement)
                             except:
                                 pass
                 if not rec.has_key('licence'):
                     for simplepara in artxml.getElementsByTagName('SimplePara'):
                         for rs in simplepara.getElementsByTagName('RefSource'):
                             rec['licence'] = {'url' : rs.firstChild.data}
-                            rec['note'].append(rs.firstChild.data)
+                            #rec['note'].append(rs.firstChild.data)
                         if not rec.has_key('licence'):
                             try:
                                 paratext = simplepara.firstChild.data
                                 if re.search('CC.BY.\d', paratext):
                                     statement = re.sub('.*(CC.BY.\d.0).*', r'\1', paratext.strip())
                                     rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
-                                    rec['note'].append(statement)
+                                    #rec['note'].append(statement)
                                 elif re.search('CC.BY', paratext):
                                     statement = re.sub('.*(CC.[A-Z\- \.\d]*).*', r'\1', paratext.strip())
                                     rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
-                                    rec['note'].append(statement)
+                                    #rec['note'].append(statement)
                             except:
                                 pass
 #        except:
