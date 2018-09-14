@@ -171,16 +171,24 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
                 elif meta['name'] == 'citation_pdf_url' and (jnl == 'ptep'):
                     rec['FFT'] = meta['content']
                     rec['p1'] = re.sub('.*\/20\d\d\/\d+\/(.*?)\/.*', r'\1', rec['FFT'])
-        print rec['doi'], rec['tit']
+        print rec['doi']
         for abstract in page.find_all('section', attrs = {'class' : 'abstract'}):
-            fsunwrap(abstract)
-            rec['abs'] = re.sub('\n *', ' ', abstract.p.get_text().strip())
+            try:
+                fsunwrap(abstract)
+                rec['abs'] = re.sub('\n *', ' ', abstract.p.text.strip())
+            except:
+                print ' -- no abstract --'
         for ref in page.find_all('div', attrs = {'class' : 'ref-content '}):
+            refdois = []
             for a in ref.find_all('a'):
-                atext = a.text
-                if re.search('CrossRef', atext):
-                    refdoi = re.sub('http...dx.doi.org.', ', DOI: ', a['href'])
-                    a.replace_with(refdoi)
+                atext = a.text                
+                if re.search('CrossRef', atext) or re.search('https?...dx.doi.org.', atext):
+                    refdoi = re.sub('https?...dx.doi.org.', ', DOI: ', a['href']+' ')
+                    if not refdoi in refdois:
+                        a.replace_with(refdoi)
+                        refdois.append(refdoi)
+                    else:
+                        a.replace_with('')
                 elif re.search('Google Scholar', atext) or re.search('PubMed', atext) or re.search('Search ADS', atext):
                     a.replace_with(' ')
             rec['refs'].append([('x', ref.text)])
@@ -200,7 +208,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
             for a in am.find_all('a'):
                 if a.has_attr('href') and re.search('PTEP', a['href']):
                     rec['keyw'].append(a.text)
-        print rec
+        #print rec
         recs.append(rec)
 
 
