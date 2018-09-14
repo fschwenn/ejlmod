@@ -40,17 +40,17 @@ journals = {#'aaa'   : ('Abstr.Appl.Anal. ', 'Hindawi'),
             #'maa'   : ('Methods Appl.Anal.', 'International Press'),
             'ps'    : ('Probab.Surv.', 'The Institute of Mathematical Statistics and the Bernoulli Society'),
             'tjm'   : ('Tokyo J.Math.', 'Publication Committee for the Tokyo Journal of Mathematics'),
-            'facm'  : ('Funct.Approx.Comment.Math.', 'Adam Mickiewicz University, Faculty of Mathematics and Computer Science')}
+            'facm'  : ('Funct.Approx.Comment.Math.', 'Adam Mickiewicz University, Faculty of Mathematics and Computer Science'),
+            'pgiq'  : ('Proc.Geom.Int.Quant.', 'Institute of Biophysics and Biomedical Engineering, Bulgarian Academy of Sciences')}
 
 #journals = {'jdg'   : ('J.Diff.Geom.', 'Lehigh University')}
 
 
-#temp['facm'] = ['https://projecteuclid.org/euclid.facm/1426857030']
+temp = {'pgiq' : ['https://projecteuclid.org/euclid.pgiq/1484362813']}
 
 
 for jnl in journals.keys():
-##for jnl in temp.keys():
-#    todo = temp[jnl]
+#for jnl in temp.keys():
 
     print jnl
 #    print todo
@@ -71,6 +71,7 @@ for jnl in journals.keys():
                     print ' ',re.sub('\n? +', ' ', text)
                 else:
                     break
+    #todo = temp[jnl]
     #individual volumes
     for link in todo:
         jnlfilename = re.sub('.*euclid.(.*?)\/(.*)', r'projecteuclid_\1.\2', link)
@@ -104,6 +105,8 @@ for jnl in journals.keys():
         for article in articles:
             #rec = {'jnl' : jnlname, 'link' : 'http://projecteuclid.org'+article, 'auts' : [], 'tc' : 'P'}
             rec = {'jnl' : jnlname, 'auts' : [], 'tc' : 'P'}
+            if jnl == 'pgiq':
+                rec['tc'] = 'C'
             rec['note'] = [ note ]
             try:
                 articlepage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org' + article))
