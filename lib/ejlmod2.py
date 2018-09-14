@@ -235,7 +235,8 @@ def writeXML(recs,dokfile,publisher):
             xmlstring += marcxml('242',[('a',kapitalisiere(rec['transtit'])), ('9',publisher)])
         if rec.has_key('language'):
             print rec
-            xmlstring += marcxml('041',[('a',rec['language'])])
+            xmlstring += marcxml('041', [('a', rec['language'])])
+            xmlstring += marcxml('599', [('a', 'Text in %s' % (rec['language']))])
         if rec.has_key('abs'):
             if len(rec['abs']) > 5:
                 xmlstring += marcxml('520',[('a',rec['abs']), ('9',publisher)])
@@ -535,6 +536,8 @@ def writeXML(recs,dokfile,publisher):
 
 
 def shapeaut(author):
+    author = re.sub('\&nbps;', ' ', author)
+    author = re.sub('\xa0', ' ', author)
     if not re.search(',', author):
         if re.search('(.*) (van den|van der|van de|de la) (.*)', author):
             author = re.sub('(.*) (van den|van der|van de|de la) (.*)',r'\2 \3, \1',author).strip()
