@@ -64,6 +64,8 @@ elif jid == 'FMP':
     jnlname = 'Forum Math.Pi'
 elif jid == 'MTK':
     jnlname = 'Mathematika'
+elif jid == 'JOG':
+    jnlname = 'J.Glaciol.'
 
 if len(sys.argv) > 5:
     toclink = explicittoclink
