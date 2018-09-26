@@ -95,6 +95,8 @@ def ieee(number):
                 jnlname = 'IEEE Trans.Instrum.Measur.'
             elif re.search('^IEEE Xplore . Nuclear Science Symposium Conference Record', meta['content']):
                 jnlname = 'IEEE Nucl.Sci.Symp.Conf.Rec.'
+            elif meta['content'] in ["IEEE Xplore - Journal of Lightwave Technology"]:
+                jnlname = 'J.Lightwave Tech.'
             elif meta['content'] in ["IEEE Xplore - Instrumentation & Measurement Magazine, IEEE", "IEEE Xplore - IEEE Instrumentation & Measurement Magazine"]:
                 jnlname = 'IEEE Instrum.Measur.Mag.'
                 tc = 'I'
@@ -163,7 +165,7 @@ def ieee(number):
                 rec['p1'] = gdm['startPage']
                 rec['p2'] = gdm['endPage']
         else:
-            #if gdm.has_key('endPageXXX'):
+#            if gdm.has_key('endPageXXX'):
             if gdm.has_key('endPage'):
                 rec['p1'] = gdm['startPage']
                 rec['p2'] = gdm['endPage']
@@ -185,7 +187,8 @@ def ieee(number):
                 rec['pages'] = int(re.sub(' .*', '', gdm['endPage'])) - int(gdm['startPage']) + 1
             except:
                 pass
-        rec['doi'] = gdm['doi']
+        if gdm.has_key('doi'):
+            rec['doi'] = gdm['doi']
         if gdm.has_key('keywords'):
             for kws in gdm['keywords']:
                 for kw in kws['kwd']:
