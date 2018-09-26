@@ -95,6 +95,9 @@ def getarticle(href, sec, subsec, p1):
             #title
             elif meta['name'] == 'dc.Title':
                 rec['tit'] = meta['content'] 
+    #get rid of 'related articles' 
+    for div in artpage.body.find_all('div', attrs = {'class' : 'related-articles'}):
+        div.replace_with('')
     #check whether older date exists
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name') and meta['name'] == 'dc.onlineDate':
