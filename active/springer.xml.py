@@ -131,13 +131,16 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '10967': ['jrnc', 'J.Radioanal.Nucl.Chem.'],
       '40485': ['epjti', 'EPJ Tech.Instrum.'],
       '41114': ['lrr', 'Living Rev.Rel.'],
-      '8790' : ['sprthe', 'BOOK'],
+       '8790': ['sprthe', 'BOOK'],
       '41467': ['natcomm', 'Nature Commun.'],
       '41598': ['scirep', 'Sci.Rep.'],
       '41550': ['natastr', 'Nat.Astron.'],
       '41566': ['natphoton', 'Nature Photon.'],
       '41567': ['natphys', 'Nature Phys.'],
-      '41586': ['nature', 'Nature']}
+      '41586': ['nature', 'Nature'],
+      '40995': ['ijsta', 'Iran.J.Sci.Technol.A'],
+      '11139': ['ramanujan', 'Ramanujan J.'],
+       '8902': ['sprbip', 'BOOK']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
@@ -554,6 +557,11 @@ def xmlExtractBook(): # (FS) extract book information. Just slightly different t
     ti = getAllTextplusTeX(artxml.getElementsByTagName('BookTitle')[0]) # (FS)
     rec["tit"] = ti
     rec['tc'] = 'B'
+    #book series
+    if jnr == '8902':
+        rec['bookseries'] = 'SpringerBriefs in Physics'
+    elif jnr == '8790':
+        rec['bookseries'] = 'Springer Theses'
     #proceedings: 
     if jnr in ['7395','0361']: rec['tc'] = 'K'
     if jnr in ['8431']:
