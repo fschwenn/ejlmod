@@ -19,7 +19,6 @@ from bs4 import BeautifulSoup
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 tmpdir = '/tmp'
 
-publisher = 'Sociedade Brasileira de Física'
 jnl = sys.argv[1]
 year = sys.argv[2]
 issue = sys.argv[3]
@@ -28,15 +27,22 @@ jnlfilename = jnl+year+'.'+issue
 typecode = 'P'
 
 if   (jnl == 'rbef'): 
+    trunc = 'http://www.scielo.br'
     issn = '1806-1117'
     jnlname = 'Rev.Bras.Ens.Fis.'
+    publisher = 'Sociedade Brasileira de Fisica'
     #despite its name it does not contain reviews
     #typecode = 'R'
+elif (jnl == 'rmaa'):
+    trunc = 'http://www.scielo.org.mx'
+    issn = '0185-1101'
+    jnlname = 'Rev.Mex.Astron.Astrofis.'
+    publisher = 'National Autonomous University of Mexico'
 else:
     print 'Dont know journal %s!' % (jnl)
     sys.exit(0)
 
-tocurl = 'http://www.scielo.br/scielo.php?script=sci_issuetoc&pid=%s%s%04i&lng=en&nrm=iso' % (issn, year, int(issue))
+tocurl = '%s/scielo.php?script=sci_issuetoc&pid=%s%s%04i&lng=en&nrm=iso' % (trunc, issn, year, int(issue))
 print "get table of content of %s%s.%s via %s..." %(jnlname, year, issue, tocurl)
 tocpage = BeautifulSoup(urllib2.urlopen(tocurl))
 
@@ -57,7 +63,7 @@ for table in tocpage.body.find_all('table'):
         for a in td.find_all('a'):
             if a.has_attr('href'):
                 if re.search('^pdf', a.text):
-                    rec['FFT'] = 'http://www.scielo.br' + a['href']
+                    rec['FFT'] = trunc + a['href']
                     rec['p1'] = re.sub('.*\-(.*?)\.pdf', r'\1', rec['FFT'])
                 elif re.search('^text in', a.text):
                     rec['language'] = re.sub('text in ', '', a.text.strip())
