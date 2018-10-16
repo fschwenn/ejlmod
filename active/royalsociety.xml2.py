@@ -81,7 +81,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-toc'}):
                     autaff.append('EMAIL:%s' % (email))
                 elif meta['name'] == 'DC.Description':
                     rec['abs'] = meta['content']
-        rec['autaff'].append(autaff)
+        if autaff:
+            rec['autaff'].append(autaff)
         #ref
         for ol in artpage.body.find_all('ol', attrs = {'class' : 'cit-list'}):
             for li in ol.find_all('li', recursive=False):
