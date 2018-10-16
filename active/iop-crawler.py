@@ -65,8 +65,13 @@ if jnls.has_key(issn):
 else:
     print 'journal not known'
     sys.exit(0)
-
-tocpage = BeautifulSoup(urllib2.urlopen(starturl, timeout=300))
+try:
+    tocpage = BeautifulSoup(urllib2.urlopen(starturl, timeout=300))
+except:
+    print 'try "%s" again after 5 minutes' % (starturl)
+    time.sleep(300)
+    tocpage = BeautifulSoup(urllib2.urlopen(starturl, timeout=300))
+    
 recs = []   
 issnote = False
 h3note = False
@@ -101,7 +106,12 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                 if h3note: rec['note'].append(h3note)
                 if h4note: rec['note'].append(h4note)
                 artlink = 'http://iopscience.iop.org' + a['href']
-                artpage = BeautifulSoup(urllib2.urlopen(artlink, timeout=300))
+                try:
+                    artpage = BeautifulSoup(urllib2.urlopen(artlink, timeout=300))
+                except:
+                    print 'try "%s" again after 5 minutes' % (artlink)
+                    time.sleep(300)
+                    artpage = BeautifulSoup(urllib2.urlopen(artlink, timeout=300))
                 autaff = False
                 #licence
                 for divl in artpage.body.find_all('div', attrs = {'class' : 'col-no-break wd-jnl-art-license media'}):
