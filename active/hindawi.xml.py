@@ -58,6 +58,8 @@ elif (jnl == 'jgrav'):
     jnlname = 'J.Grav.'
 elif (jnl == 'aaa'):
     jnlname = 'Abstr.Appl.Anal.'
+elif (jnl == 'jam'):
+    jnlname = 'J.Appl.Math.'
 
 if re.search('isrn',jnl):
     if re.search('astro',jnl):
@@ -158,17 +160,21 @@ for articleID in articleIDs:
                         rec['auts'].append('=Aff%s' % (aff))
         #affiliations come right after
         p = div.next_sibling
-        if p.find_all('sup'):
-            aff = False
-            for child in p.contents:
-                if type(child) == type(p):
-                    if child.name == 'sup':
-                        aff = 'Aff%s= ' % (child.text.strip())
-                elif aff:
-                    aff += child
-                    rec['aff'].append(aff)
-        else:
-            rec['aff'].append(p.text.strip())
+        try:
+            if p.find_all('sup'):
+                aff = False
+                for child in p.contents:
+                    if type(child) == type(p):
+                        if child.name == 'sup':
+                            aff = 'Aff%s= ' % (child.text.strip())
+                    elif aff:
+                        aff += child
+                        rec['aff'].append(aff)
+            else:
+                rec['aff'].append(p.text.strip())
+        except:
+            print p
+            print '^_ could not extract afiliation'
     #references
     for ol in artpage.body.find_all('ol'):
         for li in ol.find_all('li'):
