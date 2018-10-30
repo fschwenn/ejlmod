@@ -44,6 +44,8 @@ elif (jnl == 'ltp'):
     jnlname2 = 'Fiz.Nizk.Temp.'
 elif (jnl == 'php'):
     jnlname = 'Phys.Plasmas'
+elif (jnl == 'adva'):
+    jnlname = 'AIP Adv.'
 elif (jnl == 'aipconf') or (jnl == 'aipcp') or (jnl == 'apc'):
     jnlname = 'AIP Conf.Proc.'
     jnl = 'apc'
