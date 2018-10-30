@@ -32,7 +32,7 @@ if jnl == 'pip':
 elif jnl == 'cip':
     publisher = 'Publishing House for Science and Technology, Vietnam Academy of Science and Technology'
     jnlname = 'Commun.Phys.'
-    urltrunk = 'http://vjs.ac.vn/index.php/cip/issue/view/%s' % (vol)
+    urltrunk = 'http://vjs.ac.vn/index.php/cip/issue/view/%s/showToc' % (vol)
 jnlfilename = '%s%s' % (jnl, vol)
 
     
