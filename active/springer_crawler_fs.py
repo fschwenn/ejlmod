@@ -25,6 +25,8 @@ jnl = sys.argv[2]
 vol = sys.argv[3]
 issue = sys.argv[4]
 
+urltrunc = 'https://link.springer.com'
+
 jnlfilename = re.sub(' ', '_', "%s%s.%s" % (jnl,vol,issue))
 if len(sys.argv) > 5:
     cnum = sys.argv[5]
@@ -99,6 +101,13 @@ def get_records(url):
             newlinks = page.body.findAll('div', attrs={'class': 'content-type-list__title'})        
             links += newlinks
             print('b) %i potential links in %s' % (len(newlinks), tocurl))
+    if not links:
+        for tocurl in pages.keys():
+            page = pages[tocurl]
+            newlinks = page.body.findAll('p', attrs={'class': 'item__title'})
+            links += newlinks
+            print('a) %i potential links in %s' % (len(newlinks), tocurl))
+            #urltrunc = 'https://materials.springer.com'
     artlinks = []
     for link in links:
         rec = {'jnl' : jnl, 'vol' : vol, 'autaff' : []}
@@ -111,7 +120,7 @@ def get_records(url):
             rec['tc'] = 'P'
         rec['tit'] = link.text.strip()
         for a in link.find_all('a'):
-            rec['artlink'] = 'https://link.springer.com' + a['href']
+            rec['artlink'] = urltrunc + a['href']
         if not rec['artlink'] in artlinks:
             recs.append(rec)
             artlinks.append(rec['artlink'])
@@ -166,7 +175,61 @@ for rec in recs:
                     rdoi = re.sub('.*doi.org\/', '', a['href'])
                     a.replace_with(', DOI: %s' % (rdoi))
             rec['refs'].append([('x', li.text.strip())])
-
+    #SPECIAL CASE LANDOLT-BOERNSTEIN
+    if not rec['autaff']:
+        del rec['autaff']
+        #date
+        rec['tc'] = 'S'
+        rec['date'] = re.sub('.* (\d\d\d\d) *$', r'\1', rec['abs'])
+        for dl in artpage.body.find_all('dl', attrs = {'class' : 'definition-list__content'}):
+            chapterDOI = False
+            #ChapterDOI
+            for child in dl.children:
+                try:
+                    child.name
+                except:
+                    continue
+                if re.search('Chapter DOI', child.text):
+                    chapterDOI = True
+                elif chapterDOI:
+                    rec['doi'] = child.text.strip()
+                    chapterDOI = False
+            #Authors and Email
+            for dd in dl.find_all('dd', attrs = {'id' : 'authors'}):
+                rec['auts'] = []
+                for li in dd.find_all('li'):
+                    email = False
+                    for sup in li.find_all('sup'):
+                        aff = re.sub('.*\((.*)\).*', r'\1', sup.text.strip())
+                        sup.replace_with(',,=Aff%s' % (aff))
+                    for a in li.find_all('a'):
+                        for img in a.find_all('img'):
+                            if re.search('@', img['title']):
+                                email = img['title']
+                                a.replace_with('') 
+                    autaff = re.split(' *,, *', re.sub('[\n\t]', '', li.text.strip()))
+                    author = autaff[0]
+                    if email:
+                         rec['auts'].append(re.sub(' *(.*) (.*)', r'\2, \1', author) + ', EMAIL:%s' % (email))
+                    else:
+                         rec['auts'].append(re.sub(' *(.*) (.*)', r'\2, \1', author))
+                    if len(autaff) > 1:
+                        rec['auts'] += autaff[1:]
+            #Affiliations
+            for dd in dl.find_all('dd', attrs = {'class' : 'definition-description author-affiliation'}):
+                rec['aff'] = []
+                for li in dd.find_all('li'):
+                    aff = re.sub('[\n\t]', ' ', li.text.strip())
+                    aff = re.sub('  +', ' ', aff).strip()
+                    rec['aff'].append(re.sub('^(\d.*?) (.*)', r'Aff\1= \2', aff))
+        #Abstract
+        for div in artpage.body.find_all('div', attrs = {'class' : 'section__content'}):
+            for p in div.find_all('p'):
+                rec['abs'] = p.text.strip()
+                
+                        
+                    
+                    
 
   
 #write xml
