@@ -33,7 +33,14 @@ elif (jnl == 'araa'):
 
 
 print "get table of content of %s%s ... via %s" %(jnlname,vol, urltrunk)
-tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+tocfilename = '%s/%s.toc' % (tmpdir, jnlfilename)
+if not os.path.isfile(tocfilename):
+    os.system("wget -O %s %s" % (tocfilename, urltrunk))
+inf = open(tocfilename, 'r')
+toc = ' '.join(map(tfstrip, inf.readlines()))
+inf.close()
+#tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+tocpage = BeautifulSoup(toc)
 
 recs = []
 doisdone = []
@@ -58,7 +65,14 @@ for div in tocpage.find_all('article', attrs = {'class' : 'teaser'}):
     else:
         doisdone.append(rec['doi'])
     print rec['doi']
-    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    artfilename = tocfilename + re.sub('\W', '', rec['doi']) 
+    if not os.path.isfile(artfilename):
+        os.system("wget -O %s %s" % (artfilename, rec['artlink']))
+    inf = open(artfilename, 'r')
+    art = ' '.join(map(tfstrip, inf.readlines()))
+    inf.close()
+    artpage = BeautifulSoup(art)
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #Title
