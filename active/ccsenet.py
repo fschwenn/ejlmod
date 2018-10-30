@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 #!/usr/bin/python
 #program to harvest CCSENET
-# FS 2012-06-01
+# FS 2018-10-30
 
 import os
 import ejlmod2
@@ -9,18 +10,19 @@ import sys
 import unicodedata
 import string
 import codecs
-from removehtmlgesocks import removehtmlgesocks
+import urllib2
+import urlparse
+import time
+from bs4 import BeautifulSoup
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 tmpdir = '/tmp'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 def tfstrip(x): return x.strip()
 
 publisher = 'Canadian Center of Science and Education'
 jnl = sys.argv[1]
 vol = sys.argv[2]
 isu = sys.argv[3]
-
 
 if   (jnl == 'apr'): 
     jnlname = 'Appl.Phys.Res.'
@@ -30,83 +32,54 @@ elif (jnl == 'jmr'):
     issn = '1916-9795'
 
 jnlfilename = jnl+vol+'.'+isu
+tc = 'P'
 
-urltrunk = 'http://ccsenet.org/journal/index.php/%s' % (jnl)
+archiveslink = 'http://www.ccsenet.org/journal/index.php/%s/issue/archives' % (jnl)
 
 
-recnr = 1
+print '[archive] %s' % (archiveslink)
+arcpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(archiveslink))
+for li in arcpage.body.find_all('li'):
+    for a in li.find_all('a'):
+        at = a.text.strip()
+        if re.search('Vol. %s, No. %s$' % (vol, isu), at):
+            toclink = a['href']
+
+
+print '[TOC] %s' % (toclink)
+tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
 recs = []
-print "get table of content of %s%s.%s ..." %(jnlname,vol,isu)
-#toclink = os.popen("lynx -source \"%s/issue/archive\"|grep 'href.*Vol.* %s,.* %s'" % (urltrunk,vol,isu)).read().rstrip()
-os.system('wget -O /tmp/%s%s%s \"%s/issue/archive\"' % (jnl,vol,isu,urltrunk))
-toclink = os.popen("grep 'href.*Vol.* %s,.* %s' /tmp/%s%s%s" % (vol,isu,jnl,vol,isu)).read().rstrip()
-print toclink
-if re.search('Vol',toclink):
-    year = re.sub('.*\((20\d+)\).*',r'\1',toclink)
-    toclink = re.sub('.*href=\"(.*?)\">.*',r'\1',toclink)
-    #os.system("lynx -source \"%s\" > %s/%s.toc" % (toclink,tmpdir,jnlfilename))
-    os.system("wget -O   %s/%s.toc \"%s\" " % (tmpdir,jnlfilename,toclink))
-else:
-    print "Issue not yet online"
-    #year = '2012'
-    #toclink = "http://ccsenet.org/journal/index.php/apr/issue/view/665"
-    #os.system("wget -O   %s/%s.toc \"%s\" " % (tmpdir,jnlfilename,toclink))
-    sys.exit()
-
-
-tocfil = open("%s/%s.toc" % (tmpdir,jnlfilename),'r')
-for tline in  re.split('<.td>', ''.join(map(tfstrip,tocfil.readlines()))):
-    #articles
-    if re.search(' class=\"tocTitle\">',tline):
-        tline = removehtmlgesocks(tline)
-        rec = {}
-        rec['auts'] = []
-        rec['aff'] = []
-        rec['year'] = year
-        rec['vol'] = vol
-        rec['issue'] = isu
-        rec['typ'] = ''
-        rec['jnl'] = jnlname
-        rec['note'] = []
-        rec['tc'] = "P"
-        rec['tit'] = re.sub('.*\">(.*)<\/a>.*',r'\1',tline)
-        articlelink = re.sub('.*href=\"(.*?)\">.*',r'\1',tline)
-    elif re.search(' class=\"tocPages\">',tline):
-        rec['p1'] = re.sub('.* class=\"tocPages\">[pP](\d+)<.*',r'\1',tline)
-        print "%s%s (%s) %s" % (jnlname,rec['vol'],year,rec['p1'])
-        #more informations from article page
-        artfilname = "%s/%s.%s" %(tmpdir,jnlfilename,rec['p1'])
-        if not os.path.isfile(artfilname):
-            #os.system("lynx -source \"%s\" > %s" %(articlelink,artfilname))
-            os.system("wget -O %s \"%s\" " %(artfilname,articlelink))
-        artfil = open(artfilname,'r')
-        for aline in  map(tfstrip,artfil.readlines()):
-            if re.search('<div id=\"authorString\">',aline):
-                authors = re.sub('.*<div id=\"authorString\">(.*)<\/div>.*',r'\1',removehtmlgesocks(aline))
-                authors = re.sub('<\/?em>','',authors)
-                for aut in re.split(' *, *',authors):
-                    #print ".",aut
-                    aut = re.sub('\. ([A-Z])\.', r'.\1.',aut)
-                    aut = re.sub('\. ([A-Z])\.', r'.\1.',aut)
-                    aut = re.sub('\.\-([A-Z])\.', r'.\1.',aut)
-                    rec['auts'].append(re.sub('^(.*) (.*?)$', r'\2, \1', aut))
-            elif re.search('href.*PDF',aline):
-                rec['pdf'] = re.sub('.*href=\"(.*?)\".*',r'\1',aline)
-            elif re.search('DC.Identifier.DOI',aline):
-                rec['doi'] = re.sub('.*content=\"(10.*?)\".*',r'\1',aline)
-                doi1 = re.sub('(\(|\)|\/)','_',rec['doi'])
-            elif re.search('DC.Description',aline):
-                rec['abs'] = re.sub('.*content=\" *(.*?) *\".*',r'\1',aline)
-            elif re.search('DC.Language',aline):
-                language = re.sub('.*content=\" *(.*?) *\".*',r'\1',aline)
-                if not (language == 'en'):
-                    if (language == 'fr'):
-                        rec['tit'] += ' (In French)'
-                    else:
-                        rec['tit'] += ' (In %s???)' % language
-        #write record
+for li in tocpage.body.find_all('li', attrs = {'class' : 'h5'}):
+    for a in li.find_all('a'):
+        artlink = a['href']
+        print '[ART] %s' % (artlink)
+        rec = {'vol' : vol, 'issue' : isu, 'jnl' : jnlname, 'tc' : tc,
+               'auts' : []}
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+        for meta in artpage.head.find_all('meta'):
+            if meta.has_attr('name'):
+                if meta['name'] == 'DC.Date.issued':
+                    rec['date'] = meta['content'] 
+                elif meta['name'] == 'DC.Description':
+                    rec['abs'] = meta['content'] 
+                elif meta['name'] == 'DC.Identifier.pageNumber':
+                    rec['p1'] = meta['content'] 
+                elif meta['name'] == 'DC.Identifier.DOI':
+                    rec['doi'] = meta['content'] 
+                elif meta['name'] == 'DC.Rights':
+                    if re.search('creativecommons.org', meta['content']):
+                        rec['licence'] = {'url' : meta['content']}
+                elif meta['name'] == 'DC.Title':
+                    rec['tit'] = meta['content'] 
+                elif meta['name'] == 'citation_author':
+                    rec['auts'].append(meta['content'])
+                elif meta['name'] == 'citation_firstpage':
+                    rec['p1'] = meta['content'] 
+                elif meta['name'] == 'citation_lastpage':
+                    rec['p2'] = meta['content'] 
+                elif meta['name'] == 'citation_pdf_url':
+                    rec['FFT'] = meta['content'] 
         recs.append(rec)
-        recnr += 1
 
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 #xmlfile = open(xmlf, 'w')
@@ -117,7 +90,7 @@ xmlfile.close()
 #retrival
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
-line = jnlfilename + "\n"
+line = jnlfilename + ".xml\n"
 if not line in retfiles_text: 
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
