@@ -447,7 +447,7 @@ def xmlExtract():
                     erratumdoi = re.sub('.*dx.doi.org.', '', rnote.firstChild.data)
                     rec['tit'] += ' [doi:%s]' % erratumdoi
             elif re.search('Original.*published in', snotedata) or re.search('Translated from', snotedata):
-                print '+', snotedata, '+'
+                #print '+', snotedata, '+'
                 secondpubnote = re.sub('.*published in *', '', snotedata)
                 secondpubnote = re.sub('.*Translated from *', '', secondpubnote)
                 snotedataparts = re.split(' *, *', secondpubnote)
