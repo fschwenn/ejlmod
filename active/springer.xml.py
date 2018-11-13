@@ -26,7 +26,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 # uninteresting journals:
 
 
-jw = ['00153', '11105', '00426', '10853']
+jw = ['00153', '11105', '00426', '10853', '00477']
 
 
 #INSPIRE convention instead of DPBN as in springer.py
@@ -140,6 +140,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '41586': ['nature', 'Nature'],
       '40995': ['ijsta', 'Iran.J.Sci.Technol.A'],
       '11139': ['ramanujan', 'Ramanujan J.'],
+      '42254': ['natrp', 'Nature Rev.Phys.'],
        '8902': ['sprbip', 'BOOK']}
 
 #folgende Zeile unbeding loeschen
