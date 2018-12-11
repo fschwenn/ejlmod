@@ -59,7 +59,8 @@ jnls = {'1538-3881': 'Astron.J.',
         '1402-4896': 'Phys.Scripta',
         '0953-2048': 'Supercond.Sci.Technol.',
         '2399-6528': 'J.Phys.Comm.',
-        '1757-899X': 'IOP Conf.Ser.Mater.Sci.Eng.'}
+        '1757-899X': 'IOP Conf.Ser.Mater.Sci.Eng.',
+        '0036-0279': 'Russ.Math.Surveys'}
 if jnls.has_key(issn):
     jnl = jnls[issn]
 else:
