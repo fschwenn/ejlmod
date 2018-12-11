@@ -432,7 +432,12 @@ def writeXML(recs,dokfile,publisher):
                     elif re.search('EMAIL', aff):
                         autlist.append(('m', re.sub('EMAIL:', '', aff)))
                     else:
-                        autlist.append(('v', aff))
+                        #GRID hier
+                        if re.search(', GRID:', aff):
+                            autlist.append(('v',  re.sub(', GRID:.*', '', aff)))
+                            autlist.append(('t',  re.sub('.*, GRID:', 'GRID:', aff)))
+                        else:
+                            autlist.append(('v', aff))
                 xmlstring += marcxml(marc, autlist)
                 marc = '700'
         elif rec.has_key('auts'):
@@ -480,7 +485,15 @@ def writeXML(recs,dokfile,publisher):
                         aut.append(('a', author))
                     if (len(tempaffs) == 0) and (len(affdict) > 0):
                         tempaffs = [('v',affdict[affdict.keys()[0]])]
-                    longauts.insert(0,aut+tempaffs)
+                    #GRID hier
+                    ntempaffs = []
+                    for ta in tempaffs:
+                        if re.search(', GRID:', ta[1]):
+                            ntempaffs.append(('v', re.sub(', GRID:.*', '', ta[1])))
+                            ntempaffs.append(('t', re.sub('.*, GRID:', 'GRID:', ta[1])))
+                        else:
+                            ntempaffs.append(ta)
+                    longauts.insert(0,aut+ntempaffs)
                 preventry = entry
             marc = '100'
             for aut in longauts:
