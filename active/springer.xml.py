@@ -141,7 +141,8 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '40995': ['ijsta', 'Iran.J.Sci.Technol.A'],
       '11139': ['ramanujan', 'Ramanujan J.'],
       '42254': ['natrp', 'Nature Rev.Phys.'],
-       '8902': ['sprbip', 'BOOK']}
+       '8902': ['sprbip', 'BOOK'],
+      '40623': ['eaplsc', 'Earth Planets Space']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
@@ -321,7 +322,18 @@ def xmlExtract():
             print "problems with OrgAddress!"
         orgname = orgname.replace('University', 'U.')
         orgname = orgname.replace(',', ' -')
-        affil.append(affid + "= " + orgname)
+        #affiliation identifier:
+        (grid, isni) = (False, False)
+        for orgidnode in node.getElementsByTagName('OrgID'):
+            if orgidnode.attributes['Type'].value == 'GRID':
+                grid = orgidnode.firstChild.data
+            elif orgidnode.attributes['Type'].value == 'ISNI':
+                isni = orgidnode.firstChild.data
+        if grid:
+            affil.append(affid + "= " + orgname + ', GRID:' + grid)
+            #affil.append(affid + "= " + orgname)
+        else:
+            affil.append(affid + "= " + orgname)
     rec['aff'] = affil
     try:
         for node in artxml.getElementsByTagName('ArticleNote'):
@@ -528,10 +540,11 @@ def xmlExtract():
     #references
     rec['refs'] = []
     for citation in artxml.getElementsByTagName('Citation'):
-        reftext = ''
-        doitext = ''
+        (reftext, doitext, citnum) = ('', '', '')
         for BibUnstructured in citation.getElementsByTagName('BibUnstructured'):
-            reftext = getAllText(BibUnstructured)
+            for CitationNumber in citation.getElementsByTagName('CitationNumber'):
+                citnum = getAllText(CitationNumber) + ' '
+            reftext = citnum + ' ' + getAllText(BibUnstructured)
         if len(reftext) < 20:
             reftext = getAllText(citation)
         if not re.search('10\.\d+\/', reftext):            
@@ -560,9 +573,9 @@ def xmlExtractBook(): # (FS) extract book information. Just slightly different t
     rec['tc'] = 'B'
     #book series
     if jnr == '8902':
-        rec['bookseries'] = 'SpringerBriefs in Physics'
+        rec['bookseries'] = [('a', 'SpringerBriefs in Physics')]
     elif jnr == '8790':
-        rec['bookseries'] = 'Springer Theses'
+        rec['bookseries'] = [('a', 'Springer Theses')]
     #proceedings: 
     if jnr in ['7395','0361']: rec['tc'] = 'K'
     if jnr in ['8431']:
