@@ -109,6 +109,7 @@ def get_records(url):
             print('a) %i potential links in %s' % (len(newlinks), tocurl))
             #urltrunc = 'https://materials.springer.com'
     artlinks = []
+    #print links
     for link in links:
         rec = {'jnl' : jnl, 'vol' : vol, 'autaff' : []}
         if issue != '0':
@@ -121,9 +122,9 @@ def get_records(url):
         rec['tit'] = link.text.strip()
         for a in link.find_all('a'):
             rec['artlink'] = urltrunc + a['href']
-        if not rec['artlink'] in artlinks:
-            recs.append(rec)
-            artlinks.append(rec['artlink'])
+            if not rec['artlink'] in artlinks:
+                recs.append(rec)
+                artlinks.append(rec['artlink'])
     return recs
 
 
@@ -154,6 +155,13 @@ for rec in recs:
                 rec['abs'] = meta['content']
             elif meta['name'] == 'citation_cover_date':
                 rec['date'] = meta['content']
+    if not 'date' in rec.keys():
+        for  meta in artpage.head.find_all('meta', attrs = {'name' : 'citation_publication_date'}):
+            rec['date'] = meta['content']
+    if not 'date' in rec.keys():
+        for span in artpage.body.find_all('span', attrs = {'class' : 'bibliographic-information__value', 'id' : 'copyright-info'}):
+            if re.search('[12]\d\d\d', span.text):
+                rec['date'] = re.sub('.*?([12]\d\d\d).*', r'\1', span.text.strip())
     #Abstract
     for section in artpage.body.find_all('section', attrs = {'class' : 'Abstract'}):
         rec['abs'] = ''
@@ -179,8 +187,9 @@ for rec in recs:
     if not rec['autaff']:
         del rec['autaff']
         #date
-        rec['tc'] = 'S'
-        rec['date'] = re.sub('.* (\d\d\d\d) *$', r'\1', rec['abs'])
+        #rec['tc'] = 'S'
+        if not 'date' in rec.keys():
+            rec['date'] = re.sub('.* (\d\d\d\d) *$', r'\1', rec['abs'])
         for dl in artpage.body.find_all('dl', attrs = {'class' : 'definition-list__content'}):
             chapterDOI = False
             #ChapterDOI
