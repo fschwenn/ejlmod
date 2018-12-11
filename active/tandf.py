@@ -47,6 +47,8 @@ elif (jnl == 'tphm20'):
     jnlname = 'Phil.Mag.'
 elif (jnl == 'gnpn20'):
     jnlname = 'Nucl.Phys.News'
+elif (jnl == 'tnmp20'):
+    jnlname = 'J.Nonlin.Mathematical Phys.'
 
 
 
@@ -64,7 +66,8 @@ tc = 'P'
 for adoi in page.body.find_all('a'):
     if not adoi.has_attr('href'):
         continue
-    if not re.search('^Full Text', adoi.text):
+#    if not re.search('^Full Text', adoi.text):
+    if not re.search('^PDF', adoi.text):
         continue
     if jnl == 'tcph20':
         tc = 'IR'
