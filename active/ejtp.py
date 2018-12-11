@@ -7,8 +7,6 @@ import os
 #import xml.dom.minidom
 #import urllib
 import ejlmod2
-#import Recode
-#import time
 import re
 import sys
 import unicodedata
@@ -40,13 +38,15 @@ recnr = 1
 recs = []
 print "get table of content of %s%s.%s via %s ..." %(jnlname,vol,issue, urltrunk)
 #print "lynx -source \"%s/PV%sIss%s.html\" > %s/%s.toc" % (urltrunk,vol,issue,tmpdir,jnlfilename)
-os.system("lynx -source \"%s\" > %s/%s.toc" % (urltrunk,tmpdir,jnlfilename))
+if not os.path.isfile("%s/%s.toc" % (tmpdir,jnlfilename)):
+    os.system("lynx -source \"%s\" > %s/%s.toc" % (urltrunk,tmpdir,jnlfilename))
     
 tocfil = codecs.open("%s/%s.toc" % (tmpdir,jnlfilename),'r', 'cp1252')
+#tocfil = codecs.open("%s/%s.toc" % (tmpdir,jnlfilename),'r', 'utf8')
 #for tline in  map(tfstrip,tocfil.readlines()):
 tocline = re.sub('\s\s+',' ',' '.join(map(tfstrip,tocfil.readlines())))
 for tline in re.split(' *<\/tr> *',tocline):
-    if re.search('<h1>.*Volume.*20\d+',tline):
+    if re.search('<h1.*?Volume.*20\d+',tline):
         #print tline
         year = re.sub('.*<h1.*Volume.*?\(.*?(20\d+).*',r'\1',tline)
         print year
@@ -92,7 +92,7 @@ for tline in re.split(' *<\/tr> *',tocline):
                     aut = re.sub('([A-Z]\.) ([A-Z]\.)',r'\1\2',aut)
                     if len(aut) > 1:
                         rec['auts'].append(re.sub('(.*?) (.*)',r'\2, \1',re.sub('<sup.*','',aut)))
-                        print 'A',aut
+                        #print 'A',aut
                     if re.search('<sup>',author):
                         sups = re.sub('.*<sup>(.*?)<.*',r'\1',author)
                         for sup in re.split(' *[;,] *',sups):
