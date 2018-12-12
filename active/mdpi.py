@@ -37,12 +37,17 @@ if jnl == 'proceedings':
     done = []
 else:
     starturl = 'http://www.mdpi.com/search?journal=%s&year_from=1996&year_to=2025&page_count=100&sort=pubdate&view=default' % (jnl)
+    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=2016&year_to=2025&page_count=100&sort=pubdate&view=default' % (jnl)
     jnlfilename = '%s.%s' % (jnl, stampoftoday)
     done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
     print 'already done:', done
-tocpage = BeautifulSoup(urllib2.urlopen(starturl))
+print starturl
+#tocpage = BeautifulSoup(urllib2.urlopen(starturl))
+hdr = {'User-Agent' : 'Mozilla/5.0'}
+req = urllib2.Request(starturl, headers=hdr)
+tocpage = BeautifulSoup(urllib2.urlopen(req))
 
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
@@ -59,7 +64,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
         rec['tit'] = a.text
         print '->', link
         #get detailed page
-        page = BeautifulSoup(urllib2.urlopen(link))
+        artreq = urllib2.Request(link, headers=hdr)
+        page = BeautifulSoup(urllib2.urlopen(artreq))
         ##Review?1
         for meta in page.head.find_all('meta', attrs = {'name' : 'dc.type'}):
             if meta['content'] == 'Review': rec['tc'] = 'R'
@@ -124,7 +130,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'article-content'}):
                     rec['aff'].append(aff.strip())
         #references 
         reflink = 'http://www.mdpi.com' + a['href']  + '/htm'
-        refpage = BeautifulSoup(urllib2.urlopen(reflink))
+        refreq = urllib2.Request(reflink, headers=hdr)
+        refpage = BeautifulSoup(urllib2.urlopen(refreq))
         for section in refpage.body.find_all('section', attrs = {'id' : 'html-references_list'}):
             for li in section.find_all('li'):
                 for a2 in li.find_all('a', attrs = {'class' : 'cross-ref'}):
