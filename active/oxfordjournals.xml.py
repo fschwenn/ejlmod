@@ -82,6 +82,9 @@ elif (jnl == 'bjps'):
     jnlname = "Brit.J.Phil.Sci."
 elif (jnl == 'imrn'): 
     jnlname = "Int.Math.Res.Not."
+elif (jnl == 'nsr'):
+    jnlname = "Natl.Sci.Rev. "
+    
 else:
     print 'Dont know journal %s!' % (jnl)
     sys.exit(0)
