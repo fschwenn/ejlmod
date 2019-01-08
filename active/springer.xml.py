@@ -109,7 +109,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
        '5304': ['lnp', 'Lect.Notes Phys.'],
        '0304': ['lnm', 'Lect.Notes Math.'],
        '0361': ['spprph', 'Springer Proc.Phys.'], 
-      '10533': ['spprma', 'Springer Proc.Math.'], #Lieferung
+       '8806': ['spprma', 'Springer Proc.Math.'], #discontinued
       '10781': ['fias', 'FIAS Interdisc.Sci.Ser.'],
       '10502': ['fimono', 'Fields Inst.Monogr.'], #Fields Institute Monographs
       '10503': ['ficomm', 'Fields Inst.Commun.'], #Fields Institute Communications
@@ -142,7 +142,8 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '11139': ['ramanujan', 'Ramanujan J.'],
       '42254': ['natrp', 'Nature Rev.Phys.'],
        '8902': ['sprbip', 'BOOK'],
-      '40623': ['eaplsc', 'Earth Planets Space']}
+      '40623': ['eaplsc', 'Earth Planets Space'],
+      '12036': ['jasas', 'J.Astrophys.Astron.']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
