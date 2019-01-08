@@ -33,6 +33,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 if jnl == 'proceedings':
     starturl = 'http://www.mdpi.com/2504-3900/%s/%s' % (vol, iss)
+    #starturl = 'https://www.mdpi.com/journal/universe/special_issues/ICNFP2018'
     jnlfilename = 'mdpi_proc%s.%s_%s' % (vol, iss, cnum)
     done = []
 else:
@@ -43,6 +44,9 @@ else:
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
     print 'already done:', done
+
+
+
 
 hdr = {'User-Agent' : 'Mozilla/5.0'}
 artlinks = []
@@ -147,8 +151,8 @@ for artlink in artlinks:
                 span.replace_with(';;;')
             for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
                 rec['aff'].append(aff.strip())
-    #references 
-    reflink = 'http://www.mdpi.com' + a['href']  + '/htm'
+    #references
+    reflink = artlink[0]  + '/htm'
     refreq = urllib2.Request(reflink, headers=hdr)
     refpage = BeautifulSoup(urllib2.urlopen(refreq))
     for section in refpage.body.find_all('section', attrs = {'id' : 'html-references_list'}):
