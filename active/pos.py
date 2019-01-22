@@ -10,6 +10,10 @@ import urllib2
 import urlparse
 from bs4 import BeautifulSoup
 
+from collclean_lib import coll_cleanforthe
+from collclean_lib import coll_clean710
+from collclean_lib import coll_split
+
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 ftppath = '/afs/desy.de/group/library/preprints/incoming/'
 publisherpath = '/afs/desy.de/group/library/publisherdata/sissa/done/'
@@ -131,6 +135,26 @@ def pos_harvesting(conf_acronym,cnum):
                 record_add_field(record, '520', ' ', ' ', '', [('a', abstract), ('9', 'SISSA')])
             if not doi:
                 record_add_field(record,'024','7',' ','',[('a',nodoi),('2','NODOI')])
+            #check for collaborations in author field
+            if '700' in record.keys():
+                for author in record_delete_fields(record,'700'):
+                    na = []
+                    for entry in author[0]:
+                        if entry[0] == 'a':
+                            if re.search('Collaboration', entry[1], re.IGNORECASE):                                
+                                newcolls = []
+                                (coll, author) = coll_cleanforthe(entry[1])
+                                for scoll in coll_split(coll):
+                                    newcolls.append(re.sub('^the ', '', coll_clean710(scoll), re.IGNORECASE))
+                                for col in newcolls:
+                                    record_add_field(record, '710', ' ', ' ', '', [('g', re.sub(',', '', col))])
+                                    print 'found collection "%s" in author field' % (col)
+                                if author:
+                                    na.append(('a', collcheck[0]))
+                        else:
+                            na.append(entry)    
+                    if author:
+                        record_add_field(record, '700', ' ', ' ', '', na)
             #bibclassify abstract 
             if not abstract:
                 tmpfile = tmpdir+'fs'+doi1
