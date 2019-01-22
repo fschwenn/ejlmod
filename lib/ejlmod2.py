@@ -18,6 +18,7 @@ except:
     print 'could not import extract_references_from_string'
 
 
+
 #from collclean import clean710
 
 #mappings for refferences in JSON to MARC 
@@ -73,6 +74,30 @@ def arXivfromADS(rec):
             else:
                 rec['note'] = ['arXiv number from ADS (not from publisher!)']
     return
+
+#find collaborations in authorfield
+refcauthor = re.compile(' *([A-Z].*? [A-Z][a-z]+ .*?) FFF ')
+refcsplitter1 = re.compile('( |^)[fF]or [Tt]he ')
+refcsplitter2 = re.compile('( |^)[oO]n [bB]ehalf [oO]f [Tt]he ')
+refcsplitter3 = re.compile('( |^)[fF]or ')
+refcsplitter4 = re.compile('( |^)[oO]n [bB]ehalf [oO]f ')
+def findcollaborations(authorfield):
+    if re.search('Collaboration', authorfield):
+        aft = re.sub('^ *\( *(.*) *\) *$', r'\1', authorfield)
+        aft = refcsplitter1.sub(' FFF ', aft)
+        aft = refcsplitter2.sub(' FFF ', aft)
+        aft = refcsplitter3.sub(' FFF ', aft)
+        aft = refcsplitter4.sub(' FFF ', aft)
+        author = False
+        if refcauthor.search(aft):
+            author = refcauthor.sub(r'\1', aft)
+        collaborations = re.sub('.*FFF ', '', aft)
+        collaborations = re.sub('^ *(.*) Collaborations.*', '', collaborations)
+        colparts = re.split(' *, *', re.sub(' [aA]nd ', ', ', collaborations))
+        return (author, colparts)
+    else:
+        return (authorfield, False)
+            
 
 
 #FS:
@@ -422,6 +447,20 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('autaff'):
             marc = '100'
             for autaff in rec['autaff']:
+                #check for collaborations
+                if re.search('Collaboration', autaff[0], re.IGNORECASE):
+                    newcolls = 0
+                    (coll, author) = coll_cleanforthe(autaff[0])
+                    for scoll in coll_split(coll):
+                        newcolls.append(re.sub('^the ', '', coll_clean710(scoll), re.IGNORECASE))
+                    for col in newcolls:
+                        xmlstring += marcxml('710',[('g',col)])
+                        if not rec.has_key('exp') and colexpdict.has_key(col):
+                            xmlstring += marcxml('693',[('e',colexpdict[col])])
+                    if author:
+                        autaff[0] = author
+                    else:
+                        continue
                 if re.search('\([eE]d\.\)', autaff[0]):
                     autlist = [('a', shapeaut(re.sub(' *\([eE]d\.\) *','',autaff[0]))), ('e','ed.')]
                 else:
@@ -468,6 +507,20 @@ def writeXML(recs,dokfile,publisher):
                             tempaffs.insert(0,('v',affdict[aff[1:]]))
                     #print tempaffs
                 else:
+                    #check for collaborations
+                    if re.search('Collaboration', entry, re.IGNORECASE):
+                        newcolls = []
+                        (coll, author) = coll_cleanforthe(entry)
+                        for scoll in coll_split(coll):
+                            newcolls.append(re.sub('^the ', '', coll_clean710(scoll), re.IGNORECASE))
+                        for col in newcolls:
+                            xmlstring += marcxml('710',[('g',col)])
+                            if not rec.has_key('exp') and colexpdict.has_key(col):
+                                xmlstring += marcxml('693',[('e',colexpdict[col])])
+                        if author:
+                            entry = author
+                        else:
+                            continue
                     if re.search('\([eE]d\.\)',entry):
                         aut = [('a', shapeaut(re.sub(' *\([eE]d\.\) *','',entry))), ('e','ed.')]
                     else:
