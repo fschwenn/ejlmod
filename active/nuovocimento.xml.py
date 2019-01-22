@@ -96,10 +96,10 @@ def xmltorec(xmlfilename):
             for a in AuthorGroup.find_all('author'):
                 ##author
                 aut = ''
-                for fn in a.find_all('familyname'):
-                    aut += fn.text
                 for gn in a.find_all('givenname'):
-                    aut += ', ' + gn.text
+                    aut += gn.text
+                for fn in a.find_all('familyname'):
+                    aut += ' ' + fn.text
                 artrec['auts'].append(aut)
                 ##her affiliation
                 if a.has_attr('affiliationids'):
