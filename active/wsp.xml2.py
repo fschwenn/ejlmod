@@ -37,7 +37,13 @@ regexpdoi2 = re.compile('.*servlet.*key=(10\.\d\d.*).*')
 def getreferencesfromweb(doi):
     link = 'http://www.worldscientific.com/doi/ref/%s' % (doi)
     print '   ', link
-    refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(link))
+    reffile = '%s/%s%s.ref' % (tmpdir, publisher, re.sub('[\/\(\)]', '_', doi))
+    if not os.path.isfile(reffile):
+        os.system("wget -T 300 -t 3 -q -O %s %s" % (reffile, link))
+    inf = open(reffile, 'r')
+    refpage = BeautifulSoup(''.join(inf.readlines()))
+    inf.close()
+    #refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(link))
     refs = []
     for ul in refpage.body.find_all('ul', attrs = {'class' : 'rlist separator'}):
         print '      %i references' % (len(ul))
@@ -87,7 +93,7 @@ def concert(rawrecs):
         wsprecord = BeautifulSoup(''.join(xmlrec.readlines()))
         xmlrec.close()
         rec = {'tc' : 'P', 'note' : [], 'autaff' : [], 'keyw' : []}
-        #references !!!!!!!!!!!!
+        #ignore references in metadata delivery
         for reflist in wsprecord.find_all('ref-list'):
             for ref in reflist.find_all('ref'):
                 x = re.sub('[\n\t]', ' ', ref.text.strip())
