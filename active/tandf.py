@@ -48,7 +48,7 @@ elif (jnl == 'tphm20'):
 elif (jnl == 'gnpn20'):
     jnlname = 'Nucl.Phys.News'
 elif (jnl == 'tnmp20'):
-    jnlname = 'J.Nonlin.Mathematical Phys.'
+    jnlname = 'J.Nonlin.Math.Phys.'
 
 
 
