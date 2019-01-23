@@ -69,7 +69,6 @@ else:
                 if not ('http://www.mdpi.com' + a['href'], a.text) in artlinks:
                     artlinks.append(('http://www.mdpi.com' + a['href'], a.text))
 
-
 i=0
 recs = []
 for artlink in artlinks:
@@ -162,7 +161,14 @@ for artlink in artlinks:
                 a2.replace_with(rdoi)
             for a2 in li.find_all('a'):
                 a2.replace_with('')
-            rec['refs'].append([('x', li.text.strip())])
+            lit = re.sub('\[\]', '', li.text.strip())
+            lit = re.sub('\.? *\[(doi:.*?)\]', ', \1', lit)
+            lit = re.sub('\.? *\[(http.*?)\]', ', \1', lit)
+            lit = re.sub('\[Google Scholar\]', '', lit)
+            #Semikolon between authors
+            lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
+            lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
+            rec['refs'].append([('x', lit)])
     recs.append(rec)
 print '%i new records' % (len(recs)) 
 
