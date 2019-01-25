@@ -162,8 +162,8 @@ for artlink in artlinks:
             for a2 in li.find_all('a'):
                 a2.replace_with('')
             lit = re.sub('\[\]', '', li.text.strip())
-            lit = re.sub('\.? *\[(doi:.*?)\]', ', \1', lit)
-            lit = re.sub('\.? *\[(http.*?)\]', ', \1', lit)
+            lit = re.sub('\.? *\[(doi:.*?)\]', r', \1', lit)
+            lit = re.sub('\.? *\[(http.*?)\]', r', \1', lit)
             lit = re.sub('\[Google Scholar\]', '', lit)
             #Semikolon between authors
             lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
