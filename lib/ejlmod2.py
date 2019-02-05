@@ -449,7 +449,7 @@ def writeXML(recs,dokfile,publisher):
             for autaff in rec['autaff']:
                 #check for collaborations
                 if re.search('Collaboration', autaff[0], re.IGNORECASE):
-                    newcolls = 0
+                    newcolls = []
                     (coll, author) = coll_cleanforthe(autaff[0])
                     for scoll in coll_split(coll):
                         newcolls.append(re.sub('^the ', '', coll_clean710(scoll), re.IGNORECASE))
