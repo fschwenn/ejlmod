@@ -60,6 +60,9 @@ elif (jnl == 'anyaa'):
 elif (jnl == 'tnya'):
     doitrunk = '10.1111/tnya'
     jnlname = 'Trans.New York Acad.Sci.'
+elif (jnl == 'mdpc'):
+    doitrunk = '10.1002/mdp2'
+    jnlname = 'Mater.Des.Proc.Comm.'
     
 
 
