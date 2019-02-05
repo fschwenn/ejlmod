@@ -51,6 +51,8 @@ else:
 hdr = {'User-Agent' : 'Mozilla/5.0'}
 artlinks = []
 if jnl == 'proceedings':
+#    starturl = 'https://www.mdpi.com/journal/galaxies/special_issues/non-thermalUniverse'
+#    done = []
     print starturl
     req = urllib2.Request(starturl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
@@ -69,11 +71,13 @@ else:
                 if not ('http://www.mdpi.com' + a['href'], a.text) in artlinks:
                     artlinks.append(('http://www.mdpi.com' + a['href'], a.text))
 
+done = []
+                    
 i=0
 recs = []
 for artlink in artlinks:
-    rec = {'jnl' : jnl.title(), 'tc' : 'P', 'keyw' : [], 'aff' : [], 'auts' : [],
-           'note' : [], 'refs' : []}
+    rec = {'jnl' : jnl.title(), 'tc' : 'C', 'keyw' : [], 'aff' : [], 'auts' : [],
+           'note' : [], 'refs' : []}#, 'cnum' : 'C18-09-18.1'}
     i += 1
     #title and link
     if jnl == 'proceedings':
@@ -82,6 +86,8 @@ for artlink in artlinks:
         rec['cnum'] = cnum
     elif jnl == 'condensedmatter':
         rec['jnl'] = 'Condens.Mat.'
+    elif jnl == 'physics':
+        rec['jnl'] = 'MDPI Physics'
     print '---{ %i/%i }---{ %s }---' % (i, len(artlinks), artlink[0])
     rec['FFT'] = artlink[0] + '/pdf'
     rec['tit'] = artlink[1]
@@ -136,12 +142,22 @@ for artlink in artlinks:
                 sup.replace_with(newcont)
             for script in page.body.find_all('script'):
                 script.replace_with('')
+            #ORCIDs
+            for a in div.find_all('a', attrs = {'itemprop' : 'author'}):
+                if a.has_attr('href') and re.search('orcid=[0-9]', a['href']):
+                    orcid = re.sub('.*orcid=', 'ORCID:', a['href'])
+                    author = a.text.strip()
+                    a.replace_with('%s; %s' % (author, orcid))
             authors = re.sub(' and ', ' , ', re.sub('\xa0', ' ', div.text))
             authors = re.sub('&nbsp;', ' ', authors)
             authors = re.sub('\*', ' ', authors)
             for author in re.split(' *, *', re.sub('[\n\t]', '', authors)):
                 if len(author.strip()) > 2:
-                    rec['auts'].append(author.strip())        
+                    if re.search('ORCID', author):
+                        parts = re.split(' *; *', author)
+                        rec['auts'].append('%s, %s' % (ejlmod2.shapeaut(parts[0]), parts[1]))
+                    else:
+                        rec['auts'].append(author.strip())        
     for diva in page.body.find_all('div', attrs = {'class' : 'art-affiliations'}):
         for div in diva.find_all('div', attrs = {'class' : 'affiliation'}):
             for sup in div.find_all('sup'):
