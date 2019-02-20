@@ -27,7 +27,7 @@ if issue == '10':
 elif issue == '11':
     urltrunk = 'http://www.proceedings.bas.bg/content/%s_b_cntent.html' % (year)
 elif issue == '12':
-    urltrunk = 'http://www.proceedings.bas.bg/content/%s_b_cntent.html' % (year)
+    urltrunk = 'http://www.proceedings.bas.bg/content/%s_c_cntent.html' % (year)
 else:
     urltrunk = 'http://www.proceedings.bas.bg/content/%s_%s_cntent.html' % (year, issue)
 print urltrunk
