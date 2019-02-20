@@ -323,7 +323,16 @@ for article in tocpage.find_all('stk_header'):
                     a.replace_with(doi)
             for a in li.find_all('a'):
                 if a.has_attr('href'):
-                    link = ', %s: %s' % (a.text, a['href'])
+                    at = a.text.strip()
+                    if re.search('doi\.org', a['href']):
+                        if re.search('^10\.[0-9]+', at):
+                            link = ' DOI: ' + at
+                        elif re.search('http.*dx.doi.org\/10', at):
+                            link = ' DOI: ' + re.sub('.*dx.doi.org\/', '', at)
+                        else:
+                            link = a['href']
+                    else:
+                        link = ', %s: %s' % (at, a['href'])
                     a.replace_with(link)
             ref = li.text
             if regexpdxdoi.search(ref):
