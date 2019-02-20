@@ -33,7 +33,7 @@ if   (jnl == 'astp'):
     year = str(int(vol) + 2006)
     typecode = "P"
 elif (jnl == 'aap'): 
-    jnlname = 'Adv.Stud.Appl.Phys.'
+    jnlname = 'Adv.Appl.Phys.'
     issn = ''
     year = str(int(vol) + 2012)
     typecode = "P"
