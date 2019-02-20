@@ -29,64 +29,50 @@ if   (jnl == 'prs'):
     jnlname = 'Proc.Roy.Soc.Lond.'
     vol = 'A' + vol
     urltrunk = 'http://rspa.royalsocietypublishing.org'
+    urltrunk = 'https://royalsocietypublishing.org/toc/rspa'
 elif (jnl == 'prts'): 
     issn = '1364-503x'
     url = 'PTRSA'
     vol = 'A' + vol
     jnlname = 'Phil.Trans.Roy.Soc.Lond.'
     urltrunk = 'http://rsta.royalsocietypublishing.org'
+    urltrunk = 'https://royalsocietypublishing.org/toc/rsta'
 
 jnlfilename = "%s%s.%s" % (jnl,vol,issue)
 toclink = "%s/content/%s/%s.toc" % (urltrunk, re.sub('^[A-Z]', '', vol), issue)
+toclink = "%s/%s/%s/" % (urltrunk, re.sub('^[A-Z]', '', vol), issue)
 
 print "%s%s, Issue %s" %(jnlname,vol,issue)
 print "get table of content... from %s" % (toclink)
 
-tocpage = BeautifulSoup(urllib2.urlopen(toclink))
+tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
 
 recs = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-toc'}):
-    for a in div.find_all('a', attrs = {'class' : 'highwire-cite-linked-title'}):
-        artlink = "%s%s" % (urltrunk, a['href'])
+for h5 in tocpage.body.find_all('h5', attrs = {'class' : 'issue-item__title'}):
+    for a in h5.find_all('a'):
+        artlink = "%s%s" % ('https://royalsocietypublishing.org', a['href'])
         print artlink
-        artpage = BeautifulSoup(urllib2.urlopen(artlink))
-        rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'autaff' : [], 'refs' : []}
-    #meta
-        autaff = False
+        time.sleep(1)
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+        rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'auts' : []}
+        rec['doi'] = re.sub('.*\/(10\..*)', r'\1', artlink)
+        #meta
         for meta in artpage.head.find_all('meta'):
             if meta.has_attr('name'):
-                if meta['name'] == 'citation_firstpage':
-                    rec['p1'] = meta['content']
-                if meta['name'] == 'citation_lastpage':
-                    rec['p2'] = meta['content']
-                elif meta['name'] == 'citation_doi':
-                    rec['doi'] = meta['content']
-                elif meta['name'] == 'article:section':
-                    rec['note'] = [ meta['content'] ]
-                elif meta['name'] == 'citation_publication_date':
-                    rec['date'] = meta['content']
-                elif meta['name'] == 'citation_title':
+                if meta['name'] == 'dc.Title':
                     rec['tit'] = meta['content']
-                elif meta['name'] == 'citation_author':
-                    if autaff:
-                        rec['autaff'].append(autaff)
-                    autaff = [ meta['content'] ]
-                elif meta['name'] == 'citation_author_institution':
-                    autaff.append(meta['content'])
-                elif meta['name'] == 'citation_author_orcid':
-                    orcid = re.sub('.*\/', '', meta['content'])
-                    autaff.append('ORCID:%s' % (orcid))
-                elif meta['name'] == 'citation_author_email':
-                    email = meta['content']
-                    autaff.append('EMAIL:%s' % (email))
-                elif meta['name'] == 'DC.Description':
+                elif meta['name'] == 'dc.Creator':
+                    rec['auts'].append(meta['content'])
+                elif meta['name'] == 'dc.Subject':
+                    rec['keyw'] = re.split(' *; *', meta['content'])
+                elif meta['name'] == 'dc.Description':
                     rec['abs'] = meta['content']
-        if autaff:
-            rec['autaff'].append(autaff)
-        #ref
-        for ol in artpage.body.find_all('ol', attrs = {'class' : 'cit-list'}):
-            for li in ol.find_all('li', recursive=False):
-                rec['refs'].append([('x', re.sub('\)OpenUrl', ' ) ', li.text.strip()))])
+                elif meta['name'] == 'dc.Date':
+                    rec['date'] = re.sub('.*?(\d\d\d\\d\-\d+\-\d+)$', r'\1', meta['content'])
+                elif meta['name'] == 'dc.Type':
+                    rec['note'] = [ meta['content'] ]
+                elif meta['name'] == 'dc.Identifier':
+                    rec['p1'] = re.sub('\D*', '', meta['content'])
         recs.append(rec)
 
 
