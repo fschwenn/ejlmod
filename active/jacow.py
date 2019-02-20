@@ -10,11 +10,14 @@ from invenio.bibrecord import *
 from invenio.search_engine import perform_request_search
 from invenio.search_engine import get_record
 #from invenio.bibcheck_task import AmendableRecord
+from invenio.bibrecord  import record_add_field
+from clean_fulltext import clean_fulltext_jacow, clean_linebreaks, get_reference_section
 
 ##from correct_utf8 import check_record
 
 ## http://invenio-software.org/code-browser/invenio.bibrecord-module.html
 
+tmppath = '/tmp/jacow/'
 publisherdatapath = '/afs/desy.de/group/library/publisherdata/jacow/'
 ejl = '/afs/desy.de/user/l/library/inspire/ejl/'
 #ejl = '/afs/desy.de/user/s/sachs/inspire/jacow/'
@@ -22,6 +25,59 @@ ejl = '/afs/desy.de/user/l/library/inspire/ejl/'
 TRANSLATE ={"&uuml;":u"ü", "&auml;":u"ä", "&ouml;":u"ö", "&Auml;":u"Ä", 
     "&Ouml;":u"Ö", "&Uuml;":u"Ü", "&szlig;":u"ß", "&thinsp;":u" "}
 
+def get_references(url):
+    from refextract import extract_references_from_string
+    filename = url.split('/')[-1]
+#    os.system('wget -q -O %s%s %s' % (tmppath, filename, url))
+#    os.system('/usr/bin/pdftotext %s%s' % (tmppath, filename))
+
+    infile = codecs.EncodedFile(codecs.open('%s/%s.txt' % (tmppath, filename[:-4])),'utf8')
+    fulltext = clean_fulltext_jacow(infile.readlines())
+#    fulltext = clean_linebreaks(fulltext)
+    fulltext = get_reference_section(fulltext)
+    infile.close()
+    controlfile = codecs.EncodedFile(codecs.open('%s/%s_clean.txt' % (tmppath, filename[:-4]), mode='wb'),'utf8')
+    controlfile.write(fulltext)
+    controlfile.close()
+    
+    refs = extract_references_from_string(fulltext, is_only_references=False, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
+    references = []
+    
+    #mappings for references in JSON to MARC
+    mappings = {'doi': 'a',
+                'collaborations': 'c',
+                'document_type': 'd',
+                'author': 'h',
+                'isbn': 'i',
+                'texkey': 'k',
+                'misc': 'm',
+                'journal_issue': 'n',
+                'label': 'o',
+                'linemarker': 'o',
+                'reportnumber': 'r',
+                'journal_reference': 's',
+                'title': 't',
+                'urls': 'u',
+                'url': 'u',
+                'raw_ref': 'x',
+#                'journal_title': None,
+#                'journal_volume': None,
+#                'journal_page': None,
+#                'journal_year': None,
+#                'publisher': None,
+                'year': 'y'}
+    
+    for ref in refs:
+        entryaslist = [('9','refextract')]
+        for key in ref.keys():
+            if key in mappings:
+                for entry in ref[key]:
+                     entryaslist.append((mappings[key], entry))
+#            else:
+#                print 'no mapping for', key
+        references.append(entryaslist)
+    return references
+    
 def convertToInspire(argv):
     re_non_char = re.compile(r"[^\w',. -]", re.UNICODE)
     conf = ''
@@ -158,10 +214,17 @@ def convertToInspire(argv):
                         print 'No FFT for',url
                     else:
                         record_add_field(record,'FFT',' ',' ','',[('a', url),('y', 'Fulltext'),('t', 'INSPIRE-PUBLIC')])
+                        #add references
+                        references = get_references(url)
+                        for ref in references:
+                            record_add_field(record, '999', ind1='C', ind2='5', subfields=ref)
                 else:
                     record_add_field(record,'856','4',' ','',[('u', urls[0]),('y', 'JACOW')])            
+               
             else:
                 record_add_field(record,'856','4',' ','',[('u', urls[0]),('y', 'JACOW')])            
+           
+        
         else:
             print 'No URL found!'
             print record
@@ -334,6 +397,8 @@ def convertToInspire(argv):
             else:
                 info[title] = art_ids
     
+    print 'created xml for %s records' % nrec
+
     incompleteAuthorsfile.close()
     authorsfile.close()
     authorproblems.close()
