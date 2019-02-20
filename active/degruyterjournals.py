@@ -33,9 +33,11 @@ if journal == 'phys':
     else:        
         jnl = 'Open Phys.'
 
+
 #get list of volumes
 if not os.path.isfile('/tmp/dg%s' % (jnlfilename)):
-    os.system("wget -T 300 -t 3 -q -O /tmp/dg%s %s/view/j/%s.%s.%s.issue-%s/issue-files/%s.%s.%s.issue-%s.xml" % (jnlfilename, urltrunc, journal, year, vol, iss, journal, year, vol, iss))
+    print "%s/view/j/%s.%s.%s.issue-%s/issue-files/%s.%s.%s.issue-%s.xml" % (urltrunc, journal, year, vol, iss, journal, year, vol, iss)
+    os.system('wget -T 300 -t 3 -O -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" /tmp/dg%s %s/view/j/%s.%s.%s.issue-%s/issue-files/%s.%s.%s.issue-%s.xml' % (jnlfilename, urltrunc, journal, year, vol, iss, journal, year, vol, iss))
 inf = open('/tmp/dg%s' % (jnlfilename), 'r')
 tocpage = BeautifulSoup(''.join(inf.readlines()))
 inf.close()
@@ -44,9 +46,9 @@ recs = []
 i = 0
 for h3 in tocpage.find_all('h3'):
     for a in h3.find_all('a'):
-        if a.has_attr('href') and re.search('^.view', a['href']):
+        if a.has_attr('href') and re.search('view\/', a['href']):
             i += 1
-            vollink = urltrunc + a['href']
+            vollink = a['href']
             print vollink
             rec = {'tc' : 'P', 'jnl' : jnl, 'year' : year, 'vol' : vol, 'issue' : iss,
                    'auts' : [], 'aff' : [], 'keyw' : [], 'pacs' : []}
@@ -54,7 +56,7 @@ for h3 in tocpage.find_all('h3'):
             rec['tit'] = a.text.strip()
             #get details
             if not os.path.isfile('/tmp/dg%s.%i' % (jnlfilename, i)):
-                os.system("wget -T 300 -t 3 -q -O /tmp/dg%s.%i %s" % (jnlfilename, i, vollink))
+                os.system('wget -T 300 -t 3 -q -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0"  -O /tmp/dg%s.%i %s' % (jnlfilename, i, vollink))
             inf = open('/tmp/dg%s.%i' % (jnlfilename, i), 'r')
             artpage = BeautifulSoup(''.join(inf.readlines()))
             inf.close()
