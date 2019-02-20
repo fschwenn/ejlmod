@@ -50,11 +50,18 @@ elif (jnl == 'gnpn20'):
 elif (jnl == 'tnmp20'):
     jnlname = 'J.Nonlin.Math.Phys.'
 
+jnlfilename = "%s.%s.%s" % (jnl, vol, issue)
 
 
 print 'get table of content from http://www.tandfonline.com/toc/%s/%s/%s' % (jnl, vol, issue)
-page = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.tandfonline.com/toc/%s/%s/%s' % (jnl, vol, issue)))
+#page = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.tandfonline.com/toc/%s/%s/%s' % (jnl, vol, issue)))
+if not os.path.isfile('/tmp/tandf_%s' % (jnlfilename)):
+    os.system("wget -T 300 -t 3 -q -O /tmp/tandf_%s http://www.tandfonline.com/toc/%s/%s/%s" % (jnlfilename, jnl, vol, issue))
+inf = open('/tmp/tandf_%s' % (jnlfilename), 'r')
+page = BeautifulSoup(''.join(inf.readlines()))
+inf.close()
 
+              
 #get year
 for div in page.body.find_all('div', attrs = {'class' : 'hd prevNextLink'}):
     year = re.sub('.* ([21]\d\d\d) .*', r'\1', re.sub('\n', ' ', div.text.strip()))
@@ -63,7 +70,9 @@ for div in page.body.find_all('div', attrs = {'class' : 'hd prevNextLink'}):
 recs = []
 inputs = page.body.find_all('input', attrs = {'name' : 'doi'})
 tc = 'P'
+i = 0
 for adoi in page.body.find_all('a'):
+    i += 1
     if not adoi.has_attr('href'):
         continue
 #    if not re.search('^Full Text', adoi.text):
@@ -75,18 +84,29 @@ for adoi in page.body.find_all('a'):
         tc = ''
     rec = {'jnl' : jnlname, 'tc' : tc, 'vol' : vol, 'issue' : issue, 'autaff' : [], 'note' : []}
     rec['doi'] = re.sub('.*\/(10\..*)', r'\1', adoi['href'])    
-    print '%s' % (rec['doi'])
-    time.sleep(10)
-    try:
-        apage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.tandfonline.com/doi/ref/%s' % (rec['doi'])))
-    except:
+    print '%i %s' % (i, rec['doi'])
+#    try:
+#        apage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.tandfonline.com/doi/ref/%s' % (rec['doi'])))
+#    except:
+#        try:
+#            print 'try 5 minutes later'
+#            time.sleep(300)
+#            apage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.tandfonline.com/doi/ref/%s' % (rec['doi'])))
+#        except:
+#            print 'try without references'
+#            apage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.tandfonline.com/doi/full/%s' % (rec['doi'])))
+    artfilname = '/tmp/tandf_%s_%i' % (jnlfilename, i)
+    if not os.path.isfile(artfilname):
         try:
-            print 'try 5 minutes later'
-            time.sleep(300)
-            apage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.tandfonline.com/doi/ref/%s' % (rec['doi'])))
+            os.system("wget -T 300 -t 3 -q -O %s http://www.tandfonline.com/doi/ref/%s" % (artfilname, rec['doi']))
         except:
             print 'try without references'
-            apage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('http://www.tandfonline.com/doi/full/%s' % (rec['doi'])))
+            os.system("wget -T 300 -t 3 -q -O %s http://www.tandfonline.com/doi/full/%s" % (artfilname, rec['doi']))
+        time.sleep(10)        
+    #inf = open(artfilname)
+    inf = codecs.EncodedFile(open(artfilname, mode='rb'), "utf8")
+    apage = BeautifulSoup(''.join(inf.readlines()))
+    inf.close()
     #cnum
     if len(sys.argv) > 4:
         rec['tc'] = 'C'
@@ -139,24 +159,38 @@ for adoi in page.body.find_all('a'):
     for ul in apage.body.find_all('ul', attrs = {'class' : 'references numeric-ordered-list'}):
         rec['refs'] = []
         for li in ul.find_all('li'):
-            for a in li.find_all('a'):
+            rdoi = ''
+            for a in li.find_all('a'):                
                 if a.has_attr('href'):
-                    if re.search('CrossRef', a.text):
+                    if re.search('Cross[rR]ef', a.text):
                         rdoi = re.sub('.*=', ', DOI: ', a['href'])
-                        rdoi = re.sub('%2F', '/', rdoi)
-                        a.replace_with(rdoi)
+                        a.replace_with('')
                     elif re.search('Web of Science', a.text):
+                        if not rdoi:
+                            rdoi = re.sub('.*doi=', ', DOI: ', a['href'])
+                            rdoi = re.sub('\&.*', '', rdoi)
                         a.replace_with('')
-                    elif re.search('PubMed', a.text):
-                        a.replace_with('')
-            rec['refs'].append([('x', li.text)])
+                    elif re.search('(PubMed|Taylor|Google Scholar)', a.text):
+                        a.replace_with('')                        
+            lit = re.sub('\. *$', '', li.text)
+            lit = re.sub('\xa0', ' ', li.text)
+            lit = re.sub('[\n\t]', ' ', lit)
+            lit = re.sub(',\s*,', ',', lit)
+            lit = re.sub(',\s*,', ',', lit)
+            lit = re.sub('; *(\d)', r', \1', lit)
+            if rdoi:
+                rdoi = re.sub('%2F', '/', rdoi)
+                rdoi = re.sub('%28', '(', rdoi)
+                rdoi = re.sub('%29', ')', rdoi)
+                rec['refs'].append([('x',  re.sub(',\s*,', ',', lit + rdoi))])
+            else:
+                rec['refs'].append([('x', lit)])
     if rec.has_key('note') and rec['note'][0] in ['Book reviews ', 'Essay reviews ']:
         continue
     else:
         recs.append(rec)
 
 
-jnlfilename = "%s.%s.%s" % (jnl, vol, issue)
 
 
 
