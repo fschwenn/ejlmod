@@ -511,6 +511,7 @@ def writeXML(recs,dokfile,publisher):
                     if re.search('Collaboration', entry, re.IGNORECASE):
                         newcolls = []
                         (coll, author) = coll_cleanforthe(entry)
+                        coll = re.sub(', ORCID.*', '', coll)
                         for scoll in coll_split(coll):
                             newcolls.append(re.sub('^the ', '', coll_clean710(scoll), re.IGNORECASE))
                         for col in newcolls:
