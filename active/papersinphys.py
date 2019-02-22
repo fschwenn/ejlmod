@@ -46,8 +46,12 @@ except:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
 
 recs = []
-#for table in tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'}):
-for table in tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summary'}):
+if jnl == 'pip':
+    tables = tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summary'})
+elif jnl == 'cip':
+    tables = tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'})
+
+for table in tables:
     rec = {'jnl' : jnlname, 'tc' : typecode, 'vol' : vol, 'keyw' : [], 'autaff' : [], 'refs' : []}
     #PDF
     for a in table.find_all('a'):
@@ -59,7 +63,11 @@ for table in tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summar
         for a in td.find_all('a'):
             rec['artlink'] = a['href']
     if not rec.has_key('tit'):
-        #for div in table.find_all('div', attrs = {'class' : 'tocTitle'}):
+        for div in table.find_all('div', attrs = {'class' : 'tocTitle'}):
+            rec['tit'] = div.text.strip()
+            for a in div.find_all('a'):
+                rec['artlink'] = a['href']
+    if not rec.has_key('tit'):
         for div in table.find_all('div', attrs = {'class' : 'title'}):
             rec['tit'] = div.text.strip()
             for a in div.find_all('a'):
@@ -124,18 +132,23 @@ for rec in recs:
     for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
         rec['licence'] = {'url' : a['href']}
     #references
-    reflink = re.sub('(.*)\/(.*)', r'https://www.papersinphysics.org/papersinphysics/article/download/\2/ref\2?inline=1', rec['artlink'])
-    print reflink
-    refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(reflink))
-    for a in refpage.body.find_all('a'):
-        if a.has_attr('href') and re.search('doi.org', a['href']):
-            rdoi = re.sub('.*doi.org\/', '', a['href'])
-            a.replace_with(', DOI: %s' % (rdoi))
-    allrefs = re.sub('[\n\t\r]', ' ', refpage.body.text.strip())
-    allrefs = re.sub('  +', ' ', allrefs)
-    allrefs = re.sub('\. *, DOI:', ', DOI:', allrefs)        
-    for ref in re.split('\[\d+\] +', allrefs):
-        rec['refs'].append([('x', ref)])
+    if jnl == 'pip':
+        reflink = re.sub('(.*)\/(.*)', r'https://www.papersinphysics.org/papersinphysics/article/download/\2/ref\2?inline=1', rec['artlink'])
+        print reflink
+        refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(reflink))
+        for a in refpage.body.find_all('a'):
+            if a.has_attr('href') and re.search('doi.org', a['href']):
+                rdoi = re.sub('.*doi.org\/', '', a['href'])
+                a.replace_with(', DOI: %s' % (rdoi))
+        allrefs = re.sub('[\n\t\r]', ' ', refpage.body.text.strip())
+        allrefs = re.sub('  +', ' ', allrefs)
+        allrefs = re.sub('\. *, DOI:', ', DOI:', allrefs)        
+        for ref in re.split('\[\d+\] +', allrefs):
+            rec['refs'].append([('x', ref)])
+    elif jnl == 'cip':
+        for div in artpage.body.find_all('div', attrs = {'id' : 'articleCitations'}):
+            for p in div.find_all('p'):
+                rec['refs'].append([('x', p.text.strip())])
 
                                        
 #closing of files and printing
