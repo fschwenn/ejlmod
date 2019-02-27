@@ -30,7 +30,11 @@ jnlfilename = 'gesj'+year+'.'+issue
 
 print "get table of content..."
 if issue == '1':
-    os.system("wget -q -O /tmp/gesj http://gesj.internet-academy.org.ge/en/list_artic_en.php\\?b_sec=phys\\&issue=%s-06" % (year))
+    if int(year) > 2017:
+        os.system("wget -q -O /tmp/gesj http://gesj.internet-academy.org.ge/en/list_artic_en.php\\?b_sec=phys\\&issue=%s-07" % (year))
+        print " http://gesj.internet-academy.org.ge/en/list_artic_en.php\\?b_sec=phys\\&issue=%s-07" % (year)
+    else:
+        os.system("wget -q -O /tmp/gesj http://gesj.internet-academy.org.ge/en/list_artic_en.php\\?b_sec=phys\\&issue=%s-06" % (year))
 else:
     os.system("wget -q -O /tmp/gesj http://gesj.internet-academy.org.ge/en/list_artic_en.php\\?b_sec=phys\\&issue=%s-12" % (year))
 
@@ -52,13 +56,15 @@ for record in  re.split('images.bul1.gif', toc)[1:]:
     title = re.sub('.*<strong>(.*?)</strong>.*spacer.gif.*',r'\1',record)
     if not re.search('[A-Z]', title):
         continue
-    rec['tit'] = title.encode('utf8')
+    #rec['tit'] = title.encode('utf8')
+    rec['tit'] = title
     #pages
     rest = re.sub('.*?spacer.gif', '', record)
     pages = re.sub('.*?<strong>(.*?)<\/strong>.*', r'\1', rest)
     [rec['p1'], rec['p2']] = re.split('\-', pages)
     #pdf
-    rec['pdf'] = re.sub('.*<a href="(.*?)".*', r'\1', rest)
+    rec['FFT'] = re.sub('.*<a href="(.*?)".*', r'\1', rest)
+    rec['licence'] = {'url' : 'http://creativecommons.org/licenses/by/4.0/'}
     #abstract
     abstractlink = 'http://gesj.internet-academy.org.ge/en/'+re.sub('.*"(v_abstr.*issue.*?)".*', r'\1', rest)
     os.system("wget -q -O /tmp/gesj%s%s%s '%s'" % (year, issue, rec['p1'], abstractlink))
@@ -66,7 +72,7 @@ for record in  re.split('images.bul1.gif', toc)[1:]:
     abstract = re.sub('<br *\/?>', '', ''.join(map(tfstrip, absfil.readlines())))
     rec['abs'] = re.sub('.*?<div class="indent">(.*?)<\/div>.*',  r'\1', abstract)
     recs.append(rec)
-    #print rec
+    #rint rec
 tocfil.close()
 
                 
