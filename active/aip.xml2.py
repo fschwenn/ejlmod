@@ -52,27 +52,42 @@ elif (jnl == 'aipconf') or (jnl == 'aipcp') or (jnl == 'apc'):
     typecode = 'C'
 
     
+tocfilname = '%s/%s.toc' % (tmpdir, jnlfilename)
 urltrunk = 'http://aip.scitation.org/toc/%s/%s/%s?size=all' % (jnl,vol,iss)
 print urltrunk
-try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+if not os.path.isfile(tocfilname):
+    os.system('wget -T 300 -t 3 -q -O %s "%s"' % (tocfilname, urltrunk))
     time.sleep(3)
-except:
-    print "retry %s in 180 seconds" % (urltrunk)
-    time.sleep(180)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+inf = open(tocfilname, 'r')
+tocpage = BeautifulSoup(''.join(inf.readlines()))
+inf.close()
+#try:
+#    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+#    time.sleep(3)
+#except:
+#    print "retry %s in 180 seconds" % (urltrunk)
+#    time.sleep(180)
+#    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
 
 
 def getarticle(href, sec, subsec, p1):
     artlink = 'http://aip.scitation.org%s' % (href)
-    try:
-        print artlink
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+    artfilname = '%s/%s.%s' % (tmpdir, jnlfilename, re.sub('\W', '', p1))
+    if not os.path.isfile(artfilname):
+        os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilname, artlink))
         time.sleep(3)
-    except:
-        print "retry %s in 180 seconds" % (artlink)
-        time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+    inf = open(artfilname, 'r')
+    artpage = BeautifulSoup(''.join(inf.readlines()))
+    inf.close()
+
+#    try:
+#        print artlink
+#        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+#        time.sleep(3)
+#    except:
+#        print "retry %s in 180 seconds" % (artlink)
+#        time.sleep(180)
+#        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
     rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : iss, 'tc' : typecode, 
            'note' : [], 'auts' : [], 'aff' : [], 'p1' : p1}
     emails = {}
