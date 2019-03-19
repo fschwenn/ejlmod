@@ -23,12 +23,12 @@ publisher = 'WSP'
 #regular expressions for reference extraction
 regexparx = re.compile('.*org\/abs\/')
 regexpdoi = re.compile('.*genRefLink.*\'(10\.\d\d.*)\'.*')
-regexpdoihtml = re.compile('%252F')
-regexpdoihtml2 = re.compile('%253A') #:
-regexpdoihtml3 = re.compile('%2528') #(
-regexpdoihtml4 = re.compile('%2529') #)
-regexpdoihtml5 = re.compile('%253C') #<
-regexpdoihtml6 = re.compile('%253E') #>
+regexpdoihtml = re.compile('%2(52)?F')
+regexpdoihtml2 = re.compile('%2(53)?A') #:
+regexpdoihtml3 = re.compile('%2(52)?8') #(
+regexpdoihtml4 = re.compile('%2(52)?9') #)
+regexpdoihtml5 = re.compile('%2(53)?C') #<
+regexpdoihtml6 = re.compile('%2(53)?E') #>
 regexpabs = re.compile('.*worldscientific.com\/doi\/(10.*?)\'.*')
 regexpcr = re.compile('[\n\t\r]')
 regexpdoi2 = re.compile('.*servlet.*key=(10\.\d\d.*).*')
