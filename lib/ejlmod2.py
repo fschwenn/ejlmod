@@ -515,9 +515,10 @@ def writeXML(recs,dokfile,publisher):
                         for scoll in coll_split(coll):
                             newcolls.append(re.sub('^the ', '', coll_clean710(scoll), re.IGNORECASE))
                         for col in newcolls:
-                            xmlstring += marcxml('710',[('g',col)])
-                            if not rec.has_key('exp') and colexpdict.has_key(col):
-                                xmlstring += marcxml('693',[('e',colexpdict[col])])
+                            if not re.search('(CHINESENAME|ORCID|EMAIL)', col):
+                                xmlstring += marcxml('710',[('g',col)])
+                                if not rec.has_key('exp') and colexpdict.has_key(col):
+                                    xmlstring += marcxml('693',[('e',colexpdict[col])])
                         if author:
                             entry = author
                         else:
@@ -558,8 +559,9 @@ def writeXML(recs,dokfile,publisher):
             for ref in rec['refs']:
                 #print '  ->  ', ref
                 if len(ref) == 1 and ref[0][0] == 'x':
+                    rawref = re.sub('Google ?Scholar', '', ref[0][1])
                     try:
-                        for ref2 in extract_references_from_string(ref[0][1], override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
+                        for ref2 in extract_references_from_string(rawref, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
                             entryaslist = [('9','refextract')]
                             for key in ref2.keys():
                                 for mapping in mappings:
@@ -570,7 +572,7 @@ def writeXML(recs,dokfile,publisher):
                     except:
                         print 'UTF8 Problem in Referenzen'
                         try:
-                            ref01 = unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', ref[0][1])).encode('ascii','ignore'),'utf-8')
+                            ref01 = unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', rawref)).encode('ascii','ignore'),'utf-8')
                             for ref2 in extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
                                 entryaslist = [('9','refextract')]
                                 for key in ref2.keys():
