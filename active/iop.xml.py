@@ -138,7 +138,10 @@ tocfile.close()
 tocpage = BeautifulSoup(tocraw)
 
 recsunsrtd = []                         # dictionary of all records, key: pubnote
-for article in tocpage.find_all('stk_header'):
+articles = tocpage.find_all('stk_header')
+i = 0
+for article in articles:
+    i += 1
     rec = {'note' : [], 'keyw' : [], 'aff' : []}
     #journal
     for issnnode in article.find_all('issn'):
@@ -297,7 +300,7 @@ for article in tocpage.find_all('stk_header'):
         rec['abs'] = collapseWs.sub(' ', absnode.text.strip())
     #references
     refurl = "http://iopscience.iop.org/article/%s/meta" % (rec['doi'])
-    print '  lynx %s' % (refurl)
+    print '---{ %i/%i }---{ %s }---' % (i, len(articles), refurl)
     try:
         page = BeautifulSoup(urllib2.urlopen(refurl))
         time.sleep(11)
@@ -341,7 +344,7 @@ for article in tocpage.find_all('stk_header'):
                 ref = regexpiopurl.sub('DOI: 10.1088/', ref)
             rec['refs'].append([('x', ref)])
     except:
-        print 'no references'
+        print '      no references'
     try:
         if issn == '1748-0221' and rec['p1'][0] == 'C':
             rec['tc'] = ['C']
