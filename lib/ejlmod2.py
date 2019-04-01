@@ -560,6 +560,7 @@ def writeXML(recs,dokfile,publisher):
                 #print '  ->  ', ref
                 if len(ref) == 1 and ref[0][0] == 'x':
                     rawref = re.sub('Google ?Scholar', '', ref[0][1])
+                    rawref = re.sub('[cC]ross[rR]ef', '', rawref)
                     try:
                         for ref2 in extract_references_from_string(rawref, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
                             entryaslist = [('9','refextract')]
