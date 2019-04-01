@@ -41,7 +41,7 @@ jnls = {'1538-3881': 'Astron.J.',
         '0256-307X': 'Chin.Phys.Lett.',
         '0253-6102': 'Commun.Theor.Phys.',
         '0143-0807': 'Eur.J.Phys.',
-        '0295-5075': 'Europhys.Lett.',
+        '0295-5075': 'EPL',
         '1757-899X': 'IOP Conf.Ser.Mater.Sci.Eng.',
         '1751-8121': 'J.Phys.',
         '1742-6596': 'J.Phys.Conf.Ser.',
@@ -60,7 +60,8 @@ jnls = {'1538-3881': 'Astron.J.',
         '0953-2048': 'Supercond.Sci.Technol.',
         '2399-6528': 'J.Phys.Comm.',
         '1757-899X': 'IOP Conf.Ser.Mater.Sci.Eng.',
-        '0036-0279': 'Russ.Math.Surveys'}
+        '0036-0279': 'Russ.Math.Surveys',
+        '0951-7715': 'Nonlinearity'}
 if jnls.has_key(issn):
     jnl = jnls[issn]
 else:
@@ -128,7 +129,16 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                         elif meta['name'] == 'citation_online_date':
                             rec['date'] = meta['content']
                         elif meta['name'] == 'citation_volume':
-                            rec['vol'] = meta['content']
+                            if issn == '1674-1056':
+                                rec['vol'] = 'B' + meta['content']
+                            elif issn == '1674-1137':
+                                rec['vol'] = 'C' + meta['content']
+                            elif issn == '1751-8121':
+                                rec['vol'] = 'A' + meta['content']
+                            elif issn == '0954-3899':
+                                rec['vol'] = 'G' + meta['content']
+                            else:
+                                rec['vol'] = meta['content']
                         elif meta['name'] == 'citation_issue':
                             rec['issue'] = meta['content']
                         elif meta['name'] == 'citation_firstpage':
@@ -150,7 +160,11 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                             orcidsfound = True
                         elif meta['name'] == 'citation_author_email':
                             email = meta['content']
-                            autaff.append('EMAIL:%s' % (email))    
+                            autaff.append('EMAIL:%s' % (email))
+                #JCAP
+                if issn == '1475-7516':
+                    rec['vol'] = '%s%02i' % (rec['date'][2:4], int(rec['issue']))
+                    del rec['issue']
                 if autaff:
                     rec['autaff'].append(autaff)
                 #authors if no ORCIDs in meta-section
@@ -226,6 +240,7 @@ for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
                     rec['refs'].append([('x', ref)])
                 print '  - ', rec['doi'], ' orcidfound:', orcidsfound
                 print '    ', rec.keys()
+                print rec
                 if rec.has_key('autaff'):
                     if rec['autaff']:
                         recs.append(rec)
