@@ -75,6 +75,7 @@ def getarticle(href, sec, subsec, p1):
     artfilname = '%s/%s.%s' % (tmpdir, jnlfilename, re.sub('\W', '', p1))
     if not os.path.isfile(artfilname):
         os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilname, artlink))
+        print artlink
         time.sleep(3)
     inf = open(artfilname, 'r')
     artpage = BeautifulSoup(''.join(inf.readlines()))
@@ -111,7 +112,11 @@ def getarticle(href, sec, subsec, p1):
                 rec['date'] = meta['content'] 
             #title
             elif meta['name'] == 'dc.Title':
-                rec['tit'] = meta['content'] 
+                rec['tit'] = meta['content']
+    #date
+    if not 'date' in rec.keys():
+        for div in artpage.body.find_all('div', attrs = {'class' : 'publicationContentEpubDate'}):
+            rec['date'] = re.sub('.*: *', '', div.text.strip())
     #get rid of 'related articles' 
     for div in artpage.body.find_all('div', attrs = {'class' : 'related-articles'}):
         div.replace_with('')
@@ -124,9 +129,12 @@ def getarticle(href, sec, subsec, p1):
     for header in artpage.body.find_all('header', attrs = {'class' : 'publicationContentTitle'}):
         for h2 in header.find_all('h2'):
             rec['tit'] = h2.text.strip()
-            rec['tit'] = re.sub('\n* *Scilight relation icon', '', rec['tit'])
+        if not 'tit' in rec.keys():
+            for h3 in header.find_all('h3'):
+                rec['tit'] = h3.text.strip()
+        rec['tit'] = re.sub('\n* *Scilight relation icon', '', rec['tit'])
     #doi
-    rec['doi'] = re.sub('\/doi\/', '', re.sub('.doi.abs.', '', href))
+    rec['doi'] = re.sub('\/doi\/', '', re.sub('\/doi\/full\/', '', re.sub('.doi.abs.', '', href)))
     #emails
     for authornotes in artpage.body.find_all('author-notes'):
         for p in authornotes.find_all('p', attrs = {'class' : 'first last'}):
@@ -134,7 +142,9 @@ def getarticle(href, sec, subsec, p1):
             for sup in p.find_all('sup'):
                 affnr =  re.sub('\)', '', sup.text)
             for a in p.find_all('a', attrs = {'class' : 'email'}):
-                emails[affnr] = re.sub('mailto:', '', a.text.strip())
+                ats = a.text.strip()
+                if not re.search('email.protection', ats):
+                    emails[affnr] = re.sub('mailto:', '', )
     #affiliations
     for div in artpage.body.find_all('div', attrs = {'class' : 'affiliations-list hide'}):
         for li in div.find_all('li'):
@@ -216,6 +226,8 @@ def getarticle(href, sec, subsec, p1):
                             elif not re.search('arxiv.org', a['href']):
                                 a.replace_with('')
                     rec['refs'].append([('x', regexpref.sub(' ', li.text.strip()))])
+    print rec['doi'] + ': ' + ' '.join(['%s[%i]' % (k, len(rec[k])) for k in rec.keys()])
+    time.sleep(2)
     return rec
                 
 recs = []
@@ -251,7 +263,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'sub-section'}):
                             if href and p1:
                                 article = getarticle(href, sec, subsec, p1)
                                 if article['auts']:
-                                    recs.append(article)
+                                    recs.append(article)                    
                         
 
 
