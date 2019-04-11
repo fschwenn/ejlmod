@@ -135,9 +135,10 @@ for rec in recs:
             #PDF
             #elif meta['name'] == 'citation_pdf_url':
             #    rec['FFT'] = meta['content']
-    if not rec.has_key('p1'):
+    if not 'p1' in rec.keys():
         for meta in artpage.head.find_all('meta', attrs = {'name' : 'article_references'}):
-            rec['p1'] = re.sub('.*, (.+?)\..*', r'\1', meta['content'])
+            rec['p1'] = re.sub('.*, (.+?)\..*', r'\1', meta['content'].strip())
+            rec['p1'] = re.sub('.*: (\d+)', r'\1', rec['p1'])
     if autaff:
         rec['autaff'].append(autaff)
     #abstract
