@@ -143,7 +143,9 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '42254': ['natrp', 'Nature Rev.Phys.'],
        '8902': ['sprbip', 'BOOK'],
       '40623': ['eaplsc', 'Earth Planets Space'],
-      '12036': ['jasas', 'J.Astrophys.Astron.']}
+      '12036': ['jasas', 'J.Astrophys.Astron.'],
+      '40065': ['arjoma', 'Arab.J.Math.'],
+      '41605': ['rdtm', 'Rad.Det.Tech.Meth.']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
@@ -824,7 +826,7 @@ for d1 in os.listdir(sprdir):
                         xmlf = os.path.join(xmldir,jrnl+ '.'+str(cday)+'.xml')
                         #xmlfile = open(xmlf,'w')
                         xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-			print "tit=", rec['tit']
+			#print "tit=", rec['tit']
                         ejlmod2.writeXML([rec],xmlfile,'Springer')
                         xmlfile.close()
                         #retrival
