@@ -44,7 +44,6 @@ jnl = {'1538-3881': 'Astron.J.',
        '1538-4357': 'Astrophys.J.',
        '2041-8205': 'Astrophys.J.',
        '0067-0049': 'Astrophys.J.Supp.',
-       '1538-3881': 'Astronom.J.',
        '0264-9381': 'Class.Quant.Grav.',
        '1009-9271': 'Chin.J.Astron.Astrophys.',
        '1009-1963': 'Chin.Phys.',
@@ -54,7 +53,9 @@ jnl = {'1538-3881': 'Astron.J.',
        '0253-6102': 'Commun.Theor.Phys.',
        '0143-0807': 'Eur.J.Phys.',
        '0295-5075': 'EPL',
+       '1757-899X': 'IOP Conf.Ser.Mater.Sci.Eng.',
        '1751-8121': 'J.Phys.',
+       '2399-6528': 'J.Phys.Comm.',
        '1742-6596': 'J.Phys.Conf.Ser.',
        '0954-3899': 'J.Phys.',
        '1475-7516': 'JCAP ',
@@ -62,14 +63,17 @@ jnl = {'1538-3881': 'Astron.J.',
        '1748-0221': 'JINST ',
        '1742-5468': 'JSTAT ',
        '0957-0233': 'Measur.Sci.Tech.',
+       '0026-1394': 'Metrologia',
        '1367-2630': 'New J.Phys.',
        '0031-9120': 'Phys.Educ.',
+       '0031-9155': 'Phys.Med.Biol.',
+       '1402-4896': 'Phys.Scripta',
        '1063-7869': 'Phys.Usp.',
+       '0741-3335': 'Plasma Phys.Control.Fusion',
        '0034-4885': 'Rep.Prog.Phys.',
        '1674-4527': 'Res.Astron.Astrophys.',
-       '1402-4896': 'Phys.Scripta',
-       '2399-6528': 'J.Phys.Comm.',
-       }
+       '0036-0279': 'Russ.Math.Surveys',
+       '0953-2048': 'Supercond.Sci.Technol.'}
 
 #CNUMs for conferences in JINST
 cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RPC2014)': 'C14-02-23.2',
@@ -108,7 +112,9 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'Light Detection in Noble Elements (LIDINE2017)' : 'C17-09-22',
             'XII International Symposium on Radiation from Relativistic Electrons in Periodic Structures (RREPS-17)' : 'C17-09-18.6',
             '24th International congress on x-ray optics and microanalysis (ICXOM24)' : 'C17-09-25.6',
-            '20th International Workshop On Radiation Imaging Detectors' : 'C18-06-24.2'}
+            '20th International Workshop On Radiation Imaging Detectors' : 'C18-06-24.2',
+            '5th International Conference Frontiers in Diagnostcs Technologies (ICFDT)' : 'C18-10-03.1',
+            'The 9th International Workshop on Semiconductor Pixel Detectors for Particles and Imaging' : 'C18-12-10'}
 
 
 
@@ -175,7 +181,7 @@ for article in articles:
     #volume
     for volumenode in article.find_all('volume'):
         rec['vol'] = volumenode.text.strip()
-        if issn == '1674-1056':
+        if issn in ['1674-1056', '0953-4075']:
             rec['vol'] = 'B'+rec['vol']
         elif issn == '1674-1137':
             rec['vol'] = 'C'+rec['vol']
@@ -240,7 +246,7 @@ for article in articles:
     afid = ''
     for aunode in article.find_all('author_granular'):
         #name
-        (fname, nlfname, nllname) = ('', '', '')
+        (fname, nlfname, nllname, lname) = ('', '', '', '')
         for group in aunode.find_all('group'):
             rec['col'] = group.text
         for fnamenode in aunode.find_all('given'):
@@ -266,7 +272,8 @@ for article in articles:
             finalauthor = lname + ', ' + fname
         if nllname + nlfname != '':
             finalauthor += ', CHINESENAME: ' + nllname + ' ' +  nlfname
-        authors.append(finalauthor)
+        if re.search('[a-zA-Z]', finalauthor):
+            authors.append(finalauthor)
     if afid:
         authors.append('=' + afid)
     rec['auts'] = authors
@@ -339,9 +346,9 @@ for article in articles:
                     a.replace_with(link)
             ref = li.text
             if regexpdxdoi.search(ref):
-                ref = regexpdxdoi.sub('DOI: ', ref)
+                ref = regexpdxdoi.sub(', DOI: ', ref)
             if regexpiopurl.search(ref):
-                ref = regexpiopurl.sub('DOI: 10.1088/', ref)
+                ref = regexpiopurl.sub(', DOI: 10.1088/', ref)
             rec['refs'].append([('x', ref)])
     except:
         print '      no references'
