@@ -28,20 +28,36 @@ issue = sys.argv[3]
 if   (jnl == 'sps'): 
     jnlname = 'SciPost Phys.'
     #urltrunk = 'https://scipost.org/10.21468/SciPostPhys'
-    urltrunk = 'https://scipost.org/SciPostPhys'
+    urltrunk = 'https://scipost.org/SciPostPhys'    
+    toclink = "%s.%s.%s" % (urltrunk, vol, issue)
+elif   (jnl == 'spsp'): 
+    jnlname = 'SciPost Phys.Proc.'
+    urltrunk = 'https://scipost.org/SciPostPhysProc'
+    toclink = "%s.%s" % (urltrunk, vol)
 
 jnlfilename = "%s%s.%s" % (jnl, vol, issue)
-toclink = "%s.%s.%s" % (urltrunk, vol, issue)
 
 print "%s%s, Issue %s" %(jnlname,vol,issue)
 print "get table of content... from %s" % (toclink)
 
 tocpage = BeautifulSoup(urllib2.urlopen(toclink))
+#divs = tocpage.body.find_all('div', attrs = {'class' : 'card card-grey card-publication'})
+divs = tocpage.body.find_all('div', attrs = {'class' : ['card', 'card-gray', 'card-publication']})
+divs = tocpage.body.find_all('div', attrs = {'class' : 'card-publication'})
+
 
 recs = []
 #for div  in tocpage.body.find_all('div', attrs = {'class' : 'publicationHeader'}):
-for div  in tocpage.body.find_all('div', attrs = {'class' : 'card card-grey card-publication'}):
-    rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'auts' : []}
+i = 0
+for div  in divs:
+    i += 1
+    print '---{ %i/%i }---' % (i, len(divs))
+    rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'auts' : []}
+    if (jnl == 'sps'):
+        rec['issue'] = issue
+    elif (jnl == 'spsp'):
+        rec['cnum'] = issue
+        rec['tc'] = 'C'
     for h3 in div.find_all('h3'):
         for a in h3.find_all('a'):
             artlink = 'https://scipost.org' + a['href']
@@ -83,7 +99,37 @@ for div  in tocpage.body.find_all('div', attrs = {'class' : 'card card-grey card
                 rec['arxiv'] = regexpsubm2.sub(r'\1', a['href'])
     #licence
     for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
-        rec['licence'] = {'url' : 'http:' + a['href']}                        
+        rec['licence'] = {'url' : 'http:' + a['href']}
+    #author
+    for ul in artpage.body.find_all('ul', attrs = {'class' : 'list-inline'}):
+        if ul['class'] != ['list-inline', 'my-2']:
+            continue
+        rec['auts'] = []
+        for li in ul.find_all('li', attrs = {'class' : ['list-inline-item', 'mr-1']}):            
+            sups = []
+            for sup in li.find_all('sup'):
+                sups.append('=Aff' + sup.text.strip())                
+                sup.replace_with('')
+            lit = li.text.strip()
+            lit = re.sub(', *$', '', lit)
+            rec['auts'].append(lit)
+            rec['auts'] += sups
+    #affiliation
+    for ul in artpage.body.find_all('ul', attrs = {'class' : 'list'}):
+        if ul['class'] != ['list', 'list-unstyled', 'my-2', 'mx-3']:
+            continue
+        rec['aff'] = []
+        for li in ul.find_all('li'):
+            for sup in li.find_all('sup'):
+                supnr = sup.text.strip()
+                sup.replace_with('')
+            rec['aff'].append('Aff%s= %s' % (supnr, li.text.strip()))
+    #collaboration
+    for p in artpage.body.find_all('p', attrs = {'class' : 'mb-1'}):
+        pt = p.text.strip()
+        if re.search('[Cc]ollaboration', pt):
+            rec['col'] = pt
+    print rec
     recs.append(rec)
 
 
