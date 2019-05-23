@@ -62,7 +62,10 @@ jnl = sys.argv[1]
 vol = sys.argv[2]
 issue = sys.argv[3]
 
-jnlfilename = jnl+vol+'.'+issue
+if len(sys.argv) > 4:
+    jnlfilename = '%s%s.%s_%s' % (jnl, vol, issue, sys.argv[4])
+else:
+    jnlfilename = '%s%s.%s' % (jnl, vol, issue)
 
 if   (jnl == 'rpd'): 
     issn = '1742-3406'
