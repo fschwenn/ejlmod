@@ -46,7 +46,6 @@ journals = {#'aaa'   : ('Abstr.Appl.Anal. ', 'Hindawi'),
 #journals = {'jdg'   : ('J.Diff.Geom.', 'Lehigh University')}
 
 
-temp = {'pgiq' : ['https://projecteuclid.org/euclid.pgiq/1484362813']}
 
 
 for jnl in journals.keys():
@@ -61,7 +60,10 @@ for jnl in journals.keys():
     url = 'http://projecteuclid.org/all/euclid.%s' % (jnl)
     page = BeautifulSoup(urllib2.urlopen(url))
     todo = []
-    for ul in page.body.find_all('ul', attrs = {'class' : 'contents-simple'}):
+    uls = page.body.find_all('ul', attrs = {'class' : 'contents-simple'})
+    if not uls:
+        uls = page.body.find_all('ul', attrs = {'class' : 'volumeContents'})
+    for ul in uls:
         for a in ul.find_all('a'):
             if a.has_attr('href'):
                 link = 'http://projecteuclid.org' + a['href']
@@ -74,6 +76,7 @@ for jnl in journals.keys():
     #todo = temp[jnl]
     #individual volumes
     for link in todo:
+        print '.link=%s' % (link)
         jnlfilename = re.sub('.*euclid.(.*?)\/(.*)', r'projecteuclid_\1.\2', link)
         #check whether file already exists
         goahead = True
@@ -107,6 +110,16 @@ for jnl in journals.keys():
             rec = {'jnl' : jnlname, 'auts' : [], 'tc' : 'P'}
             if jnl == 'pgiq':
                 rec['tc'] = 'C'
+                if link == 'http://projecteuclid.org/euclid.pgiq/1545361482':
+                    rec['cnum'] = 'C18-06-02'
+                elif link == 'http://projecteuclid.org/euclid.pgiq/1513998413':
+                    rec['cnum'] = 'C17-06-02'
+                elif link == 'http://projecteuclid.org/euclid.pgiq/1484362813':
+                    rec['cnum'] = 'C16-06-03.1'
+                elif link == 'http://projecteuclid.org/euclid.pgiq/1450194149':
+                    rec['cnum'] = 'C15-06-05.1'
+                elif link == 'http://projecteuclid.org/euclid.pgiq/1436815733':
+                    rec['cnum'] = 'C14-06-06'
             rec['note'] = [ note ]
             try:
                 articlepage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org' + article))
