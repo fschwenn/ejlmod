@@ -75,7 +75,8 @@ done =  map(tfstrip,os.popen("grep '^3.*DOI' %s |sed 's/.*\///'|sed 's/;//'" % (
 print "Already done:"
 for dd in done:
     print dd
-
+#done = []
+ 
 print "get table of content of %s%s ..." %(jnlname,year)
 
 tocpage = BeautifulSoup(urllib2.urlopen(urltrunk))
@@ -90,9 +91,12 @@ for li in tocpage.body.find_all('li'):
                     articleIDs.append(articleID)
 print articleIDs
 
+
 recs = []
+i = 0
 for articleID in articleIDs:
-    print articleID
+    i += 1
+    print '---{ %i/%i }---{ %s }---' % (i, len(articleIDs), articleID)
     if re.search('isrn',jnl):
         artpage = BeautifulSoup(urllib2.urlopen('http://www.hindawi.com/journals/isrn/%s/%s' % (year, articleID)))
     else:
@@ -155,6 +159,12 @@ for articleID in articleIDs:
                         rec['auts'].append(author)
                     else:
                         rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', child.text.strip()))
+                elif child.name == 'span':
+                    if child.has_attr('class') and 'orcid' in child['class']:
+                        for a in child.find_all('a'):
+                            orcid = re.sub('.*org\/', r'ORCID:', a['href'])
+                            print '  ', orcid
+                            rec['auts'][-1] += ', ' + orcid
                 elif child.name == 'sup':
                     for aff in re.split(' *, *', child.text.strip()):
                         rec['auts'].append('=Aff%s' % (aff))
@@ -177,7 +187,10 @@ for articleID in articleIDs:
             print '^_ could not extract afiliation'
     #references
     for ol in artpage.body.find_all('ol'):
+        refnum = ''
         for li in ol.find_all('li'):
+            if li.has_attr('id'):
+                refnum = li['id']
             for a in li.find_all('a'):
                 if re.search('doi.org\/10', a['href']):
                     doi = re.sub('http.*doi.org.', ', DOI: ', a['href'])
@@ -185,13 +198,28 @@ for articleID in articleIDs:
                     doi = re.sub('%28', '(', doi)                    
                     doi = re.sub('%29', ')', doi)                    
                     doi = re.sub('%20', ' ', doi)                    
+                    doi = re.sub('%3a', ':', doi)                    
                     a.replace_with(doi)
                 else:
                     a.replace_with('')
-            ref = li.text.strip()
+            lit = li.text.strip()
+            #change pubnote to be digestable by refextract
+            lit = re.sub(', no. [0-9]+, ', ', ', lit)
+            lit = re.sub(', vol. ', ', ', lit)
+            lit = re.sub(', Article ID ', ', ', lit)
+            lit = re.sub(', pp. ', ', ', lit)
+            lit = re.sub(u',\u201d', '",', lit)
+            lit = re.sub(u'\u201c', '"', lit)
+            lit = re.sub(u'\u2013', '-', lit)
+            if refnum:                
+                ref = '[%s] %s' % (refnum, lit)
+            else:
+                ref = li.text.strip()
             rec['refs'].append([('x', ref)])
     if not rec['tc'] == 'Editorial':
         recs.append(rec)
+        print ' keys: ' + ', '.join(rec.keys())
+
 
 
 
