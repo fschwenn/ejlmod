@@ -169,6 +169,39 @@ def lam(x):
     x  = x.group()
     return unichr(int(x[3:-1], 16))
 
+#we can not install the latest refextractor :(
+#here are some "manual" journal normalizations
+renjwas = [(re.compile('Journal of Physics G.? Nuclear and Particle Physics, *'), 'J.Phys.,G'),
+           (re.compile('Journal of Physics A.? General Physics, *'), 'J.Phys.,A'),
+           (re.compile('Advances in High Energy Physics, *'), 'AHEP, '),
+           (re.compile('Physical Review A.? Atomic, Molecular and Optical Physics, *'), 'Phys.Rev.,A'),
+           (re.compile('Physical Review B.? Condensed Matter and Materials Physics, *'), 'Phys.Rev.,B'),
+           (re.compile('Physical Review E.? Statistical, Nonlinear, and Soft Matter Physics, *'), 'Phys.Rev.,E'),
+           (re.compile('Progress of Theoretical and Experimental Physics, *'), 'PTEP, '),
+           (re.compile('Fortschritte der Physik.Progress of Physics, *'), 'Fortsch.Phys., '),
+           (re.compile('Electronic Journal of Theoretical Physics, *'), 'Electron.J.Theor.Phys. , '),
+           (re.compile('Journal of Modern Physics, *'), 'J.Mod.Phys., '),
+           (re.compile('Physica Scripta. An International Journal for Experimental and Theoretical Physics, *'), 'Phys.Scripta, '),
+           (re.compile('Results in Physics, *'), 'Results Phys., '),
+           (re.compile('Computational Mathematics and Mathematical Physics, *'), 'Comput.Math.Math.Phys., '),
+           (re.compile('Journal of Nonlinear Mathematical Physics, *'), 'J.Nonlin.Mathematical Phys., '),
+           (re.compile('Journal of Geophysical Research.? .?Space Physics.?, *'), 'J.Geophys.Res.Space Phys., '),
+           (re.compile('J. Geophys. Res. Space Physics, *'), 'J.Geophys.Res.Space Phys., '),
+           (re.compile('Journal of Atmospheric and Solar..?.?Terrestrial Physics, *'), 'J.Atmos.Sol.Terr.Phys., '),
+           (re.compile('International Journal Geometrical Methods in Modern Physics, *'), 'Int.J.Geom.Meth.Mod.Phys., '),
+           (re.compile('Advances in Mathematical Physics, *'), 'Adv.Math.Phys., '),
+           (re.compile('SciPost Physics, *'), 'SciPost Phys., '),
+           (re.compile('Studies in History and Philosophy of Science. Part B. Studies in History and Philosophy of Modern Physics, *'), 'Stud.Hist.Phil.Sci.,B'),
+           (re.compile('Indian Journal of Radio ..?.?.?.? Space Physics, *'), 'Indian J.Radio Space Phys, '),
+           (re.compile('Atmospheric Chemistry And Physics, *'), 'Atmos.Chem.Phys., '),
+           (re.compile('Low Temperature Physics, *'), 'Low Temp.Phys., ')]
+
+
+def normalizejournalsworkaround(rawref):
+    for (renjwa, normalized) in renjwas:
+        rawref = renjwa.sub(normalized, rawref)
+    return rawref
+
 
 
 def validxml(string):
@@ -440,7 +473,8 @@ def writeXML(recs,dokfile,publisher):
                     if re.search('ORCID', aff):
                         autlist.append(('j', aff))
                     elif re.search('EMAIL', aff):
-                        autlist.append(('m', re.sub('EMAIL:', '', aff)))
+                        if re.search('@', aff):
+                            autlist.append(('m', re.sub('EMAIL:', '', aff)))
                     else:
                         autlist.append(('u', aff))
                 xmlstring += marcxml(marc, autlist)
@@ -469,7 +503,8 @@ def writeXML(recs,dokfile,publisher):
                     if re.search('ORCID', aff):
                         autlist.append(('j', aff))
                     elif re.search('EMAIL', aff):
-                        autlist.append(('m', re.sub('EMAIL:', '', aff)))
+                        if re.search('@', aff):
+                            autlist.append(('m', re.sub('EMAIL:', '', aff)))
                     else:
                         #GRID hier
                         if re.search(', GRID:', aff):
@@ -526,18 +561,19 @@ def writeXML(recs,dokfile,publisher):
                     if re.search('\([eE]d\.\)',entry):
                         aut = [('a', shapeaut(re.sub(' *\([eE]d\.\) *','',entry))), ('e','ed.')]
                     else:
-                        author = shapeaut(entry)
+                        author = entry
                         aut = []
                         if re.search('CHINESENAME', author):
                             aut.append(('q', re.sub('.*, CHINESENAME: ', '', author)))
                             author = re.sub(', CHINESENAME.*', '', author)
-                        elif re.search('ORCID', author):
+                        if re.search('ORCID', author):
                             aut.append(('j', re.sub('\.$', '', re.sub('.*, ',  '', author))))
                             author = re.sub(', ORCID.*', '', author)
-                        elif re.search('EMAIL', author):
-                            aut.append(('m', re.sub('.*, EMAIL:',  '', author)))
+                        if re.search('EMAIL', author):
+                            if re.search('@', author):
+                                aut.append(('m', re.sub('.*, EMAIL:',  '', author)))
                             author = re.sub(', EMAIL.*', '', author)
-                        aut.append(('a', author))
+                        aut.append(('a', shapeaut(author)))
                     if (len(tempaffs) == 0) and (len(affdict) > 0):
                         tempaffs = [('v',affdict[affdict.keys()[0]])]
                     #GRID hier
@@ -561,26 +597,35 @@ def writeXML(recs,dokfile,publisher):
                 if len(ref) == 1 and ref[0][0] == 'x':
                     rawref = re.sub('Google ?Scholar', '', ref[0][1])
                     rawref = re.sub('[cC]ross[rR]ef', '', rawref)
+                    rawref = normalizejournalsworkaround(rawref)
                     try:
-                        for ref2 in extract_references_from_string(rawref, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
+                        extractedrefs = extract_references_from_string(rawref, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
+                        for ref2 in extractedrefs:
                             entryaslist = [('9','refextract')]
                             for key in ref2.keys():
                                 for mapping in mappings:
                                     if key == mapping[0]:
                                         for entry in ref2[key]:
                                             entryaslist.append((mapping[1], entry))
+                            if len(extractedrefs) == 1:
+                                if re.search('inspirehep.net\/record\/\d+', rawref):
+                                    entryaslist.append(('0', re.sub('.*inspirehep.net\/record\/(\d+).*', r'\1',  rawref)))
                             xmlstring += marcxml('999C5',entryaslist)
                     except:
                         print 'UTF8 Problem in Referenzen'
                         try:
                             ref01 = unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', rawref)).encode('ascii','ignore'),'utf-8')
-                            for ref2 in extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}"):
+                            extractedrefs = extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
+                            for ref2 in extractedrefs:
                                 entryaslist = [('9','refextract')]
                                 for key in ref2.keys():
                                     for mapping in mappings:
                                         if key == mapping[0]:
                                             for entry in ref2[key]:
                                                 entryaslist.append((mapping[1], entry))
+                                if len(extractedrefs) == 1:
+                                    if re.search('inspirehep.net\/record\/\d+', rawref):
+                                        entryaslist.append(('0', re.sub('.*inspirehep.net\/record\/(\d+).*', r'\1',  rawref)))
                                 xmlstring += marcxml('999C5',entryaslist)
                         except:
                             print 'real UTF8 Problem in Referenzen'
