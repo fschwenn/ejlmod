@@ -70,6 +70,7 @@ jnls = {'1538-3881': 'Astron.J.',
         '0953-4075': 'J.Phys.',
         '0953-8984': 'J.Phys.Condens.Matter',
         '0031-9155': 'Phys.Med.Biol.',
+        '1538-3873': 'Publ.Astron.Soc.Pac.',
         '2399-6528': 'J.Phys.Comm.',
         '0741-3335': 'Plasma Phys.Control.Fusion',
         '0026-1394': 'Metrologia'}
@@ -85,7 +86,7 @@ for starturl in starturls:
     try:
         print '---{ %i/%i }---{ %s }---' % (j, len(starturls), starturl)
         tocpages.append(BeautifulSoup(urllib2.urlopen(starturl, timeout=300)))
-        time.sleep(5)
+        time.sleep(10)
     except:
         print 'try "%s" again after 5 minutes' % (starturl)
         time.sleep(300)
@@ -93,6 +94,7 @@ for starturl in starturls:
     
 recs = []
 voliss = []
+vols = []
 j = 0
 for tocpage in tocpages:
     j += 1
@@ -118,7 +120,7 @@ for tocpage in tocpages:
                 print '---%s---' % (h4note)
             elif child.name == 'div':
                 for a in child.find_all('a', attrs = {'class' : 'art-list-item-title'}):
-                    time.sleep(20)
+                    time.sleep(30)
                     rec = {'jnl' : jnl, 'note' : [], 'tc' : 'P', 'autaff' : [], 'refs' : []}
                     orcidsfound = False
                     if len(sys.argv) > 2:
@@ -273,8 +275,13 @@ for tocpage in tocpages:
                         if rec['auts']:
                             recs.append(rec)
     voliss.append('%s.%s' % (rec['vol'], rec['issue']))
+    if not rec['vol'] in vols:
+        vols.append(rec['vol'])
 
-iopf = 'iopcrawl.' + re.sub(' ', '', jnl) + '.' + '_'.join(voliss)
+if len(vols) == 1:
+    iopf = 'iopcrawl.' + re.sub(' ', '', jnl) + re.sub('_\d+', '', '.' + '_'.join(voliss))
+else:
+    iopf = 'iopcrawl.' + re.sub(' ', '', jnl) + '.' + '_'.join(voliss)
 
 xmlf = os.path.join(xmldir,iopf+'.xml')
 #xmlfile = open(xmlf, 'w')
