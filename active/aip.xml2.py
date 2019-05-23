@@ -50,14 +50,19 @@ elif (jnl == 'aipconf') or (jnl == 'aipcp') or (jnl == 'apc'):
     jnlname = 'AIP Conf.Proc.'
     jnl = 'apc'
     typecode = 'C'
-
+elif (jnl == 'apl'):
+    jnlname = 'Appl.Phys.Lett.'
+elif (jnl == 'jap'):
+    jnlname = 'J.Appl.Phys.'
+elif (jnl == 'jcp'):
+    jnlname = 'J.Chem.Phys.'
     
 tocfilname = '%s/%s.toc' % (tmpdir, jnlfilename)
 urltrunk = 'http://aip.scitation.org/toc/%s/%s/%s?size=all' % (jnl,vol,iss)
 print urltrunk
 if not os.path.isfile(tocfilname):
-    os.system('wget -T 300 -t 3 -q -O %s "%s"' % (tocfilname, urltrunk))
-    time.sleep(3)
+    os.system('wget -T 300 -t 3 -q  -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" -O %s "%s"' % (tocfilname, urltrunk))
+    time.sleep(5)
 inf = open(tocfilname, 'r')
 tocpage = BeautifulSoup(''.join(inf.readlines()))
 inf.close()
@@ -75,8 +80,12 @@ def getarticle(href, sec, subsec, p1):
     artfilname = '%s/%s.%s' % (tmpdir, jnlfilename, re.sub('\W', '', p1))
     if not os.path.isfile(artfilname):
         os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilname, artlink))
-        print artlink
-        time.sleep(3)
+        time.sleep(10)
+        if not os.path.getsize(artfilname):
+            print 'retry %s' % (artfilname)            
+            time.sleep(20)
+            os.system('wget -T 300 -t 3 -q  -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" -O %s "%s"' % (artfilname, artlink))
+            time.sleep(10)
     inf = open(artfilname, 'r')
     artpage = BeautifulSoup(''.join(inf.readlines()))
     inf.close()
@@ -143,7 +152,7 @@ def getarticle(href, sec, subsec, p1):
                 affnr =  re.sub('\)', '', sup.text)
             for a in p.find_all('a', attrs = {'class' : 'email'}):
                 ats = a.text.strip()
-                if not re.search('email.protection', ats):
+                if not re.search('email.protect', ats):
                     emails[affnr] = re.sub('mailto:', '', )
     #affiliations
     for div in artpage.body.find_all('div', attrs = {'class' : 'affiliations-list hide'}):
@@ -196,7 +205,7 @@ def getarticle(href, sec, subsec, p1):
                     author += re.sub('http.*orcid.org.', ', ORCID:', a['href'])
             for affi in range(len(affs)):
                 if emails.has_key(affs[affi]):
-                    if not re.search('ORCID', author):
+                    if not re.search('ORCID', author) and re.search('@', emails[affs[affi]]):
                         author += ', EMAIL:%s' % (emails[affs[affi]])
                     affs[affi] = ''
             rec['auts'].append(author)                    
@@ -204,7 +213,8 @@ def getarticle(href, sec, subsec, p1):
                 if aff:
                     rec['auts'].append('=Aff%s' % (aff))
     if len(rec['auts']) == 1 and not re.search('EMAIL', rec['auts'][0]) and emails.has_key('NOAFFNR'):
-        rec['auts'][0] += ', EMAIL:%s' % (emails['NOAFFNR'])        
+        if re.search('@', emails['NOAFFNR']):
+            rec['auts'][0] += ', EMAIL:%s' % (emails['NOAFFNR'])        
     #abstract
     for div in artpage.body.find_all('div', attrs = {'class' : 'abstractSection abstractInFull'}):
         rec['abs'] = div.text.strip()
@@ -225,13 +235,15 @@ def getarticle(href, sec, subsec, p1):
                                 a.replace_with(rdoi)
                             elif not re.search('arxiv.org', a['href']):
                                 a.replace_with('')
-                    rec['refs'].append([('x', regexpref.sub(' ', li.text.strip()))])
-    print rec['doi'] + ': ' + ' '.join(['%s[%i]' % (k, len(rec[k])) for k in rec.keys()])
+                    rawref = li.text.strip()
+                    if not rawref in ['Published by AIP Publishing.']:
+                        rec['refs'].append([('x', regexpref.sub(' ', rawref))])
+    print '  ', rec['doi'] + ': ' + ' '.join(['%s[%i]' % (k, len(rec[k])) for k in rec.keys()])
     time.sleep(2)
     return rec
                 
-recs = []
 (sec, subsec) = (False, False)
+tocheck = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'sub-section'}):
     for child in div.contents:
         if child.name == 'h5': 
@@ -251,7 +263,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'sub-section'}):
                                 for div3  in article.find_all('div', attrs = {'class' : 'meta-article'}):
                                     p1 = re.sub('.*, ([A-Z0-9]+) \(\d\d\d\d\);.*', r'\1', div3.text.strip())
                                 if href and p1:
-                                    recs.append(getarticle(href, sec, subsec, p1))
+                                    tocheck.append((href, sec, subsec, p1))
                     elif child2.name == 'article':
                         for div2 in child2.find_all('div', attrs = {'class' : 'art_title linkable'}):
                             (href, p1) = (False, False)
@@ -261,11 +273,19 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'sub-section'}):
                             for div3  in child2.find_all('div', attrs = {'class' : 'meta-article'}):
                                 p1 = re.sub('.*, ([A-Z0-9]+) \(\d\d\d\d\);.*', r'\1', div3.text.strip())
                             if href and p1:
-                                article = getarticle(href, sec, subsec, p1)
-                                if article['auts']:
-                                    recs.append(article)                    
+                                tocheck.append((href, sec, subsec, p1))
                         
-
+recs = []
+i = 0
+for (href, sec, subsec, p1) in tocheck:
+    i += 1
+    if href in ['/doi/full/10.1063/1.5019809']:
+        print 'skip %s' % (href)
+    else:
+        print '---{ %i/%i }---{ %s %s %s %s }---' % (i, len(tocheck), href, sec, subsec, p1)
+        rec = getarticle(href, sec, subsec, p1)
+        if rec['auts']:
+            recs.append(rec)
 
 
 
