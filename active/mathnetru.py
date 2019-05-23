@@ -134,7 +134,7 @@ print tocurl
 tocpage = BeautifulSoup(urllib2.urlopen(tocurl))
 
 artlinks = []
-for table in tocpage.body.find_all('table', attrs = {'cellpadding' : '2'}):
+for table in tocpage.body.find_all('table', attrs = {'cellpadding' : '5'}):
     for td in table.find_all('td'):
         for b in td.find_all('b'):
             artlinks.append(b.text)
