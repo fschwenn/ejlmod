@@ -53,10 +53,13 @@ def pos_harvesting(conf_acronym,cnum):
         for recordtuple in recs:
             if recordtuple[1] == 0:
                 message = '%sBad record %s\n' % (message,recordtuple[2])
+                print message
                 continue
             record = recordtuple[0]
             if not record:
                 continue        
+
+                            
             
             if record.has_key('540'):
                 m540 = record_delete_field(record,'540',' ',' ')
@@ -144,13 +147,16 @@ def pos_harvesting(conf_acronym,cnum):
                             if re.search('Collaboration', entry[1], re.IGNORECASE):                                
                                 newcolls = []
                                 (coll, author) = coll_cleanforthe(entry[1])
+                                print entry[1], '|', coll, author
                                 for scoll in coll_split(coll):
                                     newcolls.append(re.sub('^the ', '', coll_clean710(scoll), re.IGNORECASE))
                                 for col in newcolls:
                                     record_add_field(record, '710', ' ', ' ', '', [('g', re.sub(',', '', col))])
                                     print 'found collection "%s" in author field' % (col)
                                 if author:
-                                    na.append(('a', collcheck[0]))
+                                    na.append(('a', author))
+                            else:
+                                na.append(entry)    
                         else:
                             na.append(entry)    
                     if author:
@@ -167,7 +173,9 @@ def pos_harvesting(conf_acronym,cnum):
             #count pages
             anzahlseiten = os.popen('pdftk %s.pdf dump_data output | grep -i NumberO' % (posfile)).read().strip()
             anzahlseiten = re.sub('.*NumberOfPages. (\d*).*',r'\1',anzahlseiten)
-            record_add_field(record, '300', ' ', ' ', '', [('a', anzahlseiten)]) 
+            record_add_field(record, '300', ' ', ' ', '', [('a', anzahlseiten)])
+            #remove link since PoS now has DOIs
+            record_delete_fields(record, '856')
             if anzahlseiten != '1':
                 records.append(record)
                 bigxmlfile.write(record_xml_output(record))
