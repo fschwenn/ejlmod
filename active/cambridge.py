@@ -93,12 +93,14 @@ for meta in toc.head.find_all('meta', attrs = {'property' : 'og:url'}):
             ptext = p.text.strip()
             if re.search('age \d+ of \d+', ptext):
                 numpages = int(re.sub('.* of (\d+).*', r'\1', ptext))
+                print 'check %i pages' % (numpages)
 
 note = ''
 recs = []
 #first run through TOC to get DOIs
 for i in range(numpages):
     toclink = '%s?pageNum=%i' % (baseurl, i+1)
+    print ' . ', toclink
     if not os.path.isfile('/tmp/%s.%i.toc' % (jnlfilename, i)):
         os.system('wget -O /tmp/%s.%i.toc "%s"' % (jnlfilename, i, toclink))
     tocf = open('/tmp/%s.%i.toc' % (jnlfilename, i), 'r')
