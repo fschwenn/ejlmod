@@ -39,7 +39,7 @@ listpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(
 for div in listpage.find_all('div', attrs = {'class' : 'periodical-catalog'}):
     for div2 in div.find_all('div'):
         div2t = div2.text.strip()
-        if 'Volume %s, Issue %s ' % (vol, iss) in div2t:
+        if re.search('Vol[a-z]*\.? %s, Iss[a-z]*\.? %s ' % (vol, iss), div2t):
             for a in div2.find_all('a'):
                 tocurl = 'http://www.global-sci.com' + a['href']
 
@@ -53,7 +53,7 @@ else:
 
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'article-list-info'}):
-    rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : iss, 'tc' : 'P', 'pacs' : []}
+    rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : iss, 'tc' : 'P', 'pacs' : [], 'auts' : [], 'keyw' : []}
     #DOI
     for a in div.find_all('a', attrs = {'class' : 'doi'}):
         rec['doi'] = a.text.strip()
@@ -76,14 +76,19 @@ for rec in recs:
         if meta.has_attr('name'):
             #keywords
             if meta['name'] == 'keywords':
-                rec['keyw'] = re.split(' *, *', meta['content'].strip())
+                for keyw in re.split(' *, *', meta['content'].strip()):
+                    if not keyw in ['Global Science Press', 'JPDE', 'CICP',
+                                    'Communications in Computational Physics'
+                                    'Journal of Partial Differential Equations']:
+                        rec['keyw'].append(keyw)
     for div in artpage.body.find_all('div', attrs = {'class' : 'article-list-info'}):
         #authors and pages
         for div2 in div.find_all('div', attrs = {'class' : 'article-list-content'}):
             ps = div2.find_all('p')
             authors = regcr.sub(' ', ps[0].text.strip())
             pages = ps[1].text.strip()
-            rec['auts'] = re.split(' *, *', re.sub(' and ', ', ', authors))
+            for aut in re.split(' *, *', re.sub(' and ', ', ', authors)):
+                rec['auts'].append(aut.strip())
             rec['year'] = re.sub('.*\((\d+)\).*', r'\1', pages)
             rec['p1'] = re.sub('.*\).*?(\d+).*', r'\1', pages)
             if re.search('\).*\-', pages):
@@ -107,7 +112,8 @@ for rec in recs:
                         rec['abs'] = p.text.strip()
                         if not rec['abs']:
                             rec['abs'] = re.sub('^ *Abstract', '', div2.text.strip())
-    print rec.keys()
+                        rec['abs'] = re.sub('[\n\t\r]+', ' ', rec['abs'])
+    print '  ', rec.keys()
 
 
 
