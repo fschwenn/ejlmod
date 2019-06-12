@@ -67,7 +67,7 @@ for div  in divs:
     #for p in div.find_all('p', attrs = {'class' : 'publicationAbstract'}):
     #for p in div.find_all('p', attrs = {'class' : 'abstract mb-0 py-2'}):
     for p in div.find_all('p', attrs = {'class' : 'abstract'}):
-        rec['abs'] = p.text.strip()
+        rec['abs'] = re.sub('  +', ' ', re.sub('[\n\t\r]', ' ', p.text.strip()))
     #year
     #for p in div.find_all('p', attrs = {'class' : 'publicationReference'}):
     for p in div.find_all('p', attrs = {'class' : 'card-text text-muted'}):
