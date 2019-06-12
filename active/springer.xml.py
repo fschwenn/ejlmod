@@ -10,6 +10,7 @@ import time
 import re
 import sys
 import codecs
+from invenio.search_engine import search_pattern
 
 #reload(Recode)
 sprdir = '/afs/desy.de/group/library/publisherdata/springer'
@@ -70,7 +71,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '12648': ['ijp', 'Indian J.Phys.'],
       '10786': ['iet', 'Instrum.Exp.Tech.'],
       '10773': ['ijtp', 'Int.J.Theor.Phys.'],
-      '11958': ['jcp', 'J.Contemp.Phys.', 'Izv.Akad.Nauk Arm.SSR Fiz.'],
+      '11958': ['jocoph', 'J.Contemp.Phys.', 'Izv.Akad.Nauk Arm.SSR Fiz.'],
       '11447': ['jetp', 'J.Exp.Theor.Phys.', 'Zh.Eksp.Teor.Fiz.'],
       '10723': ['jgc', 'J.Grid Comput.'],
       '10909': ['jltp', 'J.Low.Temp.Phys.'],
@@ -145,7 +146,8 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras'],
       '40623': ['eaplsc', 'Earth Planets Space'],
       '12036': ['jasas', 'J.Astrophys.Astron.'],
       '40065': ['arjoma', 'Arab.J.Math.'],
-      '41605': ['rdtm', 'Rad.Det.Tech.Meth.']}
+      '41605': ['rdtm', 'Rad.Det.Tech.Meth.'],
+      '10955': ['jostph', 'J.Statist.Phys.']}
 
 #folgende Zeile unbeding loeschen
 #jc = {'0304': ['lnm', 'Lect. Notes Math. ']}
@@ -541,6 +543,7 @@ def xmlExtract():
 #            print 'GRANT?'
 #            print grant
     #references
+    
     rec['refs'] = []
     for citation in artxml.getElementsByTagName('Citation'):
         (reftext, doitext, citnum) = ('', '', '')
@@ -554,6 +557,28 @@ def xmlExtract():
             for doi in citation.getElementsByTagName('Occurrence'):
                 if doi.hasAttribute('Type') and doi.getAttribute('Type') == 'DOI':
                     reftext = reftext + ', DOI: ' + getAllText(doi)
+            #INSPIRE link
+            for reftarget in citation.getElementsByTagName('RefTarget'):
+                if reftarget.hasAttribute('Address'):
+                    address = reftarget.getAttribute('Address')
+                    if re.search('inspirehep.net', address):
+                        if re.search('p=find.IRN', address):
+                            irn = re.sub('.*IRN.(\d+)', r'\1', address)
+                            print ' --> found IRN:%s in reference number %s' % (irn, citnum)
+                            for recid in search_pattern(p='970__a:SPIRES-' + irn):
+                                reftext += ', https://inspirehep.net/record/%i' % (recid)
+                        elif re.search('p=find.recid', address):
+                            recid = re.sub('.*recid.(\d+)', r'\1', address)
+                            print ' --> found recid:%s in reference number %s' % (recid, citnum)
+                            reftext += ', https://inspirehep.net/record/' + recid
+                        #report number usually are already in reftext
+                        #elif re.search('p=find.R.', address):
+                        #    rn = re.sub('.*p=find.R.', '', re.sub('%22', '', address))
+                        #    print ' -> found reportnumber:%s in reference number %s' % (rn, citnum)
+                        #    reftext += ', report number: ' + rn
+            reftext = re.sub('\[ INSPIRE \]', '', reftext)
+#                        else:
+#                            print 'uninteresting INSPIRE link', address
         rec['refs'].append([('x', reftext)])
     
     #for citation in artxml.getElementsByTagName('BibUnstructured'):
