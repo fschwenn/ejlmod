@@ -61,7 +61,7 @@ jnl = {'1538-3881': 'Astron.J.',
        '1475-7516': 'JCAP',
        '1126-6708': 'JHEP',
        '1748-0221': 'JINST',
-       '1742-5468': 'JSTAT',
+       '1742-5468': 'J.Stat.Mech.',
        '0957-0233': 'Measur.Sci.Tech.',
        '0026-1394': 'Metrologia',
        '1367-2630': 'New J.Phys.',
@@ -204,7 +204,7 @@ for article in articles:
     for datenode in article.find_all('date_cover'):
         datecover = datenode.text.strip()
         rec['year'] = datecover[0:4]
-        if rec['jnl'] in ['JCAP ', 'JHEP ', 'JSTAT ']:
+        if rec['jnl'] in ['JCAP', 'JHEP', 'J.Stat.Mech.']:
             rec['vol'] = datecover[2:4] + datecover[5:7]
     #article number
     for artnumnode in article.find_all('artnum'):
@@ -370,7 +370,6 @@ for article in articles:
 recsunsrtd.sort()
 recs = [tupel[1] for tupel in recsunsrtd]
  
-        
 
 xmlf = os.path.join(xmldir,iopf+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
