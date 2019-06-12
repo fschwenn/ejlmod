@@ -597,6 +597,8 @@ def writeXML(recs,dokfile,publisher):
                 if len(ref) == 1 and ref[0][0] == 'x':
                     rawref = re.sub('Google ?Scholar', '', ref[0][1])
                     rawref = re.sub('[cC]ross[rR]ef', '', rawref)
+                    rawref = re.sub('[\n\t\r]', ' ', rawref)
+                    rawref = re.sub('  +', ' ', rawref)
                     rawref = normalizejournalsworkaround(rawref)
                     try:
                         extractedrefs = extract_references_from_string(rawref, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
@@ -661,7 +663,7 @@ def shapeaut(author):
         else:
             author = re.sub('(.*) (.*)',r'\2, \1',author).strip()
     author = re.sub(' ([A-Z]) ',r' \1. ', author)
-    author = re.sub(' ?([A-Z])$',r'\1.', author)
+    author = re.sub('([A-Z])$',r'\1.', author)
     author = re.sub('([A-Z] ?\.)[ \-]([A-Z] ?\.?)',r'\1\2', author)
     author = re.sub(', *', ', ', author.strip())
     if not re.search('[a-z]', author):
