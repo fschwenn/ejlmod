@@ -61,6 +61,7 @@ elif (jnl == 'tnya'):
     doitrunk = '10.1111/tnya'
     jnlname = 'Trans.New York Acad.Sci.'
 elif (jnl == 'mdpc'):
+    issn = '2577-6576'
     doitrunk = '10.1002/mdp2'
     jnlname = 'Mater.Des.Proc.Comm.'
     
@@ -73,6 +74,7 @@ if re.search('1111',doitrunk):
     toclink = '%s/%s.%s.%s.issue-%s/issuetoc' % (urltrunk,doitrunk,year,vol,issue)
 else:
     toclink = '%s/%s.v%s.%s/issuetoc' % (urltrunk,doitrunk,vol,issue)
+    toclink = 'https://onlinelibrary.wiley.com/toc/%s/%s/%s/%s'  % (issn[:4]+issn[5:], year, vol, issue)
 try:
     print toclink
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
@@ -100,7 +102,8 @@ i = 0
 for rec in recs:
     i += 1
     typecode = 'P'
-    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['doi'])
+    #rec['cnum'] = 'C18-09-08'
+    print '---{ %i/%i }---{ %s }---{ %s }------' % (i, len(recs), rec['doi'], rec['artlink'])
     artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     autaff = False
     for meta in artpage.head.find_all('meta'):
@@ -152,17 +155,22 @@ for rec in recs:
         if re.search('(Proceedings|Conference|Workshop)',note):
             typecode = 'C'
     #references ?
-    for ul in artpage.body.find_all('ul', attrs = {'class' : 'article-section__references-list'}):
+    uls = artpage.body.find_all('ul', attrs = {'class' : 'article-section__references-list'})
+    if not uls:
+        for section in artpage.body.find_all('section', attrs = {'id' : 'references-section'}):
+            uls = section.find_all('ul', attrs = {'class' : 'rlist'})
+            len(uls)
+    for ul in uls:
         rec['refs'] = []
         for li in ul.find_all('li'):
-            if not li.has_attr('id'):
+            if not li.has_attr('data-bib-id'):
                 continue
             for span in li.find_all('span', attrs = {'class' : 'bullet'}):
                 refno = span.text
                 span.replace_with(refno + ') ')
             for a in li.find_all('a'):
-                if a.text == 'CrossRef':
-                    rdoi = re.sub('http:..dx.doi.org.', '', a['href'])
+                if a.text in ['CrossRef', 'Crossref']:
+                    rdoi = re.sub('.*=', '', a['href'])
                     rdoi = re.sub('%28', '(', rdoi)
                     rdoi = re.sub('%29', ')', rdoi)
                     rdoi = re.sub('%2F', '/', rdoi)
