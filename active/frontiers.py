@@ -30,7 +30,7 @@ i = 0
 for artlink in urls:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(urls), artlink)
-    rec = {'tc' : 'P', 'jnl' : 'Front.in Phys.', 'autaff' : [], 'refs' : []}
+    rec = {'tc' : 'P', 'autaff' : [], 'refs' : []}
     try:
         print artlink
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
@@ -45,6 +45,15 @@ for artlink in urls:
             #volume
             if meta['name'] == 'citation_volume':
                 rec['vol'] = meta['content']
+            #journal
+            elif meta['name'] == 'citation_journal_title':
+                if meta['content'] == 'Frontiers in Astronomy and Space Sciences':
+                    rec['jnl'] = 'Front.Astron.Space Sci.'
+                elif meta['content'] == 'Frontiers in Physics':
+                    rec['jnl'] = 'Front.in Phys.'
+                else:
+                    print 'do not know journal "%s"!' % (meta['content'])
+                    sys.exit(0)
             #DOI
             elif meta['name'] == 'citation_doi':
                 rec['doi'] = meta['content']
@@ -78,8 +87,9 @@ for artlink in urls:
                 autaff.append('ORCID:%s' % (orcid))
                 orcidsfound = True
             elif meta['name'] == 'citation_author_email':
-                email = meta['content']
-                autaff.append('EMAIL:%s' % (email))    
+                if meta['content']:
+                    email = meta['content']
+                    autaff.append('EMAIL:%s' % (email))    
     if autaff:
         rec['autaff'].append(autaff)
     #section
