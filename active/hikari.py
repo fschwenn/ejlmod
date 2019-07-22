@@ -62,6 +62,7 @@ for tline in re.split(' *<p> *',tocline):
         rec['typ'] = ''
         rec['jnl'] = jnlname        
         rec['note'] = []
+        rec['issue'] = isu
         rec['tc'] = typecode        
         parts = re.split(' *<br> *',tline)
         for aut in re.split(' *, *', parts[0]):
