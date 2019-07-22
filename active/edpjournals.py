@@ -65,7 +65,10 @@ except:
 
 
 recs = []
-for a in tocpage.find_all('a', attrs = {'class' : 'article_title'}):
+i = 0
+articleas = tocpage.find_all('a', attrs = {'class' : 'article_title'}) 
+for a in articleas:
+    i += 1
     rec = {'jnl' : jnlname, 'tc' : tc, 'year' : year, 'note' : [], 'autaff' : []}
     if len(sys.argv) > 4:
         rec['tc'] = 'C'
@@ -128,11 +131,11 @@ for a in tocpage.find_all('a', attrs = {'class' : 'article_title'}):
     if autaff:
         rec['autaff'].append(autaff)
     if rec.has_key('issue'):
-        print '-- %s %s (%s), no. %s, %s' % (jnlname, rec['vol'], rec['year'], rec['issue'], rec['p1'])
+        print '-- %i/%i -- %s %s (%s), no. %s, %s' % (i, len(articleas), jnlname, rec['vol'], rec['year'], rec['issue'], rec['p1'])
     elif rec.has_key('vol'):
-        print '-- %s %s (%s), %s' % (jnlname, rec['vol'], rec['year'], rec['p1'])
+        print '-- %i/%i -- %s %s (%s), %s' % (i, len(articleas), jnlname, rec['vol'], rec['year'], rec['p1'])
     else:
-        print '-- %s (%s), %s' % (jnlname, rec['year'], rec['p1'])
+        print '-- %i/%i -- %s (%s), %s' % (i, len(articleas), jnlname, rec['year'], rec['p1'])
     #abstract 
     for div in artpage.body.find_all('div', attrs = {'id' : 'article'}):
         for p in div.find_all('p', attrs = {'align' : 'LEFT'}):
@@ -184,19 +187,23 @@ for a in tocpage.find_all('a', attrs = {'class' : 'article_title'}):
         except:
             print '%s not found' % (reflink)
             break
-        for ol in refpage.body.find_all('ol', attrs = {'class' : 'references'}):
+        list = refpage.body.find_all('ol', attrs = {'class' : 'references'})
+        if not list:
+            list = refpage.body.find_all('ul', attrs = {'class' : 'references'})
+        for ol in list:
             rec['refs'] = []
             for li in ol.find_all('li'):
                 reference = re.sub('[\t\n]+', ' ', li.text).strip()
                 reference = re.sub(' +', ' ', reference)
                 reference = re.sub('\[NASA ADS\]', '', reference)
                 reference = re.sub('\[CrossRef\]', '', reference)
+                reference = re.sub('\[Google.Scholar\]', '', reference)
                 reference = re.sub('\[PubMed\]', '', reference)
                 reference = re.sub('\[EDP Sciences\]', '', reference)
                 for a2 in li.find_all('a'):
                     if re.search('\[CrossRef\]', a2.text):
                         rdoi = a2['href']
-                        rdoi = re.sub('http...dx.doi.org.', ', DOI: ', rdoi)
+                        rdoi = re.sub('http.*.doi.org.', ', DOI: ', rdoi)
                         reference += rdoi
                 rec['refs'].append([('x', reference)])
     if rec['autaff']:
