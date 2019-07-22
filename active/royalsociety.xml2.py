@@ -14,6 +14,10 @@ import urllib2
 import urlparse
 import time
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
@@ -45,7 +49,12 @@ toclink = "%s/%s/%s/" % (urltrunk, re.sub('^[A-Z]', '', vol), issue)
 print "%s%s, Issue %s" %(jnlname,vol,issue)
 print "get table of content... from %s" % (toclink)
 
-tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
+driver = webdriver.PhantomJS()
+driver.implicitly_wait(30)
+driver.get(toclink)
+#tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
+tocpage = BeautifulSoup(driver.page_source)
+
 
 recs = []
 for h5 in tocpage.body.find_all('h5', attrs = {'class' : 'issue-item__title'}):
@@ -53,7 +62,9 @@ for h5 in tocpage.body.find_all('h5', attrs = {'class' : 'issue-item__title'}):
         artlink = "%s%s" % ('https://royalsocietypublishing.org', a['href'])
         print artlink
         time.sleep(1)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+        #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+        driver.get(artlink)
+        artpage = BeautifulSoup(driver.page_source)
         rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'auts' : []}
         rec['doi'] = re.sub('.*\/(10\..*)', r'\1', artlink)
         #meta
