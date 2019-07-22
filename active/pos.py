@@ -203,7 +203,7 @@ def pos_harvesting(conf_acronym,cnum):
         bigxmlfile.write('</collection>\n')
         bigxmlfile.close()
        
-    os.system("cp %spos_%s.xml %s" % (xmlpath,conf_acronym,publisherpath))
+    #os.system("cp %spos_%s.xml %s" % (xmlpath,conf_acronym,publisherpath))
     os.system("cp %spos_%s.xml %s" % (xmlpath, cat, publisherpath))
     
     if appendrecs:
