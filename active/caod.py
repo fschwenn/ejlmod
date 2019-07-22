@@ -59,7 +59,7 @@ if jnl == 'justc' and year == '2018':
     
 recs = []
 for div in isutocpage.body.find_all('div', attrs = {'class' : 'searchrl'}):
-    rec = {'jnl' : jnlname, 'vol' : vol, 'isu' : isu, 'year' : year, 'tc' : tc,
+    rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : isu, 'year' : year, 'tc' : tc,
            'auts' : [], 'keyw' : []}
     #authors
     for authors in div.find_all('div', attrs = {'itemprop' : 'author'}):
