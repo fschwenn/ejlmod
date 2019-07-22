@@ -27,7 +27,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 # uninteresting journals:
 
 
-jw = ['00153', '11105', '00426', '10853', '00477']
+jw = ['00153', '11105', '00426', '00477']
 
 
 #INSPIRE convention instead of DPBN as in springer.py
@@ -251,8 +251,12 @@ def xmlExtract():
             rec['vol'] = re.sub('\-','',getAllText(artxml.getElementsByTagName('BookElectronicISBN')[0])) # get Volumbenumber from XML-file for books(FS)             
     if isbook: ti =cti
     ti = getAllTextplusTeX(ti[0]) # (FS)
+
+    print '-----', ti
+    
     run_title = artxml.getElementsByTagName('RunningTitle')
-    if run_title !=[]: ti = getAllTextplusTeX(run_title[0]) # for lnp 
+    #erstmal auskommentiert, weil Titel abgekuerzt waren
+    #if run_title !=[]: ti = getAllTextplusTeX(run_title[0]) # for lnp 
     rec["tit"] = ti
     for node in artxml.getElementsByTagName('AuthorGroup'):
         auths = node.getElementsByTagName('Author')
