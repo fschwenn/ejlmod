@@ -1,7 +1,7 @@
 # -*- coding: UTF-8 -*-
 #!/usr/bin/python
-#program to harvest OUP-journals
-# FS 2015-01-26
+#program to harvest ASP books
+# FS 2019-06-21
 
 import os
 import ejlmod2
@@ -10,10 +10,10 @@ import sys
 import unicodedata
 import string
 import codecs 
-#import urllib2
-#import urlparse
+import urllib2
+import urlparse
 import time
-#from bs4 import BeautifulSoup
+from bs4 import BeautifulSoup
 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
@@ -27,65 +27,70 @@ jnlfilename = 'aspcs%s' % (bookid)
 if len(sys.argv) > 2:
     jnlfilename += '.' + sys.argv[2] 
 jnlname = 'ASP Conf.Ser.'
+typecode = 'C'
 
 
 urltrunk = "http://aspbooks.org/a/volumes"
-
-if not os.path.isfile(tmpdir+"/"+jnlfilename+".toc"):
-    print "%s/table_of_contents/?book_id=%s" % (urltrunk,bookid)
-    os.system('lynx -source "%s/table_of_contents/?book_id=%s" > %s/%s.toc' % (urltrunk,bookid,tmpdir,jnlfilename))
-
+tocurl = "%s/table_of_contents/?book_id=%s" % (urltrunk,bookid)
+tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
 print "read table of contents..."
-tocfil = open(tmpdir+"/"+jnlfilename+".toc",'r')
-articleIDs = []
 
+#global metadata
+for table in tocpage.find_all('table', attrs = {'id' : 'volumeDetails'}):
+    for tr in table.find_all('tr'):
+        for span in tr.find_all('span'):
+            if re.search('Year:', span.text, re.IGNORECASE):
+                for td in tr.find_all('td'):
+                    #volume
+                    if re.search('View this Volume on ADS', td.text, re.IGNORECASE):
+                        for a in td.find_all('a'):
+                            vol = re.sub('.*olume=(\d+).*', r'\1', a['href'])
+                    #year
+                    elif re.search('[12]\d\d\d', td.text):
+                        year = re.sub(' *([12]\d\d\d) *', r'\1', re.sub('[\n\t\r]', '', td.text.strip()))
+            elif re.search('Title:', span.text, re.IGNORECASE):
+                for td in tr.find_all('td', attrs = {'colspan' : '4'}):
+                    #note
+                    note1 = td.text.strip()
 
-
-
-typecode = 'C'
-note = ''
+#find article linkes
 recs = []
-toclines = ''.join(map(tfstrip,tocfil.readlines()))
-for line in  re.split('<tr', toclines):
-    #print line
-    if re.search('>Volume:<', line):
-        vol = re.sub('.*Volume.*?<span.*?>(\d+)<.*', r'\1', line.strip())
-    if re.search('>Year:<', line):
-        year = re.sub('.*Year.*?<span.*?>(\d+)<.*', r'\1', line.strip())
-    if re.search('<b>',line):
-        note = re.sub('<.*?>', ' ', re.sub('.*<b>(.*?)<.b>.*',r'\1',line.strip()))
-    if re.search('href.*article_details',line):
-        rec = {'jnl' : jnlname, 'note' : [note], 'tc' : typecode, 'vol' : vol, 'year' : year}
-        artlink = urltrunk + re.sub('.*href=".a.volumes(.*?)".*', r'\1', line.strip())
-        artfilname = tmpdir+"/"+jnlfilename+'.'+re.sub('.*=', '', artlink)
-        rec['link'] = artlink
-        rec['fc'] = 'a'
-        print artlink
-        if not os.path.isfile(artfilname):
-            os.system('lynx -source "%s" > %s' % (artlink, artfilname))
-            time.sleep(10)
-        inf = open(artfilname, 'r')
-        artlines = ''.join(map(tfstrip, inf.readlines()))
-        for line in  re.split('<tr', artlines):
-            if re.search('>Paper:<', line):
-                rec['tit'] = re.sub('.*Paper.*<td.*?>(.*?)<.td.*', r'\1', line.strip())
-            elif re.search('>Page:<', line):
-                rec['p1'] = re.sub('.*Page.*<td>(\d+)<.td.*', r'\1', line.strip())
-            elif re.search('>Authors:<', line):
-                rec['auts'] = re.split(' *; *', re.sub('.*Authors.*<td.*?>(.*?)<.td.*', r'\1', line.strip()))
-            elif re.search('>Abstract:<', line):
-                rec['abs'] = re.sub('.*Abstract.*<td>(.*?)<.td>.*', r'\1', line.strip())
-            
-        if not rec.has_key('tit') or rec['tit'] == '':
-            print '!!!! not title'
-            print rec
-            sys.exit(0)
-        if len(sys.argv) > 2:
-            rec['cnum'] = sys.argv[2] 
-        #print rec
-        if len(rec['auts']) > 1 or rec['auts'][0] != '':
-            recs.append(rec)
+note2 = False
+for table in tocpage.find_all('table', attrs = {'cellspacing' : '3'}):
+    for tr in table.find_all('tr'):
+        for b in tr.find_all('b'):
+            note2 = b.text.strip()
+        for a in tr.find_all('a'):
+            rec = {'jnl' : jnlname, 'note' : [note1], 'tc' : typecode, 'vol' : vol, 'year' : year}
+            if note2:
+                rec['note'].append(note2)
+            if len(sys.argv) > 2:
+                rec['cnum'] = sys.argv[2] 
+            rec['link'] = urltrunk + re.sub('.*a.volumes', '', a['href'])
+            if not a.text.strip() in ['Volume Cover', 'Front Matter', 'Back Matter']:
+                recs.append(rec)
 
+#check individual articles
+i = 0
+for rec in recs:
+    i += 1
+    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['link'])
+    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+    for table in artpage.find_all('table', attrs = {'cellspacing' : '3'}):
+        for tr in table.find_all('tr'):
+            tds = tr.find_all('td')
+            if len(tds) == 2:
+                if tds[0].text.strip() == 'Paper:':
+                    rec['tit'] = tds[1].text.strip()
+                elif tds[0].text.strip() == 'Page:':
+                    rec['p1'] = tds[1].text.strip()
+                elif tds[0].text.strip() == 'Authors:':
+                    rec['auts'] = re.split(' *; *', tds[1].text.strip())
+                elif tds[0].text.strip() == 'Abstract:':
+                    rec['abs'] = tds[1].text.strip()
+
+
+                    
 jnlfilename = 'aspcs%s.%s' % (vol, bookid)
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
