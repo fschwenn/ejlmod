@@ -79,7 +79,7 @@ i = 0
 for rec in recs:
     i += 1
     autaff = False
-    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['tit'])
+    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
@@ -133,7 +133,10 @@ for rec in recs:
         rec['licence'] = {'url' : a['href']}
     #references
     if jnl == 'pip':
-        reflink = re.sub('(.*)\/(.*)', r'https://www.papersinphysics.org/papersinphysics/article/download/\2/ref\2?inline=1', rec['artlink'])
+        #reflink = re.sub('(.*)\/(.*)', r'https://www.papersinphysics.org/papersinphysics/article/download/\2/ref\2?inline=1', rec['artlink'])
+        for a in artpage.body.find_all('a', attrs = {'class' : 'obj_galley_link file'}):
+            if re.search('REFERENCES', a.text):
+                reflink = re.sub('view', 'download', a['href'])
         print reflink
         refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(reflink))
         for a in refpage.body.find_all('a'):
