@@ -28,11 +28,12 @@ TRANSLATE ={"&uuml;":u"ü", "&auml;":u"ä", "&ouml;":u"ö", "&Auml;":u"Ä",
 def get_references(url):
     from refextract import extract_references_from_string
     filename = url.split('/')[-1]
-#    os.system('wget -q -O %s%s %s' % (tmppath, filename, url))
-#    os.system('/usr/bin/pdftotext %s%s' % (tmppath, filename))
+    if not os.path.isfile('%s/%s.txt' % (tmppath, filename[:-4])):
+        os.system('wget -q -O %s%s %s' % (tmppath, filename, url))
+        os.system('/usr/bin/pdftotext %s%s' % (tmppath, filename))
 
     infile = codecs.EncodedFile(codecs.open('%s/%s.txt' % (tmppath, filename[:-4])),'utf8')
-    fulltext = clean_fulltext_jacow(infile.readlines())
+    fulltext = clean_fulltext_jacow(infile.readlines(), verbose=1)
 #    fulltext = clean_linebreaks(fulltext)
     fulltext = get_reference_section(fulltext)
     infile.close()
@@ -125,9 +126,9 @@ def convertToInspire(argv):
     outfile = codecs.EncodedFile(codecs.open(ejl+'jacow.'+conf+'.xml',mode='wb'),'utf8')
     outfile.write('<?xml version="1.0" encoding="UTF-8"?>\n<collection>\n')
         
-    authorproblems = codecs.EncodedFile(codecs.open(publisherdatapath+conf+'_author_problems.txt',mode='wb'),'utf8')
-    authorsfile = codecs.EncodedFile(codecs.open(ejl+'jacow.'+conf+'_authors.txt',mode='wb'),'utf8')
-    incompleteAuthorsfile = codecs.EncodedFile(codecs.open(ejl+'jacow.'+conf+'_incomplete_authors.txt',mode='wb'),'utf8')
+#    authorproblems = codecs.EncodedFile(codecs.open(publisherdatapath+conf+'_author_problems.txt',mode='wb'),'utf8')
+#    authorsfile = codecs.EncodedFile(codecs.open(ejl+'jacow.'+conf+'_authors.txt',mode='wb'),'utf8')
+#    incompleteAuthorsfile = codecs.EncodedFile(codecs.open(ejl+'jacow.'+conf+'_incomplete_authors.txt',mode='wb'),'utf8')
  
  
     nrec = 0
@@ -310,46 +311,47 @@ def convertToInspire(argv):
 #                doctyp = 'ConferencePaper'
 #        record_add_field(record,'980',' ',' ','',[('a',doctyp)])
 #        record_add_field(record,'980',' ',' ','',[('a','HEP')])
-#    
-        #get authors and write them into the authors file
-        authors = record_get_field_instances(record, '100')
-        authors += record_get_field_instances(record, '700')
-        
-        for i in range(0, len(authors)):
-            name=''; aff=''; rawaff=''; email=''; aid=''
-            for line in authors[i][0]:
-                if line[0] == 'a':
-                    name = line[1]
-                if line[0] == 'u':
-                    rawaff = line[1] 
-                if line[0] == 'v':
-                    aff = line[1]
-                if line[0] == 'm':
-                    email = line[1]
-                if line[0] == 'j':
-                    aid = line[1]
-            
-
-            if email or aid:
-                afile = authorsfile
-            else:
-                badcounter += 1
-                if badcounter < 10:
-                    print 'Author informations not complete!  Writing them to '+conf+'_incomplete_authors.txt.'
-                elif badcounter == 10:
-                    print 'More authors fail'
-                afile = incompleteAuthorsfile
-            if name:
-                afile.write('NAME='+name+';\n')
-            if aff:
-                afile.write('AFFILIATION='+aff+';\n')
-            if rawaff:
-                afile.write('ADDRESS='+rawaff+';\n')
-            if email:
-                afile.write('EMAIL='+email+';\n')
-            if aid:
-                afile.write('ID='+aid+';\n')
-            afile.write(';\n')
+# 
+   
+##        #get authors and write them into the authors file
+##        authors = record_get_field_instances(record, '100')
+##        authors += record_get_field_instances(record, '700')
+##        
+##        for i in range(0, len(authors)):
+##            name=''; aff=''; rawaff=''; email=''; aid=''
+##            for line in authors[i][0]:
+##                if line[0] == 'a':
+##                    name = line[1]
+##                if line[0] == 'u':
+##                    rawaff = line[1] 
+##                if line[0] == 'v':
+##                    aff = line[1]
+##                if line[0] == 'm':
+##                    email = line[1]
+##                if line[0] == 'j':
+##                    aid = line[1]
+##            
+##
+##            if email or aid:
+##                afile = authorsfile
+##            else:
+##                badcounter += 1
+##                if badcounter < 10:
+##                    print 'Author informations not complete!  Writing them to '+conf+'_incomplete_authors.txt.'
+##                elif badcounter == 10:
+##                    print 'More authors fail'
+##                afile = incompleteAuthorsfile
+##            if name:
+##                afile.write('NAME='+name+';\n')
+##            if aff:
+##                afile.write('AFFILIATION='+aff+';\n')
+##            if rawaff:
+##                afile.write('ADDRESS='+rawaff+';\n')
+##            if email:
+##                afile.write('EMAIL='+email+';\n')
+##            if aid:
+##                afile.write('ID='+aid+';\n')
+##            afile.write(';\n')
 
         # delete wrong aff and move adress to v
         for marc in ['100','700']:
@@ -399,12 +401,14 @@ def convertToInspire(argv):
     
     print 'created xml for %s records' % nrec
 
-    incompleteAuthorsfile.close()
-    authorsfile.close()
-    authorproblems.close()
+#    incompleteAuthorsfile.close()
+#    authorsfile.close()
+#    authorproblems.close()
     
     outfile.write('</collection>\n')
     outfile.close()
 
+
+    print 'To remove fulltexts:   rm /tmp/jacow/*'
 if __name__ == "__main__":
     convertToInspire(sys.argv[1:])
