@@ -110,6 +110,10 @@ for i in range(numpages):
         if div.has_attr('class') and 'columns' in div['class']:
             if 'large-12' in div['class'] and 'margin-top' in div['class']:
                 for child in div.children:
+                    rec = {'refs' : [], 'tc' : tc,
+                           'autaff' : [], 'keyw' : [], 'jnl' : jnlname}
+                    if len(sys.argv) > 3:
+                        rec['issue'] = iss
                     try:
                         child.name
                     except:
@@ -118,8 +122,7 @@ for i in range(numpages):
                         note = child.text.strip()
                     elif child.name == 'div':
                         for a in child.find_all('a', attrs = {'class' : 'url doi'}):
-                            rec = {'artlink2' : a['href'], 'refs' : [], 'tc' : tc,
-                                   'autaff' : [], 'keyw' : [], 'jnl' : jnlname}
+                            rec['artlink2'] = a['href']
                             rec['note'] = [ note ]
                             rec['doi'] = re.sub('.*doi.org.', '', a['href'])
                             if rec['doi'] in ['10.4208/cicp.060515.161115b', 
@@ -135,6 +138,12 @@ for i in range(numpages):
                         #real article link
                         for a2 in child.find_all('a', attrs = {'class' : 'part-link'}):
                             rec['artlink'] = 'https://www.cambridge.org' + a2['href']
+                            if not 'doi' in rec.keys():
+                                rec['note'] = [ note ]
+                                if not note in ['Front Cover (OFC, IFC) and matter', 
+                                                'Back Cover (OBC, IBC) and matter']:
+                                    recs.append(rec)
+                                    print '?', rec['note']
 
 
 #2nd run to get details for individual articles
@@ -157,7 +166,10 @@ for rec in recs:
         req = urllib2.Request(rec['artlink2'], headers=hdr)
         artpage = BeautifulSoup(urllib2.urlopen(req))
         time.sleep(2)
-    print '------{ %s }------{ %i/%i }------' % (rec['doi'], i, len(recs))
+    try:
+        print '------{ %s }------{ %i/%i }------' % (rec['doi'], i, len(recs))
+    except:
+        print '------{ %i/%i }------' % (i, len(recs))
     for meta in artpage.head.find_all('meta'):
         if meta.attrs.has_key('name'):
             #title
@@ -178,6 +190,9 @@ for rec in recs:
                     rec['issue'] = meta['content']
             elif meta['name'] == 'citation_publication_date':
                 rec['year'] = meta['content'][:4]
+            #DOI
+            elif meta['name'] == 'citation_doi':
+                rec['doi'] = meta['content']
             #authors
             elif meta['name'] == 'citation_author':
                 rec['autaff'].append([meta['content'].title()])
