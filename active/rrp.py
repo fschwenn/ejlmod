@@ -50,7 +50,7 @@ for table in tocpage.body.find_all('table', attrs = {'dwcopytype' : 'CopyTableRo
             if fonttext:
                 tsection = fonttext
         for b in tr.find_all('b', attrs = {'class' : 'tocTitle'}):
-            rec = {'jnl' : jnlname, 'vol' : vol, 'iss' : issue, 'year' : year,
+            rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : issue, 'year' : year,
                    'tc' : 'P', 'note' : [tsection], 'auts' : []}
             rec['tit'] = b.text.strip()
         for div in tr.find_all('div'):
