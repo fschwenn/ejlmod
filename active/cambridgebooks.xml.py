@@ -38,7 +38,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 #scan serieses
 for series in serieses:
     prerecs = []
-    toclink = '%s/%s/' % (urltrunc, series)
+    toclink = '%s/%s%s' % (urltrunc, series, '?pageSize=20')
     subject = re.sub('.*\/', '', series)
     print '---{ %s }---' % (series)
     tocreq = urllib2.Request(toclink, headers={'User-Agent' : "Magic Browser"}) 
