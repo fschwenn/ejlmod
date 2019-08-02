@@ -158,6 +158,8 @@ for article in articles:
             rec['jnl'] = jnl[issn]
             if issn in ['1742-6596']:
                 tc = ['C']
+            elif issn in ['0034-4885']:
+                tc = ['PR']
             else:
                 tc = ['P']
         else:
@@ -343,6 +345,8 @@ for article in articles:
                             link = ' DOI: ' + re.sub('.*dx.doi.org\/', '', at)
                         else:
                             link = a['href']
+                    elif re.search('Google.?Scholar', a.text) or re.search('ADS', a.text):
+                        link = ''
                     else:
                         link = ', %s: %s' % (at, a['href'])
                     a.replace_with(link)
