@@ -46,8 +46,10 @@ for issue in re.split(',', issues):
                                 rec['note'].append(note1)
                             for a in li.find_all('a', attrs = {'class' : 'highwire-cite-linked-title'}):
                                 rec['artlink'] = 'https://www.pnas.org' + a['href']
-                            if not note1 in ['Commentaries', 'This Week in PNAS', 'News Feature']:
-                                recs.append(rec)
+                            if not rec['artlink'] in artlinks:
+                                artlinks.append(rec['artlink'])
+                                if not note1 in ['Commentaries', 'This Week in PNAS', 'News Feature']:
+                                    recs.append(rec)
                         elif 'issue-toc-section' in li['class']:
                             for grandchild in li.children:
                                 try:
@@ -73,6 +75,7 @@ for issue in re.split(',', issues):
                                                     if not note1 in ['Commentaries', 'This Week in PNAS', 'News Feature']:
                                                         recs.append(rec)
     time.sleep(7)
+
 
 for i in range(len(recs)):
     print '------{ %5i/%5i }---{ %s }---' % (i+1, len(recs), recs[i]['artlink'])
