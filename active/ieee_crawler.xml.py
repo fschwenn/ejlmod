@@ -103,14 +103,13 @@ def ieee(number):
     #get name of journal
     if number[0] == 'C': 
         #toclink = "/xpl/mostRecentIssue.jsp?punumber=%s&rowsPerPage=2000" % (number[1:])        
-        toclink = "/xpl/conhome/%s/proceeding?rowsPerPage=2000" % (number[1:])
+        toclink = "/xpl/conhome/%s/proceeding?rowsPerPage=50" % (number[1:])
         tc = 'C'
         jnlname = 'IEEE Nucl.Sci.Symp.Conf.Rec.'
         jnlname = 'BOOK'
     else:
-        toclink = "/xpl/tocresult.jsp?isnumber=%s&rowsPerPage=2000" % (number)
+        toclink = "/xpl/tocresult.jsp?isnumber=%s&rowsPerPage=50" % (number)
         tc = 'P'
-    print 'getting TOC from %s%s' % (urltrunc, toclink)
 
 # https://ieeexplore.ieee.org/xpl/tocresult.jsp?isnumber=8246765&rowsPerPage=2000
     
@@ -118,26 +117,54 @@ def ieee(number):
     driver = webdriver.PhantomJS()
     driver.implicitly_wait(30)
     #driver.delete_all_cookies()
-    driver.get(urltrunc + toclink)
-    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
-    #clicl to accept cookies
-    driver.find_element_by_css_selector('.cc-btn.cc-dismiss').click()
-    time.sleep(3)
-    page = BeautifulSoup(driver.page_source)
-    #get links to individual articles
-    articlelinks = []
-    for a in page.body.find_all('a'):
-        #print a
-        if a.text == 'View more':
-            link = a['href']
-            articlelinks.append(urltrunc+link)
+    gotallarticles = False
+    allarticlelinks = []
+    notproperarticles = 0
+    numberofarticles = 1000000
+    i = 0
+    while not gotallarticles:
+        i += 1
+        pagecommand = '&pageNumber=%i' % (i)
+        print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)
+        driver.get(urltrunc + toclink + pagecommand)
+        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
+        #clicl to accept cookies
+        if i == 1:
+            driver.find_element_by_css_selector('.cc-btn.cc-dismiss').click()
+        time.sleep(3)
+        page = BeautifulSoup(driver.page_source)
+        if i == 1:
+            for div in page.body.find_all('div', attrs = {'class' : 'Dashboard-header'}):
+                divt = re.sub('[\n\t\r]', ' ', div.text.strip())
+                numberofarticles = int(re.sub('.* of +(\d+).*', r'\1', divt))
+        #get links to individual articles
+        articlelinks = []
+        for headline in page.body.find_all('h2', attrs = {'class' : 'result-item-title'}):
+            links = headline.find_all('a')
+            if links:
+                for a in links:
+                    #print a
+                    #if a.text == 'View more':
+                    link = a['href']
+                    articlelinks.append(urltrunc+link)
+            else:
+                print ' not an article: %s' % (headline.text.strip())
+                notproperarticles += 1
+        if articlelinks:
+            allarticlelinks += articlelinks
+            print '   %i article links of %i so far (+ %i not proper articles)' % (len(allarticlelinks), numberofarticles, notproperarticles)
+            if len(allarticlelinks) + notproperarticles >= numberofarticles:
+                gotallarticles = True
+        else:
+            break
+        time.sleep(10)
 
-    print 'found %i article links' % (len(articlelinks))
+    print 'found %i article links' % (len(allarticlelinks))
     recs = []
     i = 0
-    for articlelink in articlelinks:
+    for articlelink in allarticlelinks:
         i += 1
-        print '---{ %i/%i }---{ %s }---' % (i, len(articlelinks), articlelink)
+        print '---{ %i/%i }---{ %s }---' % (i, len(allarticlelinks), articlelink)
         #rec['note'] = ['Konferenz ?']
         artfilename = '/tmp/ieee_%s.%i' % (number, i)
         if not os.path.isfile(artfilename):
@@ -264,12 +291,12 @@ def ieee(number):
                     
         if jnlname == 'IEEE Nucl.Sci.Symp.Conf.Rec.':
             try:
-                print '%3i/%3i %s (%s) %s, %s' % (i,len(articlelinks),rec['conftitle'],rec['year'],rec['doi'],rec['tit'])
+                print '%3i/%3i %s (%s) %s, %s' % (i,len(allarticlelinks),rec['conftitle'],rec['year'],rec['doi'],rec['tit'])
             except: 
-                print '%3i/%3i %s' % (i,len(articlelinks),rec['tit'])
+                print '%3i/%3i %s' % (i,len(allarticlelinks),rec['tit'])
         else:
             try:
-                print '%3i/%3i %s %s (%s) %s, %s' % (i,len(articlelinks),jnlname,rec['vol'],rec['year'],rec['p1'],rec['tit'])
+                print '%3i/%3i %s %s (%s) %s, %s' % (i,len(allarticlelinks),jnlname,rec['vol'],rec['year'],rec['p1'],rec['tit'])
             except:
                 print rec
         recs.append(rec)
