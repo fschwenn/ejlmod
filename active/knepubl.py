@@ -71,7 +71,7 @@ for rec in recs:
             elif meta['name'] == 'citation_volume':
                 rec['vol'] = meta['content']
             elif meta['name'] == 'citation_issue':
-                rec['iss'] = meta['content']
+                rec['issue'] = meta['content']
             elif meta['name'] == 'citation_firstpage':
                 rec['p1'] = meta['content']
             elif meta['name'] == 'citation_lastpage':
