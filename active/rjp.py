@@ -56,7 +56,7 @@ for div in tocpage.body.find_all('div'):
             rec['abs'] = div.text.strip()
             recs.append(rec)
     elif div.has_attr('style') and div['style'] == 'vertical-align:top;text-align:left;':
-        rec = {'jnl' : jnlname, 'vol' : vol, 'iss' : issue, 'year' : year, 
+        rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : issue, 'year' : year, 
                'tc' : 'P', 'note' : [tsection], 'auts' : []}
         for span in div.find_all('span', attrs = {'class' : 'toct'}):
             rec['tit'] = span.text.strip()
