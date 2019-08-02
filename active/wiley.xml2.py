@@ -21,30 +21,50 @@ vol = sys.argv[2]
 issue = sys.argv[3]
 year = sys.argv[4]
 jnlfilename = re.sub('\/','-',jnl+vol+'.'+issue)
-if   (jnl == 'annphys'): 
+#harvested vi desydoc
+if   (jnl == 'annphys'):
     issn = '1521-3889'
     doitrunk = '10.1002/andp'
     jnlname = 'Annalen Phys.'
-elif (jnl == 'puz'):
-    issn = '1521-3943'
-    doitrunk = '10.1002/piuz'
-    jnlname = 'Phys.Unserer Zeit'
 elif (jnl == 'fortp'):
     issn = '1521-3978'
     doitrunk = '10.1002/prop'
     jnlname = 'Fortsch.Phys.'
-elif (jnl == 'mnraa'):
-    issn = '1356-2966'
-    doitrunk = '10.1111/mnr'
-    jnlname = 'Mon.Not Roy.Astron.Soc.'
+elif (jnl == 'cpama'):
+    issn = '1097-0312'
+    doitrunk = '10.1002/cpa'
+    jnlname = 'Commun.Pure Appl.Math.'  
+#harevsted by hand
+elif (jnl == 'mdpc'):
+    issn = '2577-6576'
+    doitrunk = '10.1002/mdp2'
+    jnlname = 'Mater.Des.Proc.Comm.'
+elif (jnl == 'anyaa'):
+    issn = '1749-6643'
+    doitrunk = '10.1111/nyas'
+    jnlname = 'Annals N.Y.Acad.Sci.'
+elif (jnl == 'ctpp'):
+    issn = '1521-3986'
+    doitrunk = '10.1002/ctpp'
+    jnlname = 'Contrib.Plasma Phys.'
+elif (jnl == 'mma'):
+    issn = '1099-1476'
+    doitrunk = '10.1002/mma'
+    jnlname = 'Math.Methods Appl.Sci.'
+#not harvested
 elif (jnl == 'jamma'):
     issn = '1521-4001'
     doitrunk = '10.1002/zamm'
     jnlname = 'J.Appl.Math.Mech.'
-elif (jnl == 'cpama'):
-    issn = '1097-0312'
-    doitrunk = '10.1002/cpa'
-    jnlname = 'Commun.Pure Appl.Math.'
+elif (jnl == 'puz'):
+    issn = '1521-3943'
+    doitrunk = '10.1002/piuz'
+    jnlname = 'Phys.Unserer Zeit'
+#now at other publishers    
+elif (jnl == 'mnraa'): 
+    issn = '1356-2966'
+    doitrunk = '10.1111/mnr'
+    jnlname = 'Mon.Not Roy.Astron.Soc.'
 elif (jnl == 'mnraal'):
     issn = '1745-3933'
     doitrunk = '10.1002/mnl'
@@ -53,18 +73,6 @@ elif (jnl == 'asnaa'):
     issn = '1521-3994'
     doitrunk = '10.1002/asna'
     jnlname = 'Astron.Nachr.'
-elif (jnl == 'anyaa'):
-    issn = '1749-6643'
-    doitrunk = '10.1111/nyas'
-    jnlname = 'Annals N.Y.Acad.Sci.'
-elif (jnl == 'tnya'):
-    doitrunk = '10.1111/tnya'
-    jnlname = 'Trans.New York Acad.Sci.'
-elif (jnl == 'mdpc'):
-    issn = '2577-6576'
-    doitrunk = '10.1002/mdp2'
-    jnlname = 'Mater.Des.Proc.Comm.'
-    
 
 
 
@@ -179,6 +187,7 @@ for rec in recs:
                 else:
                     a.replace_with('')
             ref = li.text.strip()
+            ref = re.sub(' ([12]\d\d\d); ([A-Z0-9\(\)]+): ', r'\2 (\1) ', ref)
             rec['refs'].append([('x', ref)])
     if not jnl in ['puz']:
         rec['tc'] = typecode
