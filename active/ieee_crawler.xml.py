@@ -89,6 +89,8 @@ def translatejnlname(ieeename):
     elif ieeename in ["Instrumentation & Measurement Magazine, IEEE", "IEEE Instrumentation & Measurement Magazine"]:
         jnlname = 'IEEE Instrum.Measur.Mag.'
         tc = 'I'
+    elif ieeename in ['IEEE Sensors Journal']:
+        jnlname = 'IEEE Sensors J.'
     elif ieeename in ["IEEE Symposium Conference Record Nuclear Science 2004.",
                       "IEEE Nuclear Science Symposium Conference Record, 2005"]:
         jnlname = 'BOOK'
@@ -146,7 +148,8 @@ def ieee(number):
                     #print a
                     #if a.text == 'View more':
                     link = a['href']
-                    articlelinks.append(urltrunc+link)
+                    if not link in ['/document/8733895/']:
+                        articlelinks.append(urltrunc+link)
             else:
                 print ' not an article: %s' % (headline.text.strip())
                 notproperarticles += 1
