@@ -14,6 +14,7 @@ import urllib2
 import urlparse
 from bs4 import BeautifulSoup
 import datetime
+import time
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
@@ -38,7 +39,7 @@ if jnl == 'proceedings':
     done = []
 else:
     starturl = 'http://www.mdpi.com/search?journal=%s&year_from=1996&year_to=2025&page_count=10&sort=pubdate&view=default' % (jnl)
-    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=2016&year_to=2025&page_count=10&sort=pubdate&view=default' % (jnl)
+    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=2018&year_to=2025&page_count=10&sort=pubdate&view=default' % (jnl)
     jnlfilename = '%s.%s' % (jnl, stampoftoday)
     done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
@@ -70,14 +71,17 @@ else:
             for a in div.find_all('a', attrs = {'class' : 'title-link'}):
                 if not ('http://www.mdpi.com' + a['href'], a.text) in artlinks:
                     artlinks.append(('http://www.mdpi.com' + a['href'], a.text))
+        time.sleep(3)
 
 done = []
                     
 i=0
 recs = []
 for artlink in artlinks:
-    rec = {'jnl' : jnl.title(), 'tc' : 'C', 'keyw' : [], 'aff' : [], 'auts' : [],
-           'note' : [], 'refs' : []}#, 'cnum' : 'C18-09-18.1'}
+    rec = {'jnl' : jnl.title(), 'tc' : 'P', 'keyw' : [], 'aff' : [], 'auts' : [],
+           'note' : [], 'refs' : []}
+    #rec['tc'] = 'C'
+    #rec['cnum'] = 'C18-07-04.1'
     i += 1
     #title and link
     if jnl == 'proceedings':
@@ -88,12 +92,18 @@ for artlink in artlinks:
         rec['jnl'] = 'Condens.Mat.'
     elif jnl == 'physics':
         rec['jnl'] = 'MDPI Physics'
-    print '---{ %i/%i }---{ %s }---' % (i, len(artlinks), artlink[0])
+    print '---{ %3i/%3i }---{ %s }---' % (i, len(artlinks), artlink[0])
     rec['FFT'] = artlink[0] + '/pdf'
     rec['tit'] = artlink[1]
     #get detailed page
-    artreq = urllib2.Request(artlink[0], headers=hdr)
-    page = BeautifulSoup(urllib2.urlopen(artreq))
+    try:
+        artreq = urllib2.Request(artlink[0], headers=hdr)
+        page = BeautifulSoup(urllib2.urlopen(artreq))
+    except:
+        print '   ... wait 15 minutes'
+        time.sleep(900)
+        artreq = urllib2.Request(artlink[0], headers=hdr)
+        page = BeautifulSoup(urllib2.urlopen(artreq))        
     ##Review?1
     for meta in page.head.find_all('meta', attrs = {'name' : 'dc.type'}):
         if meta['content'] == 'Review': rec['tc'] = 'R'
@@ -166,10 +176,14 @@ for artlink in artlinks:
                 span.replace_with(';;;')
             for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
                 rec['aff'].append(aff.strip())
-    #references
+    #references    
     reflink = artlink[0]  + '/htm'
-    refreq = urllib2.Request(reflink, headers=hdr)
-    refpage = BeautifulSoup(urllib2.urlopen(refreq))
+    print '-----------------{ %s }---' % (reflink)
+    try:
+        refreq = urllib2.Request(reflink, headers=hdr)
+        refpage = BeautifulSoup(urllib2.urlopen(refreq))
+    except:
+        print '   could not get references'
     for section in refpage.body.find_all('section', attrs = {'id' : 'html-references_list'}):
         for li in section.find_all('li'):
             for a2 in li.find_all('a', attrs = {'class' : 'cross-ref'}):
@@ -186,6 +200,8 @@ for artlink in artlinks:
             lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
             rec['refs'].append([('x', lit)])
     recs.append(rec)
+    print '  ', rec.keys()
+    time.sleep(2)
 print '%i new records' % (len(recs)) 
 
 #write xml
