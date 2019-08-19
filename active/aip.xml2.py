@@ -141,6 +141,9 @@ def getarticle(href, sec, subsec, p1):
         if not 'tit' in rec.keys():
             for h3 in header.find_all('h3'):
                 rec['tit'] = h3.text.strip()
+        if not 'tit' in rec.keys():
+            for h1 in header.find_all('h1'):
+                rec['tit'] = h1.text.strip()
         rec['tit'] = re.sub('\n* *Scilight relation icon', '', rec['tit'])
     #doi
     rec['doi'] = re.sub('\/doi\/', '', re.sub('\/doi\/full\/', '', re.sub('.doi.abs.', '', href)))
