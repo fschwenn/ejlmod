@@ -30,6 +30,9 @@ if   (jnl == 'arnps'):
 elif (jnl == 'araa'):
     jnlname = 'Ann.Rev.Astron.Astrophys.'
     urltrunk = 'http://www.annualreviews.org/toc/astro/%s/1' % (vol)
+elif (jnl == 'arcmp'):
+    jnlname = 'Ann.Rev.Condensed Matter Phys.'
+    urltrunk = 'http://www.annualreviews.org/toc/conmatphys/%s/1' % (vol)
 
 
 print "get table of content of %s%s ... via %s" %(jnlname,vol, urltrunk)
