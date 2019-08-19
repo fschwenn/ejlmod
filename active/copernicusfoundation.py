@@ -54,8 +54,9 @@ for rec in recs:
     artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     for center in artpage.find_all('center'):
         for table in center.find_all('table'):
-            for i in table.find_all('i'):
-                rec['doi'] = re.sub('.*?(10.*) *$', r'\1', i.text.strip())
+            for td in table.find_all('td'):
+                for i in td.find_all('i'):
+                    rec['doi'] = re.sub('.*?(10.*) *$', r'\1', td.text.strip())
             ttext = re.sub('[\n\t]', '', table.text.strip())
             pages = re.sub('.*pp. ([0-9\-]*).*', r'\1', ttext)
             rec['p1'] = re.sub('\-.*', '', pages)
