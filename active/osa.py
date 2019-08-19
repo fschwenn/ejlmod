@@ -92,6 +92,7 @@ for rec in recs:
         print "retry %s in 180 seconds" % (artlink)
         time.sleep(180)
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    print '   read meta tags'
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             if meta['name'] == 'dc.description':
@@ -124,7 +125,9 @@ for rec in recs:
     #references
     j = 0
     for ol in artpage.body.find_all('ol', attrs = {'id' : 'referenceById'}):
-        for li in ol.find_all('li'):
+        lis = ol.find_all('li')
+        print '   read %i references' % (len(lis))
+        for li in lis:
             j += 1
             for a in li.find_all('a'):
                 if re.search('Crossref', a.text):
