@@ -173,7 +173,7 @@ for artlink in artlinks:
     #abstract
     for p in articlepage.body.find_all('p'):
         for a in p.find_all('a', attrs = {'name' : 'Abstract'}):
-            rec['abs'] = re.sub(' *Abstract: *', '', a.text.strip())
+            rec['abs'] = re.sub(' *Abstract: *', '', p.text.strip())
     #references
     rec['refs'] = []
     for span in articlepage.body.find_all('span', attrs = {'class' : 'references'}):
