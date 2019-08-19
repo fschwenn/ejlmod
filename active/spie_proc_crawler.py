@@ -121,6 +121,26 @@ def spie(volume):
             pages = re.split(' *', div.text.strip())
             if len(pages) == 2 and pages[1] in ['pages', 'PAGES']:
                 rec['pages'] = pages[0]
+        #references
+        for div in articlepage.body.find_all('div', attrs = {'class' : 'section ref-list'}):
+            for div2 in div.find_all('div'):
+                if div2.has_attr('class'):
+                    if 'ref-content' in div2['class']:
+                        rdoi = False
+                        for a in div2.find_all('a'):
+                            if a.has_attr('href') and re.search('doi.org.10', a['href']):
+                                rdoi = re.sub('.*?(10\.\d+.*)', r'\1', a['href'])
+                            a.replace_with('')
+                        ref = div2.text.strip()
+                        if reflabel:
+                            ref = '[%s] %s' % (reflabel, ref)
+                            rec['refs'].append([('x', ref)])
+                        if rdoi:
+                            ref = re.sub('\.? *$', ', DOI: %s' % (rdoi), ref)
+                            rec['refs'].append([('x', ref), ('a', 'doi:%s' % (rdoi))])
+                        reflabel = False
+                    elif 'ref-label' in div2['class']:
+                        reflabel = re.sub('.*?(\d+).*', r'\1', div2.text.strip())
         if len(args) > 1:
             rec['cnum'] = args[1]
         try:
