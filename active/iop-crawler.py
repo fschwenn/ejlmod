@@ -51,6 +51,7 @@ jnls = {'1538-3881': 'Astron.J.',
         '1751-8121': 'J.Phys.',
         '1742-6596': 'J.Phys.Conf.Ser.',
         '0954-3899': 'J.Phys.',
+        '1361-6463': 'J.Phys.',
         '1475-7516': 'JCAP ',
         '1126-6708': 'JHEP ',
         '1748-0221': 'JINST ',
@@ -74,6 +75,7 @@ jnls = {'1538-3881': 'Astron.J.',
         '2399-6528': 'J.Phys.Comm.',
         '0741-3335': 'Plasma Phys.Control.Fusion',
         '0026-1394': 'Metrologia'}
+jnls['2516-1067'] = 'Plasma Res.Express'
 if jnls.has_key(issn):
     jnl = jnls[issn]
 else:
@@ -164,6 +166,8 @@ for tocpage in tocpages:
                                     rec['vol'] = 'A' + meta['content']
                                 elif issn == '0954-3899':
                                     rec['vol'] = 'G' + meta['content']
+                                elif issn == '1361-6463':
+                                    rec['vol'] = 'D' + meta['content']
                                 else:
                                     rec['vol'] = meta['content']
                             elif meta['name'] == 'citation_issue':
@@ -256,7 +260,9 @@ for tocpage in tocpages:
                                 doi = regexpiopurl.sub(', DOI: 10.1088/', a['href'])
                                 a.replace_with(doi)
                         for a in li.find_all('a'):
-                            if a.has_attr('href'):
+                            if re.search('Google.?Scholar', a.text) or re.search('ADS', a.text):
+                                a.replace_with('')
+                            elif a.has_attr('href'):
                                 link = ', %s: %s' % (a.text, a['href'])
                                 a.replace_with(link)
                         ref = li.text
