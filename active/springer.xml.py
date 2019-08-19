@@ -529,7 +529,8 @@ def xmlExtract():
                 if not rec.has_key('licence'):
                     for simplepara in artxml.getElementsByTagName('SimplePara'):
                         for rs in simplepara.getElementsByTagName('RefSource'):
-                            rec['licence'] = {'url' : rs.firstChild.data}
+                            if re.search('http', rs.firstChild.data):
+                                rec['licence'] = {'url' : rs.firstChild.data}
                             #rec['note'].append(rs.firstChild.data)
                         if not rec.has_key('licence'):
                             try:
@@ -608,6 +609,7 @@ def xmlExtractBook(): # (FS) extract book information. Just slightly different t
     if jnr == '8902':
         rec['bookseries'] = [('a', 'SpringerBriefs in Physics')]
     elif jnr == '8790':
+        rec['tc'] = 'T'
         rec['bookseries'] = [('a', 'Springer Theses')]
     #proceedings: 
     if jnr in ['7395','0361']: rec['tc'] = 'K'
