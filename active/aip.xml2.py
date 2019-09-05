@@ -13,7 +13,7 @@ import codecs
 from bs4 import BeautifulSoup
 import time
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+xmldir = '/afs/desy.de/user/l/library/inspire'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
@@ -56,6 +56,10 @@ elif (jnl == 'jap'):
     jnlname = 'J.Appl.Phys.'
 elif (jnl == 'jcp'):
     jnlname = 'J.Chem.Phys.'
+elif (jnl == 'phf'):
+    jnlname = 'Phys.Fluids'
+
+    
     
 tocfilname = '%s/%s.toc' % (tmpdir, jnlfilename)
 urltrunk = 'http://aip.scitation.org/toc/%s/%s/%s?size=all' % (jnl,vol,iss)
@@ -83,7 +87,7 @@ def getarticle(href, sec, subsec, p1):
         time.sleep(10)
         if not os.path.getsize(artfilname):
             print 'retry %s' % (artfilname)            
-            time.sleep(20)
+            time.sleep(120)
             os.system('wget -T 300 -t 3 -q  -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" -O %s "%s"' % (artfilname, artlink))
             time.sleep(10)
     inf = open(artfilname, 'r')
