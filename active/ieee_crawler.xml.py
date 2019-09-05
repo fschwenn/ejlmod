@@ -141,7 +141,8 @@ def ieee(number):
                 numberofarticles = int(re.sub('.* of +(\d+).*', r'\1', divt))
         #get links to individual articles
         articlelinks = []
-        for headline in page.body.find_all('h2', attrs = {'class' : 'result-item-title'}):
+        resultitems = page.body.find_all('h2', attrs = {'class' : 'result-item-title'})
+        for headline in resultitems:
             links = headline.find_all('a')
             if links:
                 for a in links:
@@ -158,6 +159,8 @@ def ieee(number):
             print '   %i article links of %i so far (+ %i not proper articles)' % (len(allarticlelinks), numberofarticles, notproperarticles)
             if len(allarticlelinks) + notproperarticles >= numberofarticles:
                 gotallarticles = True
+            elif len(resultitems) < 50:
+                gotallarticles = True                
         else:
             break
         time.sleep(10)
