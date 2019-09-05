@@ -73,8 +73,10 @@ for tline in re.split(' *<p> *',tocline):
         if re.search('<\/a>.*pp\.? *\d+ *\- *\d+',tline):
             rec['p1'] = re.sub('.*?<\/a>.*pp\.? *(\d+) *\- *(\d+).*',r'\1',tline)
             rec['p2'] = re.sub('.*?<\/a>.*pp\.? *(\d+) *\- *(\d+).*',r'\2',tline)
+            rec['issue'] =  re.sub('.*?<\/a>.*\((\d+)\). pp\.*', r'\1', tline)
         else:
             rec['p1'] = rec['p2'] = re.sub('.*?<\/a>.*p\.? *(\d+).*',r'\1',tline)
+            rec['issue'] =  re.sub('.*?<\/a>.*\((\d+)\). p\.*', r'\1', tline)
         rec['issue'] = re.sub('.*Armenian Journal of Physics, \d+ \((\d+)\).*', r'\1', tline)
         link = re.sub('.*?<a href=\"(.*?)\".*',r'\1',tline)
         #more detais from abstract page
