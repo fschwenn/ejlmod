@@ -52,8 +52,8 @@ isutocpage = BeautifulSoup(urllib2.urlopen(isutoclink))
 for span in isutocpage.body.find_all('span', attrs = {'itemprop' : 'volumeNumber'}):
     vol = span.text.strip()
 #missing metadata on some pages
-if jnl == 'justc' and year == '2018':
-    vol = '48'
+if jnl == 'justc':
+    vol = str(int(year)-1970)
 
 
     
