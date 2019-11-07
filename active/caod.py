@@ -43,9 +43,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'jinfoybig'}):
         for idiv in div.find_all('div', attrs = {'itemprop' : 'hasPart'}):
             for ia in idiv.find_all('a'):
                 for span in ia.find_all('span'):
-                    if span.text.strip() == isu:
+                    if re.sub('Issue ', '', span.text.strip()) == isu:
                         isutoclink = 'http://caod.oriprobe.com' + ia['href']
-
 print '"%s"' % (isutoclink)
 isutocpage = BeautifulSoup(urllib2.urlopen(isutoclink))
 #search volume number
