@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-#harvest theses from Catalonian server www.tdx.cat
-#FS: 2018-02-01
+#harvest theses from Barcelona, Autonoma U. 
+#FS: 2019-09-15
 
 
 import getopt
@@ -22,76 +22,87 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-startyear = now.year - 1
 
-publisher = 'www.tdx.cat'
+publisher = 'Barcelona, Autonoma U.'
 
 typecode = 'T'
 
-jnlfilename = 'THESES-CSUC-%s' % (stampoftoday)
+jnlfilename = 'THESES-TDX-%s' % (stampoftoday)
 
-tocurls = ['http://www.tdx.cat/handle/10803/65',
-           'http://www.tdx.cat/handle/10803/33551',
-           'http://www.tdx.cat/handle/10803/125',
-           'http://www.tdx.cat/handle/10803/442']
+sections = ['396268', '65']
+
+hdr = {'User-Agent' : 'Magic Browser'}
+prerecs = []
+for section in sections:
+    tocurl = 'https://www.tdx.cat/handle/10803/' + section + '/discover?filtertype=dateIssued&filter_relational_operator=equals&filter=[' + str(now.year - 1) + '+TO+' + str(now.year + 1) + ']&rpp=100'
+    print tocurl
+    req = urllib2.Request(tocurl, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    time.sleep(3)
+    for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+        for a in div.find_all('a'):
+            rec['artlink'] = 'https://www.tdx.cat' + a['href'] + '?show=full'
+            rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+            prerecs.append(rec)
+
 
 recs = []
-for tu in tocurls:
-    filterlang = 'filtertype_1=language&filter_relational_operator_1=equals&filter_1=eng'
-    filterdate = 'filtertype_0=dateDefense&filter_relational_operator_0=contains&filter_0=[%i+TO+2030]' % (startyear)
-    tocurl = '%s/discover?%s&%s&rpp=200' % (tu, filterlang, filterdate)
-    print '==={ %s }======' % (tocurl)
-    try:
-        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
-        time.sleep(3)
-    except:
-        print "retry %s in 180 seconds" % (tocurl)
-        time.sleep(180)
-        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
-    for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-title'}):
-        for a in div.find_all('a'):
-            rec = {'tc' : 'T', 'jnl' : 'BOOK', 'keyw' : []}
-            rec['tit'] = a.text.strip()
-            rec['link'] = 'http://www.tdx.cat' + a['href']
-            recs.append(rec)
-    print '------{ %i }------' % (len(recs))
-
-
 i = 0
-for rec in recs:
+for rec in prerecs:
     i += 1
-    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
+    print '---{ %i/%i}---{ %s}------' % (i, len(prerecs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
     except:
-        print "retry %s in 180 seconds" % (rec['link'])
-        time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        try:
+            print "retry %s in 180 seconds" % (rec['link'])
+            time.sleep(180)
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        except:
+            print "no access to %s" % (rec['link'])
+            continue      
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
+            #author
             if meta['name'] == 'DC.creator':
-                rec['auts'] = [ meta['content'] ]
-            elif meta['name'] == 'DCTERMS.available':
+                author = re.sub(' *\[.*', '', meta['content'])
+                rec['autaff'] = [[ author ]]
+                if re.search('\[UNESP\]', meta['content']):
+                    rec['autaff'][-1].append('Universidade Estadual Paulista (UNESP), Instituto de Fisica Teorica (IFT), 01140-070, Sao Paulo, Brazil')
+            #title
+            elif meta['name'] == 'DC.title':
+                rec['tit'] = meta['content']
+            #date
+            elif meta['name'] == 'DCTERMS.issued':
                 rec['date'] = meta['content']
-            elif meta['name'] == 'DC.identifier':
-                if re.search('hdl.handle.net', meta['content']):
-                    rec['hdl'] = re.sub('.*hdl.handle.net\/', '', meta['content'])
-            elif meta['name'] == 'DCTERMS.abstract':
-                if not meta.has_attr('xml:lang') or meta['xml:lang'] == 'eng':
-                    rec['abs'] = meta['content']
-            elif meta['name'] == 'DCTERMS.extent':
-                rec['pages'] = re.sub('.*?(\d+).*', r'\1', meta['content'])
-            elif meta['name'] == 'DC.publisher':
-                rec['aff'] = [ meta['content'] ]
+            #keywords
             elif meta['name'] == 'DC.subject':
-                rec['keyw'].append(meta['content'])
-            elif meta['name'] == 'citation_date':
-                rec['date'] = meta['content']
+                for keyw in re.split(' *; *', meta['content']):
+                    rec['keyw'].append(keyw)
+            #language
+            elif meta['name'] == 'DC.language':
+                if meta['content'] == 'por':
+                    rec['language'] = 'portuguese'
+            #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['FFT'] = meta['content']
-    
-    
+            #abstract
+            elif meta['name'] == 'DCTERMS.abstract':
+                rec['abs'] = meta['content']
+            #license            
+            elif meta['name'] == 'DC.rights':
+                if re.search('creativecommons.org', meta['content']):
+                    rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
+                    
+    recs.append(rec)
+
+
+
+	
+
+
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
