@@ -13,7 +13,7 @@ import codecs
 from bs4 import BeautifulSoup
 import time
 
-xmldir = '/afs/desy.de/user/l/library/inspire'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
@@ -195,8 +195,7 @@ def getarticle(href, sec, subsec, p1):
             li.string = str(affnr)
             li.wrap(artpage.new_tag('sup')).wrap(artpage.new_tag('span'))
             affnr += 1
-
-
+            
         for span in div.find_all('span'):            
             affs = []
             for sup in span.find_all('sup'):
@@ -215,6 +214,9 @@ def getarticle(href, sec, subsec, p1):
                     if not re.search('ORCID', author) and re.search('@', emails[affs[affi]]):
                         author += ', EMAIL:%s' % (emails[affs[affi]])
                     affs[affi] = ''
+            #chinese name
+            if re.search(' \(.+\)', author):
+                author = re.sub('(.*) *\((.*)\)(.*)', r'\1\3, CHINESENAME: \2', author)
             rec['auts'].append(author)                    
             for aff in affs:
                 if aff:
@@ -293,7 +295,7 @@ for (href, sec, subsec, p1) in tocheck:
         rec = getarticle(href, sec, subsec, p1)
         if rec['auts']:
             recs.append(rec)
-
+print '%i records for %s' % (len(recs), jnlfilename)
 
 
                                        
