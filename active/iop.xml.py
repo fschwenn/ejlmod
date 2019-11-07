@@ -208,6 +208,7 @@ for article in articles:
         rec['year'] = datecover[0:4]
         if rec['jnl'] in ['JCAP', 'JHEP', 'J.Stat.Mech.']:
             rec['vol'] = datecover[2:4] + datecover[5:7]
+            del rec['issue']
     #article number
     for artnumnode in article.find_all('artnum'):
         rec['artnum'] = artnumnode.text.strip()
