@@ -33,6 +33,10 @@ if   (jnl == 'atmp'):
     jnlname = 'Adv.Theor.Math.Phys.'
     issn = '1095-0761'
     url = "http://www.intlpress.com/%s/%s-issue_%s_%s.php" % (jnl.upper(),jnl.upper(),vol,isu)
+elif (jnl == 'amsa'):
+    jnlname = 'Ann.Math.Sci.Appl.'
+    issn = '2380-288X'
+    url = "http://www.intlpress.com/%s/%s-vol-%s.php" % (jnl.upper(),jnl.upper(),vol)
 elif (jnl == 'cntp'):
     jnlname = 'Commun.Num.Theor.Phys.'
     issn = '1931-4523'
@@ -79,7 +83,7 @@ tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(u
 
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'list_item'}):
-    rec = {'vol' : vol, 'jnl' : jnlname, 'tc' : 'P',
+    rec = {'vol' : vol, 'jnl' : jnlname, 'tc' : 'P', 'issue' : isu,
            'autaff' : [], 'note' : [], 'abs' : ''}
     for a in div.find_all('a'):
         rec['artlink'] = 'http://www.intlpress.com/' + a['href']
