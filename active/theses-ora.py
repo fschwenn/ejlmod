@@ -30,6 +30,7 @@ typecode = 'T'
 jnlfilename = 'THESES-ORA-%s' % (stampoftoday)
 
 tocurl = 'https://ora.ox.ac.uk/search/detailed?q=%2A%3A%2A&truncate=450&filterf_subject=%22Physics%22&filterf_thesisLevel=%22Doctoral%22&rows=500&sort=timestamp%20desc'
+tocurl = 'https://ora.ox.ac.uk/?f%5Bf_degree_level%5D%5B%5D=Doctoral&f%5Bf_type_of_work%5D%5B%5D=Thesis&f%5Bf_subjects%5D%5B%5D=Physics&per_page=100&q=&search_field=all_fields&sort=publication_date+desc'
 
 try:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
@@ -40,18 +41,20 @@ except:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
 
 prerecs = []
-for div in tocpage.find_all('div', attrs = {'class' : 'response_doc'}):
-    rec = {'jnl' : 'BOOK', 'tc' : typecode}
+#for div in tocpage.find_all('div', attrs = {'class' : 'response_doc'}):
+for div in tocpage.find_all('section', attrs = {'class' : 'document-metadata-header'}):
+    rec = {'jnl' : 'BOOK', 'tc' : typecode, 'keyw' : [], 'note' : []}
     isnew = True
-    for td in div.find_all('td'):
-        if re.search('^20\d\d', td.text):
-            rec['date'] = re.sub('^(20\d\d).*', r'\1', td.text.strip()) 
+    for li in div.find_all('li'):
+        lit = li.text.strip()
+        if re.search('^2\d\d\d', lit):
+            rec['date'] = li.text.strip()
             year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
             if year < now.year - 1:
                 isnew = False
-    for span in div.find_all('span', attrs = {'class' : 'stitle'}):
-        rec['tit'] = span.text.strip()
-        for a in span.find_all('a'):
+    for h3 in div.find_all('h3'):
+        rec['tit'] = h3.text.strip()
+        for a in h3.find_all('a'):
             rec['link'] = 'https://ora.ox.ac.uk' + a['href']
             rec['doi'] = re.sub('.*:', '20.2000/', a['href'])
     if isnew:
@@ -69,53 +72,24 @@ for rec in prerecs:
         print "retry %s in 180 seconds" % (rec['link'])
         time.sleep(180)
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
-    #fulltext
-    for ul in artpage.body.find_all('ul', attrs = {'id' : 'download_ul'}):
-        for a in ul.find_all('a'):
-            rec['FFT'] = a['href']
-    #abstract
-    for div in artpage.body.find_all('div', attrs = {'class' : 'abstract_block'}):
-        rec['abs'] = re.sub('^Abstract. *', '', div.text.strip())
-    #contributors
-    for div in artpage.body.find_all('div', attrs = {'class' : 'author'}):
-        authortyp = False
-        for span in div.find_all('span', attrs = {'class' : 'small_link'}):            
-            if re.search('More by this author', span.text):
-                authortyp = 'author'
-            elif re.search('More by this supervisor', span.text):
-                authortyp = 'supervisor'
-            span.replace_with('')
-        if authortyp == 'author':
+
+    for meta in artpage.head.find_all('meta'):
+        if meta.has_attr('name'):
+            #fulltext
+            if meta['name'] == 'citation_pdf_url':
+                rec['FFT'] = meta['content']
+            #abstract
+            elif meta['name'] == 'citation_abstract':
+                rec['abs'] = meta['content']
+            #keywords
+            elif meta['name'] == 'prism.keyword':
+                rec['keyw'].append(meta['content'])
             #author
-            for div2 in div.find_all('div', attrs = {'class' : 'aname'}):
-                rec['auts'] = [ div2.text.strip() ]
-            #affiliation
-                for div2 in div.find_all('div', attrs = {'class' : 'adet'}):
-                    aff = ''
-                    for td in div2.find_all('td'):
-                        if not td.text.strip() in ['Affiliation', 'Author', 'Role', 'Roles', 'Author, Copyright holder']:
-                            aff += ' ' + td.text.strip()
-                    rec['aff'] = [ aff.strip() ]
-        elif authortyp == 'supervisor':
-            #supervisor
-            for div2 in div.find_all('div', attrs = {'class' : 'aname'}):
-                if rec.has_key('MARC'):
-                    rec['MARC'].append(('701', [('a', re.sub('(.*) (.*)', r'\2, \1', div2.text.strip()))]))
-                else:
-                    rec['MARC'] = [('701', [('a', re.sub('(.*) (.*)', r'\2, \1', div2.text.strip()))])]
-    #keywords
-    #subject
-    for table in artpage.body.find_all('table'):
-        if table.has_attr('class'):
-            if 'infoL' in table['class'] or 'infoR' in table['class']:
-                if re.search('Keywords', table.text):
-                    rec['keyw'] = []
-                    for li in table.find_all('li'):
-                        rec['keyw'].append(li.text.strip())
-                elif re.search('Subjects', table.text):
-                    rec['note'] = []
-                    for li in table.find_all('li'):
-                        rec['note'].append(li.text.strip())
+            elif meta['name'] == 'citation_author':
+                rec['auts'] = [ meta['content'] ]
+            #subject
+            elif meta['name'] == 'DC.subject':
+                rec['note'].append(meta['content'])
     #bad metadata
     if not rec.has_key('auts'):
         rec['auts'] = [ 'Mustermann, Martin' ]
