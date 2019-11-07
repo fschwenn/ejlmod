@@ -28,6 +28,7 @@ publisher = 'NIKHEF'
 jnlfilename = 'THESES-NIKHEF-%s' % (stampoftoday)
 
 tocurl = 'https://www.nikhef.nl/pub/services/newbiblio/theses.php'
+print tocurl
 
 try:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
@@ -36,6 +37,11 @@ except:
     print "retry %s in 180 seconds" % (tocurl)
     time.sleep(180)
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+
+
+
+for fieldset in tocpage.body.find_all('fieldset'):
+    fieldset.replace_with('')
 
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'id' : 'main'}):
@@ -47,6 +53,7 @@ for div in tocpage.body.find_all('div', attrs = {'id' : 'main'}):
         if child.name == 'dt':
             rec = {'tc' : 'T', 'auts' : [ child.text.strip() ], 'jnl' : 'BOOK'}
         elif child.name == 'dd':
+            ct = re.sub('^\n', '', re.sub('\n$', '', child.text.strip()))            
             parts = re.split('\n', child.text.strip())
             for a in child.find_all('a'):
                 rec['tit'] = a.text.strip()
@@ -54,23 +61,22 @@ for div in tocpage.body.find_all('div', attrs = {'id' : 'main'}):
                 rec['doi'] = '20.2000/' + re.sub('.*\/', '', rec['link']) + '_' + re.sub('\W', '', rec['auts'][0])
                 if re.search('pdf$', rec['link']):
                     rec['FFT'] = a['href']
-            #if rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_R_Aben.pdf':
-            #    rec['date'] = '2015-06-17'
-            #    recs.append(rec)
-            #elif rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_C_Galea.pdf':
-            #    rec['date'] = '2008-06-16'
-            #    recs.append(rec)
-            #elif rec['link'] == 'http://www.nikhef.nl/pub/services/biblio/theses_pdf/thesis_J_Uiterwijk.pdf':
-            #    rec['date'] = '2007-06-12'
-            #    recs.append(rec)
             if len(parts) > 1:
-                rec['date'] = re.sub('Okt', 'Oct', re.sub('\.', '', parts[1].strip()))
-                year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
-                if year >= now.year - 1:
-                    recs.append(rec)
-            else:
-                print rec
+                rec['date'] = re.sub('Okt', 'Oct', re.sub('\.', '', parts[-1]))
+                if re.search('20\d\d', rec['date']):
+                    year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
+                    if year >= now.year - 1:
+                        recs.append(rec)
+                elif re.search('19\d\d', rec['date']):
+                    year = int(re.sub('.*(19\d\d).*', r'\1', rec['date']))
+                else:
+                    print rec['tit']
+                    print ' problematic date', rec['date'], '\n'
+            
 
+
+
+                    
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
