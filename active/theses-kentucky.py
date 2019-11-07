@@ -51,24 +51,27 @@ for div in tocpage.body.find_all('div', attrs = {'id' : 'series-home'}):
             for span in child.find_all('span'):
                 date = span.text.strip()
         elif name == 'p':
-            year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
-            if year >= now.year - 1:
+            #year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
+            if int(date) >= now.year - 1:
                 if child.has_attr('class') and 'article-listing' in child['class']:
                     rec = {'jnl' : 'BOOK', 'tc' : 'T', 'date' : date}
                     for a in child.find_all('a'):                    
                         rec['tit'] = a.text.strip()
-                        rec['link'] = a['href']
+                        rec['artlink'] = a['href']
                         a.replace_with('')
                     recs.append(rec)
 
+i = 0
 for rec in recs:
+    i += 1
+    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
     except:
-        print "retry %s in 180 seconds" % (rec['link'])
+        print "retry %s in 180 seconds" % (rec['artlink'])
         time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             if meta['name'] == 'description':
@@ -89,7 +92,7 @@ for rec in recs:
             elif meta['name'] == 'bepress_citation_pdf_url':
                 rec['FFT'] = meta['content']
             elif meta['name'] == 'bepress_citation_doi':
-                rec['doi'] = meta['content']
+                rec['doi'] = re.sub('^ht.*?\/10', '10', meta['content'])
             elif meta['name'] == 'bepress_citation_online_date':
                 rec['date'] = meta['content']
     for div in artpage.body.find_all('div', attrs = {'id' : 'advisor1'}):
@@ -99,7 +102,8 @@ for rec in recs:
         for p in div.find_all('p'):
             rec['supervisor'].append( [re.sub('^Dr. ', '', p.text.strip())] )
     if not rec.has_key('doi'):
-        rec['doi'] = '20.2000/KENTUCKY/' + re.sub('\W', '', re.sub('.*edu', '', rec['link']))
+        rec['doi'] = '20.2000/KENTUCKY/' + re.sub('\W', '', re.sub('.*edu', '', rec['artlink']))
+        rec['link'] = rec['artlink']
 
     
     
