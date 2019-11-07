@@ -233,6 +233,8 @@ for artlink in artlinks:
             rec['refs'] = []
             for tr in refpage.body.find_all('tr'):
                 trt = tr.text.strip()
+                trt = re.sub('[\n\t\r]', ' ', trt)
+                trt = re.sub('  +', ' ', trt)
                 if len(trt) > 10:
                     rec['refs'].append([('x', trt)])
             print ' %i references found' % (len(rec['refs']))
