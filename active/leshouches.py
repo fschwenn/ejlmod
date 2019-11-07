@@ -45,12 +45,20 @@ for title in tocpage.head.find_all('title'):
                 rec['artlink'] = 'https://www.oxfordscholarship.com' + a['href']
                 recs.append(rec)
 
+                
 i = 0
 for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
-    driver.get(rec['artlink'])
-    artpage = BeautifulSoup(driver.page_source)
+    try:
+        time.sleep(2)
+        driver.get(rec['artlink'])
+        artpage = BeautifulSoup(driver.page_source)
+    except:
+        print 'wait 5 minutes'
+        time.sleep(300)
+        driver.get(rec['artlink'])
+        artpage = BeautifulSoup(driver.page_source)        
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #keywords
@@ -65,16 +73,22 @@ for rec in recs:
             #author
             elif meta['name'] == 'citation_author':
                 rec['auts'].append(meta['content'])
+    #DOI
+    for meta in artpage.head.find_all('meta', attrs = {'property' : 'http://purl.org/dc/terms/identifier'}):
+        rec['doi'] = meta['content']
+    #keywords
+    for meta in artpage.head.find_all('meta', attrs = {'property' : 'http://schema.org/keywords'}):
+        rec['keyw'].append(meta['content'])
     for div in artpage.body.find_all('div', attrs = {'class' : 'bibliography'}):
         for p in div.find_all('p'):
             pt = p.text.strip()
             #DOI
-            if re.search('DOI:', pt):
-                rec['doi'] = re.sub('.*?(10\..*)', r'\1', pt)
+            #if re.search('DOI:', pt):
+            #    rec['doi'] = re.sub('.*?(10\..*)', r'\1', pt)
             #year
-            elif re.search('Print publication date', pt):
+            if re.search('Print publication date', pt):
                 rec['year'] = re.sub('.*?(20\d\d).*', r'\1', pt)
-
+    print rec
 
 jnlfilename = 'leshouches%s' % (rec['vol'])
   
