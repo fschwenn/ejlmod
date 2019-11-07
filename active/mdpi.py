@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 #!/usr/bin/python
-#program to harvest MDPI journals (Universe, Symmetry, Sensors, Instruments, Galaxies, Entropy)
+#program to harvest MDPI journals (Universe, Symmetry, Sensors, Instruments, Galaxies, Entropy, Atoms)
 # FS 2017-07-17
 
 import os
@@ -34,7 +34,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 if jnl == 'proceedings':
     starturl = 'http://www.mdpi.com/2504-3900/%s/%s' % (vol, iss)
-    #starturl = 'https://www.mdpi.com/journal/universe/special_issues/ICNFP2018'
+    #starturl = 'https://www.mdpi.com/journal/universe/special_issues/quantum_fields'
     jnlfilename = 'mdpi_proc%s.%s_%s' % (vol, iss, cnum)
     done = []
 else:
@@ -74,7 +74,8 @@ else:
         time.sleep(3)
 
 done = []
-                    
+
+
 i=0
 recs = []
 for artlink in artlinks:
@@ -159,9 +160,11 @@ for artlink in artlinks:
                     author = a.text.strip()
                     a.replace_with('%s; %s' % (author, orcid))
             authors = re.sub(' and ', ' , ', re.sub('\xa0', ' ', div.text))
+            authors = re.sub('[\n\t]', '', authors)
             authors = re.sub('&nbsp;', ' ', authors)
+            authors = re.sub('^ *by *', '', authors)
             authors = re.sub('\*', ' ', authors)
-            for author in re.split(' *, *', re.sub('[\n\t]', '', authors)):
+            for author in re.split(' *, *', authors):
                 if len(author.strip()) > 2:
                     if re.search('ORCID', author):
                         parts = re.split(' *; *', author)
@@ -178,7 +181,7 @@ for artlink in artlinks:
                 rec['aff'].append(aff.strip())
     #references    
     reflink = artlink[0]  + '/htm'
-    print '-----------------{ %s }---' % (reflink)
+    print '              ---{ %s }---' % (reflink)
     try:
         refreq = urllib2.Request(reflink, headers=hdr)
         refpage = BeautifulSoup(urllib2.urlopen(refreq))
