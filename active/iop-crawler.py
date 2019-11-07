@@ -107,7 +107,10 @@ for tocpage in tocpages:
     for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-title'}):
         for h4 in div.find_all('h4'):
             issnote = h4.text
-    for div in tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'}):
+    divs = tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'})
+    if not divs:
+        divs = tocpage.find_all('div', attrs = {'class' : 'art-list'})
+    for div in divs:
         for child in div.children:
             try:
                 child.name
