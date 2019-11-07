@@ -510,12 +510,12 @@ def xmlExtract():
                 if not rec.has_key('licence'):
                     for para in artxml.getElementsByTagName('Para'):
                         for rs in para.getElementsByTagName('RefSource'):
-                            if re.search('creativecommons.org', rs.firstChild.data):
+                            if re.search('creativecommons.org', getAllText(rs)):
                                 rec['licence'] = {'url' : rs.firstChild.data}
                                 rec['note'].append(rs.firstChild.data)
                         if not rec.has_key('licence'):
                             try:
-                                paratext = para.firstChild.data
+                                paratext = getAllText(para)
                                 if re.search('CC.BY.\d', paratext):
                                     statement = re.sub('.*(CC.BY.\d.0).*', r'\1', paratext.strip())
                                     rec['licence'] = {'statement' : re.sub(' ', '-', statement)}
