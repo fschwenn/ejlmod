@@ -365,6 +365,8 @@ def writeXML(recs,dokfile,publisher):
                 xmlstring += marcxml('035', [('9', 'EUCLID'), ('a', rec['doi'][8:])])
         elif rec.has_key('hdl'):
             xmlstring += marcxml('0247',[('a',rec['hdl']), ('2','HDL'), ('9',publisher)])
+        elif rec.has_key('urn'):
+            xmlstring += marcxml('0247',[('a',rec['urn']), ('2','URN'), ('9',publisher)])
         elif len(liste) > 2 or rec.has_key('isbn') or rec.has_key('isbns'):
             pseudodoi = '20.2000/'+re.sub(' ','_','-'.join([tup[1] for tup in liste]))
             if rec.has_key('isbn'):
@@ -447,6 +449,8 @@ def writeXML(recs,dokfile,publisher):
             xmlstring += marcxml('fft',[('a',rec['FFT']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
         if rec.has_key('link'):
             xmlstring += marcxml('8564',[('u', rec['link'])])
+        if 'license' in rec.keys() and not 'licence' in rec.keys():
+            rec['licence'] = rec['license']
         if rec.has_key('licence'):
             entry = []
             if rec['licence'].has_key('statement'):
@@ -565,10 +569,10 @@ def writeXML(recs,dokfile,publisher):
                         aut = []
                         if re.search('CHINESENAME', author):
                             aut.append(('q', re.sub('.*, CHINESENAME: ', '', author)))
-                            author = re.sub(', CHINESENAME.*', '', author)
+                            author = re.sub(' *, CHINESENAME.*', '', author)
                         if re.search('ORCID', author):
                             aut.append(('j', re.sub('\.$', '', re.sub('.*, ',  '', author))))
-                            author = re.sub(', ORCID.*', '', author)
+                            author = re.sub(' *, ORCID.*', '', author)
                         if re.search('EMAIL', author):
                             if re.search('@', author):
                                 aut.append(('m', re.sub('.*, EMAIL:',  '', author)))
@@ -643,6 +647,18 @@ def writeXML(recs,dokfile,publisher):
                 xmlstring += marcxml('599',[('a',comment)])
         if rec.has_key('typ'):
             xmlstring += marcxml('599',[('a',rec['typ'])])
+        #Add 502 for Theses
+        if 'T' in rec['tc'] and not re.search('"502"', xmlstring):
+            thesispbn = [('b', 'PhD')]
+            if 'autaff' in rec.keys() and len(rec['autaff'][0]) > 1:
+                for aff in rec['autaff'][0][1:]:
+                    if not re.search('EMAIL', aff) and not re.search('ORCID', aff):
+                        thesispbn.append(('c', aff))
+            elif 'aff' in rec.keys():
+                thesispbn.append(('c', rec['aff'][0]))
+            if 'date' in rec.keys() and re.search('[12]\d\d\d', rec['date']):
+                thesispbn.append(('d', re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])))
+            xmlstring += marcxml('502', thesispbn)
         xmlstring += '</record>\n'
         try:
             dokfile.write(xmlstring)
