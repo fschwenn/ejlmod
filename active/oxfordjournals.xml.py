@@ -310,7 +310,10 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
         for a in div.find_all('a', attrs = {'class' : 'viewArticleLink'}):
             artlink = "https://academic.oup.com" + a['href']
             articles.append((artlink, note))
+    i = 0 
     for (artlink, note) in articles:
+        i += 1
+        print '---{ %i/%i }---{ %s }---' % (i, len(articles), artlink)
         try:
             time.sleep(27)
             pagreq = urllib2.Request(artlink, headers={'User-Agent' : "Magic Browser"})
@@ -322,6 +325,16 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
             page = BeautifulSoup(urllib2.urlopen(pagreq))
         rec = {'issue' : issue, 'vol' : vol, 'jnl' : jnlname, 'note' : [], 'tc' : typecode,
                'refs' : [], 'autaff' : [], 'keyw' : []}
+        #not completely loaded?
+        for meta in page.find_all('meta', attrs = {'name' : 'citation_doi'}):
+            rec['doi'] = meta['content']
+        if 'doi' in rec.keys():
+            print '   ', rec['doi']
+        else:
+            print "retry in 180 seconds"
+            time.sleep(180)
+            pagreq = urllib2.Request(artlink, headers={'User-Agent' : "Magic Browser"})
+            page = BeautifulSoup(urllib2.urlopen(pagreq))                               
         if note:
             rec['note'] = [note]
         for meta in page.find_all('meta'):
@@ -354,7 +367,6 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
                 elif meta['name'] == 'citation_pdf_url' and (jnl == 'ptep'):
                     rec['FFT'] = meta['content']
                     rec['p1'] = re.sub('.*\/20\d\d\/\d+\/(.*?)\/.*', r'\1', rec['FFT'])
-        print rec['doi']
         for abstract in page.find_all('section', attrs = {'class' : 'abstract'}):
             try:
                 fsunwrap(abstract)
@@ -391,7 +403,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
             for a in am.find_all('a'):
                 if a.has_attr('href') and re.search('PTEP', a['href']):
                     rec['keyw'].append(a.text)
-        #print rec
+        print '   ', rec.keys()
         recs.append(rec)
 
 
