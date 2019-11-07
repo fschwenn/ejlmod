@@ -64,7 +64,10 @@ for table in tocpage.body.find_all('table', attrs = {'class' : 'sortable'}):
                     exp = re.sub('^E\d?(\d\d)\-(\d+)', r'JLAB-E-\1-\2', rawexperiment)
                     if search_pattern(p='980__a:EXPERIMENT 119__a:%s' % (exp)):
                         rec['exp'] = exp
-                year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
+                if re.search('20\d\d', rec['date']):
+                    year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
+                elif re.search('19\d\d', rec['date']):
+                    year = int(re.sub('.*(19\d\d).*', r'\1', rec['date']))
                 if year >= now.year - 1:
                     recs.append(rec)
 
