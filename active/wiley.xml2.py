@@ -76,6 +76,8 @@ elif (jnl == 'asnaa'):
 
 
 
+
+
 urltrunk = 'http://onlinelibrary.wiley.com/doi'
 print "%s%s, Issue %s" %(jnlname,vol,issue)
 if re.search('1111',doitrunk):
@@ -83,14 +85,21 @@ if re.search('1111',doitrunk):
 else:
     toclink = '%s/%s.v%s.%s/issuetoc' % (urltrunk,doitrunk,vol,issue)
     toclink = 'https://onlinelibrary.wiley.com/toc/%s/%s/%s/%s'  % (issn[:4]+issn[5:], year, vol, issue)
-try:
+#try:
+if 1 > 0:
     print toclink
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
+    tocfile = '/tmp/wiley%s.%s.%s.%s.toc' % (jnl, year, vol, issue)
+    if not os.path.isfile(tocfile):
+        os.system('wget  -T 300 -t 3 -q -O %s "%s"' % (tocfile, toclink))
+    inf = open(tocfile, 'r')
+    tocpage = BeautifulSoup(''.join(inf.readlines()))
+    inf.close()
+    #tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
     #tocpage = BeautifulSoup(urllib2.urlopen(toclink,timeout=300))
-except:
-    toclink = '%s/%s.%s.%s.issue-%s/issuetoc' % (urltrunk, doitrunk, year, vol, issue)
-    print toclink
-    tocpage = BeautifulSoup(urllib2.urlopen(toclink,timeout=300))
+#except:
+#    toclink = '%s/%s.%s.%s.issue-%s/issuetoc' % (urltrunk, doitrunk, year, vol, issue)
+#    print toclink
+#    tocpage = BeautifulSoup(urllib2.urlopen(toclink,timeout=300))
 
 
 recs = []
@@ -112,7 +121,14 @@ for rec in recs:
     typecode = 'P'
     #rec['cnum'] = 'C18-09-08'
     print '---{ %i/%i }---{ %s }---{ %s }------' % (i, len(recs), rec['doi'], rec['artlink'])
-    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    artfile = '/tmp/wiley%s.%s.%s.%s.%04i' % (jnl, year, vol, issue, i)
+    if not os.path.isfile(artfile):
+        os.system('wget  -T 300 -t 3 -q -O %s "%s"' % (artfile, rec['artlink']))
+        time.sleep(2)
+    inf = open(artfile, 'r')
+    artpage = BeautifulSoup(''.join(inf.readlines()))
+    inf.close()    
+    #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     autaff = False
     for meta in artpage.head.find_all('meta'):
         if meta.attrs.has_key('name'):
@@ -193,7 +209,7 @@ for rec in recs:
         rec['tc'] = typecode
     else:
         rec['tc'] = ''
-    print rec
+    print rec.keys()
 
 
 
