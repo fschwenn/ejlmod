@@ -28,9 +28,10 @@ publisher = 'U. Heidelberg (main)'
 typecode = 'T'
 
 jnlfilename = 'THESES-HEIDELBERG-%s' % (stampoftoday)
-#years = [str(now.year - 7), str(now.year - 6), str(now.year - 5), str(now.year - 4), str(now.year - 3), str(now.year - 2), str(now.year - 1), str(now.year)]
-years = [str(now.year - 1), str(now.year)]
-
+if now.month <= 8:
+    years = [str(now.year - 1), str(now.year)]
+else:
+    years = [str(now.year)]
 
 tocurl = 'http://archiv.ub.uni-heidelberg.de/volltextserver/view/type/doctoralThesis.html'
 print tocurl
