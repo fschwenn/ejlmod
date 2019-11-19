@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-#harvest theses from SISSA
-#FS: 2018-01-30
+#harvest theses from Goettingen U.
+#FS: 2019-11-13
 
 
 import getopt
@@ -29,33 +29,39 @@ typecode = 'T'
 
 jnlfilename = 'THESES-GOETTINGEN-%s' % (stampoftoday)
 
-tocurl = 'https://ediss.uni-goettingen.de/handle/11858/8/discover?fq=dateIssued.year=[' + str(now.year - 1) + '+TO+' + str(now.year + 1) + ']&rpp=500'
+tocurl = 'https://ediss.uni-goettingen.de/handle/11858/8/discover?fq=dateIssued.year=[' + str(now.year - 1) + '+TO+' + str(now.year + 1) + ']&rpp=2000'
 
 
 print tocurl
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
-prerecs = []
+prerecs = {}
 os.system('wget -O /tmp/%s.toc "%s"' % (jnlfilename, tocurl))
 inf = open('/tmp/%s.toc' % (jnlfilename), 'r')
 lines = inf.readlines()
 inf.close()
 tocpage = BeautifulSoup(' '.join(lines))
+i = 0
 for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
-    rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+    i += 1
     for a in div.find_all('a'):
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
         rec['artlink'] = 'https://ediss.uni-goettingen.de' + a['href'] + '?show=full'
         rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-        prerecs.append(rec)
+        if a['href'] in prerecs.keys():
+            print '%3i) %s already on list' % (i, a['href'])
+        else:
+            prerecs[a['href']] = rec
+            print '%3i) %s added to list (%i)' % (i, a['href'], len(prerecs))
 
-
+    
 recs = []
 i = 0
-for rec in prerecs:
+for rec in prerecs.values():
     i += 1
     time.sleep(3)
-    print '---{ %i/%i}---{ %s}------' % (i, len(prerecs), rec['artlink'])
+    print '---{ %i/%i }---{ %s}------' % (i, len(prerecs), rec['artlink'])
     os.system('wget -O /tmp/%s.%05i "%s"' % (jnlfilename, i, rec['artlink']))
     inf = open('/tmp/%s.%05i' % (jnlfilename, i), 'r')
     lines = inf.readlines()
@@ -93,12 +99,8 @@ for rec in prerecs:
                 if re.search('creativecommons.org', meta['content']):
                     rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
 
-    print rec
+    print rec.keys()
     recs.append(rec)
-
-
-
-	
 
 
 #closing of files and printing
