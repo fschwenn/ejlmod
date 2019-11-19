@@ -192,7 +192,7 @@ for tag in toc.body.find_all():
             else:
                 rec['FFT'] = 'http://journals.jps.jp/doi/pdf/%s' % (rec['doi'])
 
-        print rec
+        print '  ', rec.keys()
         recs.append(rec)
 
 
