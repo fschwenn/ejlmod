@@ -64,15 +64,25 @@ for table in tocpage.body.find_all('table'):
             if a.has_attr('href'):
                 if re.search('^pdf', a.text):
                     rec['FFT'] = trunc + a['href']
-                    rec['p1'] = re.sub('.*\-(.*?)\.pdf', r'\1', rec['FFT'])
+                    if re.search('\-', a['href']):
+                        rec['p1'] = re.sub('.*\-(.*?)\.pdf', r'\1', rec['FFT'])
                 elif re.search('^text in', a.text):
-                    rec['language'] = re.sub('text in ', '', a.text.strip())
+                    language = re.sub('text in ', '', a.text.strip())
+                    if not re.search('nglish', language):
+                        rec['language'] = language
                     arturl = a['href']
                 elif re.search('abstract *in *English', a.text):
                     absurl = a['href']                    
         if absurl:
+            time.sleep(3)
             #more informations from abstract page
-            abspage = BeautifulSoup(urllib2.urlopen(absurl))
+            print '   more informations from abstract page'
+            try:
+                abspage = BeautifulSoup(urllib2.urlopen(absurl))
+            except:
+                print '      wait 5 minutes to get', absurl
+                time.sleep(300)
+                abspage = BeautifulSoup(urllib2.urlopen(absurl))
             for p in abspage.find_all('p'):
                 ptext = re.sub('[\n\t]', ' ', p.text.strip())
                 if not rec.has_key('abs'):                    
@@ -92,17 +102,31 @@ for table in tocpage.body.find_all('table'):
                     keywords = re.sub('\. *$', '', re.sub('Keywords *: *', '', ptext))
                     rec['keyw'] = re.split(' *; *', keywords)
         if arturl:
+            time.sleep(3)
             #more informations from article page
-            artpage = BeautifulSoup(urllib2.urlopen(arturl))
+            print '   more informations from article page'
+            try:
+                artpage = BeautifulSoup(urllib2.urlopen(arturl))
+            except:
+                print '      wait 5 minutes to get', arturl
+                time.sleep(300)
+                artpage = BeautifulSoup(urllib2.urlopen(arturl))
             autaffs = []
             for meta in artpage.find_all('meta'):
                 if meta.has_attr('name') and meta.has_attr('content'):
                     if meta['name'] == 'citation_volume':
                         rec['vol'] = meta['content']
                     elif meta['name'] == 'citation_doi':
-                        rec['doi'] = meta['content']
+                        if meta['content']:
+                            rec['doi'] = meta['content']
                     elif meta['name'] == 'citation_title':
                         rec['tit'] = meta['content']
+                    elif meta['name'] == 'citation_firstpage':
+                        if meta['content'] and meta['content'] != "0":
+                            rec['p1'] =  meta['content']
+                    elif meta['name'] == 'citation_lastpage':
+                        if meta['content'] and meta['content'] != "0":
+                            rec['p2'] =  meta['content']
                     elif 'citation_author' == meta['name']:
                         aut = meta['content']
                         autaffs.append([aut])
@@ -120,7 +144,16 @@ for table in tocpage.body.find_all('table'):
                     if links.text == 'Links':
                         links.replace_with('')
                 rec['refs'].append([('x', p.text)])
-            print rec
+            #keywords
+            for p in artpage.find_all('p'):
+                for b in p.find_all('b'):
+                    if re.search('[kK]ey [wW]ords', b.text):
+                        b.replace_with('')
+                    rec['keyw'] = re.split('; ', p.text.strip())
+        if 'p1' in rec.keys():
+            print rec.keys()
+            if not 'doi' in rec.keys():
+                rec['doi'] = '20.2000/SCIELO/%s/%s/%s/%s' % (jnl, year, issue, rec['p1'])
             if not rec['doi'] in alldois:
                 recs.append(rec)
                 alldois.append(rec['doi'])
