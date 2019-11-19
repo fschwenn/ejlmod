@@ -31,7 +31,7 @@ jnlfilename = 'THESES-FRANKFURT-%s' % (stampoftoday)
 hdr = {'User-Agent' : 'Magic Browser'}
 
 recs = []
-for page in ['0', '10', '20']
+for page in ['0', '10', '20']:
     tocurl = 'http://publikationen.ub.uni-frankfurt.de/solrsearch/index/search/searchtype/simple/query/%2A%3A%2A/browsing/true/doctypefq/doctoralthesis/start/' + page + '/rows/10/institutefq/Physik/sortfield/year/sortorder/desc'
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
