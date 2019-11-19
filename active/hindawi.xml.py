@@ -60,15 +60,17 @@ elif (jnl == 'aaa'):
     jnlname = 'Abstr.Appl.Anal.'
 elif (jnl == 'jam'):
     jnlname = 'J.Appl.Math.'
+elif (jnl == 'acmp'):
+    jnlname = 'Adv.Cond.Mat.Phys.'
 
 if re.search('isrn',jnl):
     if re.search('astro',jnl):
-        urltrunk = "http://www.isrn.com/journals/%s/%s/" % (re.sub('isrn','',jnl),year)
+        urltrunk = "https://www.isrn.com/journals/%s/%s/" % (re.sub('isrn','',jnl),year)
     else:
-        urltrunk = "http://www.hindawi.com/journals/isrn/%s/%s/" % (year,re.sub('isrn','',jnl))
+        urltrunk = "https://www.hindawi.com/journals/isrn/%s/%s/" % (year,re.sub('isrn','',jnl))
         urltrunk = re.sub('\/mp','/mathematical.physics',urltrunk)
 else:
-    urltrunk = "http://www.hindawi.com/journals/%s/%s/" % (jnl,year)
+    urltrunk = "https://www.hindawi.com/journals/%s/%s/" % (jnl,year)
 
 directoriestocheck = '%s/backup/%s*doki %s/backup/%i/%s*doki %s/backup/%i/%s*doki ' % (ejdir,jnl, ejdir, int(year), jnl, ejdir, int(year)-1, jnl)
 done =  map(tfstrip,os.popen("grep '^3.*DOI' %s |sed 's/.*\///'|sed 's/;//'" % (directoriestocheck)))
@@ -77,9 +79,17 @@ for dd in done:
     print dd
 #done = []
  
-print "get table of content of %s%s ..." %(jnlname,year)
+print "get table of content of %s%s via %s ..." % (jnlname, year, urltrunk)
 
-tocpage = BeautifulSoup(urllib2.urlopen(urltrunk))
+#tocpage = BeautifulSoup(urllib2.urlopen(urltrunk))
+#tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+tocfilename = '/tmp/%s.toc' % (jnlfilename)
+if not os.path.isfile(tocfilename):
+    os.system('wget  -T 300 -t 3 -q  -O %s "%s"' % (tocfilename, urltrunk))
+    time.sleep(2)
+tocfil = open(tocfilename,'r')
+tocpage = BeautifulSoup(''.join(tocfil.readlines()))
+tocfil.close()
 
 articleIDs = []
 for li in tocpage.body.find_all('li'):
@@ -98,9 +108,16 @@ for articleID in articleIDs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(articleIDs), articleID)
     if re.search('isrn',jnl):
-        artpage = BeautifulSoup(urllib2.urlopen('http://www.hindawi.com/journals/isrn/%s/%s' % (year, articleID)))
+        artpage = BeautifulSoup(urllib2.urlopen('https://www.hindawi.com/journals/isrn/%s/%s' % (year, articleID)))
     else:
-        artpage = BeautifulSoup(urllib2.urlopen('%s/%s' % (urltrunk, articleID)))
+        #artpage = BeautifulSoup(urllib2.urlopen('%s/%s' % (urltrunk, articleID)))
+        artfilename = '/tmp/hindawi.%s' % (articleID)
+        if not os.path.isfile(artfilename):
+            os.system('wget  -T 300 -t 3 -q  -O %s "%s/%s"' % (artfilename, urltrunk, articleID))
+            time.sleep(2)
+    artfil = open(artfilename,'r')
+    artpage = BeautifulSoup(''.join(artfil.readlines()))
+    artfil.close()
     rec = {'year' : year, 'jnl' : jnlname, 'p1' : articleID, 'tc' : 'P', 'vol' : year, 
            'auts' : [], 'aff' : [], 'refs' : [], 'note' : [], 'refs' : []}
     for meta in artpage.head.find_all('meta'):
@@ -216,7 +233,9 @@ for articleID in articleIDs:
             else:
                 ref = li.text.strip()
             rec['refs'].append([('x', ref)])
-    if not rec['tc'] == 'Editorial':
+    if rec['tc'] == 'Editorial':
+        print 'skip Editorial'
+    else:
         recs.append(rec)
         print ' keys: ' + ', '.join(rec.keys())
 
