@@ -127,9 +127,12 @@ def ieee(number):
     while not gotallarticles:
         i += 1
         pagecommand = '&pageNumber=%i' % (i)
-        print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)
+        print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)        
         driver.get(urltrunc + toclink + pagecommand)
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
+        if number[0] == 'C':
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
+        else:
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
         #clicl to accept cookies
         if i == 1:
             driver.find_element_by_css_selector('.cc-btn.cc-dismiss').click()
@@ -166,6 +169,8 @@ def ieee(number):
         time.sleep(10)
 
     print 'found %i article links' % (len(allarticlelinks))
+    if not allarticlelinks:
+        print page
     recs = []
     i = 0
     for articlelink in allarticlelinks:
@@ -306,8 +311,10 @@ def ieee(number):
             except:
                 print rec
         recs.append(rec)
-        
-    oufname = re.sub('[ \.]','',jnlname).lower()
+    if jnlname == 'BOOK':
+        oufname = 'IEEENuclSciSympConfRec'
+    else:
+        oufname = re.sub('[ \.]','',jnlname).lower()
     if rec.has_key('vol'): oufname += '.'+rec['vol']
     if rec.has_key('issue'): oufname += '.'+rec['issue']
     if rec.has_key('cnum'): oufname += '.'+rec['cnum']
