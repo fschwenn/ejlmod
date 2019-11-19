@@ -29,8 +29,7 @@ typecode = 'T'
 
 
 
-for year in [now.year-2, now.year-1, now.year]:
-#for year in [now.year-1, now.year]:
+for year in [now.year-1, now.year]:
     recs = []
     jnlfilename = 'THESES-UNIBO-%i-%s' % (year, stampoftoday)
     tocurl = 'http://amsdottorato.unibo.it/view/year/%i.html' % (year)
