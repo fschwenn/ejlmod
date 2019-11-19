@@ -6,7 +6,7 @@ import ejlmod2
 import re
 import sys
 import unicodedata
-import codecs 
+import codecs
 import urllib2
 import urlparse
 import time
@@ -37,7 +37,7 @@ elif (jnl == 'jgrse'):
 elif (jnl == 'jgro'):
     jnlname = 'J.Geophys.Res.Oceans'
     toclink = 'https://agupubs.onlinelibrary.wiley.com/toc/21699291/%i/%s/%s' % (int(vol)+1895, vol, issue)
-    
+
 if len(sys.argv) > 4:
     cnum = sys.argv[4]
     tc = 'C'
@@ -46,10 +46,17 @@ else:
     jnlfilename = '%s%s.%s' % (jnl, vol, issue)
 
 print toclink
-tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
+#tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
+tocfilename = '/tmp/%s.toc' % (jnlfilename)
+if not os.path.isfile(tocfilename):
+    os.system('wget -T 300 -t 3 -q -O %s "%s"' % (tocfilename, toclink))
+inf = open(tocfilename, 'r')
+tocpage = BeautifulSoup(''.join(inf.readlines()))
+inf.close()
+
 (note1, note2) = (False, False)
 recs = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'card issue-items-container'}):
+for div in tocpage.body.find_all('div', attrs = {'class' : ['card', 'issue-items-container']}):
     for child in div.children:
         try:
             child.name
@@ -67,38 +74,40 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'card issue-items-con
                 if child2.name == 'h4':
                     note2 = child2.text.strip()
                     print '-----[ %s ]-----' % (note2)
-                elif child2.name == 'div':                
+                elif child2.name == 'div':
                     at = child2.find_all('a', attrs = {'class' : 'issue-item__title'})
                     if not at:
-                        at = child2.find_all('a', attrs = {'class' : 'issue-item__title visitable'})
+                        at = child2.find_all('a', attrs = {'class' : ['issue-item__title', 'visitable']})
                     for a in at:
                         rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : issue, 'year' : '%i' % (int(vol)+1895),
                                'tc' : tc, 'note' : [], 'autaff' : [], 'keyw' : []}
                         if len(sys.argv) > 4:
                             rec['cnum'] = cnum
-                        rec['doi'] = re.sub('.*\/(10\..*)', r'\1', a['href'])
-                        rec['artlink'] = 'https://agupubs.onlinelibrary.wiley.com' + a['href']
-                        if note1:
-                            rec['note'].append(note1)
-                        if note2:
-                            rec['note'].append(note2)
-                        print '    ', rec['doi']
-                        recs.append(rec)
+                        if re.search('\/10\.', a['href']):
+                            rec['doi'] = re.sub('.*\/(10\..*)', r'\1', a['href'])
+                            rec['artlink'] = 'https://agupubs.onlinelibrary.wiley.com' + a['href']
+                            if note1:
+                                rec['note'].append(note1)
+                            if note2:
+                                rec['note'].append(note2)
+                            print '    a)', rec['doi']
+                            recs.append(rec)
                 elif child2.name == 'a':
                     if child2.has_attr('class') and ('issue-item__title' in child2['class'] or 'issue-item__title visitable' in child2['class']):
                         rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : issue, 'year' : '%i' % (int(vol)+1895),
                                'tc' : tc, 'note' : [], 'autaff' : [], 'keyw' : []}
                         if len(sys.argv) > 4:
                             rec['cnum'] = cnum
-                        rec['doi'] = re.sub('.*\/(10\..*)', r'\1', child2['href'])
-                        rec['artlink'] = 'https://agupubs.onlinelibrary.wiley.com' + child2['href']
-                        if note1:
-                            rec['note'].append(note1)
-                        if note2:
-                            rec['note'].append(note2)
-                        print '    ', rec['doi']
-                        recs.append(rec)
-  
+                        if re.search('\/10\.', child2['href']):
+                            rec['doi'] = re.sub('.*\/(10\..*)', r'\1', child2['href'])
+                            rec['artlink'] = 'https://agupubs.onlinelibrary.wiley.com' + child2['href']
+                            if note1:
+                                rec['note'].append(note1)
+                            if note2:
+                                rec['note'].append(note2)
+                            print '    b)', rec['doi']
+                            recs.append(rec)
+
 
 
 
@@ -106,8 +115,14 @@ i = 0
 for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
-    time.sleep(10)
-    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    artfilename = '/tmp/%s.%s' % (jnlfilename, re.sub('\W', '', rec['artlink'][8:]))
+    if not os.path.isfile(artfilename):
+        time.sleep(10)
+        os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilename, rec['artlink']))
+    inf = open(artfilename, 'r')
+    artpage = BeautifulSoup(''.join(inf.readlines()))
+    inf.close()
     for meta in artpage.head.find_all('meta'):
         if meta.attrs.has_key('name'):
             #title
@@ -136,7 +151,7 @@ for rec in recs:
                 email = meta['content']
                 rec['autaff'][-1].append('EMAIL:%s' % (email))
     #abstract
-    for div in artpage.body.find_all('div', attrs = {'class' : 'article-section__content en main'}):
+    for div in artpage.body.find_all('div', attrs = {'class' : ['article-section__content', 'en', 'main']}):
         rec['abs'] = div.text.strip()
     #references
     for section in artpage.body.find_all('section', attrs = {'id' : 'references-section'}):
@@ -170,7 +185,7 @@ for rec in recs:
             rec['refs'].append([('x', ref)])
         print '        %i references found (%i with DOI)' % (len(rec['refs']), refswithdoi)
     print '    ', rec.keys()
-                            
+
 
 
 
@@ -188,9 +203,9 @@ xmlfile.close()
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
+if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
 
-    
+
