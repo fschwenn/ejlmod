@@ -283,7 +283,10 @@ for tocpage in tocpages:
                     else:
                         if rec['auts']:
                             recs.append(rec)
-    voliss.append('%s.%s' % (rec['vol'], rec['issue']))
+    if 'issue' in rec.keys():
+        voliss.append('%s.%s' % (rec['vol'], rec['issue']))
+    elif not rec['vol'] in voliss:
+        voliss.append(rec['vol'])
     if not rec['vol'] in vols:
         vols.append(rec['vol'])
 
