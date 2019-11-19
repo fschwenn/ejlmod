@@ -109,7 +109,7 @@ for rec in recs:
         continue
     else:
         print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['doi'])    
-    artlink = 'http://doi.org/' + rec['doi']
+    artlink = 'http://doi.eso.org/' + rec['doi']
     artreq = urllib2.Request(artlink, headers={'User-Agent' : "Magic Browser"})
     response = urllib2.urlopen(artreq)
     truelink = response.geturl()
