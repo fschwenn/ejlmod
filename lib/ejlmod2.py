@@ -303,7 +303,7 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('keyw'):
             for kw in rec['keyw']:
                 #xmlstring += marcxml('6531',[('a',kw), ('9','publisher')])
-                xmlstring += marcxml('6531',[('a',kw), ('9','author')])
+                if kw: xmlstring += marcxml('6531',[('a',kw), ('9','author')])
         if rec.has_key('authorkeyw'):
             for kw in rec['authorkeyw']:
                 xmlstring += marcxml('6531',[('a',kw), ('9','author')])
@@ -337,6 +337,7 @@ def writeXML(recs,dokfile,publisher):
             if rec.has_key('pbnrep'): liste.append(('r',rec['pbnrep']))
             if rec.has_key('issue'): liste.append(('n',rec['issue']))
             if rec.has_key('cnum'): liste.append(('w',rec['cnum']))
+            if rec.has_key('motherisbn'): liste.append(('z',rec['motherisbn']))
             xmlstring += marcxml('773',liste)
         if rec.has_key('jnl2') and rec.has_key('vol2'):
             liste = [('p',rec['jnl2'])]
