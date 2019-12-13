@@ -66,6 +66,8 @@ elif jid == 'MTK':
     jnlname = 'Mathematika'
 elif jid == 'JOG':
     jnlname = 'J.Glaciol.'
+elif jid == 'CJM':
+    jnlname = 'Can.J.Math.'
 
 if len(sys.argv) > 5:
     toclink = explicittoclink
@@ -223,6 +225,8 @@ for rec in recs:
         for tit in div.find_all('title'):
             tit.replace_with('')
         rec['abs'] = div.text.strip()
+        rec['abs'] = re.sub('[\n\t\r]', ' ', rec['abs'])
+        rec['abs'] = re.sub('  +', ' ', rec['abs'])
     #references (only with DOI)
     for div in artpage.body.find_all('div', attrs = {'id' : 'references'}):
         for child in div.children:
@@ -238,7 +242,11 @@ for rec in recs:
                         refdoi = re.sub('.*doi.org.', '', a['href'])
                         reference += ', DOI: ' + refdoi
             elif child.name == 'hr':
-                rec['refs'].append([('x', reference)])                
+                rec['refs'].append([('x', reference)])
+        #(new/other) references
+        if not rec['refs']:
+            for div2 in div.find_all('div', attrs = {'class' : 'ref'}):
+                rec['refs'].append([('x', div2.text.strip())])
     #licence
     for div in artpage.body.find_all('div', attrs = {'class' : 'description'}):
         for div2 in div.find_all('div', attrs = {'class' : 'margin-top'}):
