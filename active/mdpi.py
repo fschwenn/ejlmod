@@ -30,6 +30,28 @@ if jnl == 'proceedings':
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
+#journals have quite different number of articles per month
+if jnl == 'symmetry': #2211
+    numberofpages = 8
+elif jnl == 'universe': #367
+    numberofpages = 2
+elif jnl == 'sensors': #9570
+    numberofpages = 24
+elif jnl == 'instruments': #91
+    numberofpages = 2
+elif jnl == 'galaxies': #231
+    numberofpages = 2
+elif jnl == 'entropy': #2124
+    numberofpages = 8
+elif jnl == 'particles': #53
+    numberofpages = 2
+elif jnl == 'physics': #26
+    numberofpages = 2
+elif jnl == 'condensedmatter': #139
+    numberofpages = 2
+elif jnl == 'atoms': #173
+    numberofpages = 2
+
 
 
 if jnl == 'proceedings':
@@ -38,13 +60,19 @@ if jnl == 'proceedings':
     jnlfilename = 'mdpi_proc%s.%s_%s' % (vol, iss, cnum)
     done = []
 else:
-    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=1996&year_to=2025&page_count=10&sort=pubdate&view=default' % (jnl)
-    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=2018&year_to=2025&page_count=10&sort=pubdate&view=default' % (jnl)
-    jnlfilename = '%s.%s' % (jnl, stampoftoday)
+    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=2017&year_to=2150&page_count=10&sort=pubdate&view=default' % (jnl)
+    jnlfilename = '%s.%s_%i' % (jnl, stampoftoday, 10*numberofpages)
     done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
-    print 'already done:', done
+
+
+    done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/zu_punkten/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
+    done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/zu_punkten/enriched/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
+
+
+    
+    print 'already done:', len(done)
 
 
 
@@ -52,8 +80,8 @@ else:
 hdr = {'User-Agent' : 'Mozilla/5.0'}
 artlinks = []
 if jnl == 'proceedings':
-#    starturl = 'https://www.mdpi.com/journal/galaxies/special_issues/non-thermalUniverse'
-#    done = []
+    #starturl = 'https://www.mdpi.com/journal/symmetry/special_issues/mttd2019_symmetry'
+    #done = []  
     print starturl
     req = urllib2.Request(starturl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
@@ -62,7 +90,7 @@ if jnl == 'proceedings':
         for a in div.find_all('a', attrs = {'class' : 'title-link'}):
             artlinks.append(('http://www.mdpi.com' + a['href'], a.text))
 else:
-    for j in range(40-20):
+    for j in range(numberofpages):
         print '%s&page_no=%i' % (starturl, j+1)
         req = urllib2.Request('%s&page_no=%i' % (starturl, j+1), headers=hdr)
         tocpage = BeautifulSoup(urllib2.urlopen(req))
@@ -71,9 +99,10 @@ else:
             for a in div.find_all('a', attrs = {'class' : 'title-link'}):
                 if not ('http://www.mdpi.com' + a['href'], a.text) in artlinks:
                     artlinks.append(('http://www.mdpi.com' + a['href'], a.text))
+        print '  %i article links so far ' % (len(artlinks))
         time.sleep(3)
 
-done = []
+#done = []
 
 
 i=0
@@ -82,7 +111,8 @@ for artlink in artlinks:
     rec = {'jnl' : jnl.title(), 'tc' : 'P', 'keyw' : [], 'aff' : [], 'auts' : [],
            'note' : [], 'refs' : []}
     #rec['tc'] = 'C'
-    #rec['cnum'] = 'C18-07-04.1'
+    #rec['cnum'] = 'C19-09-01'
+    #rec['jnl'] = 'Symmetry'
     i += 1
     #title and link
     if jnl == 'proceedings':
@@ -104,7 +134,7 @@ for artlink in artlinks:
         print '   ... wait 15 minutes'
         time.sleep(900)
         artreq = urllib2.Request(artlink[0], headers=hdr)
-        page = BeautifulSoup(urllib2.urlopen(artreq))        
+        page = BeautifulSoup(urllib2.urlopen(artreq))
     ##Review?1
     for meta in page.head.find_all('meta', attrs = {'name' : 'dc.type'}):
         if meta['content'] == 'Review': rec['tc'] = 'R'
@@ -133,7 +163,9 @@ for artlink in artlinks:
         rec['p2'] = meta['content']
     for meta in page.head.find_all('meta', attrs = {'name' : 'citation_doi'}):
         rec['doi'] = meta['content']
-    if rec['doi'] in done: continue        
+    if rec['doi'] in done:
+        print '  %s already in done'  % (rec['doi'])
+        continue
     ##abstract
     for meta in page.head.find_all('meta', attrs = {'name' : 'dc.description'}):
         rec['abs'] = meta['content']
@@ -143,7 +175,7 @@ for artlink in artlinks:
             for a2 in div.find_all('a'):
                 rec['note'].append([ a2.text ])
     ##authors and affiliations
-    for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):                    
+    for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):
 #        for div in diva.find_all('div', attrs = {'class' : 'author'}):
             for sup in div.find_all('sup'):
                 newcont = ''
@@ -170,7 +202,7 @@ for artlink in artlinks:
                         parts = re.split(' *; *', author)
                         rec['auts'].append('%s, %s' % (ejlmod2.shapeaut(parts[0]), parts[1]))
                     else:
-                        rec['auts'].append(author.strip())        
+                        rec['auts'].append(author.strip())
     for diva in page.body.find_all('div', attrs = {'class' : 'art-affiliations'}):
         for div in diva.find_all('div', attrs = {'class' : 'affiliation'}):
             for sup in div.find_all('sup'):
@@ -179,7 +211,7 @@ for artlink in artlinks:
                 span.replace_with(';;;')
             for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
                 rec['aff'].append(aff.strip())
-    #references    
+    #references
     reflink = artlink[0]  + '/htm'
     print '              ---{ %s }---' % (reflink)
     try:
@@ -204,8 +236,8 @@ for artlink in artlinks:
             rec['refs'].append([('x', lit)])
     recs.append(rec)
     print '  ', rec.keys()
-    time.sleep(2)
-print '%i new records' % (len(recs)) 
+    time.sleep(3)
+print '%i new records' % (len(recs))
 
 #write xml
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -216,7 +248,7 @@ xmlfile.close()
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
+if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
