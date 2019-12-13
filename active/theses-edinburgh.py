@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #harvest theses from University of Edinburgh
-#FS: 2019-09-2y
+#FS: 2019-11-25
 
 
 import getopt
@@ -34,12 +34,15 @@ print tocurl
 req = urllib2.Request(tocurl, headers=hdr)
 tocpage = BeautifulSoup(urllib2.urlopen(req))
 recs = []
+hdls = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
     rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
     for a in div.find_all('a'):
         rec['artlink'] = 'https://www.era.lib.ed.ac.uk' + a['href'] #+ '?show=full'
         rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-        recs.append(rec)
+        if not rec['hdl'] in hdls:
+            recs.append(rec)
+            hdls.append(rec['hdl'])
 
 i = 0
 for rec in recs:
