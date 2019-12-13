@@ -188,6 +188,8 @@ for rec in recs:
     for body in artpage.find_all('body'):
         unikey = re.sub('\W', '', uni)
         unikey = re.sub('[a-z]', '', unikey)
+        #avoid lots of files with just 1 record
+        unikey = str(len(recs))
         j = 0
         while unikey in dictrecs.keys() and len(dictrecs[unikey]) >= 150:
             j += 1
