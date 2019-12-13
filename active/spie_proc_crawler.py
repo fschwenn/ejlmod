@@ -141,6 +141,11 @@ def spie(volume):
                         reflabel = False
                     elif 'ref-label' in div2['class']:
                         reflabel = re.sub('.*?(\d+).*', r'\1', div2.text.strip())
+        ###
+        if rec['doi'] == '10.1117/12.2536012':
+            rec['autaff'] = [['Schaefer, H.']]
+        if not rec['autaff'][0]:
+            rec['autaff'] = [['NONE']]
         if len(args) > 1:
             rec['cnum'] = args[1]
         try:
@@ -148,7 +153,7 @@ def spie(volume):
         except:
             pass
         if rec.has_key('year'):
-            print '  %s %s (%s) %s, %s' % (jnlname,volume,rec['year'],rec['p1'],rec['tit'])
+            print '  %s %s (%s) %s' % (jnlname,volume,rec['year'],rec['p1'])
         else:
             print '=== PROBLEM WITH RECORD ==='
             print rec
