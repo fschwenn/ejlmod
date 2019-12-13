@@ -88,6 +88,7 @@ for rec in prerecs:
             #DOI
             elif meta['name'] == 'bepress_citation_doi':
                 rec['doi'] = re.sub('.*org\/(10.*)', r'\1', meta['content'])
+                rec['doi'] = re.sub('.*org\/doi:(10.*)', r'\1', rec['doi'])
             #typ of dissertation
             elif meta['name'] == 'bepress_citation_dissertation_name':
                 disstyp = meta['content']
