@@ -11,7 +11,7 @@ from invenio.search_engine import perform_request_search
 from invenio.search_engine import get_record
 #from invenio.bibcheck_task import AmendableRecord
 from invenio.bibrecord  import record_add_field
-from clean_fulltext import clean_fulltext_jacow, clean_linebreaks, get_reference_section
+from clean_fulltext import clean_fulltext_jacow, clean_fulltext_moriond, clean_linebreaks, get_reference_section
 
 ##from correct_utf8 import check_record
 
@@ -25,16 +25,25 @@ ejl = '/afs/desy.de/user/l/library/inspire/ejl/'
 TRANSLATE ={"&uuml;":u"ü", "&auml;":u"ä", "&ouml;":u"ö", "&Auml;":u"Ä", 
     "&Ouml;":u"Ö", "&Uuml;":u"Ü", "&szlig;":u"ß", "&thinsp;":u" "}
 
-def get_references(url):
+def get_references(url, clean='jacow'):
     from refextract import extract_references_from_string
     filename = url.split('/')[-1]
     if not os.path.isfile('%s/%s.txt' % (tmppath, filename[:-4])):
-        os.system('wget -q -O %s%s %s' % (tmppath, filename, url))
+        if not os.path.isfile('%s/%s' % (tmppath, filename)):
+            os.system('wget -q -O %s%s %s' % (tmppath, filename, url))
         os.system('/usr/bin/pdftotext %s%s' % (tmppath, filename))
 
     infile = codecs.EncodedFile(codecs.open('%s/%s.txt' % (tmppath, filename[:-4])),'utf8')
-    fulltext = clean_fulltext_jacow(infile.readlines(), verbose=1)
-#    fulltext = clean_linebreaks(fulltext)
+    fulltext = infile.readlines()
+    if clean == 'jacow':
+        fulltext = clean_fulltext_jacow(fulltext, verbose=1)
+    elif clean == 'moriond':
+        fulltext = clean_fulltext_moriond(fulltext)
+    elif clean == 'linebreaks':
+        fulltext = '\n'.join(fulltext)+'\n'
+        fulltext = clean_linebreaks(fulltext)
+    else:
+        fulltext = '\n'.join(fulltext)+'\n'
     fulltext = get_reference_section(fulltext)
     infile.close()
     controlfile = codecs.EncodedFile(codecs.open('%s/%s_clean.txt' % (tmppath, filename[:-4]), mode='wb'),'utf8')
