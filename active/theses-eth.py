@@ -93,8 +93,8 @@ for rec in prerecs:
                 if meta['content'] == 'por':
                     rec['language'] = 'portuguese'
             #FFT
-            elif meta['name'] == 'citation_pdf_url':
-                rec['FFT'] = meta['content']
+            #elif meta['name'] == 'citation_pdf_url':
+            #    rec['FFT'] = meta['content']
             #abstract
             elif meta['name'] == 'DCTERMS.abstract':
                 rec['abs'] = meta['content']
@@ -102,7 +102,11 @@ for rec in prerecs:
             elif meta['name'] == 'DC.rights':
                 if re.search('creativecommons.org', meta['content']):
                     rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
-                    
+    if 'licence' in rec.keys():
+        for div in artpage.body.find_all('div', attrs = {'class' : 'file-link'}):
+            for a in div.find_all('a'):
+                if re.search('Fulltext', a.text):
+                    rec['FFT'] = 'https://www.research-collection.ethz.ch' + a['href']
     recs.append(rec)
 
 
