@@ -87,6 +87,13 @@ for rec in recs:
                 supervisor = re.sub(' *\[.*', '', meta['content'])
                 rec['supervisor'] = [[ supervisor ]]
                 rec['supervisor'][-1].append('Bern U.')
+    #license
+    for a in artpage.body.find_all('a'):
+        if a.has_attr('href') and re.search('creativecommons.org', a['href']):
+            atext = a.text.strip()
+            if re.search('\(CC.[A-Z][A-Z]', atext):
+                rec['license'] = {'statement' : re.sub('.*\((CC.*?)\).*', r'\1', atext)}
+            
 
 
 
