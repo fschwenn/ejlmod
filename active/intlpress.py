@@ -98,7 +98,11 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'list_item'}):
                 elif meta['name'] == 'citation_year':
                     rec['year'] = meta['content']
                 elif meta['name'] == 'citation_doi':
-                    rec['doi'] = meta['content']
+                    if meta['content']:
+                        rec['doi'] = meta['content']
+                    else:
+                        rec['link'] = rec['artlink']
+                        rec['doi'] = '20.2000/' + re.sub('\W', '',  rec['artlink'][10:])
                 elif meta['name'] == 'citation_title':
                     rec['tit'] = meta['content']                
                 elif 'citation_author' == meta['name']:
