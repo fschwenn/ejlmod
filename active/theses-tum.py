@@ -83,6 +83,10 @@ for rec in recs:
     for div in artpage.body.find_all('div', attrs = {'class' : 'field-description'}):
         for div2 in div.find_all('div', attrs = {'class' : 'mask_value'}):
             rec['abs'] = div2.text.strip()
+    #urn
+    for div in artpage.body.find_all('div', attrs = {'class' : 'field-urn_link'}):
+        for div2 in div.find_all('div', attrs = {'class' : 'mask_value'}):
+            rec['urn'] = re.sub('.*resolver.pl.', '', div2.text.strip())
     #link
     for div in artpage.body.find_all('div', attrs = {'class' : 'field-www-address'}):
         for div2 in div.find_all('div', attrs = {'class' : 'mask_value'}):
@@ -93,10 +97,6 @@ for rec in recs:
     for div in artpage.body.find_all('div', attrs = {'class' : 'field-pdf_pages'}):
         for div2 in div.find_all('div', attrs = {'class' : 'mask_value'}):
             rec['pages'] = re.sub('\D', '', div2.text.strip())
-    #urn
-    for div in artpage.body.find_all('div', attrs = {'class' : 'field-urn_link'}):
-        for div2 in div.find_all('div', attrs = {'class' : 'mask_value'}):
-            rec['urn'] = re.sub('.*resolver.pl.', '', div2.text.strip())
     #PDF
     for a in artpage.body.find_all('a', attrs = {'target' : 'documentdownload'}):
         rec['FFT'] = 'https://mediatum.ub.tum.de' + a['href']
