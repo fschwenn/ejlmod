@@ -71,9 +71,10 @@ for issue in re.split(',', issues):
                                                 for a in li.find_all('a', attrs = {'class' : 'highwire-cite-linked-title'}):
                                                     rec['artlink'] = 'https://www.pnas.org' + a['href']
                                                 if not rec['artlink'] in artlinks:
-                                                    artlinks.append(rec['artlink'])
-                                                    if not note1 in ['Commentaries', 'This Week in PNAS', 'News Feature']:
-                                                        recs.append(rec)
+                                                    if not re.search('early', rec['artlink']):
+                                                        artlinks.append(rec['artlink'])
+                                                        if not note1 in ['Commentaries', 'This Week in PNAS', 'News Feature']:
+                                                            recs.append(rec)
     time.sleep(7)
 
 
