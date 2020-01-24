@@ -37,7 +37,15 @@ tocurl = 'https://www.ingentaconnect.com/content/%s/%s/%s/%08i/%08i' % (jnl, jnl
 print tocurl
 hdr = {'User-Agent' : 'Mozilla/5.0'}
 req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
+try:
+    tocpage = BeautifulSoup(urllib2.urlopen(req))
+except:
+    tocfile = '/tmp/%s.toc' % (jnlfilename)
+    if not os.path.isfile(tocfile):                               
+        os.system('wget -O %s %s' % (tocfile, tocurl))
+    inf = open(tocfile, 'r')
+    tocpage = BeautifulSoup(''.join(inf.readlines()))
+    inf.close()
 recs = []
 articlelinks = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'greybg'}):
@@ -56,9 +64,16 @@ i=0
 for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['articlelink'])
-    time.sleep(20)
     req = urllib2.Request(rec['articlelink'], headers=hdr)
-    artpage = BeautifulSoup(urllib2.urlopen(req))
+    try:
+        artpage = BeautifulSoup(urllib2.urlopen(req))
+    except:
+        artfile = '/tmp/%s.%03i.art' % (jnlfilename, i)
+        if not os.path.isfile(artfile):                               
+            os.system('wget -O %s %s' % (artfile, rec['articlelink']))
+        inf = open(artfile, 'r')
+        artpage = BeautifulSoup(''.join(inf.readlines()))
+        inf.close()
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             if meta['name'] == 'DC.creator':
@@ -76,6 +91,8 @@ for rec in recs:
         abstract = div.text.strip()
         if not abstract == 'No Abstract.':
             rec['abs'] = abstract
+    print rec.keys()
+    time.sleep(20)
 
 #write xml
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
