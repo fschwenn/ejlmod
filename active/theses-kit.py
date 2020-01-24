@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python
 #program to harvest theses from Karlsruhe Insitute of Technolgy
-# FS 2018-01-08
+# FS 2020-01-13
 
 import sys
 import os
@@ -21,108 +21,123 @@ tmpdir = '/tmp'
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
-publisher = 'KIT'
+publisher = 'KIT, Karlsruhe'
 
 typecode = 'T'
 
 jnlfilename = 'THESES-KIT-%s' % (stampoftoday)
+pages = 2
+years = 2
 
-tocurl = 'http://www.etp.kit.edu/english/391.php'
-try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
-    time.sleep(3)
-except:
-    print "retry %s in 180 seconds" % (tocurl)
-    time.sleep(180)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+tocurl = 'https://primo.bibliothek.kit.edu/primo_library/libweb/action/search.do?ct=facet&rfnGrpCounter=5&rfnGrpCounter=4&fn=search&indx=1&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&mulIncFctN=facet_local12&mulIncFctN=facet_local12&mulIncFctN=facet_local12&dscnt=0&rfnIncGrp=3&rfnIncGrp=3&rfnIncGrp=3&vid=KIT&fctV=%5B2009+TO+null%5D&fctV=istDissertation&mode=Basic&ct=facet&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&fctExcV=Institut+f%C3%BCr+Unternehmungsf%C3%BChrung+%28IBU%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Computational+Materials+Science+%28IAM-CMS%29&fctExcV=Institut+f%C3%BCr+Informationswirtschaft+und+Marketing+%28IISM%29&fctExcV=Institut+f%C3%BCr+Meteorologie+und+Klimaforschung+-+Forschungsbereich+Troposph%C3%A4re+%28IMK-TRO%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Werkstoffkunde+%28IAM-WK%29&fctExcV=Institut+f%C3%BCr+Angewandte+Biowissenschaften+%28IAB%29&fctExcV=Institut+f%C3%BCr+Fahrzeugsystemtechnik+%28FAST%29&fctExcV=Institut+f%C3%BCr+Bio-+und+Lebensmitteltechnik+%28BLT%29&fctExcV=Institut+f%C3%BCr+Anthropomatik+und+Robotik+%28IAR%29&fctExcV=Institut+f%C3%BCr+Produktionstechnik+%28WBK%29&fctExcV=Institut+f%C3%BCr+Technische+Chemie+und+Polymerchemie+%28ITCP%29&fctExcV=Institut+f%C3%BCr+Physikalische+Chemie+%28IPC%29&fctExcV=Institut+f%C3%BCr+Industriebetriebslehre+und+Industrielle+Produktion+%28IIP%29&fctExcV=Institut+f%C3%BCr+Mikrostrukturtechnik+%28IMT%29&fctExcV=Lichttechnisches+Institut+%28LTI%29&fctExcV=Institut+f%C3%BCr+Angewandte+Informatik+und+Formale+Beschreibungsverfahren+%28AIFB%29&fctExcV=Institut+f%C3%BCr+Anorganische+Chemie+%28AOC%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Informatik+%28INFORMATIK%29&fctExcV=Institut+f%C3%BCr+Organische+Chemie+%28IOC%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Maschinenbau+%28MACH%29&fctExcV=Institut+f%C3%BCr+Volkswirtschaftslehre+%28ECON%29&fctExcV=Institut+f%C3%BCr+Technische+Informatik+%28ITEC%29&fctExcV=Institut+f%C3%BCr+Angewandte+Geowissenschaften+%28AGW%29&fctExcV=Institut+f%C3%BCr+Theoretische+Informatik+%28ITI%29&fctExcV=Institut+f%C3%BCr+Funktionelle+Grenzfl%C3%A4chen+%28IFG%29&fctExcV=Institut+f%C3%BCr+Sport+und+Sportwissenschaft+%28IfSS%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Werkstoff-+und+Biomechanik+%28IAM-WBM%29&fctExcV=Institut+f%C3%BCr+Produktentwicklung+%28IPEK%29&fctExcV=Institut+f%C3%BCr+Technische+Mechanik+%28ITM%29&fctExcV=Botanisches+Institut+und+Botanischer+Garten+%28BOTANIK%29&fctExcV=Institut+f%C3%BCr+Nanotechnologie+%28INT%29&fctExcV=Institut+f%C3%BCr+Programmstrukturen+und+Datenorganisation+%28IPD%29&fctExcV=Institut+f%C3%BCr+Toxikologie+und+Genetik+%28ITG%29&fctExcV=Institut+f%C3%BCr+Mechanische+Verfahrenstechnik+und+Mechanik+%28MVM%29&fctExcV=Institut+f%C3%BCr+Technik+der+Informationsverarbeitung+%28ITIV%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Bauingenieur-%2C+Geo-+und+Umweltwissenschaften+%28BGU%29&fctExcV=Engler-Bunte-Institut+%28EBI%29&rfnGrp=4&rfnGrp=1&tab=kit_evastar&srt=date&fctN=facet_searchcreationdate&fctN=facet_local8&vl(freeText0)=istKITopen&dstmp=1578919455926&fctIncV=Institut+f%C3%BCr+Angewandte+Physik+%28APH%29&fctIncV=Physikalisches+Institut+%28PHI%29&fctIncV=Institut+f%C3%BCr+Experimentelle+Kernphysik+%28IEKP%29&fctExcV=Steinbuch%20Centre%20for%20Computing%20(SCC)&mulExcFctN=facet_local12&rfnExcGrp=5&fctExcV=Institut%20f%C3%BCr%20Angewandte%20Materialien%20-%20Keramik%20im%20Maschinenbau%20(IAM-KM)&mulExcFctN=facet_local12&rfnExcGrp=5&fctExcV=Karlsruhe%20School%20of%20Optics%20%26%20Photonics%20(KSOP)&mulExcFctN=facet_local12&rfnExcGrp=5'
 
-prerecs = []
-for td in tocpage.body.find_all('td'):
-    for a in td.find_all('a'):
-        if a.has_attr('href'):
-            link = a['href']
-            if re.search('ekp-invenio.physik.uni-karlsruhe.de.record.\d+$', link):
-                rec = {'jnl' : 'BOOK', 'link' : link, 'tc' : typecode}
-                prerecs.append(rec)
-                print link
+recs = []
+for i in range(pages):
+    print '---{ %i }---' % (i)
+    newrecs = []
+    try:
+        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+        time.sleep(3)
+    except:
+        print "retry %s in 180 seconds" % (tocurl)
+        time.sleep(180)
+        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+    for div in tocpage.body.find_all('div', attrs ={'class' : 'EXLSummaryContainer'}):
+        for h3 in div.find_all('h3', attrs ={'class' : 'EXLResultFourthLine'}):
+            rec = {'jnl' : 'BOOK', 'tc' : 'T'}
+            rec['year'] = h3.text.strip()
+            rec['date'] = h3.text.strip()
+            for h2 in div.find_all('h2'):
+                for a in h2.find_all('a'):
+                    rec['artlink'] = 'https://primo.bibliothek.kit.edu/primo_library/libweb/action/' + a['href']
+                    rec['tit'] = a.text.strip()
+            try:
+                if int(rec['year']) >= now.year - years:
+                    newrecs.append(rec)
+            except:
+                newrecs.append(rec)
+                print '   ', rec['year'], '?'
+    print '   %i+%i=%i recs' % (len(recs), len(newrecs), len(recs)+len(newrecs))
+    recs += newrecs                            
+    if newrecs:
+        for a in tocpage.body.find_all('a', attrs ={'class' : 'EXLBriefResultsPaginationLinkNext'}):
+            tocurl = a['href']
+    else:
+        break
+    
+        
 
 i = 0
-recs = []
-for rec in prerecs:
-    isnew = True
+for rec in recs:
     i += 1
+    print '---{ %i/%i }---' % (i, len(recs))
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']+'/export/xm'))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
     except:
         print "retry %s in 180 seconds" % (rec['link'])
         time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']+'/export/xm'))
-    #author
-    for datafield in artpage.find_all('datafield', attrs = {'tag' : '100'}):
-        for subfield in datafield.find_all('subfield', attrs = {'code' : 'a'}):
-            rec['auts'] = [ subfield.text.strip() ] 
-    #title
-    for datafield in artpage.find_all('datafield', attrs = {'tag' : '245'}):
-        for subfield in datafield.find_all('subfield', attrs = {'code' : 'a'}):
-            rec['tit'] =  subfield.text.strip()  
-    #reportnumber
-    for datafield in artpage.find_all('datafield', attrs = {'tag' : '035'}):
-        for subfield in datafield.find_all('subfield', attrs = {'code' : 'a'}):
-            if rec.has_key('rn'):
-                rec['rn'].append(subfield.text.strip())
-            else:
-                rec['rn'] = [ subfield.text.strip() ]
-    #language
-    for datafield in artpage.find_all('datafield', attrs = {'tag' : '041'}):
-        for subfield in datafield.find_all('subfield', attrs = {'code' : 'a'}):
-            if not 'English' == subfield.text.strip():
-                rec['language'] = subfield.text.strip()
-    #date
-    for datafield in artpage.find_all('datafield', attrs = {'tag' : '260'}):
-        for subfield in datafield.find_all('subfield', attrs = {'code' : 'c'}):
-            rec['date'] = subfield.text.strip()
-            year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
-            if year < now.year - 1:
-                isnew = False
-    #abstract
-    for datafield in artpage.find_all('datafield', attrs = {'tag' : '520'}):
-        for subfield in datafield.find_all('subfield', attrs = {'code' : 'a'}):
-            rec['abs'] = subfield.text.strip()
-    #DOI,FFT
-    for datafield in artpage.find_all('datafield', attrs = {'tag' : '856'}):
-        for subfield in datafield.find_all('subfield', attrs = {'code' : 'u'}):
-            url = subfield.text.strip()
-            if re.search('doi.org.*10\.', url):
-                rec['doi'] = re.sub('.*?(10\.\d.*)', r'\1', url)
-            elif re.search('\.pdf$', url):
-                rec['FFT'] = url
-    #CMS-paper
-    for datafield in artpage.find_all('datafield', attrs = {'tag' : '920'}):
-        for subfield in datafield.find_all('subfield', attrs = {'code' : 'l'}):
-            exp = subfield.text.strip()
-            if exp == 'CMS':
-                rec['exp'] = 'CERN-LHC-CMS'
-            elif exp == 'Belle':
-                rec['exp'] = 'KEK-BF-BELLE-II'
-            elif exp == 'KATRIN':
-                rec['exp'] = 'KATRIN'
-            elif exp == 'CDF':
-                rec['exp'] = 'FNAL-E-0830'
-            elif exp == 'DELPHI':
-                rec['exp'] = 'CERN-LEP-DELPHI'    
-    if not rec.has_key('doi'):
-        rec['doi'] = '20.2000/' + re.sub('.*\/', '', rec['link'])
-    print '---[ %i/%i ]---[ %s ]---' % (i, len(recs), rec['tit'])
-    if isnew:
-        recs.append(rec)
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    for div in artpage.body.find_all('div', attrs = {'class' : 'EXLDetailsContent'}):
+        for li in div.find_all('li'):
+            if li.has_attr('id'):
+                #author
+                if li['id'] == 'Verfasser-1':
+                    for a in li.find_all('a'):
+                        rec['autaff'] = [[ a.text.strip(), publisher ]]
+                #pages
+                if li['id'] == 'Auflage / Umfang-1':
+                    for span in li.find_all('span'):
+                        pages = span.text.strip()
+                        if re.search('\d', pages):
+                            rec['pages'] = re.sub('\D*(\d+).*', r'\1', pages)
+                #language
+                if li['id'] == 'Sprache-1':
+                    for span in li.find_all('span'):
+                        language = span.text.strip()
+                        if language != 'Englisch':
+                            if language == 'Deutsch':
+                                rec['language'] = 'german'
+                            else:
+                                rec['language'] = language
+                #DOI, ISBN
+                if li['id'] == 'Identifikator-1':
+                    for span in li.find_all('span'):
+                        spant = span.text.strip()
+                        if re.search('10\.5445\/', spant):
+                            rec['doi'] = re.sub('.*(10\.5445\/.*)', r'\1', spant)
+                        elif re.search('^978\-', spant):
+                            rec['isbn'] = re.sub('\-', '', spant)
+    #FFT
+    for a in artpage.body.find_all('a'):
+        if a.has_attr('href'):
+            if a.text.strip() == 'Online Ressource':
+                rec['FFT'] = a['href']
+    #DOI-landingpage
+    if 'doi' in rec.keys():
+        doilink = re.sub('.*\/', 'https://publikationen.bibliothek.kit.edu/', rec['doi'])
+        try:
+            doipage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(doilink))
+            time.sleep(3)
+        except:
+            print "retry %s in 180 seconds" % (rec['link'])
+            time.sleep(180)
+            doipage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(doilink))        
+        #abstract
+        for meta in doipage.head.find_all('meta', attrs = {'name' : 'citation_abstract'}):
+            rec['abs'] = meta['content']
+        for table in doipage.body.find_all('table', attrs = {'class' : 'table'}):
+            for tr in table.find_all('tr'):
+                tds = tr.find_all('td')
+                if len(tds) == 2:
+                    #Keywords
+                    if tds[0].text.strip() == 'Schlagworte':
+                        rec['keyw'] = re.split(', ', tds[1].text.strip())
     else:
-        print 'old thesis'
-    time.sleep(5)
-            
-            
+        rec['doi'] = '20.2000/KIT/%s/%04i' % (stampoftoday, i)
+    print rec.keys()
+
     
-            
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
