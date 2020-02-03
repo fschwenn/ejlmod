@@ -32,7 +32,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 #journals have quite different number of articles per month
 if jnl == 'symmetry': #2211
-    numberofpages = 8
+    numberofpages = 18
 elif jnl == 'universe': #367
     numberofpages = 2
 elif jnl == 'sensors': #9570
