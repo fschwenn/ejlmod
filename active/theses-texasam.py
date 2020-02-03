@@ -28,7 +28,7 @@ publisher = 'Texas A-M'
 typecode = 'T'
 
 
-rpp = 20
+rpp = 200
 
 hdr = {'User-Agent' : 'Magic Browser'}
 for department in ['Physics', 'Physics+and+Astronomy', 'Mathematics']:
@@ -101,6 +101,9 @@ for department in ['Physics', 'Physics+and+Astronomy', 'Mathematics']:
                                     print divt
                                 else:
                                     rec['FFT'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+        #upload PDF at least hidden
+        if not 'FFT' in rec.keys() and 'pdf_url' in rec.keys():
+            rec['hidden'] = rec['pdf_url']
                                     
     jnlfilename = 'THESES-TEXAS_AM-%s_%s' % (stampoftoday, re.sub('\W', '', department))
 
