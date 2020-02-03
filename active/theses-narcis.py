@@ -32,6 +32,7 @@ ejldirs = ['/afs/desy.de/user/l/library/dok/ejl/onhold',
            '/afs/desy.de/user/l/library/dok/ejl/backup/%i' % (now.year-1)]
 redoki = re.compile('THESES.NARCIS.*doki$')
 rehttp = re.compile('^I\-\-(http.*id).*')
+nochmal = []
 bereitsin = []
 for ejldir in ejldirs:
     print ejldir
@@ -43,8 +44,9 @@ for ejldir in ejldirs:
                     if rehttp.search(line):
                         http = rehttp.sub(r'\1', line.strip())
                         if not http in bereitsin:
-                            bereitsin.append(http)
-                            print http
+                            if not http in nochmal:
+                                bereitsin.append(http)
+                                #print http
             print '  %6i %s' % (len(bereitsin), datei)
 
 
@@ -53,10 +55,11 @@ hdr = {'User-Agent' : 'Magic Browser'}
 
 recs = []
 for year in [str(now.year-1), str(now.year)]:
-    page = 1
+    page = 0
     complete = False
     while not complete:
         tocurl = 'https://www.narcis.nl/search/coll/publication/Language/EN/genre/doctoralthesis/dd_year/' + year + '/pageable/' + str(page)
+        print tocurl
         try:
             req = urllib2.Request(tocurl, headers=hdr)
             tocpage = BeautifulSoup(urllib2.urlopen(req))
@@ -159,7 +162,7 @@ for rec in recs:
                 if not 'hdl' in rec.keys() and not 'doi' in rec.keys():
                     if re.search('\/handle\/\d', rec['link']):
                         rec['hdl'] = re.sub('.*handle\/', '', rec['link'])
-    if rec['oa'] and 'link' in rec.keys():
+    if 'link' in rec.keys():
         print '  try to get PDF from %s' % (rec['link'])
         try:
             req = urllib2.Request(rec['link'], headers=hdr)
@@ -167,7 +170,10 @@ for rec in recs:
             for meta in origpage.head.find_all('meta'):
                 if meta.has_attr('name'):
                     if meta['name'] == 'citation_pdf_url':
-                        rec['FFT'] = meta['content']
+                        if rec['oa']:
+                            rec['FFT'] = meta['content']
+                        else:
+                            rec['hidden'] = meta['content']
                         print '  found PDF: %s' % (meta['content'])
                     if meta['name'] == 'citation_isbn':
                         if not 'isbn' in rec.keys():
