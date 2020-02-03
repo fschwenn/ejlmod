@@ -110,6 +110,19 @@ for rec in recs:
                                 print divt
                             else:
                                 rec['FFT'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+    #hidden PDF
+    if not 'FFT' in rec.keys():
+        if 'pdf_url' in rec.keys():
+            rec['FFT'] = rec['pdf_url']
+        else:
+            for div in artpage.find_all('div'):
+                for a2 in div.find_all('a'):
+                    if a2.has_attr('href') and re.search('bistream.*\.pdf', a['href']):
+                        divt = div.text.strip()
+                        if re.search('Restricted', divt):
+                            print divt
+                        else:
+                            rec['hidden'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
     print '  ', rec.keys()
 jnlfilename = 'THESES-SIDNEY-%s' % (stampoftoday)
 
