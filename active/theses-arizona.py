@@ -84,6 +84,9 @@ for department in ['Physics', 'Mathematics', 'Astrophysics']:
                 rec['license'] = {'url' : a['href']}
                 if 'citation_pdf_url' in rec.keys():
                     rec['FFT'] = rec['citation_pdf_url']
+        #hiddenPDF
+        if not 'license' in rec.keys() and 'citation_pdf_url' in rec.keys():
+            rec['hidden'] = rec['citation_pdf_url']
         #pseudo doi needed?
         if not 'hdl' in rec.keys():
             rec['doi'] = '20.2000/ARIZONA_STATE/' + re.sub('\W', '', rec['artlink'][10:])
