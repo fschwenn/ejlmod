@@ -94,8 +94,8 @@ for year in years:
                     if meta['xml:lang'] == "en_US":
                         rec['abs'] = meta['content']
                 #FFT
-                #elif meta['name'] == 'citation_pdf_url':
-                #    rec['FFT'] = meta['content']
+                elif meta['name'] == 'citation_pdf_url':
+                    rec['hidden'] = meta['content']
         for span in artpage.body.find_all('span', attrs = {'class' : 'text-theses-failed'}):
             rec['tit'] += ' [FAILED]'
         print rec.keys()
