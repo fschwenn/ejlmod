@@ -73,6 +73,9 @@ for year in [now.year, now.year-1]:
                 #DOI
                 elif meta['name'] == 'citation_doi':
                     rec['doi'] = meta['content']
+                #upload PDF at least hidden
+                elif meta['name'] == 'citation_pdf_url':
+                    rec['hidden'] = meta['content']
         for a in artpage.body.find_all('a'):
             if a.has_attr('href'):
                 if re.search('\/collection\/Infoscience\/Research\/[A-Z]', a['href']):
