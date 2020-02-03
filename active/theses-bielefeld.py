@@ -69,6 +69,11 @@ for k in range(pages):
                 for datei in thesis['file']:
                     if datei['relation'] == 'main_file':
                         rec['FFT'] = 'https://pub.uni-bielefeld.de/download/%s/%s/%s' % (thesis['_id'], datei['file_id'], datei['file_name'])
+        #hidden PDF
+        elif 'file' in thesis.keys():
+            for datei in thesis['file']:
+                if datei['relation'] == 'main_file':
+                    rec['hidden'] = 'https://pub.uni-bielefeld.de/download/%s/%s/%s' % (thesis['_id'], datei['file_id'], datei['file_name'])
         #author
         for author in thesis['author']:
             rec['autaff'].append([author['full_name']])
