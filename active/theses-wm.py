@@ -83,8 +83,11 @@ for rec in prerecs:
             elif meta['name'] == 'description':
                 rec['abs'] = meta['content']
             #FFT
-            elif meta['name'] == 'bepress_citation_pdf_url' and 'license' in rec.keys():
-                rec['FFT'] = meta['content']
+            elif meta['name'] == 'bepress_citation_pdf_url':
+                if 'license' in rec.keys():
+                    rec['FFT'] = meta['content']
+                else:
+                    rec['hidden'] = meta['content']
             #DOI
             elif meta['name'] == 'bepress_citation_doi':
                 rec['doi'] = re.sub('.*org\/(10.*)', r'\1', meta['content'])
