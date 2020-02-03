@@ -21,7 +21,7 @@ import datetime
 from invenio.search_engine import search_pattern
 
 
-sprdir = '/afs/desy.de/group/library/publisherdata/springer/test'
+sprdir = '/afs/desy.de/group/library/publisherdata/springer'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -305,7 +305,7 @@ def get_references(rl):
                         el.decompose()
                     elif re.search('inspirehep.net.*recid', link):
                         recid = re.sub('.*\D', '', link)
-                        inspirelink += ', https://inspirehep.net/record/%i' % (recid)
+                        inspirelink += ', https://inspirehep.net/record/%s' % (recid)
                         el.decompose()
                     elif re.search('inspirehep.net', link):
                         el.decompose()
@@ -382,11 +382,12 @@ def convertarticle(journalnumber, filename, contlevel):
         for ac in meta.find_all('article-categories'):
             for subj in ac.find_all('subject'):
                 subjt = subj.text.strip()
-                rec['note'].append(subjt)
+                if re.search('[a-zA-Z]', subjt):
+                    rec['note'].append(subjt)
                 if subjt in ['Review', 'Review Article', 'Review Paper', 'Short Review', 'Systematic Review']:
                     if not 'R' in rec['tc']:
                         rec['tc'] += 'R'
-                elif subjt in ['Editorial']:
+                elif subjt in ['Editorial', 'News Q&A', 'Correspondence']:
                     return {}
                 #check whether article in fact is part of proceedings
                 elif re.search('Proceedings of ', subjt) and 'P' in rec['tc']:
@@ -607,8 +608,9 @@ def convertbook(journalnumber, dirname):
             rec['vol'] = isbn
         crecs.append(rec)
     #copy date to HA
-    if not 'date' in ha.keys() and 'date' in rec.keys():
-        ha['date'] = rec['date']
+    if front:
+        if not 'date' in ha.keys() and 'date' in rec.keys():
+            ha['date'] = rec['date']
     #combine
     if front:
         if rec['tc'] == 'C':            
@@ -678,7 +680,7 @@ for dirlev1 in os.listdir(sprdir):
         print 'journal skipped: ' + journalnumber
         os.system('echo "check www.springer.com/journal/%s" | mail -s "[SPRINGER] unknown journal" %s' % (journalnumber, 'florian.schwennsen@desy.de'))
         continue
-    #crawl through directories of volumes
+    #crawl through directories of volumes (to check for online first)
     for dirlev2 in os.listdir(dirlev1fullpath):
         dirlev2fullpath = os.path.join(dirlev1fullpath, dirlev2)
         onlinefirstpath = os.path.join(dirlev1fullpath, cday)
@@ -688,6 +690,10 @@ for dirlev1 in os.listdir(sprdir):
             if ('ART' in dirlev3):
 		print ' fake ' + dirlev3
                 os.renames(os.path.join(dirlev2fullpath, dirlev3), os.path.join(onlinefirstpath, dirlev3))
+    #crawl through directories of volumes
+    for dirlev2 in os.listdir(dirlev1fullpath):
+        dirlev2fullpath = os.path.join(dirlev1fullpath, dirlev2)
+        onlinefirstpath = os.path.join(dirlev1fullpath, cday)
         #Book
         if 'BOK' in dirlev2:
             print '==={ %s/%s }==={ %s }===' % (dirlev1, dirlev2, jc[journalnumber][1])
@@ -724,10 +730,10 @@ for dirlev1 in os.listdir(sprdir):
                     retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
                     retfiles_text = open(retfiles_path, "r").read()
                     line = jnlfilename+'.xml'+ "\n"
-#                    if not line in retfiles_text:
-#                        retfiles = open(retfiles_path, "a")
-#                        retfiles.write(line)
-#                        retfiles.close()
+                    if not line in retfiles_text:
+                        retfiles = open(retfiles_path, "a")
+                        retfiles.write(line)
+                        retfiles.close()
 
 
 
