@@ -147,6 +147,10 @@ for rec in recs:
                 rec['license'] = {'url' : a['href']}
                 for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'eprints.document_url'}):
                     rec['FFT'] = meta2['content']
+    #hidden PDF
+    if not 'license' in rec.keys():
+        for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'eprints.document_url'}):
+            rec['hidden'] = meta2['content']
     #502
     rec['MARC'] = [('502', [('d', rec['date'][:4]), ('c', 'Cologne U.'), ('b', 'PhD')])]
     print '    ', rec.keys()
