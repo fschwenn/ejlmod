@@ -25,8 +25,8 @@ publisher = 'Freiburg U.'
 
 typecode = 'T'
 
-pages = 2+20+50
-startyear = now.year - 10
+pages = 2
+startyear = now.year - 1
 stopyear = now.year + 1
 
 jnlfilename = 'THESES-FREIBURG-%s_%s' % (stampoftoday, startyear)
@@ -84,17 +84,23 @@ for record in records:
                     sft = sf2.text.strip()
                     if re.search('\(orcid\)', sft):
                         rec['supervisor'][-1].append(re.sub('.*\)', 'ORCID:', sft))
-                rec['supervisor'][-1].append(publisher)                
+                rec['supervisor'][-1].append(publisher)
+    #PDF
+    for df2 in record.find_all('datafield', attrs = {'tag' : '856'}):
+        for sf2 in df2.find_all('subfield', attrs = {'code' : 'x'}):
+            if sf2.text == 'Transfer-URL':
+                for sf3 in df2.find_all('subfield', attrs = {'code' : 'u'}):
+                    rec['pdf_url'] = sf3.text
     #licence and FFT
     for df in record.find_all('datafield', attrs = {'tag' : '506'}):
         for sf in df.find_all('subfield', attrs = {'code' : 'f'}):
             if re.search('(cc|CC)', sf.text):
                 rec['licence'] = {'statement' : sf.text.strip()}
-                for df2 in record.find_all('datafield', attrs = {'tag' : '856'}):
-                    for sf2 in df2.find_all('subfield', attrs = {'code' : 'x'}):
-                        if sf2.text == 'Transfer-URL':
-                            for sf3 in df2.find_all('subfield', attrs = {'code' : 'u'}):
-                                rec['FFT'] = sf3.text
+                if 'pdf_url' in rec.keys():
+                    rec['FFT'] = rec['pdf_url']
+    #upload PDF at least hidden
+    if 'pdf_url' in rec.keys() and not 'FFT' in rec.keys():
+        rec['hidden'] = rec['pdf_url']
     #title
     for df in record.find_all('datafield', attrs = {'tag' : '245'}):
         for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
