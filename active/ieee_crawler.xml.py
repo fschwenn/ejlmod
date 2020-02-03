@@ -112,9 +112,7 @@ def ieee(number):
     else:
         toclink = "/xpl/tocresult.jsp?isnumber=%s&rowsPerPage=50" % (number)
         tc = 'P'
-
-# https://ieeexplore.ieee.org/xpl/tocresult.jsp?isnumber=8246765&rowsPerPage=2000
-    
+        
     articlelinks = []
     driver = webdriver.PhantomJS()
     driver.implicitly_wait(30)
@@ -129,7 +127,8 @@ def ieee(number):
         pagecommand = '&pageNumber=%i' % (i)
         print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)        
         driver.get(urltrunc + toclink + pagecommand)
-        if number[0] == 'C':
+        if number[0] in ['C', '8']:
+#        if number[0] in ['C']:
             WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
         else:
             WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
@@ -141,6 +140,7 @@ def ieee(number):
         if i == 1:
             for div in page.body.find_all('div', attrs = {'class' : 'Dashboard-header'}):
                 divt = re.sub('[\n\t\r]', ' ', div.text.strip())
+                divt = re.sub(',', '', divt)
                 numberofarticles = int(re.sub('.* of +(\d+).*', r'\1', divt))
         #get links to individual articles
         articlelinks = []
@@ -187,6 +187,7 @@ def ieee(number):
                 time.sleep(60)
         inf = open(artfilename, 'r')
         articlepage = BeautifulSoup(''.join(inf.readlines()))
+        inf.close()
         rec = {'keyw' : [], 'autaff' : [], 'refs' : []}
         #metadata now in javascript
         for script in articlepage.find_all('script', attrs = {'type' : 'text/javascript'}):
@@ -269,20 +270,13 @@ def ieee(number):
             rec['cnum'] = args[1]  
             rec['tc'] = 'C'
         #references
-        try:
-            driver.get(articlelink + 'references')
-            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'stats-reference-link-googleScholar')))
-            refpage = BeautifulSoup(driver.page_source)
-        except:
-            print 'wait 3 minutes'
-            time.sleep(180)
-            try:
-                driver.get(articlelink + 'references')
-                WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'stats-reference-link-googleScholar')))
-                refpage = BeautifulSoup(driver.page_source)
-            except:
-                print '  could not load "%s%s"' % (articlelink, 'references')
-                refpage = page
+        reffilename = '/tmp/ieee_%s.%i.ref' % (number, i)
+        if not os.path.isfile(reffilename):
+            time.sleep(20)
+            os.system("wget -T 300 -t 3 -q -O %s %s" % (reffilename, articlelink + 'references'))
+        inf = open(reffilename, 'r')
+        refpage = BeautifulSoup(''.join(inf.readlines()))
+        inf.close()
         for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
             for span in div.find_all('span', attrs = {'class' : 'number'}):
                 for b in span.find_all('b'):
