@@ -67,8 +67,8 @@ for i in range(numofpages):
                 elif meta['name'] == 'DC.subject':
                     rec['keyw'].append( meta['content'] )
                 #FFT
-                #elif meta['name'] == 'citation_pdf_url':
-                #    rec['FFT'] = meta['content']
+                elif meta['name'] == 'citation_pdf_url':
+                    rec['hidden'] = meta['content']
                 #URN
         print '  ', rec.keys()
                 
