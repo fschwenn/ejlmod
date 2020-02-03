@@ -444,7 +444,10 @@ def writeXML(recs,dokfile,publisher):
                     coll = coll_clean710(coll)
                     newcolls.append(coll)
                     if author:
-                        print 'found author%s in collaboration strin %s' % (author, original)
+                        try:
+                            print 'found author %s in collaboration string %s' % (author, original)
+                        except:
+                            print 'found author in collaboration string'
             for col in newcolls:
                 xmlstring += marcxml('710',[('g',col)])
                 if not rec.has_key('exp') and colexpdict.has_key(col):
