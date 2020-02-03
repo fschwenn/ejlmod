@@ -79,7 +79,11 @@ for inst in ['Physikalisches+Institut', 'Institut+f%C3%BCr+Theoretische+Physik+u
                     if re.search('reativecommons.org', meta['content']):
                         rec['license'] = {'url' : re.sub('.deed.de', '', meta['content'])}
                         for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
-                            rec['FFT'] = meta2['content']
+                            rec['FFT'] = meta2['content']                            
+        #upload PDF at least hidden
+        if not 'license' in rec.keys():
+            for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
+                rec['hidden'] = meta2['content']            
         for tr in artpage.body.find_all('tr'):
             for th in tr.find_all('th'):
                 #PACS
