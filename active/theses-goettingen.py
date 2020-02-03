@@ -67,6 +67,9 @@ for rec in prerecs.values():
     lines = inf.readlines()
     inf.close()
     artpage = BeautifulSoup(' '.join(lines))
+    for meta in artpage.head.find_all('meta', attrs = {'name' : 'DC.rights'}):
+        if re.search('creativecommons.org', meta['content']):
+            rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #author
@@ -90,14 +93,13 @@ for rec in prerecs.values():
                     rec['language'] = 'german'
             #FFT
             elif meta['name'] == 'citation_pdf_url':
-                rec['FFT'] = meta['content']
+                if 'licence' in rec.keys():
+                    rec['FFT'] = meta['content']
+                else:
+                    rec['hiddden'] = meta['content']
             #abstract
             elif meta['name'] == 'DCTERMS.abstract':
                 rec['abs'] = meta['content']
-            #license            
-            elif meta['name'] == 'DC.rights':
-                if re.search('creativecommons.org', meta['content']):
-                    rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
 
     print rec.keys()
     recs.append(rec)
