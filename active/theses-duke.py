@@ -93,6 +93,9 @@ for department in ['Physics', 'Mathematics']:
                 rec['license'] = {'url' : a['href']}
                 if 'pdf_url' in rec.keys():
                     rec['FFT'] = rec['pdf_url']
+        #PDF as hidden
+        if not 'license' in rec.keys() and 'pdf_url' in rec.keys():
+            rec['hidden'] = rec['pdf_url']
         print '  ', rec.keys()
     jnlfilename = 'THESES-DUKE_U-%s_%s' % (stampoftoday, re.sub('\W', '', department))
 
