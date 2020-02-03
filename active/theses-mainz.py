@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #harvest theses from Mainz U.
-#FS: 2019-12-09
+#FS: 2020-01-27
 
 
 import getopt
@@ -19,7 +19,7 @@ import json
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
-yearstocover = 1
+yearstocover = 1 
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -113,6 +113,10 @@ for rec in recs:
             elif re.search('Abstract', name):
                 rec['abs2'] = content
                 abs2eng = len(re.findall('[tT]he', rec['abs2'])) - len(re.findall(' (der|die|das|den|dem|des) ', rec['abs2']))
+    #upload at least hidden PDF
+    if 'pdf_url' in rec.keys():
+        if not 'FFT' in rec.keys():
+            rec['hidden'] = rec['pdf_url']
     #decide which abstract to take
     if 'abs2' in rec.keys() and abs2eng > abs1eng:
         rec['abs'] = rec['abs2']
