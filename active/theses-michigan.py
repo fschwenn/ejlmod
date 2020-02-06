@@ -72,6 +72,9 @@ for rec in allrecs:
             #abstract
             elif meta['name'] == 'DCTERMS.abstract':
                 rec['abs'] = meta['content']
+            #PDF
+            elif meta['name'] == 'citation_pdf_url':
+                rec['hidden'] = meta['content']
     for tr in artpage.body.find_all('tr', attrs = {'class' : 'ds-table-row'}):
         for td in tr.find_all('td', attrs = {'class' : 'label-cell'}):
             label = td.text.strip()
