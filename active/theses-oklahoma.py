@@ -83,6 +83,10 @@ for uni in [('Oklahoma U.', '11244/10476'), ('Oklahome State U.', '11244/10462')
                         rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
                         for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
                             rec['FFT'] = meta2['content']
+                #upload PDF at least hidden
+                if not 'FFT' in rec.keys():
+                    for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
+                        rec['hidden'] = meta2['content']
         for tr in artpage.body.find_all('tr', attrs = {'class' : 'ds-table-row'}):
             (label, word) = ('', '')
             for td in tr.find_all('td', attrs = {'class' : 'label-cell'}): 
