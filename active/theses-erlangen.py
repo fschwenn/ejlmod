@@ -79,6 +79,10 @@ for rec in recs:
                     #PDF
                     for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
                         rec['FFT'] = meta2['content']
+    #upload PDF at least hidden
+    if not 'FFT' in rec.keys():
+        for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
+            rec['hidden'] = meta2['content']
     for table in artpage.body.find_all('table', attrs = {'class' : 'frontdoordata'}):
         for tr in table.find_all('tr'):
             for th in tr.find_all('th'):
