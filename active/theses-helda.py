@@ -82,8 +82,8 @@ for i in range(numofpages):
                     if meta.has_attr('xml:lang') and meta['xml:lang'] == 'en':
                         print '  ', meta['content']
                 #FFT
-                #elif meta['name'] == 'citation_pdf_url':
-                #    rec['FFT'] = meta['content']
+                elif meta['name'] == 'citation_pdf_url':
+                    rec['hidden'] = meta['content']
                 #URN
                 elif meta['name'] == 'DC.identifier':
                     if re.search('^URI', meta['content']):
