@@ -93,8 +93,8 @@ for rec in prerecs:
                 if meta['content'] == 'por':
                     rec['language'] = 'portuguese'
             #FFT
-            #elif meta['name'] == 'citation_pdf_url':
-            #    rec['FFT'] = meta['content']
+            elif meta['name'] == 'citation_pdf_url':
+                rec['hidden'] = meta['content']
             #abstract
             elif meta['name'] == 'DCTERMS.abstract':
                 rec['abs'] = meta['content']
