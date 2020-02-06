@@ -116,6 +116,13 @@ for record in records:
                         url = subfield.text.strip()
                         if re.search('\.pdf$', url):
                             rec['FFT'] = url
+    #hidden PDF
+    if not 'FFT' in rec.keys():
+        for df in record.find_all('datafield', attrs = {'tag' : '856'}):
+            for sf in df.find_all('subfield', attrs = {'code' : 'u'}):
+                url = subfield.text.strip()
+                if re.search('\.pdf$', url):
+                    rec['hidden'] = url
     #experiment
     for datafield in record.find_all('datafield', attrs = {'tag' : '980'}):
         for subfield in datafield.find_all('subfield', attrs = {'code' : 'a'}):
