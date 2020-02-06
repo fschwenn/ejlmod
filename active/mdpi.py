@@ -42,7 +42,7 @@ elif jnl == 'instruments': #91
 elif jnl == 'galaxies': #231
     numberofpages = 2
 elif jnl == 'entropy': #2124
-    numberofpages = 8
+    numberofpages = 8+4
 elif jnl == 'particles': #53
     numberofpages = 2
 elif jnl == 'physics': #26
