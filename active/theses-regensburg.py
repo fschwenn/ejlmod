@@ -122,6 +122,10 @@ for rec in recs:
                 rec['license'] = {'url' : a['href']}
                 for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'eprints.document_url'}):
                     rec['FFT'] = meta2['content']
+    #upload PDF at least hidden
+    if not 'FFT' in rec.keys():
+        for meta2 in artpage.head.find_all('meta', attrs = {'name' : 'eprints.document_url'}):
+            rec['hidden'] = meta2['content']          
     print '    ', rec.keys()
     
 #closing of files and printing
