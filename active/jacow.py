@@ -25,30 +25,70 @@ ejl = '/afs/desy.de/user/l/library/inspire/ejl/'
 TRANSLATE ={"&uuml;":u"ü", "&auml;":u"ä", "&ouml;":u"ö", "&Auml;":u"Ä", 
     "&Ouml;":u"Ö", "&Uuml;":u"Ü", "&szlig;":u"ß", "&thinsp;":u" "}
 
+re_number = re.compile(r'^\[(\d+)\]')
+def by_number(a,b):
+    '''
+    sort references by number
+    works only if one reference per line
+    '''
+    number_a = re_number.search(a)
+    number_b = re_number.search(b)
+    if number_a and number_b:
+        return cmp(int(number_a.group(1)), int(number_b.group(1)))
+    else:
+        return 0
+
+
 def get_references(url, clean='jacow'):
     from refextract import extract_references_from_string
     filename = url.split('/')[-1]
-    if not os.path.isfile('%s/%s.txt' % (tmppath, filename[:-4])):
-        if not os.path.isfile('%s/%s' % (tmppath, filename)):
-            os.system('wget -q -O %s%s %s' % (tmppath, filename, url))
-        os.system('/usr/bin/pdftotext %s%s' % (tmppath, filename))
-
-    infile = codecs.EncodedFile(codecs.open('%s/%s.txt' % (tmppath, filename[:-4])),'utf8')
-    fulltext = infile.readlines()
-    if clean == 'jacow':
-        fulltext = clean_fulltext_jacow(fulltext, verbose=1)
-    elif clean == 'moriond':
-        fulltext = clean_fulltext_moriond(fulltext)
-    elif clean == 'linebreaks':
-        fulltext = '\n'.join(fulltext)+'\n'
-        fulltext = clean_linebreaks(fulltext)
+    if os.path.isfile('%s/%s_clean.txt' % (tmppath, filename[:-4])):
+        controlfile = codecs.EncodedFile(codecs.open('%s/%s_clean.txt' % (tmppath, filename[:-4])),'utf8')
+        fulltext = controlfile.read()
+        controlfile.close()      
     else:
-        fulltext = '\n'.join(fulltext)+'\n'
-    fulltext = get_reference_section(fulltext)
-    infile.close()
-    controlfile = codecs.EncodedFile(codecs.open('%s/%s_clean.txt' % (tmppath, filename[:-4]), mode='wb'),'utf8')
-    controlfile.write(fulltext)
-    controlfile.close()
+        if not os.path.isfile('%s/%s.txt' % (tmppath, filename[:-4])):
+            if not os.path.isfile('%s/%s' % (tmppath, filename)):
+                os.system('wget -q -O %s%s %s' % (tmppath, filename, url))
+            os.system('/usr/bin/pdftotext %s%s' % (tmppath, filename))
+    
+        infile = codecs.EncodedFile(codecs.open('%s/%s.txt' % (tmppath, filename[:-4])),'utf8')
+        fulltext = infile.readlines()
+        if clean == 'jacow':
+            fulltext = clean_fulltext_jacow(fulltext, verbose=1)
+        elif clean == 'moriond':
+            fulltext = clean_fulltext_moriond(fulltext)
+        elif clean == 'linebreaks':
+            fulltext = '\n'.join(fulltext)+'\n'
+            fulltext = clean_linebreaks(fulltext)
+        else:
+            fulltext = '\n'.join(fulltext)+'\n'
+        fulltext = get_reference_section(fulltext)
+        infile.close()
+
+        if '[2]' in fulltext:
+            lines = fulltext.split('\n')
+            lines.sort(cmp=by_number)
+            fulltext = '\n'.join(lines)
+            last_number = 0
+            errors = ''
+            for line in lines:
+                number = re_number.search(line)
+                if number:
+                    this_number = int(number.group(1))
+                    if not this_number - last_number == 1:
+                        errors += '%s: [%s] followed by [%s]\n' % (filename[:-4], last_number, this_number)
+                    last_number = this_number
+                elif last_number:
+                    errors += '%s: No number for %s\n' % (filename[:-4], line[:30])
+            if errors:
+                reflog_file = open('%s/%s.log' % (publisherdatapath, filename[:-4]), mode='wb')
+                reflog_file.write(errors)
+                reflog_file.close()
+
+        controlfile = codecs.EncodedFile(codecs.open('%s/%s_clean.txt' % (tmppath, filename[:-4]), mode='wb'),'utf8')
+        controlfile.write(fulltext)
+        controlfile.close()      
     
     refs = extract_references_from_string(fulltext, is_only_references=False, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
     references = []
