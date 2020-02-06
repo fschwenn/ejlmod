@@ -118,6 +118,9 @@ for year in [now.year-1, now.year]:
                 elif meta['name'] == 'DC.identifier':
                     if re.search('10.11606', meta['content']):
                         rec['doi'] = re.sub('.*(10\.11606.*)', r'\1', meta['content'])
+                #upload PDF at least hidden
+                elif meta['name'] == 'citation_pdf_url':
+                    rec['hidden'] = meta['content']
         if not 'doi' in rec.keys():
             rec['doi'] = '20.2000/' + re.sub('\W', '', rec['link'][11:])
         rec['autaff'][-1].append('U. Sao Paulo (main)')
