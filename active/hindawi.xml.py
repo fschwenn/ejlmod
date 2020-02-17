@@ -124,7 +124,7 @@ for articleID in articleIDs:
         if meta.has_attr('name'):
             #DOI
             if meta['name'] == 'citation_doi':
-                rec['doi'] = meta['content']
+                rec['doi'] = re.sub('http.*doi.org\/', '', meta['content'])
             #abstract
             elif meta['name'] == 'citation_abstract':
                 rec['abs'] = meta['content']
@@ -160,48 +160,38 @@ for articleID in articleIDs:
             ps = div.find_all('p')
             rec['abs'] = ps[0].text.strip()
     #title (better)
-    for h2 in artpage.body.find_all('h2'):
-        rec['tit'] = h2.text.strip()
+    #for h2 in artpage.body.find_all('h2'):
+    #    rec['tit'] = h2.text.strip()
     #authors
-    for div in artpage.body.find_all('div', attrs = {'class' : 'author_gp'}):
-        for child in div.descendants:
-            if type(child) == type(div):
-                if child.name == 'a':
-                    author = ''
-                    for span in child.find_all('span', attrs = {'class' : 'surname'}):
-                        author = span.text
-                    for span in child.find_all('span', attrs = {'class' : 'given_names'}):
-                        author += ', ' + span.text
-                    if author:
-                        rec['auts'].append(author)
-                    else:
-                        rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', child.text.strip()))
-                elif child.name == 'span':
-                    if child.has_attr('class') and 'orcid' in child['class']:
-                        for a in child.find_all('a'):
-                            orcid = re.sub('.*org\/', r'ORCID:', a['href'])
-                            print '  ', orcid
-                            rec['auts'][-1] += ', ' + orcid
-                elif child.name == 'sup':
-                    for aff in re.split(' *, *', child.text.strip()):
-                        rec['auts'].append('=Aff%s' % (aff))
-        #affiliations come right after
-        p = div.next_sibling
-        try:
-            if p.find_all('sup'):
-                aff = False
-                for child in p.contents:
-                    if type(child) == type(p):
-                        if child.name == 'sup':
-                            aff = 'Aff%s= ' % (child.text.strip())
-                    elif aff:
-                        aff += child
-                        rec['aff'].append(aff)
-            else:
-                rec['aff'].append(p.text.strip())
-        except:
-            print p
-            print '^_ could not extract afiliation'
+    for div in artpage.body.find_all('div', attrs = {'class' : 'article_authors'}):
+        for child in div.children:
+            try:
+                child.name
+            except:
+                continue
+            if child.name == 'span':
+                affs = []
+                orcid = False
+                for sup in child.find_all('sup'):
+                    affs = re.split(' *, *', sup.text.strip())
+                    sup.replace_with('')
+                for a in child.find_all('a'):
+                    if a.has_attr('href') and re.search('orcid.org', a['href']):
+                        orcid = re.sub('.*org\/(\d.*\d).*', r'ORCID:\1', a['href'])
+                    a.replace_with('')
+                author = re.sub(' *and$', '', re.sub(' *,', '', child.text.strip()))
+                if orcid:
+                    author += ', ' + orcid
+                rec['auts'].append(author)
+                for aff in affs:
+                    rec['auts'].append('=Aff%s' % (aff))
+            elif child.name == 'div':
+                for sup in child.find_all('sup'):
+                    supt = sup.text.strip()
+                    sup.replace_with('Aff%s= ' % (supt))
+                for p in child.find_all('p'):
+                    rec['aff'].append(re.sub('[\n\t\r]', '', p.text.strip()))
+
     #references
     for ol in artpage.body.find_all('ol'):
         refnum = ''
