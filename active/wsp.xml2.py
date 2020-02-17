@@ -11,6 +11,7 @@ import urlparse
 import time
 from bs4 import BeautifulSoup
 import zipfile
+from ftplib import FTP
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 tmpdir = '/tmp'
@@ -294,8 +295,16 @@ def concert(rawrecs):
     return recs
 
 
-
-
+#download metadata feeds
+os.chdir(feeddir)
+ftp = FTP("ftp.wspc.com.sg")
+ftp.login("inspire", "Ins!539Ws%")
+files = ftp.nlst()  #list of the zip.files
+for filename in files[-20:]:
+    print 'download "%s"' % (filename)
+    f2 = open(filename,"wb")
+    ftp.retrbinary("RETR " + filename,f2.write)
+    f2.close()
 
 #check for new files
 done = os.listdir(os.path.join(wspdir, 'done'))
