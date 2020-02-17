@@ -23,7 +23,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
-publisher = 'Durham U. '
+publisher = 'Durham U.'
 
 typecode = 'T'
 
@@ -88,7 +88,7 @@ for rec in recs:
             #FFT
             elif meta['name'] == 'eprints.document_url':
                 rec['FFT'] = meta['content']
-
+    rec['autaff'][-1].append(publisher)
 
 
 #closing of files and printing
