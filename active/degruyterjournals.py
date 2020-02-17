@@ -32,6 +32,8 @@ if journal == 'phys':
         jnl = 'Central Eur.J.Phys.'
     else:        
         jnl = 'Open Phys.'
+elif journal == 'ract':
+    jnl = 'Radiochim.Acta'
 
 
 #get list of volumes
