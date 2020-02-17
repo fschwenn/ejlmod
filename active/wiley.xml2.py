@@ -73,6 +73,10 @@ elif (jnl == 'asnaa'):
     issn = '1521-3994'
     doitrunk = '10.1002/asna'
     jnlname = 'Astron.Nachr.'
+elif (jnl == 'mtk'):
+    issn = '2041-7942':
+    doitrunk = '10.1112/mtk.'
+    jnlname = 'Mathematika'
 
 
 
