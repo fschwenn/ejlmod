@@ -112,7 +112,14 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'PIXEL2018' : 'C18-12-10',
             '3rd European Conference on Plasma Diagnostics (ECPD2019)' : 'C19-05-06.5',
             'ECPD2019' : 'C19-05-06.5',
-            '20th International Workshop On Radiation Imaging Detectors' : 'C18-06-24.2'}
+            '20th International Workshop On Radiation Imaging Detectors' : 'C18-06-24.2',
+            'LAPD19' : 'C19-09-22.5',
+            'IWORID2019' : 'C19-07-07.2',
+            'RREPS-19' : 'C19-09-16.8',
+            'IPRD19' : 'C19-10-14.1',
+            'DIRC2019' : 'C19-09-11.1',
+            'INFIERI 2019' : 'C19-05-12.3',
+            'LIDINE2019' : 'C19-08-28'}
 
 
 bisac = {'SCI000000' : 'SCIENCE / General',
