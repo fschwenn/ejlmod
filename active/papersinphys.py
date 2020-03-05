@@ -33,6 +33,10 @@ elif jnl == 'cip':
     publisher = 'Publishing House for Science and Technology, Vietnam Academy of Science and Technology'
     jnlname = 'Commun.Phys.'
     urltrunk = 'http://vjs.ac.vn/index.php/cip/issue/view/%s/showToc' % (vol)
+elif jnl == 'eureka':
+    publisher = 'Scientific Route OU'
+    jnlname = 'Eureka'
+    urltrunk = 'http://eu-jr.eu/engineering/issue/view/%s' % (vol)
 jnlfilename = '%s%s' % (jnl, vol)
 
     
@@ -49,6 +53,8 @@ recs = []
 if jnl == 'pip':
     tables = tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summary'})
 elif jnl == 'cip':
+    tables = tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'})
+elif jnl == 'eureka':
     tables = tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'})
 
 for table in tables:
@@ -101,11 +107,15 @@ for rec in recs:
             elif meta['name'] == 'citation_author_institution':
                 rec['autaff'][-1].append(meta['content'])
             #volume and issue
-            if jnl in ['cip']:
-                if meta['name'] == 'citation_volume':
-                    rec['vol'] = meta['content']
-                elif meta['name'] == 'citation_issue':
+            if meta['name'] == 'citation_issue':
+                if jnl in ['cip', 'eureka']:
                     rec['issue'] = meta['content']
+            if meta['name'] == 'citation_volume':
+                if jnl == 'cip':
+                    rec['vol'] = meta['content']
+    #year as volume
+    if jnl == 'eureka':
+        rec['vol'] = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
     #authors, 2nd possibility
     if not rec['autaff']:
         for div in artpage.body.find_all('div', attrs = {'id' : 'authorBio'}):
@@ -148,7 +158,7 @@ for rec in recs:
         allrefs = re.sub('\. *, DOI:', ', DOI:', allrefs)        
         for ref in re.split('\[\d+\] +', allrefs):
             rec['refs'].append([('x', ref)])
-    elif jnl == 'cip':
+    elif jnl in ['cip', 'eureka']:
         for div in artpage.body.find_all('div', attrs = {'id' : 'articleCitations'}):
             for p in div.find_all('p'):
                 rec['refs'].append([('x', p.text.strip())])
