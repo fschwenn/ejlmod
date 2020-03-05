@@ -105,27 +105,865 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             '24th International congress on x-ray optics and microanalysis (ICXOM24)' : 'C17-09-25.6',
             '20th International Workshop On Radiation Imaging Detectors' : 'C18-06-24.2',
             '5th International Conference Frontiers in Diagnostcs Technologies (ICFDT)' : 'C18-10-03.1',
-            'The 9th International Workshop on Semiconductor Pixel Detectors for Particles and Imaging' : 'C18-12-10'}
+            'The 9th International Workshop on Semiconductor Pixel Detectors for Particles and Imaging' : 'C18-12-10',
+            '14th Workshop on Resistive Plate Chambers and Related Detectors (RPC2018)' : 'C18-02-19.3',
+            'PIXEL2018' : 'C18-12-10',
+            '3rd European Conference on Plasma Diagnostics (ECPD2019)' : 'C19-05-06.5',
+            'ECPD2019' : 'C19-05-06.5',
+            '20th International Workshop On Radiation Imaging Detectors' : 'C18-06-24.2',
+            'LAPD19' : 'C19-09-22.5',
+            'DIRC2019' : 'C19-09-11.1',            
+            'RREPS-19' : 'C19-09-16.8',
+            'IWORID2019' : 'C19-07-07.2',
+            'IPRD19' : 'C19-10-14.1',
+            'INFIERI 2019' : 'C19-05-12.3',
+            'LIDINE2019' : 'C19-08-28',
+            'RPC2018' : 'C18-02-19.3'}
+
+
+bisac = {'SCI000000' : 'SCIENCE / General',
+         'SCI001000' : 'SCIENCE / Acoustics & Sound',
+         'SCI003000' : 'SCIENCE / Applied Sciences',
+         'SCI004000' : 'SCIENCE / Astronomy',
+         'SCI005000' : 'SCIENCE / Astrophysics & Space Science',
+         'SCI010000' : 'SCIENCE / Biotechnology',
+         'SCI012000' : 'SCIENCE / Chaotic Behavior in Systems',
+         'SCI013000' : 'SCIENCE / Chemistry / General',
+         'SCI013010' : 'SCIENCE / Chemistry / Analytic',
+         'SCI013020' : 'SCIENCE / Chemistry / Clinical',
+         'SCI013060' : 'SCIENCE / Chemistry / Industrial & Technical',
+         'SCI013030' : 'SCIENCE / Chemistry / Inorganic',
+         'SCI013040' : 'SCIENCE / Chemistry / Organic',
+         'SCI013050' : 'SCIENCE / Chemistry / Physical & Theoretical',
+         'SCI015000' : 'SCIENCE / Cosmology',
+         'SCI016000' : 'SCIENCE / Crystallography',
+         'SCI019000' : 'SCIENCE / Earth Sciences / General',
+         'SCI030000' : 'SCIENCE / Earth Sciences / Geography',
+         'SCI031000' : 'SCIENCE / Earth Sciences / Geology',
+         'SCI081000' : 'SCIENCE / Earth Sciences / Hydrology',
+         'SCI042000' : 'SCIENCE / Earth Sciences / Meteorology & Climatology',
+         'SCI048000' : 'SCIENCE / Earth Sciences / Mineralogy',
+         'SCI052000' : 'SCIENCE / Earth Sciences / Oceanography',
+         'SCI082000' : 'SCIENCE / Earth Sciences / Seismology & Volcanism',
+         'SCI021000' : 'SCIENCE / Electricity',
+         'SCI022000' : 'SCIENCE / Electromagnetism',
+         'SCI023000' : 'SCIENCE / Electron Microscopes & Microscopy',
+         'SCI024000' : 'SCIENCE / Energy',
+         'SCI026000' : 'SCIENCE / Environmental Science',
+         'SCI080000' : 'SCIENCE / Essays',
+         'SCI028000' : 'SCIENCE / Experiments & Projects',
+         'SCI032000' : 'SCIENCE / Geophysics',
+         'SCI033000' : 'SCIENCE / Gravity',
+         'SCI034000' : 'SCIENCE / History',
+         'SCI086000' : 'SCIENCE / Life Sciences / General',
+         'SCI056000' : 'SCIENCE / Life Sciences / Anatomy & Physiology (see also Life Sciences / Human Anatomy & Physiology)',
+         'SCI006000' : 'SCIENCE / Life Sciences / Bacteriology',
+         'SCI007000' : 'SCIENCE / Life Sciences / Biochemistry',
+         'SCI008000' : 'SCIENCE / Life Sciences / Biology / General',
+         'SCI072000' : 'SCIENCE / Life Sciences / Biology / Developmental Biology',
+         'SCI039000' : 'SCIENCE / Life Sciences / Biology / Marine Biology',
+         'SCI045000' : 'SCIENCE / Life Sciences / Biology / Microbiology',
+         'SCI049000' : 'SCIENCE / Life Sciences / Biology / Molecular Biology',
+         'SCI009000' : 'SCIENCE / Life Sciences / Biophysics',
+         'SCI011000' : 'SCIENCE / Life Sciences / Botany',
+         'SCI017000' : 'SCIENCE / Life Sciences / Cytology',
+         'SCI020000' : 'SCIENCE / Life Sciences / Ecology',
+         'SCI027000' : 'SCIENCE / Life Sciences / Evolution',
+         'SCI029000' : 'SCIENCE / Life Sciences / Genetics & Genomics',
+         'SCI073000' : 'SCIENCE / Life Sciences / Horticulture',
+         'SCI036000' : 'SCIENCE / Life Sciences / Human Anatomy & Physiology',
+         'SCI087000' : 'SCIENCE / Life Sciences / Taxonomy',
+         'SCI070000' : 'SCIENCE / Life Sciences / Zoology / General',
+         'SCI025000' : 'SCIENCE / Life Sciences / Zoology / Entomology',
+         'SCI070010' : 'SCIENCE / Life Sciences / Zoology / Ichthyology',
+         'SCI070020' : 'SCIENCE / Life Sciences / Zoology / Invertebrates',
+         'SCI070030' : 'SCIENCE / Life Sciences / Zoology / Mammals',
+         'SCI070040' : 'SCIENCE / Life Sciences / Zoology / Ornithology',
+         'SCI070050' : 'SCIENCE / Life Sciences / Zoology / Primatology',
+         'SCI037000' : 'SCIENCE / Light',
+         'SCI083000' : 'SCIENCE / Limnology',
+         'SCI038000' : 'SCIENCE / Magnetism',
+         'SCI040000' : 'SCIENCE / Mathematical Physics',
+         'SCI041000' : 'SCIENCE / Mechanics / General',
+         'SCI018000' : 'SCIENCE / Mechanics / Dynamics / General',
+         'SCI084000' : 'SCIENCE / Mechanics / Dynamics / Aerodynamics',
+         'SCI085000' : 'SCIENCE / Mechanics / Dynamics / Fluid Dynamics',
+         'SCI065000' : 'SCIENCE / Mechanics / Dynamics / Thermodynamics',
+         'SCI079000' : 'SCIENCE / Mechanics / Statics',
+         'SCI044000' : 'SCIENCE / Metric System',
+         'SCI047000' : 'SCIENCE / Microscopes & Microscopy',
+         'SCI074000' : 'SCIENCE / Molecular Physics',
+         'SCI050000' : 'SCIENCE / Nanostructures',
+         'SCI051000' : 'SCIENCE / Nuclear Physics',
+         'SCI053000' : 'SCIENCE / Optics',
+         'SCI054000' : 'SCIENCE / Paleontology',
+         'SCI075000' : 'SCIENCE / Philosophy & Social Aspects',
+         'SCI055000' : 'SCIENCE / Physics',
+         'SCI057000' : 'SCIENCE / Quantum Theory',
+         'SCI058000' : 'SCIENCE / Radiation',
+         'SCI059000' : 'SCIENCE / Radiology',
+         'SCI060000' : 'SCIENCE / Reference',
+         'SCI061000' : 'SCIENCE / Relativity',
+         'SCI043000' : 'SCIENCE / Research & Methodology',
+         'SCI076000' : 'SCIENCE / Scientific Instruments',
+         'SCI077000' : 'SCIENCE / Solid State Physics',
+         'SCI078000' : 'SCIENCE / Spectroscopy & Spectrum Analysis',
+         'SCI063000' : 'SCIENCE / Study & Teaching',
+         'SCI064000' : 'SCIENCE / System Theory',
+         'SCI066000' : 'SCIENCE / Time',
+         'SCI067000' : 'SCIENCE / Waves & Wave Mechanics',
+         'SCI068000' : 'SCIENCE / Weights & Measures',
+         'MAT000000' : 'MATHEMATICS / General',
+         'MAT001000' : 'MATHEMATICS / Advanced',
+         'MAT002000' : 'MATHEMATICS / Algebra / General',
+         'MAT002010' : 'MATHEMATICS / Algebra / Abstract',
+         'MAT002030' : 'MATHEMATICS / Algebra / Elementary',
+         'MAT002040' : 'MATHEMATICS / Algebra / Intermediate',
+         'MAT002050' : 'MATHEMATICS / Algebra / Linear',
+         'MAT003000' : 'MATHEMATICS / Applied',
+         'MAT004000' : 'MATHEMATICS / Arithmetic',
+         'MAT005000' : 'MATHEMATICS / Calculus',
+         'MAT036000' : 'MATHEMATICS / Combinatorics',
+         'MAT006000' : 'MATHEMATICS / Counting & Numeration',
+         'MAT007000' : 'MATHEMATICS / Differential Equations',
+         'MAT008000' : 'MATHEMATICS / Discrete Mathematics',
+         'MAT039000' : 'MATHEMATICS / Essays',
+         'MAT009000' : 'MATHEMATICS / Finite Mathematics',
+         'MAT037000' : 'MATHEMATICS / Functional Analysis',
+         'MAT011000' : 'MATHEMATICS / Game Theory',
+         'MAT012000' : 'MATHEMATICS / Geometry / General',
+         'MAT012010' : 'MATHEMATICS / Geometry / Algebraic',
+         'MAT012020' : 'MATHEMATICS / Geometry / Analytic',
+         'MAT012030' : 'MATHEMATICS / Geometry / Differential',
+         'MAT012040' : 'MATHEMATICS / Geometry / Non-Euclidean',
+         'MAT013000' : 'MATHEMATICS / Graphic Methods',
+         'MAT014000' : 'MATHEMATICS / Group Theory',
+         'MAT015000' : 'MATHEMATICS / History & Philosophy',
+         'MAT016000' : 'MATHEMATICS / Infinity',
+         'MAT017000' : 'MATHEMATICS / Linear Programming',
+         'MAT018000' : 'MATHEMATICS / Logic',
+         'MAT034000' : 'MATHEMATICS / Mathematical Analysis',
+         'MAT019000' : 'MATHEMATICS / Matrices',
+         'MAT020000' : 'MATHEMATICS / Mensuration',
+         'MAT021000' : 'MATHEMATICS / Number Systems',
+         'MAT022000' : 'MATHEMATICS / Number Theory',
+         'MAT023000' : 'MATHEMATICS / Pre-Calculus',
+         'MAT029000' : 'MATHEMATICS / Probability & Statistics / General',
+         'MAT029010' : 'MATHEMATICS / Probability & Statistics / Bayesian Analysis',
+         'MAT029020' : 'MATHEMATICS / Probability & Statistics / Multivariate Analysis',
+         'MAT029030' : 'MATHEMATICS / Probability & Statistics / Regression Analysis',
+         'MAT025000' : 'MATHEMATICS / Recreations & Games',
+         'MAT026000' : 'MATHEMATICS / Reference',
+         'MAT027000' : 'MATHEMATICS / Research',
+         'MAT028000' : 'MATHEMATICS / Set Theory',
+         'MAT030000' : 'MATHEMATICS / Study & Teaching',
+         'MAT038000' : 'MATHEMATICS / Topology',
+         'MAT031000' : 'MATHEMATICS / Transformations',
+         'MAT032000' : 'MATHEMATICS / Trigonometry',
+         'MAT033000' : 'MATHEMATICS / Vector Analysis',
+         'TEC000000' : 'TECHNOLOGY / General',
+         'TEC001000' : 'TECHNOLOGY / Acoustics & Sound',
+         'TEC002000' : 'TECHNOLOGY / Aeronautics & Astronautics',
+         'TEC003000' : 'TECHNOLOGY / Agriculture / General',
+         'TEC003020' : 'TECHNOLOGY / Agriculture / Animal Husbandry',
+         'TEC003030' : 'TECHNOLOGY / Agriculture / Crop Science',
+         'TEC003040' : 'TECHNOLOGY / Agriculture / Forestry',
+         'TEC003050' : 'TECHNOLOGY / Agriculture / Irrigation',
+         'TEC003060' : 'TECHNOLOGY / Agriculture / Soil Science',
+         'TEC003070' : 'TECHNOLOGY / Agriculture / Sustainable Agriculture',
+         'TEC003010' : 'TECHNOLOGY / Agriculture / Tropical Agriculture',
+         'TEC004000' : 'TECHNOLOGY / Automation',
+         'TEC048000' : 'TECHNOLOGY / Cartography',
+         'TEC005000' : 'TECHNOLOGY / Construction / General',
+         'TEC005010' : 'TECHNOLOGY / Construction / Carpentry',
+         'TEC005020' : 'TECHNOLOGY / Construction / Contracting',
+         'TEC005030' : 'TECHNOLOGY / Construction / Electrical',
+         'TEC005040' : 'TECHNOLOGY / Construction / Estimating',
+         'TEC005050' : 'TECHNOLOGY / Construction / Heating, Ventilation & Air Conditioning',
+         'TEC005060' : 'TECHNOLOGY / Construction / Masonry',
+         'TEC005070' : 'TECHNOLOGY / Construction / Plumbing',
+         'TEC005080' : 'TECHNOLOGY / Construction / Roofing',
+         'TEC006000' : 'TECHNOLOGY / Drafting & Mechanical Drawing',
+         'TEC007000' : 'TECHNOLOGY / Electricity',
+         'TEC008000' : 'TECHNOLOGY / Electronics / General',
+         'TEC008010' : 'TECHNOLOGY / Electronics / Circuits / General',
+         'TEC008020' : 'TECHNOLOGY / Electronics / Circuits / Integrated',
+         'TEC008030' : 'TECHNOLOGY / Electronics / Circuits / Logic',
+         'TEC008040' : 'TECHNOLOGY / Electronics / Circuits / Printed',
+         'TEC008050' : 'TECHNOLOGY / Electronics / Circuits / VLSI',
+         'TEC008060' : 'TECHNOLOGY / Electronics / Digital',
+         'TEC008070' : 'TECHNOLOGY / Electronics / Microelectronics',
+         'TEC008080' : 'TECHNOLOGY / Electronics / Optoelectronics',
+         'TEC008090' : 'TECHNOLOGY / Electronics / Semiconductors',
+         'TEC008100' : 'TECHNOLOGY / Electronics / Solid State',
+         'TEC008110' : 'TECHNOLOGY / Electronics / Transistors',
+         'TEC009000' : 'TECHNOLOGY / Engineering / General',
+         'TEC009090' : 'TECHNOLOGY / Engineering / Automotive',
+         'TEC009010' : 'TECHNOLOGY / Engineering / Chemical & Biochemical',
+         'TEC009020' : 'TECHNOLOGY / Engineering / Civil',
+         'TEC009030' : 'TECHNOLOGY / Engineering / Electrical',
+         'TEC009050' : 'TECHNOLOGY / Engineering / Hydraulic',
+         'TEC009060' : 'TECHNOLOGY / Engineering / Industrial',
+         'TEC009070' : 'TECHNOLOGY / Engineering / Mechanical',
+         'TEC009080' : 'TECHNOLOGY / Engineering / Nuclear',
+         'TEC010000' : 'TECHNOLOGY / Environmental Engineering & Technology',
+         'TEC011000' : 'TECHNOLOGY / Fiber Optics',
+         'TEC045000' : 'TECHNOLOGY / Fire Science',
+         'TEC049000' : 'TECHNOLOGY / Fisheries & Aquaculture',
+         'TEC012000' : 'TECHNOLOGY / Food Science',
+         'TEC013000' : 'TECHNOLOGY / Fracture Mechanics',
+         'TEC056000' : 'TECHNOLOGY / History',
+         'TEC050000' : 'TECHNOLOGY / Holography',
+         'TEC014000' : 'TECHNOLOGY / Hydraulics',
+         'TEC015000' : 'TECHNOLOGY / Imaging Systems',
+         'TEC016000' : 'TECHNOLOGY / Industrial Design / General',
+         'TEC016010' : 'TECHNOLOGY / Industrial Design / Packaging',
+         'TEC016020' : 'TECHNOLOGY / Industrial Design / Product',
+         'TEC017000' : 'TECHNOLOGY / Industrial Health & Safety',
+         'TEC018000' : 'TECHNOLOGY / Industrial Technology',
+         'TEC057000' : 'TECHNOLOGY / Inventions',
+         'TEC019000' : 'TECHNOLOGY / Lasers',
+         'TEC046000' : 'TECHNOLOGY / Machinery',
+         'TEC020000' : 'TECHNOLOGY / Manufacturing',
+         'TEC021000' : 'TECHNOLOGY / Material Science',
+         'TEC022000' : 'TECHNOLOGY / Mensuration',
+         'TEC023000' : 'TECHNOLOGY / Metallurgy',
+         'TEC024000' : 'TECHNOLOGY / Microwaves',
+         'TEC025000' : 'TECHNOLOGY / Military Science',
+         'TEC026000' : 'TECHNOLOGY / Mining',
+         'TEC027000' : 'TECHNOLOGY / Nanotechnology',
+         'TEC028000' : 'TECHNOLOGY / Nuclear Energy',
+         'TEC029000' : 'TECHNOLOGY / Operations Research',
+         'TEC030000' : 'TECHNOLOGY / Optics',
+         'TEC058000' : 'TECHNOLOGY / Pest Control',
+         'TEC047000' : 'TECHNOLOGY / Petroleum',
+         'TEC031000' : 'TECHNOLOGY / Power Resources',
+         'TEC032000' : 'TECHNOLOGY / Quality Control',
+         'TEC033000' : 'TECHNOLOGY / Radar',
+         'TEC034000' : 'TECHNOLOGY / Radio',
+         'TEC035000' : 'TECHNOLOGY / Reference',
+         'TEC036000' : 'TECHNOLOGY / Remote Sensing',
+         'TEC037000' : 'TECHNOLOGY / Robotics',
+         'TEC038000' : 'TECHNOLOGY / Scanning Systems',
+         'TEC052000' : 'TECHNOLOGY / Social Aspects',
+         'TEC039000' : 'TECHNOLOGY / Superconductors & Superconductivity',
+         'TEC054000' : 'TECHNOLOGY / Surveying',
+         'TEC040000' : 'TECHNOLOGY / Technical & Manufacturing Industries & Trades',
+         'TEC044000' : 'TECHNOLOGY / Technical Writing',
+         'TEC041000' : 'TECHNOLOGY / Telecommunications',
+         'TEC043000' : 'TECHNOLOGY / Television & Video',
+         'TEC055000' : 'TECHNOLOGY / Textiles & Polymers'}
+
+
+bic = {'P' : 'Mathematics & science',
+       'PB' : 'Mathematics',
+       'PBB' : 'Philosophy of mathematics',
+       'PBC' : 'Mathematical foundations',
+       'PBCD' : 'Mathematical logic',
+       'PBCH' : 'Set theory',
+       'PBCN' : 'Number systems',
+       'PBD' : 'Discrete mathematics',
+       'PBF' : 'Algebra',
+       'PBG' : 'Groups & group theory',
+       'PBH' : 'Number theory',
+       'PBJ' : 'Pre-calculus',
+       'PBK' : 'Calculus & mathematical analysis',
+       'PBKA' : 'Calculus',
+       'PBKB' : 'Real analysis, real variables',
+       'PBKD' : 'Complex analysis, complex variables',
+       'PBKF' : 'Functional analysis & transforms',
+       'PBKJ' : 'Differential calculus & equations',
+       'PBKL' : 'Integral calculus & equations',
+       'PBKQ' : 'Calculus of variations',
+       'PBKS' : 'Numerical analysis',
+       'PBM' : 'Geometry',
+       'PBMB' : 'Trigonometry',
+       'PBMH' : 'Euclidean geometry',
+       'PBML' : 'Non-Euclidean geometry',
+       'PBMP' : 'Differential & Riemannian geometry',
+       'PBMS' : 'Analytic geometry',
+       'PBMW' : 'Algebraic geometry',
+       'PBMX' : 'Fractal geometry',
+       'PBP' : 'Topology',
+       'PBPD' : 'Algebraic topology',
+       'PBPH' : 'Analytic topology',
+       'PBT' : 'Probability & statistics',
+       'PBTB' : 'Bayesian inference',
+       'PBU' : 'Optimization',
+       'PBUD' : 'Game theory',
+       'PBUH' : 'Linear programming',
+       'PBV' : 'Combinatorics & graph theory',
+       'PBW' : 'Applied mathematics',
+       'PBWH' : 'Mathematical modelling',
+       'PBWL' : 'Stochastics',
+       'PBWR' : 'Nonlinear science',
+       'PBWS' : 'Chaos theory',
+       'PBWX' : 'Fuzzy set theory',
+       'PBX' : 'History of mathematics',
+       'PD' : 'Science: general issues',
+       'PDA' : 'Philosophy of science',
+       'PDC' : 'Scientific nomenclature & classification',
+       'PDD' : 'Scientific standards',
+       'PDDM' : 'Mensuration & systems of measurement',
+       'PDE' : 'Maths for scientists',
+       'PDG' : 'Industrial applications of scientific research & technological innovation',
+       'PDK' : 'Science funding & policy',
+       'PDN' : 'Scientific equipment, experiments & techniques',
+       'PDND' : 'Microscopy',
+       'PDR' : 'Impact of science & technology on society',
+       'PDX' : 'History of science',
+       'PDZ' : 'Popular science',
+       'PDZM' : 'Popular mathematics',
+       'PG' : 'Astronomy, space & time',
+       'PGC' : 'Theoretical & mathematical astronomy',
+       'PGG' : 'Astronomical observation: observatories, equipment & methods',
+       'PGK' : 'Cosmology & the universe',
+       'PGM' : 'Galaxies & stars',
+       'PGS' : 'Solar system: the Sun & planets',
+       'PGT' : 'Astronomical charts & atlases',
+       'PGZ' : 'Time (chronology), time systems & standards',
+       'PH' : 'Physics',
+       'PHD' : 'Classical mechanics',
+       'PHDB' : 'Elementary mechanics',
+       'PHDD' : 'Analytical mechanics',
+       'PHDF' : 'Fluid mechanics',
+       'PHDS' : 'Wave mechanics (vibration & acoustics)',
+       'PHDT' : 'Dynamics & statics',
+       'PHDV' : 'Gravity',
+       'PHDY' : 'Energy',
+       'PHF' : 'Materials / States of matter',
+       'PHFB' : 'Low temperature physics',
+       'PHFC' : 'Condensed matter physics (liquid state & solid state physics)',
+       'PHFC1' : 'Soft matter physics',
+       'PHFC2' : 'Mesoscopic physics',
+       'PHFG' : 'Physics of gases',
+       'PHFP' : 'Plasma physics',
+       'PHH' : 'Thermodynamics & heat',
+       'PHJ' : 'Optical physics',
+       'PHJL' : 'Laser physics',
+       'PHK' : 'Electricity, electromagnetism & magnetism',
+       'PHM' : 'Atomic & molecular physics',
+       'PHN' : 'Nuclear physics',
+       'PHP' : 'Particle & high-energy physics',
+       'PHQ' : 'Quantum physics (quantum mechanics & quantum field theory)',
+       'PHR' : 'Relativity physics',
+       'PHS' : 'Statistical physics',
+       'PHU' : 'Mathematical physics',
+       'PHV' : 'Applied physics',
+       'PHVB' : 'Astrophysics',
+       'PHVD' : 'Medical physics',
+       'PHVG' : 'Geophysics',
+       'PHVJ' : 'Atmospheric physics',
+       'PHVN' : 'Biophysics',
+       'PHVQ' : 'Chemical physics',
+       'PHVS' : 'Cryogenics',
+       'PN' : 'Chemistry',
+       'PNF' : 'Analytical chemistry',
+       'PNFC' : 'Chromatography',
+       'PNFR' : 'Magnetic resonance',
+       'PNFS' : 'Spectrum analysis, spectrochemistry, mass spectrometry',
+       'PNK' : 'Inorganic chemistry',
+       'PNN' : 'Organic chemistry',
+       'PNND' : 'Organometallic chemistry',
+       'PNNP' : 'Polymer chemistry',
+       'PNR' : 'Physical chemistry',
+       'PNRC' : 'Colloid chemistry',
+       'PNRD' : 'Catalysis',
+       'PNRH' : 'Electrochemistry & magnetochemistry',
+       'PNRL' : 'Nuclear chemistry, photochemistry & radiation',
+       'PNRP' : 'Quantum & theoretical chemistry',
+       'PNRS' : 'Solid state chemistry',
+       'PNRW' : 'Thermochemistry & chemical thermodynamics',
+       'PNRX' : 'Surface chemistry & adsorption',
+       'PNT' : 'Crystallography',
+       'PNV' : 'Mineralogy & gems',
+       'PS' : 'Biology, life sciences',
+       'PSA' : 'Life sciences: general issues',
+       'PSAB' : 'Taxonomy & systematics',
+       'PSAD' : 'Bio-ethics',
+       'PSAF' : 'Ecological science, the Biosphere',
+       'PSAG' : 'Xenobiotics',
+       'PSAJ' : 'Evolution',
+       'PSAK' : 'Genetics (non-medical)',
+       'PSAK1' : 'DNA & Genome',
+       'PSAN' : 'Neurosciences',
+       'PSB' : 'Biochemistry',
+       'PSBC' : 'Proteins',
+       'PSBF' : 'Carbohydrates',
+       'PSBH' : 'Lipids',
+       'PSBM' : 'Biochemical immunology',
+       'PSBT' : 'Toxicology (non-medical)',
+       'PSBZ' : 'Enzymology',
+       'PSC' : 'Developmental biology',
+       'PSD' : 'Molecular biology',
+       'PSF' : 'Cellular biology (cytology)',
+       'PSG' : 'Microbiology (non-medical)',
+       'PSGD' : 'Bacteriology (non-medical)',
+       'PSGH' : 'Parasitology (non-medical)',
+       'PSGL' : 'Virology (non-medical)',
+       'PSGN' : 'Protozoa',
+       'PSP' : 'Hydrobiology',
+       'PSPF' : 'Freshwater biology',
+       'PSPM' : 'Marine biology',
+       'PSQ' : 'Mycology, fungi (non-medical)',
+       'PST' : 'Botany & plant sciences',
+       'PSTD' : 'Plant physiology',
+       'PSTL' : 'Plant reproduction & propagation',
+       'PSTP' : 'Plant pathology & diseases',
+       'PSTS' : 'Plant ecology',
+       'PSTV' : 'Phycology, algae & lichens',
+       'PSV' : 'Zoology & animal sciences',
+       'PSVD' : 'Animal physiology',
+       'PSVH' : 'Animal reproduction',
+       'PSVL' : 'Animal pathology & diseases',
+       'PSVP' : 'Animal behaviour',
+       'PSVS' : 'Animal ecology',
+       'PSVT' : 'Zoology: Invertebrates',
+       'PSVT3' : 'Molluscs',
+       'PSVT5' : 'Crustaceans',
+       'PSVT6' : 'Arachnids',
+       'PSVT7' : 'Insects (entomology)',
+       'PSVW' : 'Zoology: Vertebrates',
+       'PSVW1' : 'Fishes (ichthyology)',
+       'PSVW3' : 'Amphibians',
+       'PSVW5' : 'Reptiles',
+       'PSVW6' : 'Birds (ornithology)',
+       'PSVW7' : 'Zoology: Mammals',
+       'PSVW71' : 'Marsupials & monotremes',
+       'PSVW73' : 'Marine & freshwater mammals',
+       'PSVW79' : 'Primates',
+       'PSX' : 'Human biology',
+       'PSXE' : 'Early man',
+       'PSXM' : 'Medical anthropology',
+       'T' : 'Technology, engineering, agriculture',
+       'TB' : 'Technology: general issues',
+       'TBC' : 'Engineering: general',
+       'TBD' : 'Technical design',
+       'TBDG' : 'Ergonomics',
+       'TBG' : 'Engineering graphics & technical drawing',
+       'TBJ' : 'Maths for engineers',
+       'TBM' : 'Instruments & instrumentation engineering',
+       'TBMM' : 'Engineering measurement & calibration',
+       'TBN' : 'Nanotechnology',
+       'TBR' : 'Intermediate technology',
+       'TBX' : 'History of engineering & technology',
+       'TBY' : 'Inventions & inventors',
+       'TC' : 'Biochemical engineering',
+       'TCB' : 'Biotechnology',
+       'TCBG' : 'Genetic engineering',
+       'TCBS' : 'Biosensors',
+       'TD' : 'Industrial chemistry & manufacturing technologies',
+       'TDC' : 'Industrial chemistry',
+       'TDCB' : 'Chemical engineering',
+       'TDCC' : 'Heavy chemicals',
+       'TDCD' : 'Detergents technology',
+       'TDCG' : 'Powder technology',
+       'TDCH' : 'Insecticide & herbicide technology',
+       'TDCJ' : 'Pigments, dyestuffs & paint technology',
+       'TDCJ1' : 'Cosmetics technology',
+       'TDCK' : 'Surface-coating technology',
+       'TDCP' : 'Plastics & polymers technology',
+       'TDCQ' : 'Ceramics & glass technology',
+       'TDCR' : 'Rubber technology',
+       'TDCT' : 'Food & beverage technology',
+       'TDCT1' : 'Brewing technology',
+       'TDCT2' : 'Winemaking technology',
+       'TDCW' : 'Pharmaceutical technology',
+       'TDG' : 'Leather & fur technology',
+       'TDH' : 'Textile & fibre technology',
+       'TDJ' : 'Timber & wood processing',
+       'TDJP' : 'Pulp & paper technology',
+       'TDM' : 'Metals technology / metallurgy',
+       'TDP' : 'Other manufacturing technologies',
+       'TDPB' : 'Precision instruments manufacture',
+       'TDPB1' : 'Clocks, chronometers & watches (horology)',
+       'TDPD' : 'Household appliances manufacture',
+       'TDPF' : 'Furniture & furnishings manufacture',
+       'TDPH' : 'Clothing & footware manufacture',
+       'TDPP' : 'Printing & reprographic technology',
+       'TG' : 'Mechanical engineering & materials',
+       'TGB' : 'Mechanical engineering',
+       'TGBF' : 'Tribology (friction & lubrication)',
+       'TGBN' : 'Engines & power transmission',
+       'TGBN1' : 'Steam engines',
+       'TGM' : 'Materials science',
+       'TGMB' : 'Engineering thermodynamics',
+       'TGMD' : 'Mechanics of solids',
+       'TGMD4' : 'Dynamics & vibration',
+       'TGMD5' : 'Stress & fracture',
+       'TGMF' : 'Mechanics of fluids',
+       'TGMF1' : 'Aerodynamics',
+       'TGMF2' : 'Hydraulics & pneumatics',
+       'TGMF3' : 'Flow, turbulence, rheology',
+       'TGMT' : 'Testing of materials',
+       'TGMT1' : 'Non-destructive testing',
+       'TGP' : 'Production engineering',
+       'TGPC' : 'Computer aided manufacture (CAM)',
+       'TGPQ' : 'Industrial quality control',
+       'TGPR' : 'Reliability engineering',
+       'TGX' : 'Engineering skills & trades',
+       'TGXT' : 'Tool making',
+       'TGXW' : 'Welding',
+       'TH' : 'Energy technology & engineering',
+       'THF' : 'Fossil fuel technologies',
+       'THFG' : 'Gas technology',
+       'THFP' : 'Petroleum technology',
+       'THFS' : 'Solid fuel technology',
+       'THK' : 'Nuclear power & engineering',
+       'THN' : 'Heat transfer processes',
+       'THR' : 'Electrical engineering',
+       'THRB' : 'Power generation & distribution',
+       'THRD' : 'Power networks, systems, stations & plants',
+       'THRF' : 'Power utilization & applications',
+       'THRH' : 'Energy conversion & storage',
+       'THRM' : 'Electric motors',
+       'THRS' : 'Electrician skills',
+       'THT' : 'Energy efficiency',
+       'THX' : 'Alternative & renewable energy sources & technology',
+       'TJ' : 'Electronics & communications engineering',
+       'TJF' : 'Electronics engineering',
+       'TJFC' : 'Circuits & components',
+       'TJFD' : 'Electronic devices & materials',
+       'TJFD1' : 'Microprocessors',
+       'TJFD3' : 'Transistors',
+       'TJFD5' : 'Semi-conductors & super-conductors',
+       'TJFM' : 'Automatic control engineering',
+       'TJFM1' : 'Robotics',
+       'TJFN' : 'Microwave technology',
+       'TJK' : 'Communications engineering / telecommunications',
+       'TJKD' : 'Radar',
+       'TJKR' : 'Radio technology',
+       'TJKS' : 'Satellite communication',
+       'TJKT' : 'Telephone technology',
+       'TJKT1' : 'Mobile phone technology',
+       'TJKV' : 'Television technology',
+       'TJKW' : 'WAP (wireless) technology',
+       'TN' : 'Civil engineering, surveying & building',
+       'TNC' : 'Structural engineering',
+       'TNCB' : 'Surveying',
+       'TNCB1' : 'Quantity surveying',
+       'TNCC' : 'Soil & rock mechanics',
+       'TNCE' : 'Earthquake engineering',
+       'TNCJ' : 'Bridges',
+       'TNF' : 'Hydraulic engineering',
+       'TNFD' : 'Dams & reservoirs',
+       'TNFH' : 'Harbours & ports',
+       'TNFL' : 'Flood control',
+       'TNFR' : 'Land reclamation & drainage',
+       'TNH' : 'Highway & traffic engineering',
+       'TNK' : 'Building construction & materials',
+       'TNKF' : 'Fire protection & safety',
+       'TNKH' : 'Heating, lighting, ventilation',
+       'TNKS' : 'Security & fire alarm systems',
+       'TNKX' : 'Conservation of buildings & building materials',
+       'TNT' : 'Building skills & trades',
+       'TNTB' : 'Bricklaying & plastering',
+       'TNTC' : 'Carpentry',
+       'TNTP' : 'Plumbing',
+       'TNTR' : 'Roofing',
+       'TQ' : 'Environmental science, engineering & technology',
+       'TQD' : 'Environmental monitoring',
+       'TQK' : 'Pollution control',
+       'TQS' : 'Sanitary & municipal engineering',
+       'TQSR' : 'Waste treatment & disposal',
+       'TQSR1' : 'Sewage treatment & disposal',
+       'TQSR3' : 'Hazardous waste treatment & disposal',
+       'TQSW' : 'Water supply & treatment',
+       'TQSW1' : 'Water purification & desalinization',
+       'TR' : 'Transport technology & trades',
+       'TRC' : 'Automotive technology & trades',
+       'TRCS' : 'Automotive (motor mechanic) skills',
+       'TRCT' : 'Road transport & haulage trades',
+       'TRF' : 'Railway technology, engineering & trades',
+       'TRFT' : 'Railway trades',
+       'TRL' : 'Shipbuilding technology, engineering & trades',
+       'TRLD' : 'Ship design & naval architecture',
+       'TRLN' : 'Navigation & seamanship',
+       'TRLT' : 'Maritime / nautical trades',
+       'TRP' : 'Aerospace & aviation technology',
+       'TRPS' : 'Aviation skills / piloting',
+       'TRT' : 'Intelligent & automated transport system technology',
+       'TT' : 'Other technologies & applied sciences',
+       'TTA' : 'Acoustic & sound engineering',
+       'TTB' : 'Applied optics',
+       'TTBF' : 'Fibre optics',
+       'TTBL' : 'Laser technology & holography',
+       'TTBM' : 'Imaging systems & technology',
+       'TTBS' : 'Scanning systems & technology',
+       'TTD' : 'Space science',
+       'TTDS' : 'Astronautics',
+       'TTM' : 'Military engineering',
+       'TTMW' : 'Ordnance, weapons technology',
+       'TTP' : 'Explosives technology & pyrotechnics',
+       'TTS' : 'Marine engineering',
+       'TTSH' : 'Offshore engineering',
+       'TTSX' : 'Sonar',
+       'TTU' : 'Mining technology & engineering',
+       'TTV' : 'Other vocational technologies & trades',
+       'TTVC' : 'Hotel & catering trades',
+       'TTVH' : 'Hairdressing & salon skills',
+       'TTVR' : 'Traditional trades & skills',
+       'TTX' : 'Taxidermy',
+       'TV' : 'Agriculture & farming',
+       'TVB' : 'Agricultural science',
+       'TVD' : 'Agricultural engineering & machinery',
+       'TVDR' : 'Irrigation',
+       'TVF' : 'Sustainable agriculture',
+       'TVG' : 'Organic farming',
+       'TVH' : 'Animal husbandry',
+       'TVHB' : 'Animal breeding',
+       'TVHF' : 'Dairy farming',
+       'TVHH' : 'Apiculture (beekeeping)',
+       'TVHP' : 'Poultry farming',
+       'TVK' : 'Agronomy & crop production',
+       'TVKC' : 'Cereal crops',
+       'TVKF' : 'Fertilizers & manures',
+       'TVM' : 'Smallholdings',
+       'TVP' : 'Pest control',
+       'TVQ' : 'Tropical agriculture: practice & techniques',
+       'TVR' : 'Forestry & silviculture: practice & techniques',
+       'TVS' : 'Horticulture',
+       'TVSW' : 'Viticulture',
+       'TVT' : 'Aquaculture & fish-farming: practice & techniques',
+       'U' : 'Computing & information technology',
+       'UB' : 'Information technology: general issues',
+       'UBH' : 'Health & safety aspects of IT',
+       'UBJ' : 'Ethical & social aspects of IT',
+       'UBL' : 'Legal aspects of IT',
+       'UBW' : 'Internet: general works ',
+       'UD' : 'Digital lifestyle',
+       'UDA' : 'Personal organisation software & apps',
+       'UDB' : 'Internet guides & online services',
+       'UDBA' : 'Online shopping & auctions',
+       'UDBD' : 'Internet searching',
+       'UDBG' : 'Internet gambling',
+       'UDBM' : 'Online finance & investing',
+       'UDBR' : 'Internet browsers',
+       'UDBS' : 'Social networking',
+       'UDBV' : 'Virtual worlds ',
+       'UDF' : 'Email: consumer/user guides',
+       'UDH' : 'Portable & handheld devices: consumer/user guides',
+       'UDM' : 'Digital music: consumer/user guides',
+       'UDP' : 'Digital photography: consumer/user guides',
+       'UDQ' : 'Digital video: consumer/user guides',
+       'UDT' : 'Mobile phones: consumer/user guides',
+       'UDV' : 'Digital TV & media centres: consumer/user guides',
+       'UDX' : 'Computer games / online games: strategy guides',
+       'UF' : 'Business applications',
+       'UFB' : 'Integrated software packages',
+       'UFBC' : 'Microsoft Office',
+       'UFBF' : 'Microsoft Works',
+       'UFBL' : 'Lotus Smartsuite',
+       'UFBP' : 'OpenOffice',
+       'UFBS' : 'StarOffice',
+       'UFBW' : 'iWork',
+       'UFC' : 'Spreadsheet software',
+       'UFCE' : 'Excel',
+       'UFCL' : 'Lotus 1-2-3',
+       'UFD' : 'Word processing software',
+       'UFDM' : 'Microsoft Word',
+       'UFG' : 'Presentation graphics software',
+       'UFGP' : 'PowerPoint',
+       'UFK' : 'Accounting software',
+       'UFL' : 'Enterprise software',
+       'UFLS' : 'SAP (Systems, applications & products in databases)',
+       'UFM' : 'Mathematical & statistical software',
+       'UFP' : 'Project management software',
+       'UFS' : 'Collaboration & group software',
+       'UG' : 'Graphical & digital media applications',
+       'UGB' : 'Web graphics & design',
+       'UGC' : 'Computer-aided design (CAD)',
+       'UGD' : 'Desktop publishing',
+       'UGG ' : 'Computer games design',
+       'UGK' : '3D graphics & modelling',
+       'UGL' : 'Illustration & drawing software',
+       'UGM' : 'Digital music: professional',
+       'UGN' : 'Digital animation',
+       'UGP' : 'Photo & image editing',
+       'UGV' : 'Digital video: professional',
+       'UK' : 'Computer hardware',
+       'UKC' : 'Supercomputers',
+       'UKD' : 'Mainframes & minicomputers',
+       'UKF' : 'Servers',
+       'UKG' : 'Grid & parallel computing',
+       'UKM' : 'Embedded systems',
+       'UKN' : 'Network hardware',
+       'UKP' : 'Personal computers',
+       'UKPC' : 'PCs (IBM-compatible personal computers)',
+       'UKPM' : 'Macintosh',
+       'UKR' : 'Maintenance & repairs',
+       'UKS' : 'Storage media & peripherals',
+       'UKX' : 'Utilities & tools',
+       'UL' : 'Operating systems',
+       'ULD' : 'Windows & variants',
+       'ULDF' : 'Windows 7',
+       'ULDG' : 'Windows Vista',
+       'ULDL' : 'Windows 2003',
+       'ULDP' : 'Windows XP',
+       'ULDT' : 'Windows 2000',
+       'ULDX' : 'Windows NT',
+       'ULH' : 'Macintosh OS',
+       'ULL' : 'Linux',
+       'ULLD' : 'Debian',
+       'ULLR' : 'Red Hat',
+       'ULLS' : 'SUSE',
+       'ULLU' : 'UBUNTU',
+       'ULN' : 'UNIX',
+       'ULNB' : 'BSD / FreeBSD',
+       'ULNH' : 'HP-UX',
+       'ULNM' : 'IBM AIX',
+       'ULNS' : 'Sun Solaris',
+       'ULP' : 'Handheld operating systems',
+       'ULQ' : 'IBM mainframe operating systems',
+       'ULR' : 'Real time operating systems',
+       'UM' : 'Computer programming / software development',
+       'UMA' : 'Program concepts / learning to program',
+       'UMB' : 'Algorithms & data structures',
+       'UMC' : 'Compilers',
+       'UMF' : 'Agile programming',
+       'UMG' : 'Aspect programming / AOP',
+       'UMH' : 'Extreme programming',
+       'UMJ' : 'Functional programming',
+       'UMK' : 'Games development & programming',
+       'UMKB' : '2D graphics: games programming',
+       'UMKC' : '3D graphics: games programming',
+       'UMKL' : 'Level design: games programming',
+       'UML' : 'Graphics programming',
+       'UMN' : 'Object-oriented programming (OOP)',
+       'UMP' : 'Microsoft programming',
+       'UMPN' : '.Net programming',
+       'UMPW' : 'Windows programming',
+       'UMQ' : 'Macintosh programming',
+       'UMR' : 'Network programming',
+       'UMS' : 'Mobile & handheld device programming / Apps programming',
+       'UMT' : 'Database programming',
+       'UMW' : 'Web programming',
+       'UMWS' : 'Web services',
+       'UMX' : 'Programming & scripting languages: general',
+       'UMZ' : 'Software Engineering',
+       'UMZL' : 'Unified Modeling Language (UML)',
+       'UMZT' : 'Software testing & verification',
+       'UMZW' : 'Object oriented software engineering',
+       'UN' : 'Databases',
+       'UNA' : 'Database design & theory',
+       'UNAR' : 'Relational databases',
+       'UNC' : 'Data capture & analysis',
+       'UND' : 'Data warehousing',
+       'UNF' : 'Data mining',
+       'UNH' : 'Information retrieval',
+       'UNJ' : 'Object-oriented databases',
+       'UNK' : 'Distributed databases',
+       'UNN' : 'Databases & the Web',
+       'UNS' : 'Database software',
+       'UNSB' : 'Oracle',
+       'UNSC' : 'Access',
+       'UNSF' : 'FileMaker',
+       'UNSJ' : 'SQL Server / MS SQL',
+       'UNSK' : 'SQLite',
+       'UNSM' : 'MySQL',
+       'UNSP' : 'PostgreSQL',
+       'UNSX' : 'IBM DB2',
+       'UNSY' : 'Sybase',
+       'UQ' : 'Computer certification',
+       'UQF' : 'Computer certification: Microsoft',
+       'UQJ' : 'Computer certification: Cisco',
+       'UQL' : 'Computer certification: ECDL',
+       'UQR' : 'Computer certification: CompTia',
+       'UQT' : 'Computer certification: CLAiT',
+       'UR' : 'Computer security',
+       'URD' : 'Privacy & data protection',
+       'URH' : 'Computer fraud & hacking',
+       'URJ' : 'Computer viruses, Trojans & worms',
+       'URQ' : 'Firewalls',
+       'URS' : 'Spam',
+       'URW' : 'Spyware',
+       'URY' : 'Data encryption',
+       'UT' : 'Computer networking & communications',
+       'UTC' : 'Cloud computing',
+       'UTD' : 'Client-Server networking',
+       'UTF' : 'Network management',
+       'UTFB' : 'Computer systems back-up & data recovery',
+       'UTG' : 'Grid computing',
+       'UTM' : 'Electronic mail (email): professional',
+       'UTN' : 'Network security',
+       'UTP' : 'Networking standards & protocols',
+       'UTR' : 'Distributed systems',
+       'UTS' : 'Networking packages',
+       'UTV' : 'Virtualisation',
+       'UTW' : 'WAP networking & applications',
+       'UTX' : 'EDI (electronic data interchange)',
+       'UY' : 'Computer science',
+       'UYA' : 'Mathematical theory of computation',
+       'UYAM' : 'Maths for computer scientists',
+       'UYD' : 'Systems analysis & design',
+       'UYF' : 'Computer architecture & logic design',
+       'UYFL' : 'Assembly languages',
+       'UYFP' : 'Parallel processing',
+       'UYM' : 'Computer modelling & simulation',
+       'UYQ' : 'Artificial intelligence',
+       'UYQE' : 'Expert systems / knowledge-based systems',
+       'UYQL' : 'Natural language & machine translation',
+       'UYQM' : 'Machine learning',
+       'UYQN' : 'Neural networks & fuzzy systems',
+       'UYQP' : 'Pattern recognition',
+       'UYQS' : 'Speech recognition',
+       'UYQV' : 'Computer vision',
+       'UYS' : 'Signal processing',
+       'UYT' : 'Image processing',
+       'UYU' : 'Audio processing',
+       'UYV' : 'Virtual reality',
+       'UYZ' : 'Human-computer interaction',
+       'UYZF' : 'Information visualization',
+       'UYZG' : 'User interface design & usability',
+       'UYZM' : 'Information architecture'}
+
 
 
 #check for new ftp-feeds
 todo = []
+bookfeeds = []
 for datei in os.listdir(ftpdir):
     if datei in os.listdir(iopdirdone):
         print '%s already in done' % (datei)
     else:
         todo.append(datei)
+
+
 print '%i packages to do: %s' % (len(todo), ', '.join(todo))
 if not todo:
     sys.exit(0)
 
 #extract the feeds:
 for directory in todo:
-    for datei in os.listdir(os.path.join(ftpdir, directory)):
-        print 'extracting %s' % (os.path.join(ftpdir, directory, datei))
-        journalfeed = tarfile.open(os.path.join(ftpdir, directory, datei), 'r:gz')
-        journalfeed.extractall(path=iopdirtmp)
-        journalfeed.close()
+    if not os.path.isdir(iopdirtmp):
+        os.system('mkdir %s' % (iopdirtmp))
+    if re.search('\.xml$', directory):
+        #not a directory with journal feeds but books in ONIX format
+        os.system('cp %s/%s %s/%s' % (ftpdir, directory, iopdirtmp, directory))
+        bookfeeds.append('%s/%s' % (iopdirtmp, directory))
+    else:
+        for datei in os.listdir(os.path.join(ftpdir, directory)):
+            print 'extracting %s' % (os.path.join(ftpdir, directory, datei))
+            journalfeed = tarfile.open(os.path.join(ftpdir, directory, datei), 'r:gz')
+            journalfeed.extractall(path=iopdirtmp)
+            journalfeed.close()
+
+#create base name
+iopftrunc = todo[0]
+for timestamp in todo[1:]:
+    if timestamp[-4:] == iopftrunc[-4:]:
+        if timestamp[-7:] == iopftrunc[-7:]:
+            iopftruncnew = iopftrunc[:-8] + '.' + timestamp[:2] + timestamp[-8:]
+            iopftrunc = iopftruncnew
+        else:
+            iopftruncnew = iopftrunc[:-5] + '_' + timestamp
+            iopftrunc = iopftruncnew
+    else:
+        iopftruncnew = iopftrunc  + '_' + timestamp
+        iopftrunc = iopftruncnew
+    
+
+
 
 collapseWs = re.compile('[\n \t]+')
 #initialBlank = re.compile('([A-Z]) ')
@@ -181,9 +1019,12 @@ def convertarticle(issn, vol, isu, artid):
                 if focusnode['alt'] == 'Proceeding Article':
                     tc = ['C']
                 rec['note'].append(focusnode['alt'])
-            if focusnode.has_attr('group'):
+                if focusnode['alt'] in cnumdict.keys():
+                    rec['cnum'] = cnumdict[focusnode['alt']]
+                    tc = ['C']
+            elif focusnode.has_attr('group'):
                 comm = focusnode['group']
-                rec['comments'] = [comm]
+                rec['note'].append(comm)
                 if comm in cnumdict.keys():
                     rec['cnum'] = cnumdict[comm]
         #volume
@@ -210,7 +1051,7 @@ def convertarticle(issn, vol, isu, artid):
         for datenode in article.find_all('date_cover'):
             datecover = datenode.text.strip()
             rec['year'] = datecover[0:4]
-            if rec['jnl'] in ['JCAP ', 'JHEP ', 'JSTAT ']:
+            if rec['jnl'] in ['JCAP', 'JHEP', 'JSTAT']:
                 rec['vol'] = datecover[2:4] + datecover[5:7]
         #article number
         for artnumnode in article.find_all('artnum'):
@@ -342,14 +1183,14 @@ def convertarticle(issn, vol, isu, artid):
                     #   ref.append(('s', pbn))
                 rec['refs'].append(ref)
         else:
-            print '   no references for ', rec['doi'], rec['tit']
+            print '   no references for ', rec['doi']
         ###check for fulltext
         for datei in os.listdir(os.path.join(iopdirtmp, issn, vol, isu, artid)):
             if re.search('\.pdf$', datei):
                 pdfsrc = os.path.join(iopdirtmp, issn, vol, isu, artid, datei)
                 pdfdst = os.path.join(pdfdir, re.sub('[\/\(\)]', '_', rec['doi']) + '.pdf')
                 if os.path.isfile(pdfdst):
-                    print '   fulltext found but no nead to copy'
+                    print '   fulltext found but no need  to copy'
                 else:
                    try:
                         shutil.copy(pdfsrc, pdfdst)
@@ -395,12 +1236,11 @@ for issn in os.listdir(iopdirtmp):
                 if recs:
                     if issn in jnl.keys():
                         if 'vol' in recs[0].keys():
-                            iopf = 'iop-%s-%s%s_%s' % ('_'.join(todo), re.sub(' ', '', jnl[issn]), recs[0]['vol'], '.'.join(issues))
+                            iopf = 'iop-%s-%s%s_%s' % (iopftrunc, re.sub(' ', '', jnl[issn]), recs[0]['vol'], '.'.join(issues))
                         else:
-                            iopf = 'iop-%s-%s%s_%s' % ('_'.join(todo), re.sub(' ', '', jnl[issn]), vol, '.'.join(issues))                 
+                            iopf = 'iop-%s-%s%s_%s' % (iopftrunc, re.sub(' ', '', jnl[issn]), vol, '.'.join(issues))                 
                     else:
-                        iopf = 'iop-%s-%s%s_%s' % ('_'.join(todo), re.sub(' ', '', issn), vol, '.'.join(issues))
-
+                        iopf = 'iop-%s-%s%s_%s' % (iopftrunc, re.sub(' ', '', issn), vol, '.'.join(issues))
                     if not issn in jnlskip.keys():
                         xmlf = os.path.join(xmldir,iopf+'.xml')
                         xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
@@ -417,9 +1257,163 @@ for issn in os.listdir(iopdirtmp):
                             retfiles.close()
                 print '   %s with %i records\n' % (iopf, len(recs))
 
+#scan books
+for bookfeed in bookfeeds:    
+    products = []
+    prerecs = {}
+    print bookfeed
+    iopf = re.sub('.*\/(.*).xml', r'iopbooks_\1', bookfeed)
+    inf = open(bookfeed, 'r')
+    product = False
+    for line in inf.readlines():
+        if '<Product>' in line:
+            product = line
+        elif product:
+            product += line
+        if '</Product>' in line:
+            products.append(product)
+            product = False
+    inf.close()
+    print '%i products found' % (len(products))
+    i = 0
+    for product in products:
+        bproduct = BeautifulSoup(product)
+        i += 1
+        print '---{ %i/%i }---' % (i, len(products))
+        rec = {'autaff' : [], 'keyw' : [], 'note' : [], 'jnl' : 'BOOK', 'tc' : 'B'}
+        #get rid of Related Material
+        for rema in bproduct.find_all('relatedmaterial'):
+            rema.replace_with('')
+        #DOI
+        for wi in bproduct.find_all('workidentifier'):
+            for wit in wi.find_all('workidtype'):
+                if wit.text == '06':
+                    for idv in wi.find_all('idvalue'):
+                        rec['doi'] = idv.text
+                        print ' ', rec['doi']
+        #productform
+        for pf in bproduct.find_all('productform'):
+            if pf.text[0] == 'B':
+                rec['productform'] = 'print'
+            elif pf.text[0] in ['D', 'E']:
+                rec['productform'] = 'online'
+        #isbn
+        isbnadded = False
+        for pi in bproduct.find_all('productidentifier'):
+            if not 'isbns' in rec.keys():
+                for pit in pi.find_all('productidtype'):
+                    if pit.text == '15':
+                        for idv in pi.find_all('idvalue'):
+                            isbn = idv.text
+                            print ' ', isbn
+                            if not 'doi' in rec.keys():
+                                rec['doi'] = '20.2000/' + isbn
+                            if 'productform' in rec.keys():
+                                rec['isbns'] = [[('a', isbn), ('b', rec['productform'])]]
+                            else:
+                                rec['isbns'] = [[('a', isbn)]]
+                            if rec['doi'] in prerecs.keys():
+                                prerecs[rec['doi']]['isbns'].append(rec['isbns'][0])
+                                isbnadded = True
+    
+        if isbnadded:
+            print 'added ISBN to existing record of %s' % (rec['doi'])
+            continue
+        #series
+        for tos in bproduct.find_all('titleofseries'):
+            rec['series'] = tos.text
+        #title
+        for tit in bproduct.find_all('title'):
+            for titt in tit.find_all('titletext'):
+                rec['tit'] = titt.text
+        if not 'tit' in rec.keys():
+            for td in bproduct.find_all('titledetail'):
+                for tel in td.find_all('titleelementlevel'):
+                    if tel.text == '01':
+                        for twp in td.find_all('titlewithoutprefix'):
+                            rec['tit'] = twp.text
+        #authors
+        for contributor in bproduct.find_all('contributor'):
+            for cr in contributor.find_all('contributorrole'):
+                role = cr.text
+            for pni in contributor.find_all('personnameinverted'):
+                if role[0] == 'A':
+                    rec['autaff'].append([ pni.text ])
+                elif role[0] == 'B':
+                    rec['autaff'].append([ pni.text + ' (Ed.)'])
+            for pa in contributor.find_all('professionalaffiliation'):
+                for paa in pa.find_all('affiliation'):
+                    rec['autaff'][-1].append(paa.text)
+        #pages
+        for nop in bproduct.find_all('numberofpages'):
+            rec['pages'] = nop.text
+        #abstract
+        for ot in bproduct.find_all(['othertext', 'textcontent']):        
+            if not 'abs' in rec.keys():
+                for ttc in ot.find_all(['texttype', 'texttypecode']):
+                    if ttc.text in ['02', '03']:
+                        for ott in ot.find_all('text'):
+                            rec['abs'] = ott.text
+        #date
+        for pd in bproduct.find_all('publicationdate'):
+            rec['date'] = re.sub('(\d\d\d\d)(\d\d)(\d\d)', r'\1-\2-\3', pd.text)
+        if not 'date' in rec.keys():
+            for pd in bproduct.find_all('publishingdate'):
+                for pdd in pd.find_all('date'):
+                    rec['date'] = re.sub('(\d\d\d\d)(\d\d)(\d\d)', r'\1-\2-\3', pdd.text)
+        #keywords
+        for subject in bproduct.find_all('subject'):
+            for ssi in subject.find_all('subjectschemeidentifier'):
+                if ssi.text in ['23', '93']:
+                    for sht in subject.find_all('subjectheadingtext'):
+                        rec['keyw'].append(sht.text)
+                elif ssi.text == '10':
+                    for sc in subject.find_all('subjectcode'):
+                        if sc.text in bisac.keys():
+                            rec['keyw'].append(bisac[sc.text])
+                            rec['note'].append('BISAC: ' + bisac[sc.text])
+                elif ssi.text == '12':
+                    for sc in subject.find_all('subjectcode'):
+                        if sc.text in bic.keys():
+                            rec['keyw'].append(bic[sc.text])
+                            rec['note'].append('BIC: ' + bic[sc.text])
+        #combine different ISBNs into one
+        quasiuniquekey = re.sub('\W', '', rec['autaff'][0][0]+rec['tit'])
+        if not quasiuniquekey in prerecs.keys():
+            print ' - new book with key:', quasiuniquekey
+            prerecs[quasiuniquekey] = rec
+        else:
+            print ' - addition to book with key:', quasiuniquekey
+            for isbn in rec['isbns']:                
+                if not isbn in prerecs[quasiuniquekey]['isbns']:
+                    print '   - add isbn:', isbn
+                    prerecs[quasiuniquekey]['isbns'].append(isbn)
+                else:
+                    print '   - do not add isbn:', isbn
+            if rec['doi'][:2] == '10':
+                prerecs[quasiuniquekey]['doi'] = rec['doi']
+    recs = prerecs.values()
+    #retrival
+    if recs:
+        xmlf = os.path.join(xmldir,iopf+'.xml')
+        xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+        ejlmod2.writeXML(recs ,xmlfile,'IOP')
+        xmlfile.close()
+        retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+        retfiles_text = open(retfiles_path,"r").read()
+        line = iopf+'.xml'+ "\n"
+        if not line in retfiles_text: 
+            retfiles = open(retfiles_path,"a")
+            retfiles.write(line)
+            retfiles.close()
+    
+
 #if everything went fine, move the files to done
 for directory in todo:
-    shutil.copytree(os.path.join(ftpdir, directory), os.path.join(iopdirdone, directory))    
+    if re.search('\.xml$', directory):
+        os.system('cp %s/%s %s/%s' % (ftpdir, directory, iopdirdone, directory))
+    else:
+        shutil.copytree(os.path.join(ftpdir, directory), os.path.join(iopdirdone, directory))    
 shutil.rmtree(iopdirtmp)
 print 'done :-)'
     
