@@ -387,7 +387,10 @@ def convertarticle(journalnumber, filename, contlevel):
                 if subjt in ['Review', 'Review Article', 'Review Paper', 'Short Review', 'Systematic Review']:
                     if not 'R' in rec['tc']:
                         rec['tc'] += 'R'
-                elif subjt in ['Editorial', 'News Q&A', 'Correspondence']:
+                elif subjt in ['Editorial', 'News Q&A', 'Correspondence', 'News And Views', 'Career Q&A',
+                               'Career News', 'Outlook', 'Technology Feature', 'Book Review', 'Obituary', 'News',
+                               'Books And Arts', 'World View', 'Seven Days', 'Career Column', 'Career Brief',
+                               'Futures']:
                     return {}
                 #check whether article in fact is part of proceedings
                 elif re.search('Proceedings of ', subjt) and 'P' in rec['tc']:
