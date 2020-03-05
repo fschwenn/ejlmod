@@ -34,7 +34,8 @@ if journal == 'phys':
         jnl = 'Open Phys.'
 elif journal == 'ract':
     jnl = 'Radiochim.Acta'
-
+elif journal == 'astro':
+    jnl = 'Open Astron.'
 
 #get list of volumes
 if not os.path.isfile('/tmp/dg%s' % (jnlfilename)):
@@ -120,9 +121,12 @@ for h3 in tocpage.find_all('h3'):
                 rec['refs'] = []
                 for li in div.find_all('li'):
                     for a in li.find_all('a'):
-                        if a.has_attr('href') and re.search('doi.org', a['href']):
-                            doi = re.sub('.*doi.org.', '', a['href'])
-                            a.replace_with(', DOI: %s  ' % (doi))                        
+                        if a.has_attr('href'):
+                            if re.search('doi.org', a['href']):
+                                doi = re.sub('.*doi.org.', '', a['href'])
+                                a.replace_with(', DOI: %s  ' % (doi))
+                            elif re.search('google.com', a['href']):
+                                a.replace_with(''q)
                     rec['refs'].append([('x', li.text)])
             #date
             for div in artpage.find_all('div', attrs = {'class' : 'pubHistory'}):
