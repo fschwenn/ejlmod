@@ -27,7 +27,7 @@ hdr = {'User-Agent' : 'Magic Browser'}
 pages = 1
 
 recs = []
-jnlfilename = 'THESES-UCLONDON-%sA' % (stampoftoday)
+jnlfilename = 'THESES-UCLONDON-%s' % (stampoftoday)
 for page in range(pages):
     tocurl = 'https://discovery.ucl.ac.uk/cgi/search/archive/advanced?exp=0%7C1%7C-date%2Fcreators_name%2Ftitle%7Carchive%7C-%7Cdivisions%3Adivisions%3AANY%3AEQ%3AMI+MJ%7Ctype%3Atype%3AANY%3AEQ%3Athesis%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow&_action_search=1&order=-date%2Fcreators_name%2Ftitle&screen=Search&cache=40354498&search_offset=' + str(20*page)
     print tocurl
