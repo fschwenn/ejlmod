@@ -59,7 +59,7 @@ for subj in [('164', 'math'), ('165', 'astro'), ('166', 'phys')]:
         print '==={ %i/%i }==={ %s }===' % (pn+1, numberofpages, tocurl)
         tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl)) 
         for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
-            rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+            rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : []}
             for a in div.find_all('a'):
                 rec['artlink'] = 'http://roderic.uv.es' + a['href'] #+ '?show=full'
                 rec['hdl'] = re.sub('.*handle\/(.*\d).*', r'\1', a['href'])
@@ -100,6 +100,10 @@ for subj in [('164', 'math'), ('165', 'astro'), ('166', 'phys')]:
                 #title
                 elif meta['name'] == 'citation_title':
                     rec['tit'] = meta['content']
+                #supervisor
+                elif meta['name'] == 'DC.contributor':
+                    if not meta.has_attr('xml:lang'):
+                        rec['supervisor'].append([meta['content']])
                 #date
                 elif meta['name'] == 'DCTERMS.issued':
                     rec['date'] = meta['content']
@@ -116,6 +120,8 @@ for subj in [('164', 'math'), ('165', 'astro'), ('166', 'phys')]:
                     rec['hidden'] = meta['content']
                 #abstract
                 elif meta['name'] == 'DCTERMS.abstract':
+                    rec['abs'] = meta['content']
+                elif meta['name'] == 'DC.description':
                     rec['abs'] = meta['content']
                 #license            
                 elif meta['name'] == 'DC.rights':
