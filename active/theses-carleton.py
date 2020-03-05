@@ -38,25 +38,25 @@ for discipline in ['Physics', 'Mathematics']:
             rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
             for div2 in div.find_all('div', attrs = {'class' : 'views-field-title'}):
                 for a in div2.find_all('a'):
-                    rec['artlink'] = 'https://curve.carleton.ca' + a['href']
+                    rec['link'] = 'https://curve.carleton.ca' + a['href']
                     recs.append(rec)
     time.sleep(30)
 
     i = 0
     for rec in recs:
-        rec['doi'] = '20.2000/' + re.sub('\W', '', rec['artlink'][6:])
+        rec['doi'] = '20.2000/' + re.sub('\W', '', rec['link'][6:])
         i += 1
-        print '---{ %s }---{ %i/%i }---{ %s }------' % (discipline, i, len(recs), rec['artlink'])
+        print '---{ %s }---{ %i/%i }---{ %s }------' % (discipline, i, len(recs), rec['link'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
             time.sleep(3)
         except:
             try:
-                print "retry %s in 180 seconds" % (rec['artlink'])
+                print "retry %s in 180 seconds" % (rec['link'])
                 time.sleep(180)
-                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
             except:
-                print "no access to %s" % (rec['artlink'])
+                print "no access to %s" % (rec['link'])
                 continue    
         for meta in artpage.head.find_all('meta'):
             if meta.has_attr('name'):
@@ -84,6 +84,10 @@ for discipline in ['Physics', 'Mathematics']:
                 if 'pdf_url' in rec.keys():
                     rec['FFT'] = rec['pdf_url']
         print '  ', rec.keys()
+        #doi
+        for a in artpage.find_all('a'):
+            if a.has_attr('href') and re.search('doi.org\/10\.22215', a['href']):
+                rec['doi'] = re.sub('.*doi.org\/', '', a['href'])
     jnlfilename = 'THESES-CARLETON-%s_%s' % (stampoftoday, re.sub('\W', '', discipline))
 
 
