@@ -150,6 +150,11 @@ for rec in recs:
             elif meta['name'] == 'citation_author_email':
                 email = meta['content']
                 rec['autaff'][-1].append('EMAIL:%s' % (email))
+    #articleID
+    if not 'p1' in rec.keys():
+        for meta in artpage.head.find_all('meta', attrs = {'name' : 'article_references'}):
+            if re.search('http', meta['content']):
+                rec['p1'] = re.sub('.*, (.*?)\. http.*', r'\1', meta['content'])
     #abstract
     for div in artpage.body.find_all('div', attrs = {'class' : ['article-section__content', 'en', 'main']}):
         rec['abs'] = div.text.strip()
