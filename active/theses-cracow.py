@@ -49,7 +49,10 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'post-folded__nav'}):
             tds = tr.find_all('td')
             if len(tds) == 3:
                 for a in tds[1].find_all('a'):
-                    rec['FFT'] = 'https://fais.uj.edu.pl' + re.sub('\.pdf\/.*', '.pdf', a['href'])
+                    if re.search('http', a['href']):
+                        rec['FFT'] = re.sub('\.pdf\/.*', '.pdf', a['href'])
+                    else:
+                        rec['FFT'] = 'https://fais.uj.edu.pl' + re.sub('\.pdf\/.*', '.pdf', a['href'])
                     rec['doi'] = '20.2000/cracow/' + re.sub('\W', '', re.sub('.*documents', '', a['href']))
                     rec['link'] = rec['FFT']
                     rec['tit'] = a.text.strip()
