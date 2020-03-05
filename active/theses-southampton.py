@@ -28,7 +28,8 @@ publisher = 'Southampton U.'
 hdr = {'User-Agent' : 'Magic Browser'}
 jnlfilename = 'THESES-SOUTHAMPTON-%s' % (stampoftoday)
 recs = []
-tocurl = 'https://eprints.soton.ac.uk/cgi/search/archive/advanced?order=-date%2Fcontributors_name%2Ftitle&_action_search=Reorder&screen=Search&dataset=archive&exp=0%7C1%7Ccontributors_name%2F-date%2Ftitle%7Carchive%7C-%7Cdivisions%3Adivisions%3AANY%3AEQ%3A3cf6f76c-0f82-49d3-a152-044a2fb10737+a8c9dd07-9533-48da-a2e5-0a51a7be7743%7Ctype%3Atype%3AANY%3AEQ%3Athesis%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow'
+tocurl = 'https://eprints.soton.ac.uk/cgi/search/archive/advanced?order=-date%2Fcontributors_name%2Ftitle&_action_search=Reorder&screen=Search&dataset=archive&exp=0%7C1%7Ccontributors_name%2F-date%2Ftitle%7Carchive%7C-%7Cdivisions%3Adivisions%3AANY%3AEQ%3Aa2476d18-5515-484c-b0b5-7be7b4f0cd2f+a8c9dd07-9533-48da-a2e5-0a51a7be7743%7Ctype%3Atype%3AANY%3AEQ%3Athesis%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow'
+
 print tocurl
 req = urllib2.Request(tocurl, headers=hdr)
 tocpage = BeautifulSoup(urllib2.urlopen(req))
