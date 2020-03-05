@@ -26,40 +26,42 @@ publisher = 'KIT, Karlsruhe'
 typecode = 'T'
 
 jnlfilename = 'THESES-KIT-%s' % (stampoftoday)
-pages = 2
+pages = 10
 years = 2
 
-tocurl = 'https://primo.bibliothek.kit.edu/primo_library/libweb/action/search.do?ct=facet&rfnGrpCounter=5&rfnGrpCounter=4&fn=search&indx=1&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&mulIncFctN=facet_local12&mulIncFctN=facet_local12&mulIncFctN=facet_local12&dscnt=0&rfnIncGrp=3&rfnIncGrp=3&rfnIncGrp=3&vid=KIT&fctV=%5B2009+TO+null%5D&fctV=istDissertation&mode=Basic&ct=facet&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&fctExcV=Institut+f%C3%BCr+Unternehmungsf%C3%BChrung+%28IBU%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Computational+Materials+Science+%28IAM-CMS%29&fctExcV=Institut+f%C3%BCr+Informationswirtschaft+und+Marketing+%28IISM%29&fctExcV=Institut+f%C3%BCr+Meteorologie+und+Klimaforschung+-+Forschungsbereich+Troposph%C3%A4re+%28IMK-TRO%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Werkstoffkunde+%28IAM-WK%29&fctExcV=Institut+f%C3%BCr+Angewandte+Biowissenschaften+%28IAB%29&fctExcV=Institut+f%C3%BCr+Fahrzeugsystemtechnik+%28FAST%29&fctExcV=Institut+f%C3%BCr+Bio-+und+Lebensmitteltechnik+%28BLT%29&fctExcV=Institut+f%C3%BCr+Anthropomatik+und+Robotik+%28IAR%29&fctExcV=Institut+f%C3%BCr+Produktionstechnik+%28WBK%29&fctExcV=Institut+f%C3%BCr+Technische+Chemie+und+Polymerchemie+%28ITCP%29&fctExcV=Institut+f%C3%BCr+Physikalische+Chemie+%28IPC%29&fctExcV=Institut+f%C3%BCr+Industriebetriebslehre+und+Industrielle+Produktion+%28IIP%29&fctExcV=Institut+f%C3%BCr+Mikrostrukturtechnik+%28IMT%29&fctExcV=Lichttechnisches+Institut+%28LTI%29&fctExcV=Institut+f%C3%BCr+Angewandte+Informatik+und+Formale+Beschreibungsverfahren+%28AIFB%29&fctExcV=Institut+f%C3%BCr+Anorganische+Chemie+%28AOC%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Informatik+%28INFORMATIK%29&fctExcV=Institut+f%C3%BCr+Organische+Chemie+%28IOC%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Maschinenbau+%28MACH%29&fctExcV=Institut+f%C3%BCr+Volkswirtschaftslehre+%28ECON%29&fctExcV=Institut+f%C3%BCr+Technische+Informatik+%28ITEC%29&fctExcV=Institut+f%C3%BCr+Angewandte+Geowissenschaften+%28AGW%29&fctExcV=Institut+f%C3%BCr+Theoretische+Informatik+%28ITI%29&fctExcV=Institut+f%C3%BCr+Funktionelle+Grenzfl%C3%A4chen+%28IFG%29&fctExcV=Institut+f%C3%BCr+Sport+und+Sportwissenschaft+%28IfSS%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Werkstoff-+und+Biomechanik+%28IAM-WBM%29&fctExcV=Institut+f%C3%BCr+Produktentwicklung+%28IPEK%29&fctExcV=Institut+f%C3%BCr+Technische+Mechanik+%28ITM%29&fctExcV=Botanisches+Institut+und+Botanischer+Garten+%28BOTANIK%29&fctExcV=Institut+f%C3%BCr+Nanotechnologie+%28INT%29&fctExcV=Institut+f%C3%BCr+Programmstrukturen+und+Datenorganisation+%28IPD%29&fctExcV=Institut+f%C3%BCr+Toxikologie+und+Genetik+%28ITG%29&fctExcV=Institut+f%C3%BCr+Mechanische+Verfahrenstechnik+und+Mechanik+%28MVM%29&fctExcV=Institut+f%C3%BCr+Technik+der+Informationsverarbeitung+%28ITIV%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Bauingenieur-%2C+Geo-+und+Umweltwissenschaften+%28BGU%29&fctExcV=Engler-Bunte-Institut+%28EBI%29&rfnGrp=4&rfnGrp=1&tab=kit_evastar&srt=date&fctN=facet_searchcreationdate&fctN=facet_local8&vl(freeText0)=istKITopen&dstmp=1578919455926&fctIncV=Institut+f%C3%BCr+Angewandte+Physik+%28APH%29&fctIncV=Physikalisches+Institut+%28PHI%29&fctIncV=Institut+f%C3%BCr+Experimentelle+Kernphysik+%28IEKP%29&fctExcV=Steinbuch%20Centre%20for%20Computing%20(SCC)&mulExcFctN=facet_local12&rfnExcGrp=5&fctExcV=Institut%20f%C3%BCr%20Angewandte%20Materialien%20-%20Keramik%20im%20Maschinenbau%20(IAM-KM)&mulExcFctN=facet_local12&rfnExcGrp=5&fctExcV=Karlsruhe%20School%20of%20Optics%20%26%20Photonics%20(KSOP)&mulExcFctN=facet_local12&rfnExcGrp=5'
-
+tocurl = 'https://primo.bibliothek.kit.edu/primo_library/libweb/action/search.do?ct=facet&rfnGrpCounter=8&rfnGrpCounter=7&indx=1&fn=search&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=2&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=3&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=4&rfnExcGrp=5&rfnExcGrp=5&rfnExcGrp=5&rfnExcGrp=5&rfnExcGrp=5&rfnExcGrp=5&rfnExcGrp=5&rfnExcGrp=5&rfnExcGrp=6&rfnExcGrp=6&rfnExcGrp=6&rfnExcGrp=6&rfnExcGrp=6&rfnExcGrp=6&rfnExcGrp=6&rfnExcGrp=6&rfnExcGrp=7&rfnExcGrp=7&rfnExcGrp=7&rfnExcGrp=7&rfnExcGrp=7&rfnExcGrp=7&rfnExcGrp=7&rfnExcGrp=7&dscnt=0&mode=Basic&vid=KIT&fctV=%5B2006+TO+null%5D&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&mulExcFctN=facet_local12&ct=facet&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Computational+Materials+Science+%28IAM-CMS%29&fctExcV=Institut+f%C3%BCr+Meteorologie+und+Klimaforschung+-+Forschungsbereich+Troposph%C3%A4re+%28IMK-TRO%29&fctExcV=Institut+f%C3%BCr+Informationswirtschaft+und+Marketing+%28IISM%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Werkstoffkunde+%28IAM-WK%29&fctExcV=Institut+f%C3%BCr+Industriebetriebslehre+und+Industrielle+Produktion+%28IIP%29&fctExcV=Institut+f%C3%BCr+Produktionstechnik+%28WBK%29&fctExcV=Institut+f%C3%BCr+Angewandte+Biowissenschaften+%28IAB%29&fctExcV=Institut+f%C3%BCr+Fahrzeugsystemtechnik+%28FAST%29&fctExcV=Institut+f%C3%BCr+Mikrostrukturtechnik+%28IMT%29&fctExcV=Institut+f%C3%BCr+Bio-+und+Lebensmitteltechnik+%28BLT%29&fctExcV=Lichttechnisches+Institut+%28LTI%29&fctExcV=Institut+f%C3%BCr+Physikalische+Chemie+%28IPC%29&fctExcV=Institut+f%C3%BCr+Anthropomatik+und+Robotik+%28IAR%29&fctExcV=Institut+f%C3%BCr+Anorganische+Chemie+%28AOC%29&fctExcV=Institut+f%C3%BCr+Technische+Chemie+und+Polymerchemie+%28ITCP%29&fctExcV=Institut+f%C3%BCr+Angewandte+Informatik+und+Formale+Beschreibungsverfahren+%28AIFB%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Informatik+%28INFORMATIK%29&fctExcV=Institut+f%C3%BCr+Organische+Chemie+%28IOC%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Maschinenbau+%28MACH%29&fctExcV=Institut+f%C3%BCr+Unternehmungsf%C3%BChrung+%28IBU%29&fctExcV=Institut+f%C3%BCr+Angewandte+Geowissenschaften+%28AGW%29&fctExcV=Institut+f%C3%BCr+Technische+Mechanik+%28ITM%29&fctExcV=Institut+f%C3%BCr+Sport+und+Sportwissenschaft+%28IfSS%29&fctExcV=Institut+f%C3%BCr+Programmstrukturen+und+Datenorganisation+%28IPD%29&fctExcV=Institut+f%C3%BCr+Theoretische+Informatik+%28ITI%29&fctExcV=Institut+f%C3%BCr+Funktionelle+Grenzfl%C3%A4chen+%28IFG%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Werkstoff-+und+Biomechanik+%28IAM-WBM%29&fctExcV=Institut+f%C3%BCr+Meteorologie+und+Klimaforschung+-+Atmosph%C3%A4rische+Umweltforschung+%28IMK-IFU%29&fctExcV=Institut+f%C3%BCr+Produktentwicklung+%28IPEK%29&fctExcV=Institut+f%C3%BCr+Mechanische+Verfahrenstechnik+und+Mechanik+%28MVM%29&fctExcV=Botanisches+Institut+und+Botanischer+Garten+%28BOTANIK%29&fctExcV=Engler-Bunte-Institut+%28EBI%29&fctExcV=Institut+f%C3%BCr+Toxikologie+und+Genetik+%28ITG%29&fctExcV=Institut+f%C3%BCr+Technik+der+Informationsverarbeitung+%28ITIV%29&fctExcV=Institut+f%C3%BCr+Nanotechnologie+%28INT%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Bauingenieur-%2C+Geo-+und+Umweltwissenschaften+%28BGU%29&fctExcV=Institut+f%C3%BCr+Thermische+Str%C3%B6mungsmaschinen+%28ITS%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Angewandte+Werkstoffphysik+%28IAM-AWP%29&fctExcV=Institut+f%C3%BCr+Technische+Informatik+%28ITEC%29&fctExcV=Institut+f%C3%BCr+Volkswirtschaftslehre+%28ECON%29&fctExcV=Institut+f%C3%BCr+Technikfolgenabsch%C3%A4tzung+und+Systemanalyse+%28ITAS%29&fctExcV=Institut+f%C3%BCr+Anthropomatik+%28IFA%29&fctExcV=Institut+f%C3%BCr+Analysis+%28IANA%29&fctExcV=Institut+f%C3%BCr+Meteorologie+und+Klimaforschung+-+Atmosph%C3%A4rische+Spurenstoffe+und+Fernerkundung+%28IMK-ASF%29&fctExcV=Institut+f%C3%BCr+Mess-+und+Regelungstechnik+mit+Maschinenlaboratorium+%28MRT%29&fctExcV=Institut+f%C3%BCr+Hochfrequenztechnik+und+Elektronik+%28IHE%29&fctExcV=Institut+f%C3%BCr+Telematik+%28TM%29&fctExcV=Institut+f%C3%BCr+Kolbenmaschinen+%28IFKM%29&fctExcV=Zoologisches+Institut+%28ZOO%29&fctExcV=Institut+Kunst-+und+Baugeschichte+%28IKB%29&fctExcV=Institut+f%C3%BCr+Experimentelle+Teilchenphysik+%28ETP%29&fctExcV=Institut+f%C3%BCr+Informationsmanagement+im+Ingenieurwesen+%28IMI%29&fctExcV=Institut+f%C3%BCr+Thermische+Verfahrenstechnik+%28TVT%29&fctExcV=Institut+f%C3%BCr+Technische+Thermodynamik+und+K%C3%A4ltetechnik+%28ITTK%29&fctExcV=Institut+f%C3%BCr+Stochastik+%28STOCH%29&fctExcV=Institut+f%C3%BCr+Finanzwirtschaft%2C+Banken+und+Versicherungen+%28FBV%29&fctExcV=Institut+f%C3%BCr+Biomedizinische+Technik+%28IBT%29&fctExcV=Institut+f%C3%BCr+Angewandte+Betriebswirtschaftslehre+-+Unternehmensf%C3%BChrung+%28IBU%29&fctExcV=Institut+f%C3%BCr+Wasser+und+Gew%C3%A4sserentwicklung+%28IWG%29&fctExcV=Institut+f%C3%BCr+Massivbau+und+Baustofftechnologie+%28IMB%29&fctExcV=Institut+f%C3%BCr+Industrielle+Informationstechnik+%28IIIT%29&fctExcV=Institut+f%C3%BCr+Informationswirtschaft+und+-management+%28IISM%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Geistes-+und+Sozialwissenschaften+%28GEISTSOZ%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Elektrotechnik+und+Informationstechnik+%28ETIT%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Wirtschaftswissenschaften+%28WIWI%29&fctExcV=Institut+f%C3%BCr+Angewandte+Materialien+-+Zuverl%C3%A4ssigkeit+von+Bauteilen+und+Systemen+%28IAM-ZBS%29&fctExcV=Institut+f%C3%BCr+Neutronenphysik+und+Reaktortechnik+%28INR%29&fctExcV=Institut+f%C3%BCr+Prozessdatenverarbeitung+und+Elektronik+%28IPE%29&fctExcV=Institut+f%C3%BCr+F%C3%B6rdertechnik+und+Logistiksysteme+%28IFL%29&fctExcV=Institut+f%C3%BCr+Prozessrechentechnik%2C+Automation+und+Robotik+%28IPR%29&fctExcV=Geophysikalisches+Institut+%28GPI%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Architektur+%28ARCH%29&fctExcV=Fakult%C3%A4t+f%C3%BCr+Chemie+und+Biowissenschaften+%28CHEM-BIO%29&rfnGrp=1&srt=date&tab=kit_evastar&fctN=facet_searchcreationdate&vl(freeText0)=istdissertation&dstmp=1582793145993&fctExcV=Institut%20f%C3%BCr%20Chemische%20Verfahrenstechnik%20(CVT)&mulExcFctN=facet_local12&rfnExcGrp=8&fctExcV=Elektrotechnisches%20Institut%20(ETI)&mulExcFctN=facet_local12&rfnExcGrp=8&fctExcV=Versuchsanstalt%20f%C3%BCr%20Stahl%2C%20Holz%20und%20Steine%20(VAKA)&mulExcFctN=facet_local12&rfnExcGrp=8&fctExcV=Fakult%C3%A4t%20f%C3%BCr%20Chemieingenieurwesen%20und%20Verfahrenstechnik%20(CIW)&mulExcFctN=facet_local12&rfnExcGrp=8&fctExcV=Institut%20f%C3%BCr%20Meteorologie%20und%20Klimaforschung%20(IMK)&mulExcFctN=facet_local12&rfnExcGrp=8'
 recs = []
 for i in range(pages):
     print '---{ %i }---' % (i)
     newrecs = []
     try:
         tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
-        time.sleep(3)
+        time.sleep(4)
     except:
-        print "retry %s in 180 seconds" % (tocurl)
-        time.sleep(180)
+        print "retry %s in 300 seconds" % (tocurl)
+        time.sleep(300)
         tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
     for div in tocpage.body.find_all('div', attrs ={'class' : 'EXLSummaryContainer'}):
+        print 'd'
         for h3 in div.find_all('h3', attrs ={'class' : 'EXLResultFourthLine'}):
-            rec = {'jnl' : 'BOOK', 'tc' : 'T'}
+            print 'h3'
+            rec = {'jnl' : 'BOOK', 'tc' : 'T', 'note' : []}
             rec['year'] = h3.text.strip()
             rec['date'] = h3.text.strip()
             for h2 in div.find_all('h2'):
                 for a in h2.find_all('a'):
-                    rec['artlink'] = 'https://primo.bibliothek.kit.edu/primo_library/libweb/action/' + a['href']
+                    rec['artlink2'] = 'https://primo.bibliothek.kit.edu/primo_library/libweb/action/' + a['href']
+                    rec['artlink'] = 'https://publikationen.bibliothek.kit.edu/' + re.sub('.*KITSRCE(\d+).*', r'\1', a['href'])
                     rec['tit'] = a.text.strip()
-            try:
+            if re.search('^\d+$', rec['year']):
                 if int(rec['year']) >= now.year - years:
                     newrecs.append(rec)
-            except:
+            else:
                 newrecs.append(rec)
                 print '   ', rec['year'], '?'
     print '   %i+%i=%i recs' % (len(recs), len(newrecs), len(recs)+len(newrecs))
     recs += newrecs                            
-    if newrecs:
+    if newrecs or True:
         for a in tocpage.body.find_all('a', attrs ={'class' : 'EXLBriefResultsPaginationLinkNext'}):
             tocurl = a['href']
     else:
@@ -70,71 +72,76 @@ for i in range(pages):
 i = 0
 for rec in recs:
     i += 1
-    print '---{ %i/%i }---' % (i, len(recs))
+    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-        time.sleep(3)
+        time.sleep(4)
     except:
         print "retry %s in 180 seconds" % (rec['link'])
         time.sleep(180)
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-    for div in artpage.body.find_all('div', attrs = {'class' : 'EXLDetailsContent'}):
-        for li in div.find_all('li'):
-            if li.has_attr('id'):
-                #author
-                if li['id'] == 'Verfasser-1':
-                    for a in li.find_all('a'):
-                        rec['autaff'] = [[ a.text.strip(), publisher ]]
+    for meta in artpage.head.find_all('meta'):
+        if meta.has_attr('name'):
+            #abstract
+            if meta['name'] == 'citation_abstract':
+                rec['abs'] = meta['content']
+            #author
+            elif meta['name'] == 'DC.Creator':
+                rec['autaff'] = [[ meta['content'] ]]
+            #ISBN
+            elif meta['name'] == 'citation_isbn':
+                rec['isbn'] = meta['content']
+            #DOI
+            elif meta['name'] == 'citation_doi':
+                rec['doi'] = meta['content']
+            #fulltext
+            elif meta['name'] == 'citation_pdf_url':
+                rec['FFT'] = meta['content']
+    for table in artpage.body.find_all('table', attrs = {'class' : 'table'}):
+        for tr in table.find_all('tr'):
+            tds = tr.find_all('td')
+            if len(tds) == 2:
+                #Keywords
+                if re.search('Schlagw', tds[0].text.strip()):
+                    rec['keyw'] = re.split(', ', tds[1].text.strip())
+                #Language
+                elif tds[0].text.strip() == 'Sprache':
+                    if tds[1].text.strip() != 'Englisch':
+                        if tds[1].text.strip() == 'Deutsch':
+                            rec['language'] = 'german'
+                        else:
+                            rec['language'] = tds[1].text.strip()
                 #pages
-                if li['id'] == 'Auflage / Umfang-1':
-                    for span in li.find_all('span'):
-                        pages = span.text.strip()
-                        if re.search('\d', pages):
-                            rec['pages'] = re.sub('\D*(\d+).*', r'\1', pages)
-                #language
-                if li['id'] == 'Sprache-1':
-                    for span in li.find_all('span'):
-                        language = span.text.strip()
-                        if language != 'Englisch':
-                            if language == 'Deutsch':
-                                rec['language'] = 'german'
-                            else:
-                                rec['language'] = language
-                #DOI, ISBN
-                if li['id'] == 'Identifikator-1':
-                    for span in li.find_all('span'):
-                        spant = span.text.strip()
-                        if re.search('10\.5445\/', spant):
-                            rec['doi'] = re.sub('.*(10\.5445\/.*)', r'\1', spant)
-                        elif re.search('^978\-', spant):
-                            rec['isbn'] = re.sub('\-', '', spant)
-    #FFT
-    for a in artpage.body.find_all('a'):
-        if a.has_attr('href'):
-            if a.text.strip() == 'Online Ressource':
-                rec['FFT'] = a['href']
-    #DOI-landingpage
-    if 'doi' in rec.keys():
-        doilink = re.sub('.*\/', 'https://publikationen.bibliothek.kit.edu/', rec['doi'])
-        try:
-            doipage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(doilink))
-            time.sleep(3)
-        except:
-            print "retry %s in 180 seconds" % (rec['link'])
-            time.sleep(180)
-            doipage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(doilink))        
-        #abstract
-        for meta in doipage.head.find_all('meta', attrs = {'name' : 'citation_abstract'}):
-            rec['abs'] = meta['content']
-        for table in doipage.body.find_all('table', attrs = {'class' : 'table'}):
-            for tr in table.find_all('tr'):
-                tds = tr.find_all('td')
-                if len(tds) == 2:
-                    #Keywords
-                    if tds[0].text.strip() == 'Schlagworte':
-                        rec['keyw'] = re.split(', ', tds[1].text.strip())
-    else:
-        rec['doi'] = '20.2000/KIT/%s/%04i' % (stampoftoday, i)
+                elif tds[0].text.strip() == 'Umfang':
+                    if re.search('\d\d\d', tds[1].text.strip()):
+                        rec['pages'] = re.sub('.*?(\d\d\d+).*', r'\1', tds[1].text.strip())
+                #supervisor
+                elif re.search('Betreuer', tds[0].text):
+                    rec['supervisor'] = [[ re.sub('Prof\. ', '', re.sub('Dr\. ', '', tds[1].text.strip())) ]]
+                #date
+                elif re.search('Pr.fungsdatum', tds[0].text):
+                    rec['MARC'] = [ ['500', [('a', 'Presented on ' + re.sub('(\d\d).(\d\d).(\d\d\d\d)', r'\3-\2-\1', tds[1].text.strip()))] ] ]
+                #institue
+                elif tds[0].text.strip() == 'Institut':
+                    rec['note'].append(tds[1].text.strip())
+                #urn
+                elif tds[0].text.strip() == 'Identifikator':
+                    for br in tds[1].find_all('br'):
+                        br.replace_with('#')
+                    for tdt in re.split('#',  re.sub('[\n\t\r]', '#', tds[1].text.strip())):
+                        if re.search('urn:nbn', tdt):
+                            rec['urn'] = re.sub('.*?(urn:nbn.*)', r'\1', tdt.strip())
+    #license
+    for a in artpage.body.find_all('a', attrs = {'class' : 'with-popover'}):
+        if a.has_attr('data-content'):
+            adc = a['data-content']
+            if re.search('creativecommons.org', adc):
+                rec['license'] = {'url' : re.sub('.*(http.*?) target.*', r'\1', adc)}                                        
+    rec['autaff'][-1].append(publisher)
+    if not 'doi' in rec.keys():
+        if not 'urn' in rec.keys():
+            rec['doi'] = '20.2000/KIT/' + re.sub('\D', '', rec['artlink'])
+        rec['link'] = rec['artlink']
     print rec.keys()
 
     
