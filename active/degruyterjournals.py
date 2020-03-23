@@ -126,7 +126,7 @@ for h3 in tocpage.find_all('h3'):
                                 doi = re.sub('.*doi.org.', '', a['href'])
                                 a.replace_with(', DOI: %s  ' % (doi))
                             elif re.search('google.com', a['href']):
-                                a.replace_with(''q)
+                                a.replace_with('')
                     rec['refs'].append([('x', li.text)])
             #date
             for div in artpage.find_all('div', attrs = {'class' : 'pubHistory'}):
