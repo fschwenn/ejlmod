@@ -61,7 +61,10 @@ except:
 
 (level0note, level1note) = (False, False)
 recs = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'osap-accordion'}):
+divs = tocpage.body.find_all('div', attrs = {'class' : 'osap-accordion'})
+if not divs:
+    divs = tocpage.find_all('body')
+for div in divs:
     for label in div.find_all('label'):
         level0note = label.text.strip()
     for div2 in div.find_all('div', attrs = {'class' : 'row'}):
@@ -79,7 +82,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'osap-accordion'}):
             for a in p.find_all('a'):
                 rec['tit'] = p.text.strip()
                 rec['artlink'] = 'https://www.osapublishing.org' + a['href']
-            recs.append(rec)
+            if not rec['artlink'] in ['https://www.osapublishing.org/josab/abstract.cfm?uri=josab-36-7-E112']:
+                recs.append(rec)
 
 i = 0
 for rec in recs:
