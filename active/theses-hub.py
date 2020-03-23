@@ -36,7 +36,7 @@ jnlfilename = 'THESES-HUB-%s' % (stampoftoday)
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
 hdls = []
-for ddc in ['530+Physik', '510+Mathematik']:
+for ddc in ['530+Physik', '510+Mathematik', '539+Moderne+Physik']:
     tocurl = 'https://edoc.hu-berlin.de/handle/18452/2/discover?sort_by=dc.date.issued_dt&order=desc&rpp=50&filtertype_0=subjectDDC&filter_relational_operator_0=equals&filter_0=' + ddc 
     print tocurl
     driver = webdriver.PhantomJS()
@@ -60,7 +60,7 @@ recs = []
 i = 0
 for rec in prerecs:
     i += 1
-    print '---{ %i/%i}---{ %s}------' % (i, len(prerecs), rec['artlink'])
+    print '---{ %i/%i }---{ %s}------' % (i, len(prerecs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
