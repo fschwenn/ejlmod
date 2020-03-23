@@ -30,7 +30,7 @@ typecode = 'T'
 jnlfilename = 'THESES-TUM-%s' % (stampoftoday)
 
 
-tocurl = 'https://mediatum.ub.tum.de/680895?nodes_per_page=50&sortfield0=-year-accepted'
+tocurl = 'https://mediatum.ub.tum.de/680895?nodes_per_page=100&sortfield0=-year-accepted'
 print tocurl
 hdr = {'User-Agent' : 'Magic Browser'}
 req = urllib2.Request(tocurl, headers=hdr)
