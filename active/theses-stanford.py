@@ -43,6 +43,7 @@ for page in range(pages):
                 rec['doi'] = '20.2000/Stanford/' + re.sub('\D', '', a['href'])
             for span in h3.find_all('span', attrs = {'class' : 'main-title-date'}):
                 rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', span.text.strip())
+                rec['date'] = rec['year']
             for a in div.find_all('a'):
                 if a.has_attr('href') and re.search('purl.stanford', a['href']):
                     rec['link'] = a['href']
@@ -54,7 +55,7 @@ for rec in recs:
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-        time.sleep(10)
+        time.sleep(5)
     except:
         try:
             print 'retry %s in 180 seconds' % (rec['artlink'])
@@ -70,7 +71,7 @@ for rec in recs:
                 person = re.sub(' *,$', '', a.text.strip())
                 person = re.sub(', [12]\d.*', '', person) 
                 person = re.sub(' \(.*', '', person) 
-                a.replace_with('')
+                #a.replace_with('')
             if re.search('author', dd.text):
                 rec['autaff'] = [[ person ]]
             elif re.search('upervisor', dd.text):
@@ -78,8 +79,23 @@ for rec in recs:
     #author2
     if not 'autaff' in rec.keys():
         for div in artpage.body.find_all('div', attrs = {'id' : 'contributors'}):
-            person = div.find_all('dd')[0].text.strip()
-            rec['autaff'] = [[ person ]]
+            for dl in div.find_all('dl'):
+                for child in dl.children:
+                    try:
+                        child.name
+                    except:
+                        continue
+                    if child.name == 'dt':
+                        dtt = child.text
+                    elif child.name == 'dd':
+                        ddt = re.sub('([a-z][a-z])\.', r'\1', child.text.strip())
+                        ddt = re.sub('[\n\t\r]', '', ddt)
+                        if ddt:
+                            if re.search('[aA]uthor', dtt):
+                                rec['autaff'] = [[ ddt ]]
+                            elif re.search('[sS]upervisor', dtt) or re.search('rimary [Aa]dvisor', dtt):
+                                rec['supervisor'] = [[ ddt ]]
+    print rec['autaff']
     #abstract
     for div in artpage.body.find_all('div', attrs = {'id' : 'contents-summary'}):
         for dd in div.find_all('dd'):
