@@ -40,6 +40,8 @@ subdomains = ["stat.ml", "stat.ap", "stat.co",
               "math.math-oa", "math.math-sg", "math.math-qa", "math.math-ra",
               "info.info-ni", "info.info-se", "info.info-dc", "info.info-cv", "info.info-lg",
               "info.info-it", "info.info-sc", "info.info-ms", "info.info-dl"]
+subdomains += ["phys.phys"]
+
 domains = {}
 for subdom in subdomains:
     dom = re.sub('\..*', '', subdom)
