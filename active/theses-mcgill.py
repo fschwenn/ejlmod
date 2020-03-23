@@ -27,7 +27,7 @@ articlesperpage = 20
 pages = 1
 departments = [('Department+of+Physics', 'McGill U.', 'PHYSICS'),
                ('Department+of+Mathematics+and+Statistics', 'McGill U., Math. Stat.', 'MATHEMATICS')]
-urltrunc = 'https://escholarship-test.mcgill.ca'
+urltrunc = 'https://escholarship.mcgill.ca'
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
