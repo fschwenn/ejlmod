@@ -27,7 +27,7 @@ publisher = 'U. Hamburg (main)'
 
 typecode = 'T'
 
-pages = 3+30
+pages = 3
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
