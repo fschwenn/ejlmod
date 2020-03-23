@@ -24,7 +24,7 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Basel U. (main)'
-jnlfilename = 'THESES-BASEL-%s_C' % (stampoftoday)
+jnlfilename = 'THESES-BASEL-%s' % (stampoftoday)
 
 reasonstoskip = []
 for reason in ['Master Thesis', 'Faculty of Humanities and Social Sciences',
