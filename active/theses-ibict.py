@@ -74,7 +74,7 @@ for rec in recs:
                     rec['date'] = td.text.strip()
                 #author
                 elif tht == 'Autor/a:':
-                    rec['auts'] = td.text.strip()
+                    rec['auts'] = [ td.text.strip() ]
                 #language
                 elif tht == 'Idioma:':
                     tdt = td.text.strip()
