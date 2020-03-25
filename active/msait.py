@@ -42,7 +42,7 @@ isutocpage = BeautifulSoup(urllib2.urlopen(isutoclink))
 recs = []
 for tr in isutocpage.find_all('tr'):
     for td in tr.find_all('td', attrs = {'colspan' : '6'}):
-        rec = {'jnl' : jnl, 'vol' : vol, 'isu' : isu, 'tc' : tc, 'year' : year}
+        rec = {'jnl' : jnl, 'vol' : vol, 'issue' : isu, 'tc' : tc, 'year' : year}
         if len(sys.argv) > 3: 
             rec['cnum'] = cnum
         for i in td.find_all('i'):
