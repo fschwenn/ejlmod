@@ -50,7 +50,7 @@ prerecs = []
 recs = []
 jnlfilename = 'THESES-GRANADA-%s' % (stampoftoday)
 for pn in range(numberofpages):
-    tocurl = 'https://digibug.ugr.es/handle/10481/191/browse?rpp=' + str(recordsperpage) + '&sort_by=2&type=dateissued&offset=' + str(pn * recordsperpage + 3000) + '&etal=-1&order=DESC'
+    tocurl = 'https://digibug.ugr.es/handle/10481/191/browse?rpp=' + str(recordsperpage) + '&sort_by=2&type=dateissued&offset=' + str(pn * recordsperpage) + '&etal=-1&order=DESC'
     print '==={ %i/%i }==={ %s }===' % (pn+1, numberofpages, tocurl)
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl)) 
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
