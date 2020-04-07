@@ -302,11 +302,11 @@ def get_references(rl):
                     if re.search('inspirehep.net.*IRN', link):
                         irn = re.sub('.*\D', '', link)
                         for recid in search_pattern(p='970__a:SPIRES-' + irn):
-                            inspirelink += ', https://inspirehep.net/record/%i' % (recid)
+                            inspirelink += ', https://old.inspirehep.net/record/%i' % (recid)
                         el.decompose()
                     elif re.search('inspirehep.net.*recid', link):
                         recid = re.sub('.*\D', '', link)
-                        inspirelink += ', https://inspirehep.net/record/%s' % (recid)
+                        inspirelink += ', https://old.inspirehep.net/record/%s' % (recid)
                         el.decompose()
                     elif re.search('inspirehep.net', link):
                         el.decompose()
