@@ -24,7 +24,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Leibniz U., Hannover'
 
-numberofpages = 4+46
+numberofpages = 4
 recordsperpage = 50
 
 prerecs = []
