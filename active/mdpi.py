@@ -16,8 +16,10 @@ from bs4 import BeautifulSoup
 import datetime
 import time
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special/'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
+
 def tfstrip(x): return x.strip()
 
 publisher = 'MDPI'
@@ -32,26 +34,27 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 #journals have quite different number of articles per month
 if jnl == 'symmetry': #2211
-    numberofpages = 18
+    numberofpages = 18 + 2
 elif jnl == 'universe': #367
-    numberofpages = 2
+    numberofpages = 2 + 2
 elif jnl == 'sensors': #9570
-    numberofpages = 24
+    numberofpages = 24 + 2
 elif jnl == 'instruments': #91
-    numberofpages = 2
+    numberofpages = 2 + 2
 elif jnl == 'galaxies': #231
-    numberofpages = 2
+    numberofpages = 2 + 2
 elif jnl == 'entropy': #2124
-    numberofpages = 8+4
+    numberofpages = 8+4 + 2
 elif jnl == 'particles': #53
-    numberofpages = 2
+    numberofpages = 2 + 2
 elif jnl == 'physics': #26
-    numberofpages = 2
+    numberofpages = 2 + 2
 elif jnl == 'condensedmatter': #139
-    numberofpages = 2
+    numberofpages = 2 + 2
 elif jnl == 'atoms': #173
-    numberofpages = 2
-
+    numberofpages = 2 + 2
+elif jnl == 'mathematics':
+    numberofpages = 4 
 
 
 if jnl == 'proceedings':
@@ -60,7 +63,7 @@ if jnl == 'proceedings':
     jnlfilename = 'mdpi_proc%s.%s_%s' % (vol, iss, cnum)
     done = []
 else:
-    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=2017&year_to=2150&page_count=10&sort=pubdate&view=default' % (jnl)
+    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=2018&year_to=2150&page_count=10&sort=pubdate&view=default' % (jnl)
     jnlfilename = '%s.%s_%i' % (jnl, stampoftoday, 10*numberofpages)
     done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
@@ -75,6 +78,7 @@ else:
     print 'already done:', len(done)
 
 
+refmissing = ['10.3390/e22040380', '10.3390/e22040389', '10.3390/e22040390', '10.3390/e22040391', '10.3390/e22040394', '10.3390/e22040395', '10.3390/e22040396', '10.3390/e22040398', '10.3390/e22040399', '10.3390/e22040400', '10.3390/e22040401', '10.3390/e22040402', '10.3390/e22040403', '10.3390/e22040404', '10.3390/e22040405', '10.3390/e22040407', '10.3390/e22040409', '10.3390/e22040411', '10.3390/particles3010019', '10.3390/particles3020020', '10.3390/particles3020021', '10.3390/particles3020022', '10.3390/particles3020023', '10.3390/particles3020024', '10.3390/particles3020025', '10.3390/particles3020026', '10.3390/physics2020008', '10.3390/sym12040515', '10.3390/sym12040517', '10.3390/sym12040522', '10.3390/sym12040534', '10.3390/sym12040537', '10.3390/sym12040542', '10.3390/sym12040543', '10.3390/sym12040554', '10.3390/sym12040558', '10.3390/sym12040568', '10.3390/sym12040569', '10.3390/sym12040570', '10.3390/sym12040572', '10.3390/sym12040573', '10.3390/sym12040579', '10.3390/sym12040585', '10.3390/sym12040593', '10.3390/sym12040595']
 
 
 hdr = {'User-Agent' : 'Mozilla/5.0'}
@@ -163,7 +167,7 @@ for artlink in artlinks:
         rec['p2'] = meta['content']
     for meta in page.head.find_all('meta', attrs = {'name' : 'citation_doi'}):
         rec['doi'] = meta['content']
-    if rec['doi'] in done:
+    if rec['doi'] in done and not rec['doi'] in refmissing:
         print '  %s already in done'  % (rec['doi'])
         continue
     ##abstract
@@ -234,8 +238,13 @@ for artlink in artlinks:
             lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
             lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
             rec['refs'].append([('x', lit)])
-    recs.append(rec)
-    print '  ', rec.keys()
+    #early access
+    for strong in page.body.find_all('strong'):
+        if re.search('is an early access version', strong.text):
+            print 'skip early acccess version'
+    else:
+        recs.append(rec)
+        print '  ', rec.keys()
     time.sleep(3)
 print '%i new records' % (len(recs))
 
@@ -245,7 +254,6 @@ xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
 ejlmod2.writeXML(recs,xmlfile,publisher)
 xmlfile.close()
 #retrival
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text:
