@@ -190,7 +190,11 @@ for artlink in artlinks:
                 if 'in Russian' not in rec['note']:
                     rec['note'].append('in Russian')
             elif re.search('^\\\\crossref.http...dx', textrow):
-                rec['doi'] = re.sub('.*dx.doi.org.(10.*)\}.*', r'\1', textrow.strip())                
+                rec['doi'] = re.sub('.*dx.doi.org.(10.*)\}.*', r'\1', textrow.strip())
+        #DOI
+        for a in table.find_all('a'):
+            if a.has_attr('title') and re.search('^DOI: ', a['title']):
+                rec['doi'] = re.sub('.*doi.org.(10.*)', r'\1', a['title'])
     #pages
     if not rec.has_key('p1'):
         for title in articlepage.head.find_all('title'):
