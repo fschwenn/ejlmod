@@ -13,6 +13,7 @@ import ejlmod2
 import codecs
 import time
 
+
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 
 publisher = 'National Academy of Sciences of the USA'
@@ -20,6 +21,14 @@ vol = sys.argv[1]
 issues = sys.argv[2]
 jnlfilename = 'procnas%s.%s' % (vol, re.sub(',', '_', issues))
 jnlname = 'Proc.Nat.Acad.Sci.'
+hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+       'Accept-Encoding': 'none',
+       'Accept-Language': 'en-US,en;q=0.8',
+       'Connection': 'keep-alive'}
+
+
 
 recs = []
 artlinks = []
@@ -27,7 +36,16 @@ for issue in re.split(',', issues):
     (note1, note2) = (False, False)
     tocurl = 'https://www.pnas.org/content/%s/%s' % (vol, issue)
     print '---{ %s of %s }---{ %s}---' % (issue, issues, tocurl)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+    req = urllib2.Request(tocurl, headers=hdr)
+    #tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocfilename = '/tmp/procnas%s.%s.toc' % (vol, issue)
+    if not os.path.isfile(tocfilename):
+        os.system("wget -q -T 300 -O %s %s" % (tocfilename, tocurl))
+        time.sleep(7)
+    tocfile = open(tocfilename, 'r')
+    tocpage = BeautifulSoup(''.join(tocfile.readlines()))
+    tocfile.close()
+
     for contdiv in tocpage.body.find_all('div', attrs = {'class' : 'issue-toc-section'}):
         for child in contdiv.children:
             try:
@@ -75,12 +93,18 @@ for issue in re.split(',', issues):
                                                         artlinks.append(rec['artlink'])
                                                         if not note1 in ['Commentaries', 'This Week in PNAS', 'News Feature']:
                                                             recs.append(rec)
-    time.sleep(7)
 
 
 for i in range(len(recs)):
     print '------{ %5i/%5i }---{ %s }---' % (i+1, len(recs), recs[i]['artlink'])
-    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(recs[i]['artlink']))
+    #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(recs[i]['artlink']))
+    artfilename = '/tmp/procnas.%s' % (re.sub('\W', '', recs[i]['artlink'][8:]))
+    if not os.path.isfile(artfilename):
+        os.system("wget -q -T 300 -O %s %s" % (artfilename, recs[i]['artlink']))
+        time.sleep(6)
+    artfile = open(artfilename, 'r')
+    artpage = BeautifulSoup(''.join(artfile.readlines()))
+    artfile.close()
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #title
@@ -138,9 +162,6 @@ for i in range(len(recs)):
                         ref += ', DOI: %s.' % (div2['data-doi'])
                 recs[i]['refs'].append([('x', ref)])
     print recs[i].keys()
-    time.sleep(6)
-                    
-                    
     
 
 #write xml
