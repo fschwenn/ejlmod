@@ -10,7 +10,7 @@ import time
 import re
 import sys
 import codecs
-from invenio.search_engine import search_pattern
+#from invenio.search_engine import search_pattern
 
 #reload(Recode)
 sprdir = '/afs/desy.de/group/library/publisherdata/springer'
@@ -410,9 +410,9 @@ def xmlExtract():
             elif jnr == '10053': rec["vol"] = 'D'
             elif jnr == '13129': rec["vol"] = 'H'
             rec["vol"] += artxml.getElementsByTagName('VolumeIDStart')[0].firstChild.data
-        elif jnr == '00039': 
+        elif jnr == '00339': 
             rec["vol"] = 'A' + artxml.getElementsByTagName('VolumeIDStart')[0].firstChild.data
-        elif jnr == '00040': 
+        elif jnr == '00340': 
             rec["vol"] = 'B' + artxml.getElementsByTagName('VolumeIDStart')[0].firstChild.data
         print "VOLUME",rec["vol"],jnr
     except: 
@@ -466,9 +466,12 @@ def xmlExtract():
             snotedata = getAllText(snote)
             #Errata
             if re.search('The online version of the original article can be found at', snotedata):
-                for rnote in snote.getElementsByTagName('RefSource'):
-                    erratumdoi = re.sub('.*dx.doi.org.', '', rnote.firstChild.data)
-                    rec['tit'] += ' [doi:%s]' % erratumdoi
+                try:
+                    for rnote in snote.getElementsByTagName('RefSource'):
+                        erratumdoi = re.sub('.*dx.doi.org.', '', rnote.firstChild.data)
+                        rec['tit'] += ' [doi:%s]' % erratumdoi
+                except:
+                    print 'could not extract original-DOI for Erratum'
             elif re.search('Original.*published in', snotedata) or re.search('Translated from', snotedata):
                 #print '+', snotedata, '+'
                 secondpubnote = re.sub('.*published in *', '', snotedata)
@@ -529,8 +532,11 @@ def xmlExtract():
                 if not rec.has_key('licence'):
                     for simplepara in artxml.getElementsByTagName('SimplePara'):
                         for rs in simplepara.getElementsByTagName('RefSource'):
-                            if re.search('http', rs.firstChild.data):
-                                rec['licence'] = {'url' : rs.firstChild.data}
+                            try:
+                                if re.search('http', rs.firstChild.data):
+                                    rec['licence'] = {'url' : rs.firstChild.data}
+                            except:
+                                rec['note'].append('could not extract license')
                             #rec['note'].append(rs.firstChild.data)
                         if not rec.has_key('licence'):
                             try:
@@ -571,12 +577,12 @@ def xmlExtract():
                         if re.search('p=find.IRN', address):
                             irn = re.sub('.*IRN.(\d+)', r'\1', address)
                             print ' --> found IRN:%s in reference number %s' % (irn, citnum)
-                            for recid in search_pattern(p='970__a:SPIRES-' + irn):
-                                reftext += ', https://inspirehep.net/record/%i' % (recid)
+                            #inspire2 for recid in search_pattern(p='970__a:SPIRES-' + irn):
+                            #inspire2     reftext += ', https://old.inspirehep.net/record/%i' % (recid)
                         elif re.search('p=find.recid', address):
                             recid = re.sub('.*recid.(\d+)', r'\1', address)
                             print ' --> found recid:%s in reference number %s' % (recid, citnum)
-                            reftext += ', https://inspirehep.net/record/' + recid
+                            reftext += ', https://old.inspirehep.net/record/' + recid
                         #report number usually are already in reftext
                         #elif re.search('p=find.R.', address):
                         #    rn = re.sub('.*p=find.R.', '', re.sub('%22', '', address))
@@ -819,12 +825,12 @@ for d1 in os.listdir(sprdir):
             except:
                 vol = d2s[0]
                 yr1 = cyear + 1
-            try:
-                if yr1 < cyear:                             # old journal
-                    print 'old journal skipped: ', jnr, vol, yr1, '\n'
-                    #continue
-            except:
-                pass
+#            try:
+#                if yr1 < cyear:                             # old journal
+#                    print 'old journal skipped: ', jnr, vol, yr1, '\n'
+#                    #continue
+#            except:
+#                pass
             df3 = os.path.join(df2, d2)
 
 # OnlineFirst has no issue directory -> create fake dir # (FS) the same for books
