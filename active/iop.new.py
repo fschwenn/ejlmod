@@ -118,7 +118,8 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'IPRD19' : 'C19-10-14.1',
             'INFIERI 2019' : 'C19-05-12.3',
             'LIDINE2019' : 'C19-08-28',
-            'RPC2018' : 'C18-02-19.3'}
+            'RPC2018' : 'C18-02-19.3',
+            'CHEF2019' : 'C19-11-25.3'}
 
 
 bisac = {'SCI000000' : 'SCIENCE / General',
@@ -942,25 +943,34 @@ for directory in todo:
         os.system('cp %s/%s %s/%s' % (ftpdir, directory, iopdirtmp, directory))
         bookfeeds.append('%s/%s' % (iopdirtmp, directory))
     else:
-        for datei in os.listdir(os.path.join(ftpdir, directory)):
-            print 'extracting %s' % (os.path.join(ftpdir, directory, datei))
-            journalfeed = tarfile.open(os.path.join(ftpdir, directory, datei), 'r:gz')
-            journalfeed.extractall(path=iopdirtmp)
-            journalfeed.close()
+        if os.path.isdir(os.path.join(ftpdir, directory)):
+            for datei in os.listdir(os.path.join(ftpdir, directory)):
+                print 'extracting %s' % (os.path.join(ftpdir, directory, datei))
+                journalfeed = tarfile.open(os.path.join(ftpdir, directory, datei), 'r:gz')
+                journalfeed.extractall(path=iopdirtmp)
+                journalfeed.close()
+        else:
+            print '   skip "%s" since is not a directory' % (os.path.join(ftpdir, directory))
 
 #create base name
 iopftrunc = todo[0]
+bookxmls = []
 for timestamp in todo[1:]:
-    if timestamp[-4:] == iopftrunc[-4:]:
-        if timestamp[-7:] == iopftrunc[-7:]:
-            iopftruncnew = iopftrunc[:-8] + '.' + timestamp[:2] + timestamp[-8:]
-            iopftrunc = iopftruncnew
-        else:
-            iopftruncnew = iopftrunc[:-5] + '_' + timestamp
-            iopftrunc = iopftruncnew
+    if re.search('xml', timestamp):
+        bookxmls.append(timestamp[4:12])
     else:
-        iopftruncnew = iopftrunc  + '_' + timestamp
-        iopftrunc = iopftruncnew
+        if timestamp[-4:] == iopftrunc[-4:]:
+            if timestamp[-7:] == iopftrunc[-7:]:
+                iopftruncnew = iopftrunc[:-8] + '.' + timestamp[:2] + timestamp[-8:]
+                iopftrunc = iopftruncnew
+            else:
+                iopftruncnew = iopftrunc[:-5] + '_' + timestamp
+                iopftrunc = iopftruncnew
+        else:
+            iopftruncnew = iopftrunc  + '_' + timestamp
+            iopftrunc = iopftruncnew
+#if bookxmls:
+#    iopftrunc += '_'.join(bookxmls)
     
 
 
@@ -1053,6 +1063,8 @@ def convertarticle(issn, vol, isu, artid):
             rec['year'] = datecover[0:4]
             if rec['jnl'] in ['JCAP', 'JHEP', 'JSTAT']:
                 rec['vol'] = datecover[2:4] + datecover[5:7]
+                if 'issue' in rec.keys():
+                    del rec['issue']
         #article number
         for artnumnode in article.find_all('artnum'):
             rec['artnum'] = artnumnode.text.strip()
