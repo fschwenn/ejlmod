@@ -47,7 +47,7 @@ inf.close()
 #get volumes
 recs = []
 i = 0
-for h3 in tocpage.find_all('h3'):
+for h3 in tocpage.find_all('h4'):
     for a in h3.find_all('a'):
         if a.has_attr('href') and re.search('view\/', a['href']):
             i += 1
@@ -102,21 +102,30 @@ for h3 in tocpage.find_all('h3'):
                         sup.replace_with('Aff%s= ' % (cont))
                     rec['aff'].append(p.text)
             #keywords / PACS
-            if not rec['keyw']:
-                for p in artpage.find_all('p', attrs = {'class' : 'articleBody_keywords'}):
-                    for span in p.find_all('span'):
-                        if re.search('PACS', span.text):
-                            key = 'pacs'                        
-                        else:
-                            key = 'keyw'
-                        rec[key] = []
-                    for a in p.find_all('a'):
-                        if a.text and not a.text in rec[key]:
-                            rec[key].append(a.text)
+            for p in artpage.find_all('p', attrs = {'class' : 'articleBody_keywords'}):
+                for span in p.find_all('span'):
+                    if re.search('PACS', span.text):
+                        key = 'pacs'                        
+                    else:
+                        key = 'keyw'
+                    rec[key] = []
+                for a in p.find_all('a'):
+                    if a.text and not a.text in rec[key]:
+                        rec[key].append(a.text)
+            #keywords
+            for div in artpage.find_all('div', attrs = {'class' : 'column'}):
+                for dl in div.find_all('dl'):
+                    for dt in dl.find_all('dt'):
+                        if re.search('Keywords', dt.text):
+                            for dd in dl.find_all('dd'):
+                                for a in dd.find_all('a'):
+                                    rec['keyw'].append(a.text.strip())
             #references
             referencesection = artpage.find_all('div', attrs = {'class' : 'moduleDetail refList'})
             if not referencesection:
                 referencesection = artpage.find_all('ul', attrs = {'class' : 'simple'})
+            if not referencesection:
+                referencesection = artpage.find_all('ul', attrs = {'class' : 'List'})
             for div in referencesection:
                 rec['refs'] = []
                 for li in div.find_all('li'):
