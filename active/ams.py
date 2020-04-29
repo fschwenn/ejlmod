@@ -17,7 +17,6 @@ from bs4 import BeautifulSoup
 import datetime
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-ejldir = '/afs/desy.de/user/l/library/dok/ejl'
 
 
 
