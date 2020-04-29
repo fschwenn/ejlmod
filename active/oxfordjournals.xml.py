@@ -373,7 +373,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
                 rec['abs'] = re.sub('\n *', ' ', abstract.p.text.strip())
             except:
                 print ' -- no abstract --'
-        for ref in page.find_all('div', attrs = {'class' : 'ref-content '}):
+        for ref in page.find_all('div', attrs = {'class' : 'ref-content'}):
             refdois = []
             for a in ref.find_all('a'):
                 atext = a.text                
