@@ -18,7 +18,8 @@ import urlparse
 from bs4 import BeautifulSoup
 import sys
 import datetime
-from invenio.search_engine import search_pattern
+#from invenio.search_engine import search_pattern
+from refextract import  extract_references_from_string
 
 
 sprdir = '/afs/desy.de/group/library/publisherdata/springer'
@@ -39,6 +40,7 @@ juninteresting = ['00153', '11105', '00426', '00477']
 jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '00016': ['pip', 'Phys.Perspect.', '', '', 'P'],
       '00023': ['ahp', 'Annales Henri Poincare', '', '', 'P'],
+      '00031': ['trgr', 'Transform.Groups', '', '', 'P'],
       '00159': ['aar', 'Astron.Astrophys.Rev.', '', '', 'P'],
       '00220': ['cmp', 'Commun.Math.Phys.', '', '', 'P'],
       '00339': ['apa', 'Appl.Phys.', 'A', '', 'P'], #HAL
@@ -242,6 +244,11 @@ def get_references(rl):
                 pbn += ' ' + fpage.text.strip()
             for lpage in mc.find_all('lpage'):
                 pbn += '-' + lpage.text.strip()
+            #refextract on pbn to normalize it
+            repbn = extract_references_from_string(pbn, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
+            if 'journal_reference' in repbn[0].keys():
+                #print ' [refextract] normalize "%s" to "%s"' % (pbn, repbn[0]['journal_reference'])
+                pbn = repbn[0]['journal_reference']
             #DOI
             for pi in mc.find_all('pub-id', attrs = {'pub-id-type' : 'doi'}):
                 doi = pi.text.strip()
@@ -301,9 +308,9 @@ def get_references(rl):
                     link = el['xlink:href']
                     if re.search('inspirehep.net.*IRN', link):
                         irn = re.sub('.*\D', '', link)
-                        for recid in search_pattern(p='970__a:SPIRES-' + irn):
-                            inspirelink += ', https://old.inspirehep.net/record/%i' % (recid)
-                        el.decompose()
+                        #inspire2 for recid in search_pattern(p='970__a:SPIRES-' + irn):
+                        #inspire2    inspirelink += ', https://old.inspirehep.net/record/%i' % (recid)
+                        #inspire2 el.decompose()
                     elif re.search('inspirehep.net.*recid', link):
                         recid = re.sub('.*\D', '', link)
                         inspirelink += ', https://old.inspirehep.net/record/%s' % (recid)
@@ -311,7 +318,18 @@ def get_references(rl):
                     elif re.search('inspirehep.net', link):
                         el.decompose()
                     elif re.search('arxiv.org', link):
-                        arxiv = el.text.strip()
+                        arxiv = re.sub(' ', '', el.text.strip())
+                        arxiv = re.sub('^\[', '', arxiv)
+                        arxiv = re.sub('(\d)\]$', r'\1', arxiv)
+                        if re.search('^\d{4}\.\d', arxiv):
+                            arxiv = 'arXiv:' + arxiv
+                        elif re.search('ar[xX]iv\:[a-z]+\/\d',  arxiv):
+                            arxiv = arxiv[6]
+                        el.decompose()
+            #missing spaces?
+            for bold in mc.find_all('bold'):
+                bt = bold.text.strip()
+                bold.replace_with(' %s ' % (bt))
             #DOI
             for pi in mc.find_all('pub-id', attrs = {'pub-id-type' : 'doi'}):
                 doi = pi.text.strip()
@@ -320,12 +338,12 @@ def get_references(rl):
             reference = [('x', refno + cleanformulas(mc))]
             if doi:
                 reference.append(('a', 'doi:'+doi))
-                if lt: reference.append(('o', re.sub('\D', '', lt)))
             if recid:
                 reference.append(('0', str(recid)))
-                if lt: reference.append(('o', re.sub('\D', '', lt)))
             if arxiv:
                 reference.append(('r', arxiv))
+            if doi or recid or arxiv:
+                if lt: reference.append(('o', re.sub('\D', '', lt)))
             refs.append(reference)
     return refs
 
@@ -644,6 +662,7 @@ def convertbook(journalnumber, dirname):
 def convertissue(journalnumber, dirname):
     recs = []
     for artdir in os.listdir(dirname):
+        print ' - %s' % (artdir)
         artdirfullpath = os.path.join(dirname, artdir)
         if os.path.isdir(artdirfullpath):
             for filename in os.listdir(artdirfullpath):
@@ -651,6 +670,7 @@ def convertissue(journalnumber, dirname):
                     fullfilename = os.path.join(artdirfullpath, filename)
                     rec = convertarticle(journalnumber, fullfilename, 'article')
                     if rec: recs.append(rec)
+    print ' -> %i records' % (len(recs))
     if recs:
         if 'vol' in rec.keys():
             if 'issue' in rec.keys():
@@ -731,7 +751,6 @@ for dirlev1 in os.listdir(sprdir):
                     ejlmod2.writeXML(recs, xmlfile, publisher)
                     xmlfile.close()
                     #retrival
-                    retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
                     retfiles_text = open(retfiles_path, "r").read()
                     line = jnlfilename+'.xml'+ "\n"
                     if not line in retfiles_text:
