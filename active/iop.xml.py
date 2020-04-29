@@ -41,8 +41,8 @@ initialEnd = re.compile(r'([A-Z])\b')
 #ISSN to journal name
 jnl = {'1538-3881': 'Astron.J.',
        '0004-637X': 'Astrophys.J.',
-       '1538-4357': 'Astrophys.J.',
-       '2041-8205': 'Astrophys.J.',
+       '1538-4357': 'Astrophys.J.Lett.',
+       '2041-8205': 'Astrophys.J.Lett.',
        '0067-0049': 'Astrophys.J.Supp.',
        '0264-9381': 'Class.Quant.Grav.',
        '1009-9271': 'Chin.J.Astron.Astrophys.',
@@ -116,7 +116,16 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             '24th International congress on x-ray optics and microanalysis (ICXOM24)' : 'C17-09-25.6',
             '20th International Workshop On Radiation Imaging Detectors' : 'C18-06-24.2',
             '5th International Conference Frontiers in Diagnostcs Technologies (ICFDT)' : 'C18-10-03.1',
-            'The 9th International Workshop on Semiconductor Pixel Detectors for Particles and Imaging' : 'C18-12-10'}
+            'The 9th International Workshop on Semiconductor Pixel Detectors for Particles and Imaging' : 'C18-12-10',
+            '14th Workshop on Resistive Plate Chambers and Related Detectors (RPC2018)' : 'C18-02-19.3',
+            'RPC2018' : 'C18-02-19.3',
+            'PIXEL2018' : 'C18-12-10',
+            '3rd European Conference on Plasma Diagnostics (ECPD2019)' : 'C19-05-06.5',
+            'ECPD2019' : 'C19-05-06.5',
+            '20th International Workshop On Radiation Imaging Detectors' : 'C18-06-24.2',
+            'LAPD19' : 'C19-09-22.5',
+            'IWORID2019' : 'C19-07-07.2',
+            'RREPS-19' : 'C19-09-16.8'}
 
 
 
@@ -156,6 +165,8 @@ for article in articles:
         issn = issnnode.text.strip()
         if jnl.has_key(issn):
             rec['jnl'] = jnl[issn]
+            if  jnl[issn] == 'Astrophys.J.Lett.':
+                rec['alternatejnl'] = 'Astrophys.J.'
             if issn in ['1742-6596']:
                 tc = ['C']
             elif issn in ['0034-4885']:
