@@ -130,7 +130,10 @@ for rec in recs:
     if len(rec['keyw']) == 1:
         rec['keyw'] = re.split(', ', rec['keyw'][0])
     #abstract
-    for div in artpage.body.find_all('div', attrs = {'id' : 'articleAbstract'}):
+    divs = artpage.body.find_all('div', attrs = {'id' : 'articleAbstract'})
+    if not divs:
+        divs = artpage.body.find_all('div', attrs = {'class' : 'abstract'})
+    for div in divs:
         for p in div.find_all('p'):
             if not rec.has_key('abs'):
                 rec['abs'] = p.text
@@ -162,6 +165,7 @@ for rec in recs:
         for div in artpage.body.find_all('div', attrs = {'id' : 'articleCitations'}):
             for p in div.find_all('p'):
                 rec['refs'].append([('x', p.text.strip())])
+    print [(k, len(k)) for k in rec.keys()]
 
                                        
 #closing of files and printing
