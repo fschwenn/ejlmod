@@ -119,7 +119,9 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'IPRD19' : 'C19-10-14.1',
             'DIRC2019' : 'C19-09-11.1',
             'INFIERI 2019' : 'C19-05-12.3',
-            'LIDINE2019' : 'C19-08-28'}
+            'LIDINE2019' : 'C19-08-28',
+            'RPC2018' : 'C18-02-19.3',
+            'CHEF2019' : 'C19-11-25.3'}
 
 
 bisac = {'SCI000000' : 'SCIENCE / General',
@@ -1047,6 +1049,8 @@ def convertarticle(issn, vol, isu, artid):
             rec['year'] = datecover[0:4]
             if rec['jnl'] in ['JCAP', 'JHEP', 'JSTAT']:
                 rec['vol'] = datecover[2:4] + datecover[5:7]
+                if 'issue' in rec.keys():
+                    del rec['issue']
         #article number
         for artnumnode in article.find_all('artnum'):
             rec['artnum'] = artnumnode.text.strip()
