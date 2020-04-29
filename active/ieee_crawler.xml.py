@@ -19,9 +19,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 absdir = '/afs/desy.de/group/library/abs'
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-#xmldir = '/afs/desy.de/user/s/schwenn/inspire/ejl'
-#xmldir = '/scratch/schwenn'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
 
 def meta_with_name(tag):
@@ -86,11 +85,17 @@ def translatejnlname(ieeename):
         jnlname = 'IEEE Nucl.Sci.Symp.Conf.Rec.'
     elif ieeename in ["Journal of Lightwave Technology"]:
         jnlname = 'J.Lightwave Tech.'
+    elif ieeename in ["IEEE Transactions on Microwave Theory and Techniques"]:
+        jnlname = 'IEEE Trans.Microwave Theor.Tech.'
     elif ieeename in ["Instrumentation & Measurement Magazine, IEEE", "IEEE Instrumentation & Measurement Magazine"]:
         jnlname = 'IEEE Instrum.Measur.Mag.'
         tc = 'I'
     elif ieeename in ['IEEE Sensors Journal']:
         jnlname = 'IEEE Sensors J.'
+    elif ieeename in ['IEEE Transactions on Image Processing']:
+        jnlname = 'IEEE Trans.Image Process.'
+    elif ieeename in ['Computing in Science & Engineering']:
+        jnlname = 'Comput.Sci.Eng.'
     elif ieeename in ["IEEE Symposium Conference Record Nuclear Science 2004.",
                       "IEEE Nuclear Science Symposium Conference Record, 2005"]:
         jnlname = 'BOOK'
@@ -115,6 +120,7 @@ def ieee(number):
         
     articlelinks = []
     driver = webdriver.PhantomJS()
+    #driver = webdriver.Firefox()
     driver.implicitly_wait(30)
     #driver.delete_all_cookies()
     gotallarticles = False
@@ -127,7 +133,7 @@ def ieee(number):
         pagecommand = '&pageNumber=%i' % (i)
         print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)        
         driver.get(urltrunc + toclink + pagecommand)
-        if number[0] in ['C', '8']:
+        if number[0] in ['C', '8', '9']:
 #        if number[0] in ['C']:
             WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
         else:
@@ -186,15 +192,17 @@ def ieee(number):
                 print "retry in 600 seconds"
                 time.sleep(60)
         inf = open(artfilename, 'r')
-        articlepage = BeautifulSoup(''.join(inf.readlines()))
+        articlepage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
         inf.close()
         rec = {'keyw' : [], 'autaff' : [], 'refs' : []}
         #metadata now in javascript
         for script in articlepage.find_all('script', attrs = {'type' : 'text/javascript'}):
-            if re.search('global.document.metadata', script.text):
-                gdm = re.sub('[\n\t]', '', script.text).strip()
-                gdm = re.sub('.*global.document.metadata=(\{.*\}).*', r'\1', gdm)
-                gdm = json.loads(gdm)
+            #if re.search('global.document.metadata', script.text):
+            if script.contents and len(script.contents):
+                if re.search('global.document.metadata', script.contents[0]):
+                    gdm = re.sub('[\n\t]', '', script.contents[0]).strip()
+                    gdm = re.sub('.*global.document.metadata=(\{.*\}).*', r'\1', gdm)
+                    gdm = json.loads(gdm)
         if gdm.has_key('publicationTitle'):
             if number[0] == 'C':
                 jnlname = 'BOOK'
@@ -270,13 +278,20 @@ def ieee(number):
             rec['cnum'] = args[1]  
             rec['tc'] = 'C'
         #references
-        reffilename = '/tmp/ieee_%s.%i.ref' % (number, i)
-        if not os.path.isfile(reffilename):
-            time.sleep(20)
-            os.system("wget -T 300 -t 3 -q -O %s %s" % (reffilename, articlelink + 'references'))
-        inf = open(reffilename, 'r')
-        refpage = BeautifulSoup(''.join(inf.readlines()))
-        inf.close()
+        #reffilename = '/tmp/ieee_%s.%i.ref' % (number, i)
+        #if not os.path.isfile(reffilename):
+        #    time.sleep(20)
+        #    os.system("wget -T 300 -t 3 -q -O %s %s" % (reffilename, articlelink + 'references'))
+        #inf = open(reffilename, 'r')
+        #refpage = BeautifulSoup(''.join(inf.readlines()))
+        #inf.close()
+        try:
+            driver.get(articlelink + 'references')
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'stats-reference-link-googleScholar')))
+            refpage = BeautifulSoup(driver.page_source)
+        except:
+            print '  could not load "%s%s"' % (articlelink, 'references')
+            continue
         for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
             for span in div.find_all('span', attrs = {'class' : 'number'}):
                 for b in span.find_all('b'):
@@ -340,7 +355,6 @@ if __name__ == '__main__':
 #os.system('rm /tmp/ieee_%s*' % (number))
 
 #retrival
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
 line = outfile + "\n"
 if not line in retfiles_text: 
