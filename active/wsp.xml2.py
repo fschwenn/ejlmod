@@ -65,18 +65,19 @@ def getreferencesfromweb(doi):
                         a.replace_with(rdoi)
             #Crossref-DOI
             for script in li.find_all('script'):
-                scriptt = script.text
-                if regexpdoi.search(scriptt):
-                    rdoi = regexpdoi.sub(r', DOI: \1 , ', scriptt)
-                    rdoi = regexpdoihtml.sub('/', rdoi)
-                    rdoi = regexpdoihtml2.sub(':', rdoi)
-                    rdoi = regexpdoihtml3.sub(')', rdoi)
-                    rdoi = regexpdoihtml4.sub('(', rdoi)
-                    rdoi = regexpdoihtml5.sub('<', rdoi)
-                    rdoi = regexpdoihtml6.sub('>', rdoi)
-                    script.replace_with(rdoi)
-                else:
-                    script.replace_with(' ')
+                if script.contents:
+                    scriptt = script.contents[0].strip()
+                    if regexpdoi.search(scriptt):
+                        rdoi = regexpdoi.sub(r', DOI: \1 , ', scriptt)
+                        rdoi = regexpdoihtml.sub('/', rdoi)
+                        rdoi = regexpdoihtml2.sub(':', rdoi)
+                        rdoi = regexpdoihtml3.sub(')', rdoi)
+                        rdoi = regexpdoihtml4.sub('(', rdoi)
+                        rdoi = regexpdoihtml5.sub('<', rdoi)
+                        rdoi = regexpdoihtml6.sub('>', rdoi)
+                        script.replace_with(rdoi)
+                    else:
+                        script.replace_with(' ')
             #refextract
             reftext = regexpcr.sub(' ', li.text.strip())
             #print '     ', reftext
