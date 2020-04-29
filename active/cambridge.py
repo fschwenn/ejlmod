@@ -159,13 +159,19 @@ i = 0
 for rec in recs:    
     i += 1 
     req = urllib2.Request(rec['artlink'], headers=hdr)
+    print rec['artlink']
     try:
         artpage = BeautifulSoup(urllib2.urlopen(req))
         time.sleep(10)
     except:
-        print 'wait 3 minutes befor trying %s instead of %s' % (rec['artlink2'], rec['artlink'])
-        time.sleep(180)
-        req = urllib2.Request(rec['artlink2'], headers=hdr)
+        if 'artlink2' in rec.keys():
+            print 'wait 3 minutes befor trying %s instead of %s' % (rec['artlink2'], rec['artlink'])
+            time.sleep(180)
+            req = urllib2.Request(rec['artlink2'], headers=hdr)
+        else:
+            print 'wait 3 minutes befor trying  again'
+            time.sleep(180)
+            req = urllib2.Request(rec['artlink'], headers=hdr)
         artpage = BeautifulSoup(urllib2.urlopen(req))
         time.sleep(2)
     try:
