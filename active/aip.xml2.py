@@ -58,6 +58,11 @@ elif (jnl == 'jcp'):
     jnlname = 'J.Chem.Phys.'
 elif (jnl == 'phf'):
     jnlname = 'Phys.Fluids'
+elif (jnl == 'jva'):
+    jnlname = 'J.Vac.Sci.Tech.'
+elif (jnl == 'jvb'):
+    jnlname = 'J.Vac.Sci.Tech.'
+
 
     
     
@@ -86,7 +91,7 @@ def getarticle(href, sec, subsec, p1):
         os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilname, artlink))
         time.sleep(10)
         if not os.path.getsize(artfilname):
-            print 'retry %s' % (artfilname)            
+            print 'retry %s' % (artlink)            
             time.sleep(120)
             os.system('wget -T 300 -t 3 -q  -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" -O %s "%s"' % (artfilname, artlink))
             time.sleep(10)
@@ -104,6 +109,10 @@ def getarticle(href, sec, subsec, p1):
 #        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
     rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : iss, 'tc' : typecode, 
            'note' : [], 'auts' : [], 'aff' : [], 'p1' : p1}
+    if jnl == 'jva':
+        rec['vol'] = 'A%s' % (vol)
+    elif jnl == 'jvb':
+        rec['vol'] = 'B%s' % (vol)
     emails = {}
     if cnum:
         rec['cnum'] = cnum
