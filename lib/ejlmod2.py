@@ -23,23 +23,27 @@ except:
 #from collclean import clean710
 
 #mappings for refferences in JSON to MARC 
-mappings = [('doi', 'a'),
-            ('collaborations', 'c'),
-            ('document_type', 'd'),
-            ('author', 'h'),
-            ('isbn', 'i'),
-            ('texkey', 'k'),
-            ('misc', 'm'),
-            ('journal_issue', 'n'),
-            ('label', 'o'),
-            ('linemarker', 'o'),
-            ('reportnumber', 'r'),
-            ('journal_reference', 's'),
-            ('title', 't'),
-            ('urls', 'u'),
-            ('raw_ref', 'x'),
-            ('year', 'y')]
+mappings = {'doi' : 'a',
+            'hdl' : 'a', 
+            'collaborations' : 'c',
+            'document_type' : 'd',
+            'author' : 'h',
+            'isbn' : 'i',
+            'texkey' : 'k',
+            'misc' : 'm',
+            'journal_issue' : 'n',
+            'label' : 'o',
+            'linemarker' : 'o',
+            'reportnumber' : 'r',
+            'journal_reference' : 's',
+            'title' : 't',
+            'urls' : 'u',
+            'raw_ref' : 'x',
+            'year' : 'y'}
 
+#find additional reportnumbers
+repreprints = re.compile('.*Preprint:? ([A-Z0-9\-\/, ]+).*')
+repreprint = re.compile('^[A-Z0-9\-\/ ]+$')
 
 #auxiliary function to strip lines
 def tgstrip(x): return x.strip()
@@ -196,6 +200,7 @@ renjwas = [(re.compile('Journal of Physics G.? Nuclear and Particle Physics, *')
            (re.compile('Studies in History and Philosophy of Science. Part B. Studies in History and Philosophy of Modern Physics, *'), 'Stud.Hist.Phil.Sci.,B'),
            (re.compile('Indian Journal of Radio ..?.?.?.? Space Physics, *'), 'Indian J.Radio Space Phys, '),
            (re.compile('Atmospheric Chemistry And Physics, *'), 'Atmos.Chem.Phys., '),
+           (re.compile('Opt. Exp., *'), 'Opt.Express, '),
            (re.compile('Low Temperature Physics, *'), 'Low Temp.Phys., ')]
 
 
@@ -356,6 +361,31 @@ def writeXML(recs,dokfile,publisher):
             if rec.has_key('cnum'): liste.append(('w',rec['cnum']))
             if rec.has_key('motherisbn'): liste.append(('z',rec['motherisbn']))
             xmlstring += marcxml('773',liste)
+        if 'alternatejnl' in rec.keys():
+            alternateliste = [('p',rec['alternatejnl'])]
+            for tup in liste:
+                if tup[0] == 'v':
+                    if 'alternatevol' in rec.keys():
+                        alternateliste.append(('v', rec['alternatevol']))
+                    else:
+                        alternateliste.append(tup)
+                elif tup[0] == 'c':
+                    if 'alternatep1' in rec.keys():
+                        if rec.has_key('alternatep2'):
+                            if rec['alternatep1'] != rec['alternatep2']:
+                                alternateliste.append(('c',rec['alternatep1']+'-'+rec['alternatep2']))
+                            else:
+                                alternateliste.append(('c',rec['alternatep1']))
+                    else:
+                        alternateliste.append(tup)
+                elif tup[0] == 'n':
+                    if 'alternateissue' in rec.keys():
+                        alternateliste.append(('n', rec['alternateissue']))
+                    else:
+                        alternateliste.append(tup)
+                else:
+                    alternateliste.append(tup)
+            xmlstring += marcxml('7731', alternateliste)
         if rec.has_key('jnl2') and rec.has_key('vol2'):
             liste = [('p',rec['jnl2'])]
             if rec.has_key('year2'):
@@ -631,37 +661,56 @@ def writeXML(recs,dokfile,publisher):
                     rawref = re.sub('[\n\t\r]', ' ', rawref)
                     rawref = re.sub('  +', ' ', rawref)
                     rawref = normalizejournalsworkaround(rawref)
+                    rawref = re.sub('\xc2\xa0', ' ', rawref)
+                    rawref = re.sub('\xa0', ' ', rawref)
                     try:
                         extractedrefs = extract_references_from_string(rawref, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
                         for ref2 in extractedrefs:
+                            #find additional reportnumbers
+                            additionalreportnumbers = []
+                            if 'misc' in ref2.keys():
+                                for misc in ref2['misc']:
+                                    if repreprints.search(misc):
+                                        for preprint in re.split(', ', repreprints.sub(r'\1', misc)):
+                                            if repreprint.search(preprint):
+                                                additionalreportnumbers.append(('r', re.sub('[\/ ]', '-', preprint)))
+                            #translate refeextract output                                          
                             entryaslist = [('9','refextract')]
                             for key in ref2.keys():
-                                for mapping in mappings:
-                                    if key == mapping[0]:
-                                        for entry in ref2[key]:
-                                            entryaslist.append((mapping[1], entry))
+                                if key in mappings.keys():
+                                    for entry in ref2[key]:
+                                        entryaslist.append((mappings[key], entry))
                             if len(extractedrefs) == 1:
                                 if re.search('inspirehep.net\/record\/\d+', rawref):
                                     entryaslist.append(('0', re.sub('.*inspirehep.net\/record\/(\d+).*', r'\1',  rawref)))
-                            xmlstring += marcxml('999C5',entryaslist)
+                            xmlstring += marcxml('999C5', entryaslist + additionalreportnumbers)
                     except:
                         print 'UTF8 Problem in Referenzen'
                         try:
                             ref01 = unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', rawref)).encode('ascii','ignore'),'utf-8')
                             extractedrefs = extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
                             for ref2 in extractedrefs:
+                                #find additional reportnumbers
+                                additionalreportnumbers = []
+                                if 'misc' in ref2.keys():
+                                    for misc in ref2['misc']:
+                                        if repreprints.search(misc):
+                                            for preprint in re.split(', ', repreprints.sub(r'\1', misc)):
+                                                if repreprint.search(preprint):
+                                                    additionalreportnumbers.append(('r', re.sub('[\/ ]', '-', preprint)))
+                                #translate refeextract output                                          
                                 entryaslist = [('9','refextract')]
                                 for key in ref2.keys():
-                                    for mapping in mappings:
-                                        if key == mapping[0]:
-                                            for entry in ref2[key]:
-                                                entryaslist.append((mapping[1], entry))
+                                    if key in mappings.keys():
+                                        for entry in ref2[key]:
+                                            entryaslist.append((mappings[key], entry))
                                 if len(extractedrefs) == 1:
                                     if re.search('inspirehep.net\/record\/\d+', rawref):
                                         entryaslist.append(('0', re.sub('.*inspirehep.net\/record\/(\d+).*', r'\1',  rawref)))
-                                xmlstring += marcxml('999C5',entryaslist)
+                                xmlstring += marcxml('999C5', entryaslist + additionalreportnumbers)
                         except:
                             print 'real UTF8 Problem in Referenzen'
+                            xmlstring += marcxml('599', [('a', 'real UTF8 Problem in Referenzen')])
                 else:
                     xmlstring += marcxml('999C5',ref)
         xmlstring += marcxml('980',[('a','HEP')])
