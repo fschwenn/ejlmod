@@ -250,8 +250,12 @@ for rec in recs:
             rec['date'] = rec['year']
     #JSON
     for script in artpage.body.find_all('script'):
-        scriptt = re.sub('[\n\t]', '', script.text.strip())
-        scriptt = re.sub('.*window.jscholApp_initialPageData *= *(\{.*\}).*', r'\1', scriptt)
+        if script.contents:
+            #scriptt = re.sub('[\n\t]', '', script.text.strip())
+            scriptt = re.sub('[\n\t]', '', script.contents[0].strip())
+            scriptt = re.sub('.*window.jscholApp_initialPageData *= *(\{.*\}).*', r'\1', scriptt)
+        else:
+            scriptt = False
         if scriptt:
             scripttjson = json.loads(scriptt)
             #supervisors
