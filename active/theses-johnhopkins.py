@@ -64,8 +64,9 @@ for j in range(pages):
         for span in div.find_all('span', title=re.compile('rft.degree=Doctor')):
             if rftcheck(span):
                 for a in div.find_all('a'):
-                    rec['artlink'] = 'https://jscholarship.library.jhu.edu' + a['href'] #+ '?show=full'
-                    rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                    rec['link'] = 'https://jscholarship.library.jhu.edu' + a['href'] #+ '?show=full'
+                    #rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                    rec['doi'] = '20.2000/JohnHopkins/' + re.sub('.*handle\/', '', a['href'])
                     recs.append(rec)
                     relevant += 1
     print '---{ %i/%i }---{  %i/%i +> %i/%i }---' % (j, pages, relevant, len(divs), len(recs), pages*rpp)
@@ -74,17 +75,17 @@ for j in range(pages):
 i = 0
 for rec in recs:
     i += 1
-    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
+    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
         time.sleep(3)
     except:
         try:
-            print "retry %s in 180 seconds" % (rec['artlink'])
+            print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
         except:
-            print "no access to %s" % (rec['artlink'])
+            print "no access to %s" % (rec['link'])
             continue    
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
