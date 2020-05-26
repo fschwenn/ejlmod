@@ -383,7 +383,7 @@ def writeXML(recs,dokfile,publisher):
                         alternateliste.append(('n', rec['alternateissue']))
                     else:
                         alternateliste.append(tup)
-                else:
+                elif tup[0] != 'p':
                     alternateliste.append(tup)
             xmlstring += marcxml('7731', alternateliste)
         if rec.has_key('jnl2') and rec.has_key('vol2'):
