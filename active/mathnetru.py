@@ -130,6 +130,9 @@ if jnldict[jrnid].has_key('embargo'):
 publisher = jnldict[jrnid]['publisher']
 
 tocurl = 'http://www.mathnet.ru/php/archive.phtml?jrnid=%s&wshow=issue&bshow=contents&series=0&volume=%s&issue=%s&option_lang=eng&year=%s' % (jrnid, vol, iss, year)
+if len(sys.argv) > 5:
+    bookid = sys.argv[5]
+    tocurl = 'http://www.mathnet.ru/php/archive.phtml?jrnid=%s&wshow=issue&bshow=contents&series=0&volume=%s&issue=%s&option_lang=eng&year=%s&bookID=%s' % (jrnid, vol, iss, year, bookid)
 print tocurl
 tocpage = BeautifulSoup(urllib2.urlopen(tocurl))
 
