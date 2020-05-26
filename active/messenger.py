@@ -121,16 +121,18 @@ for rec in recs:
         time.sleep(180)
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(truelink))
     for script in artpage.head.find_all('script', attrs = {'type' : 'application/ld+json'}):
-        metadata = json.loads(script.text)
-        if 'description' in metadata.keys():
-            rec['abs'] = metadata['description']
-        rec['tit'] = metadata['name']
-        rec['year'] = str(metadata['datePublished'])
-        for author in metadata['author']:
-            autaff = [ author['name'] ]
-            if author.has_key('affiliation'):
-                autaff.append(author['affiliation'])
-                rec['autaff'].append(autaff)
+        if script.contents:
+            scriptt = script.contents[0].strip()
+            metadata = json.loads(scriptt)
+            if 'description' in metadata.keys():
+                rec['abs'] = metadata['description']
+            rec['tit'] = metadata['name']
+            rec['year'] = str(metadata['datePublished'])
+            for author in metadata['author']:
+                autaff = [ author['name'] ]
+                if author.has_key('affiliation'):
+                    autaff.append(author['affiliation'])
+                    rec['autaff'].append(autaff)
     print rec.keys()
 
 #closing of files and printing
