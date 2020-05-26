@@ -85,7 +85,7 @@ for rec in recs:
                 rec['autaff'][-1].append('EMAIL:%s' % (meta['content']))
             #ORCID
             elif meta['name'] == 'eprints.creators_orcid':
-                orcid = re.sub('.*(\d\d\d\d\-\d\d\d\d\-\d\d\d\d\-\d\d\d\d).*', r'\1', meta['content']) 
+                orcid = re.sub('.*(\d\d\d\d\-\d\d\d\d\-\d\d\d\d\-\d\d\d[\dX]).*', r'\1', meta['content']) 
                 rec['autaff'][-1].append('ORCID:%s' % (orcid))
             #title
             elif meta['name'] == 'eprints.title':
