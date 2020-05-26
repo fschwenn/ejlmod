@@ -36,6 +36,8 @@ elif journal == 'ract':
     jnl = 'Radiochim.Acta'
 elif journal == 'astro':
     jnl = 'Open Astron.'
+elif journal == 'ijnsns':
+    jnl = 'Int.J.Nonlin.Sci.Numer.Simul.'
 
 #get list of volumes
 if not os.path.isfile('/tmp/dg%s' % (jnlfilename)):
