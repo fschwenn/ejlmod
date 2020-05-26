@@ -43,7 +43,7 @@ for k in range(pages):
         os.system('wget -q -O %s "%s"' % (jfilename, jsonurl))
         time.sleep(2)
     jfile = codecs.EncodedFile(codecs.open(jfilename, mode='rb'), 'utf8')
-    jtext = ''.join(jfile.readlines())
+    jtext = re.sub('[\n\r\t]', '', ''.join(jfile.readlines()))
     jfile.close()
     theses = json.loads(jtext)
 
