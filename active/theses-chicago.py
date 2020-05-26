@@ -16,8 +16,8 @@ import datetime
 import time
 import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl' + '/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" + '_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
 
 now = datetime.datetime.now()
