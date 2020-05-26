@@ -177,7 +177,7 @@ for articleID in articleIDs:
                     sup.replace_with('')
                 for a in child.find_all('a'):
                     if a.has_attr('href') and re.search('orcid.org', a['href']):
-                        orcid = re.sub('.*org\/(\d.*\d).*', r'ORCID:\1', a['href'])
+                        orcid = re.sub('.*org\/(\d.*[\dX]).*', r'ORCID:\1', a['href'])
                     a.replace_with('')
                 author = re.sub(' *and$', '', re.sub(' *,', '', child.text.strip()))
                 if orcid:
