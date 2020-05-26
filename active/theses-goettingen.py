@@ -29,7 +29,7 @@ typecode = 'T'
 
 jnlfilename = 'THESES-GOETTINGEN-%s' % (stampoftoday)
 
-tocurl = 'https://ediss.uni-goettingen.de/handle/11858/8/discover?fq=dateIssued.year=[' + str(now.year - 1) + '+TO+' + str(now.year + 1) + ']&rpp=2000'
+tocurl = 'https://ediss.uni-goettingen.de/handle/11858/8/discover?fq=dateIssued.year=[' + str(now.year - 1) + '+TO+' + str(now.year + 1) + ']&rpp=50'
 
 
 print tocurl
