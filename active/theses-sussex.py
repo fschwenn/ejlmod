@@ -64,7 +64,7 @@ for rec in recs:
                 rec['autaff'] = [[ meta['content'] ]]
             #ORCID
             elif meta['name'] == 'eprints.creators_orcid':
-                rec['autaff'][-1].append(re.sub('.*(\d{4}\-\d{4}\-\d{4}\-\d{4}).*', r'ORCID:\1', meta['content']))
+                rec['autaff'][-1].append(re.sub('.*(\d{4}\-\d{4}\-\d{4}\-\d{3}[\dX]).*', r'ORCID:\1', meta['content']))
             #keywords
             elif meta['name'] == 'eprints.keywords':
                 rec['keyw'] = re.split(', ', meta['content'])
