@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 # checks for new ftp-feeds from IOP and converts them
-# FS 2019-05-07
+# FS 2020-05-04
 
 import os
 import sys
@@ -25,8 +25,8 @@ publisher = 'IOP'
 #ISSN to journal name
 jnl = {'1538-3881': 'Astron.J.',
        '0004-637X': 'Astrophys.J.',
-       '1538-4357': 'Astrophys.J.',
-       '2041-8205': 'Astrophys.J.',
+       '1538-4357': 'Astrophys.J.Lett.',
+       '2041-8205': 'Astrophys.J.Lett.',
        '0067-0049': 'Astrophys.J.Supp.',
        '0264-9381': 'Class.Quant.Grav.',
        '1009-9271': 'Chin.J.Astron.Astrophys.',
@@ -121,7 +121,9 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'INFIERI 2019' : 'C19-05-12.3',
             'LIDINE2019' : 'C19-08-28',
             'RPC2018' : 'C18-02-19.3',
-            'CHEF2019' : 'C19-11-25.3'}
+            'CHEF2019' : 'C19-11-25.3',
+            'The International Conference Instrumentation for Colliding Beam Physics (INSTR2020)' : 'C20-02-24',
+            'RREPS-19' : 'C19-09-16.8'}
 
 
 bisac = {'SCI000000' : 'SCIENCE / General',
@@ -924,7 +926,7 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d-%02d-%02d' % (now.year, now.month, now.day, now.hour, now.minute)
 
 #get data from IOP stacks
-#os.system('wget -O %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
+os.system('wget -O %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
 
 
 
@@ -984,6 +986,8 @@ def fsunwrap(tag):
 def convertarticle(issn, vol, isu, artid):
     if issn in jnl.keys():
         rec = {'jnl' : jnl[issn], 'note' : [], 'keyw' : [], 'aff' : [], 'refs' : []}
+        if  jnl[issn] == 'Astrophys.J.Lett.':
+            rec['alternatejnl'] = 'Astrophys.J.'
         if issn in ['1742-6596']:
             tc = ['C']
         elif issn in ['0034-4885']:
@@ -1188,7 +1192,7 @@ def convertarticle(issn, vol, isu, artid):
                 pdfsrc = os.path.join(iopdirtmp, issn, vol, isu, artid, datei)
                 pdfdst = os.path.join(pdfdir, re.sub('[\/\(\)]', '_', rec['doi']) + '.pdf')
                 if os.path.isfile(pdfdst):
-                    print '   fulltext found but no nead to copy'
+                    print '   fulltext found but no need to copy'
                 else:
                    try:
                         shutil.copy(pdfsrc, pdfdst)
