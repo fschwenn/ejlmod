@@ -26,9 +26,9 @@ publisher = 'KIT'
 typecode = 'T'
 
 jnlfilename = 'THESES-KIT_ETP-%s' % (stampoftoday)
-pages = 15
+pages = 18 
 #tocurl = 'https://publish.etp.kit.edu/search?page=1&size=20&q=resource_type.type:%20thesis&sort=-publication_date&subtype=phd-thesis'
-tocurl = 'https://publish.etp.kit.edu/oai2d?verb=ListRecords&metadataPrefix=marcxml&from=2015-01-01'
+tocurl = 'https://publish.etp.kit.edu/oai2d?verb=ListRecords&metadataPrefix=marcxml&from=2019-01-01'
 
 records = []
 cls = 999
