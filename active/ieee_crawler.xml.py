@@ -140,7 +140,10 @@ def ieee(number):
             WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
         #clicl to accept cookies
         if i == 1:
-            driver.find_element_by_css_selector('.cc-btn.cc-dismiss').click()
+            try:
+                driver.find_element_by_css_selector('.cc-btn.cc-dismiss').click()
+            except:
+                print "\033[0;91mCould not click .cc-btn.cc-dismiss\033[0m"
         time.sleep(3)
         page = BeautifulSoup(driver.page_source)
         if i == 1:
@@ -291,7 +294,7 @@ def ieee(number):
             refpage = BeautifulSoup(driver.page_source)
         except:
             print '  could not load "%s%s"' % (articlelink, 'references')
-            continue
+            #continue
         for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
             for span in div.find_all('span', attrs = {'class' : 'number'}):
                 for b in span.find_all('b'):
@@ -354,10 +357,10 @@ if __name__ == '__main__':
 
 #os.system('rm /tmp/ieee_%s*' % (number))
 
-#retrival
-retfiles_text = open(retfiles_path,"r").read()
-line = outfile + "\n"
-if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
-    retfiles.write(line)
-    retfiles.close()
+    #retrival
+    retfiles_text = open(retfiles_path,"r").read()
+    line = outfile + "\n"
+    if not line in retfiles_text: 
+        retfiles = open(retfiles_path,"a")
+        retfiles.write(line)
+        retfiles.close()
