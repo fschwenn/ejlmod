@@ -86,7 +86,9 @@ elif (jnl == 'bjps'):
 elif (jnl == 'imrn'): 
     jnlname = "Int.Math.Res.Not."
 elif (jnl == 'nsr'):
-    jnlname = "Natl.Sci.Rev. "
+    jnlname = "Natl.Sci.Rev."
+elif (jnl == 'astrogeo'):
+    jnlname = 'Astron.Geophys.'
     
 else:
     print 'Dont know journal %s!' % (jnl)
@@ -293,6 +295,8 @@ tocpage = BeautifulSoup(urllib2.urlopen(tocreq))
 #articleIDs = []
 
 typecode = 'P'
+if jnl == 'astrogeo':
+    typecode = ''
 #typecode = 'C'
 note = ''
 recnr = 1
