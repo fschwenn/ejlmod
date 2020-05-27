@@ -15,7 +15,7 @@ import codecs
 import datetime
 import time
 import json
-
+import ssl
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
@@ -31,13 +31,18 @@ jnlfilename = 'THESIS-PANDA-%s' % (stampoftoday)
 
 tocurl = 'https://panda.gsi.de/panda-publications/thesis-th'
 
+#bad cerificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+    tocpage = BeautifulSoup(urllib2.urlopen(tocurl, context=ctx))
     time.sleep(3)
 except:
     print "retry %s in 180 seconds" % (tocurl)
     time.sleep(180)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+    tocpage = BeautifulSoup(urllib2.urlopen(tocurl, context=ctx))
 
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'role' : 'article'}):
