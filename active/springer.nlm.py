@@ -19,6 +19,7 @@ from bs4 import BeautifulSoup
 import sys
 import datetime
 #from invenio.search_engine import search_pattern
+#from invenio.search_engine import perform_request_search
 from refextract import  extract_references_from_string
 
 
@@ -32,9 +33,11 @@ publisher = 'Springer'
 #current timestamp (or other unique mark)
 cday = sys.argv[1]
 
+
+
+
 # uninteresting journals:
 juninteresting = ['00153', '11105', '00426', '00477']
-
 #dictionary of journal names
 # springer journal id : [file name, INPIRE journal name, letter for volume, russian journal name, type code, book series]
 jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
@@ -64,9 +67,9 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '10781': ['fias', 'FIAS Interdisc.Sci.Ser.', '', '', 'P'],
       '10786': ['iet', 'Instrum.Exp.Tech.', '', '', 'P'],
       '10853': ['jmsme', 'J.Mater.Sci.', '', '', 'P'],
-      '10909': ['jltp', 'J.Low.Temp.Phys.', '', '', 'P'],
+      '10909': ['jltp', 'J.Low Temp.Phys.', '', '', 'P'],
       '10955': ['jstatphys', 'J.Statist.Phys.', '', '', 'P'],
-      '10958': ['jms', 'J.Math.Sci.', 'Zap.Nauchn.Semin.', '', '', 'P'],
+      '10958': ['jms', 'J.Math.Sci.', '', 'Zap.Nauchn.Semin.', 'P'],
       '10967': ['jrnc', 'J.Radioanal.Nucl.Chem.', '', '', 'P'],
       '11005': ['lmp', 'Lett.Math.Phys.', '', '', 'P'],
       '11006': ['matnot', 'Math.Notes', '', '', 'P'],
@@ -112,6 +115,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '13324': ['anmp', 'Anal.Math.Phys.', '', '', 'P'],
       '13360': ['epjp', 'Eur.Phys.J.Plus', '', '', 'P'],
       '13538': ['bjp', 'Braz.J.Phys.', '', '', 'P'],
+      '40009': ['nasl', 'Natl.Acad.Sci.Lett.', '', '', 'P'],
       '40010': ['pnisia', 'Proc.Nat.Inst.Sci.India (Pt.A Phys.Sci.)', '', '', 'P'],
       '40042': ['jkps', 'J.Korean Phys.Soc.', '', '', 'P'],
       '40065': ['arjoma', 'Arab.J.Math.', '', '', 'P'],
@@ -167,6 +171,44 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
 #known conferences
 confdict = {'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30'}
 
+#work around for bad JHEP references from Springer:
+#get them from SISSA instead
+def getrefsfromsissa(doi):
+    url = 'https://stheno.sissa.it/scoap/%s.ft.xml' % (re.sub('\W', '', doi[8:]))
+    print '(sissa) %s %s' % (doi, url)
+    try:
+        page = BeautifulSoup(urllib2.urlopen(url))
+    except:
+        return []
+    refs = []
+    for tag in page.find_all('ref'):
+        ref = False
+        for label in tag.find_all('label'):
+            lt = label.text.strip()
+            label.replace_with('[%s] ' % (lt))
+        for uri in tag.find_all('uri'):
+            tt = re.sub('[\n\t\r]', '', uri.text)
+            if re.search('doi.org\/10', tt):
+                tt = re.sub('[\n\t\r]', '', tag.text)
+                tt = re.sub('%28', '(', tt)
+                tt = re.sub('%29', ')', tt)
+                tt = re.sub('%2F', '/', tt)
+                tt = re.sub('%3A', ':', tt)
+                ref = [('o', lt), ('a', re.sub('.*doi.org\/', 'doi:', tt))]
+            elif re.search('arxiv.org', tt):
+                bull = re.sub('.*abs\/', '', tt)
+                if re.search('^\d', bull): bull = 'arXiv:'+bull
+                ref = [('o', lt), ('r', bull)]
+        if ref:
+            refs.append(ref)
+        else:
+            tt = re.sub('[\n\t\r]', '', tag.text)
+            tt = re.sub('%28', '(', tt)
+            tt = re.sub('%29', ')', tt)
+            tt = re.sub('%2F', '/', tt)
+            tt = re.sub('%3A', ':', tt)
+            refs.append([('x', tt)])
+    return refs
 
 ###clean formulas in tag
 def cleanformulas(tag):
@@ -585,8 +627,206 @@ def convertarticle(journalnumber, filename, contlevel):
     #references
     for rl in article.find_all('ref-list', attrs = {'id' : 'Bib1'}):
         rec['refs'] = get_references(rl)
+    if journalnumber == '13130':
+        if 'refs' in rec.keys():
+            springerrefs = rec['refs']
+            sissarefs = getrefsfromsissa(rec['doi'])
+            (comment, rec['refs']) = combinerefs(springerrefs, sissarefs)
+            rec['note'].append(comment)
     return rec
 
+#combine Springer and SISSA references
+def combinerefs(badrefs, doirefs):
+    if len(badrefs) != len(doirefs):
+        return ('keep %i Springerrefs (%i SISSArefs)' % (len(badrefs), len(doirefs)), badrefs)
+    else:
+        combinedrefs = []
+        (sameids, diffids, missingids) = (0, 0, 0)
+        (addeddois, addedbulls) = ([], [])
+        for i in range(len(badrefs)):
+            bref = {}
+            for (code, value) in badrefs[i]:
+                if code in bref.keys():
+                    bref[code].append(value)
+                else:
+                    bref[code] = [value]
+            dref = {}
+            for (code, value) in doirefs[i]:
+                if code in dref.keys():
+                    dbref[code].append(value)
+                else:
+                    dref[code] = [value]
+            #compare DOIs
+            if 'a' in bref.keys():
+                if 'a' in dref.keys():
+                    if bref['a'][0] == dref['a'][0]:
+                        sameids += 1
+                        combinedrefs.append(badrefs[i])
+                    elif bref['a'][0].upper() == dref['a'][0].upper():
+                        sameids += 1
+                        combinedrefs.append(badrefs[i])                        
+                    else:
+                        #print '\033[0;31m(ref) %i/%i diff id %s != %s\033[0m' % (i, len(badrefs), bref['a'][0], dref['a'][0])
+                        combinedrefs.append(badrefs[i] + [('m', 'different DOI from SISSA:' + dref['a'][0])])
+                        diffids += 1
+                else:
+                    #print '\033[0;31m(ref) %i/%i DOI=%s missing in SISSA\033[0m' % (i, len(badrefs), bref['a'][0]), doirefs[i]
+                    combinedrefs.append(badrefs[i])  
+                    missingids += 1
+            #compare bulls
+            elif 'r' in bref.keys():
+                if 'r' in dref.keys():
+                    if bref['r'][0] == dref['r'][0]:
+                        sameids += 1
+                        #print '\033[0;32m(ref) %i/%i same id %s\033[0m' % (i, len(badrefs), bref['r'][0])
+                        combinedrefs.append(badrefs[i])
+                    elif re.sub('\D', '', bref['r'][0]) == re.sub('\D', '', dref['r'][0]):           
+                        combinedrefs.append(badrefs[i])             
+                        #print '\033[0;31m(ref) %i/%i diff id %s ?= %s\033[0m' % (i, len(badrefs), bref['r'][0], dref['r'][0])
+                    else:
+                        diffids += 1
+                        combinedrefs.append(badrefs[i] + [('m', 'different report number from SISSA:' + dref['r'][0])])
+                elif 'a' in dref.keys():
+                    #print '\033[0;32m(ref) %i/%i bull=%s ?= %s=DOI\033[0m' % (i, len(badrefs), bref['r'][0], dref['a'][0])
+                    combinedrefs.append(badrefs[i] + [('a', dref['a'][0])])
+                    addeddois.append(dref['a'][0])
+                else:
+                    #print '\033[0;31m(ref) %i/%i bull=%s missing in SISSA\033[0m' % (i, len(badrefs), bref['r'][0]), doirefs[i]
+                    combinedrefs.append(badrefs[i])
+                    missingids += 1
+            #add doi
+            elif 'a' in dref.keys() and not 'r' in bref.keys():
+                combinedrefs.append(badrefs[i] + [('a', dref['a'][0])])
+                addeddois.append(dref['a'][0])
+                #print '(ref) %i/%i add DOI=%s' % (i, len(badrefs), dref['a'][0]), badrefs[i]
+            #add bull
+            elif 'r' in dref.keys() and not 'a' in bref.keys():
+                addedbulls.append(dref['r'][0])
+                combinedrefs.append(badrefs[i] + [('r', dref['r'][0])])
+                #print '(ref) %i/%i add bull=%s' % (i, len(badrefs), dref['r'][0]), badrefs[i]
+            #nothing one can do
+            else:
+                combinedrefs.append(badrefs[i])
+        #print 'SISSA<>Springer', len(badrefs), len(doirefs), len(combinedrefs), '|', sameids, diffids, addeddois, addedbulls
+        return ('%i combined refs (%i IDs differ, %i IDs coincide, %i DOIs/%i bulls added from SISSA, %i IDs missing in SISSA)' % (len(combinedrefs),diffids,  sameids, len(addeddois), len(addedbulls), missingids), combinedrefs)
+
+#compare Springer and SISSA references in detail
+def comparerefs(badrefs, doirefs):
+    if len(badrefs) != len(doirefs):
+        return ('keep %i Springerrefs (%i SISSArefs)' % (len(badrefs), len(doirefs)), badrefs)
+    else:
+        combinedrefs = []
+        (sameids, diffids, missingids) = (0, 0, 0)
+        (addeddois, addedbulls) = ([], [])
+        for i in range(len(badrefs)):
+            bref = {}
+            for (code, value) in badrefs[i]:
+                if code in bref.keys():
+                    bref[code].append(value)
+                else:
+                    bref[code] = [value]
+            dref = {}
+            for (code, value) in doirefs[i]:
+                if code in dref.keys():
+                    dbref[code].append(value)
+                else:
+                    dref[code] = [value]
+            #compare DOIs
+            if 'a' in bref.keys():
+                if 'a' in dref.keys():
+                    if bref['a'][0] == dref['a'][0]:
+                        sameids += 1
+                        print '\033[0;32m(ref) %i/%i same id %s\033[0m' % (i, len(badrefs), bref['a'][0])
+                        combinedrefs.append(badrefs[i])
+                    elif bref['a'][0].upper() == dref['a'][0].upper():
+                        print '\033[0;32m(ref) %i/%i DOI=%s ?= %s=DOI\033[0m' % (i, len(badrefs), bref['a'][0], dref['a'][0])
+                        sameids += 1
+                        combinedrefs.append(badrefs[i])                        
+                    else:
+                        print '\033[0;31m(ref) %i/%i diff id %s != %s\033[0m' % (i, len(badrefs), bref['a'][0], dref['a'][0])
+                        diffids += 1
+                else:
+                    print '\033[0;31m(ref) %i/%i DOI=%s missing in SISSA\033[0m' % (i, len(badrefs), bref['a'][0]), doirefs[i]
+                    combinedrefs.append(badrefs[i])
+                    missingids += 1
+            #compare bulls
+            elif 'r' in bref.keys():
+                if 'r' in dref.keys():
+                    if bref['r'][0] == dref['r'][0]:
+                        sameids += 1
+                        print '\033[0;32m(ref) %i/%i same id %s\033[0m' % (i, len(badrefs), bref['r'][0])
+                        combinedrefs.append(badrefs[i])
+                    elif re.sub('\D', '', bref['r'][0]) == re.sub('\D', '', dref['r'][0]):                        
+                        print '\033[0;31m(ref) %i/%i diff id %s ?= %s\033[0m' % (i, len(badrefs), bref['r'][0], dref['r'][0])
+                        #diffids += 1
+                elif 'a' in dref.keys():
+                    brecids = perform_request_search(p='037__a:%s' % (bref['r'][0]), cc='HEP')
+                    drecids = perform_request_search(p=dref['a'][0], cc='HEP')
+                    if brecids and drecids:
+                        for brecid in brecids:
+                            for drecid in brecids:
+                                break
+                        if brecid == drecid:
+                            print '\033[0;32m(ref) %i/%i bull=%s ~= %s=DOI\033[0m' % (i, len(badrefs), bref['r'][0], dref['a'][0])
+                            combinedrefs.append(badrefs[i] + [('a', dref['a'][0])])
+                            sameids += 1                        
+                        else:
+                            print '\033[0;31m(ref) %i/%i bull=%s != %s=DOI\033[0m' % (i, len(badrefs), bref['r'][0], dref['a'][0]), badrefs[i]
+                            diffids += 1
+                    else:
+                        print '(ref) %i/%i bull=%s =? %s=DOI' % (i, len(badrefs), bref['r'][0], dref['a'][0]), badrefs[i]
+                        combinedrefs.append(badrefs[i] + [('a', dref['a'][0])])
+                else:
+                    print '\033[0;31m(ref) %i/%i bull=%s missing in SISSA\033[0m' % (i, len(badrefs), bref['r'][0]), doirefs[i]
+                    combinedrefs.append(badrefs[i])
+                    missingids += 1
+            #add doi
+            elif 'a' in dref.keys() and not 'r' in bref.keys():
+                if not 's' in bref.keys():
+                    extractedrefs = extract_references_from_string(bref['x'][0], override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
+                    for ref2 in extractedrefs:
+                        if 'journal_reference' in ref2.keys():
+                            bref['s'] = [ref2['journal_reference'][0]]
+                if 's' in bref.keys():
+                    drecids = perform_request_search(p=dref['a'][0], cc='HEP')
+                    brecids = perform_request_search(p='rawref:"%s"' % (bref['s'][0]), cc='HEP')
+                    if brecids and drecids and len(brecids) == 1:
+                        for brecid in brecids:
+                            for drecid in brecids:
+                                break
+                        if brecid == drecid:
+                            print '\033[0;32m(ref) %i/%i PBN=%s ~= %s=DOI\033[0m' % (i, len(badrefs), bref['s'][0], dref['a'][0])
+                            combinedrefs.append(badrefs[i] + [('a', dref['a'][0])])
+                            sameids += 1
+                        else:
+                            print '\033[0;31m(ref) %i/%i PBN=%s != %s=DOI\033[0m' % (i, len(badrefs), bref['s'][0], dref['a'][0]), badrefs[i]
+                            diffids += 1
+                    else:
+                        addeddois.append(dref['a'][0])
+                        combinedrefs.append(badrefs[i] + [('a', dref['a'][0])])
+                        print '(ref) %i/%i add DOI=%s' % (i, len(badrefs), dref['a'][0]), badrefs[i]
+                else:
+                    addeddois.append(dref['a'][0])
+                    combinedrefs.append(badrefs[i] + [('a', dref['a'][0])])
+                    print '(ref) %i/%i add DOI=%s' % (i, len(badrefs), dref['a'][0]), badrefs[i]
+            #add bull
+            elif 'r' in dref.keys() and not 'a' in bref.keys():
+                addedbulls.append(dref['r'][0])
+                combinedrefs.append(badrefs[i] + [('r', dref['r'][0])])
+                print '(ref) %i/%i add bull=%s' % (i, len(badrefs), dref['r'][0]), badrefs[i]
+            #nothing one can do
+            else:
+                combinedrefs.append(badrefs[i])
+        print 'SISSA<>Springer', len(badrefs), len(doirefs), len(combinedrefs), '|', sameids, diffids, addeddois, addedbulls
+        if diffids:
+            return ('keep %i Springerrefs (%i IDs differ, %i IDs coincide, %i IDs missing)' % (len(badrefs), diffids, sameids, missingids), badrefs)
+        elif sameids:
+            return ('%i combined refs (%i IDs coincide, %i DOIs added, %i bulls added, %i IDs missing)' % (len(combinedrefs), sameids, len(addeddois), len(addedbulls), missingids), combinedrefs)
+        elif addedbulls or addeddois:
+            return ('keep %i SISSA refs (no IDs in Springer, %i DOIs added, %i bulls added, %i IDs missing)' % (len(doirefs), len(addeddois), len(addedbulls), missingids), doirefs)
+
+
+        
 ###go through book directory, collect records; create HA
 def convertbook(journalnumber, dirname):
     isbn = re.sub('\D', '', re.sub('.*\/', '', dirname))
