@@ -24,12 +24,13 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'University Coll. London'
 hdr = {'User-Agent' : 'Magic Browser'}
 
-pages = 1
+pages = 5
 
 recs = []
 jnlfilename = 'THESES-UCLONDON-%s' % (stampoftoday)
 for page in range(pages):
-    tocurl = 'https://discovery.ucl.ac.uk/cgi/search/archive/advanced?exp=0%7C1%7C-date%2Fcreators_name%2Ftitle%7Carchive%7C-%7Cdivisions%3Adivisions%3AANY%3AEQ%3AMI+MJ%7Ctype%3Atype%3AANY%3AEQ%3Athesis%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow&_action_search=1&order=-date%2Fcreators_name%2Ftitle&screen=Search&cache=40354498&search_offset=' + str(20*page)
+    #tocurl = 'https://discovery.ucl.ac.uk/cgi/search/archive/advanced?exp=0%7C1%7C-date%2Fcreators_name%2Ftitle%7Carchive%7C-%7Cdivisions%3Adivisions%3AANY%3AEQ%3AMI+MJ%7Ctype%3Atype%3AANY%3AEQ%3Athesis%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow&_action_search=1&order=-date%2Fcreators_name%2Ftitle&screen=Search&cache=40354498&search_offset=' + str(20*page)
+    tocurl = 'https://discovery.ucl.ac.uk/cgi/search/archive/advanced?screen=Search&dataset=archive&documents_merge=ALL&documents=&title_merge=ALL&title=&creators_name_merge=ALL&creators_name=&editors_name_merge=ALL&editors_name=&abstract_merge=ALL&abstract=&divisions=C06&divisions_merge=ANY&date=&type=thesis&satisfyall=ALL&order=-date%2Fcreators_name%2Ftitle&_action_search=Search&search_offset=' + str(20*page)
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
