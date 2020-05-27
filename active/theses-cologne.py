@@ -15,6 +15,7 @@ import codecs
 import datetime
 import time
 import json
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -46,6 +47,10 @@ divisionsdict = {'inst_50000' : 'Universitaet zu Koeln, Faculty of Mathematics a
                  'inst_55110' : 'Universitaet zu Koeln, Institut fuer Geologie und Mineralogie, Germany'}
 
 tocurltrunc = 'https://kups.ub.uni-koeln.de/cgi/search/archive/advanced?cache=1750151&order=-date%2Fcreators_name%2Ftitle&_action_search=1&exp=0%7C1%7C-date%2Fcreators_name%2Ftitle%7Carchive%7C-%7Csubjects%3Asubjects%3AANY%3AEQ%3A510+530+no%7Ctype%3Atype%3AANY%3AEQ%3Athesis%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow&screen=Search'
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
@@ -54,7 +59,7 @@ for i in range(pagestocheck):
     tocurl = '%s&search_offset=%i' % (tocurltrunc, 20*i)
     print '---{ %i/%i }---{ %s }---' % (i+1, pagestocheck, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     time.sleep(2)
     for tr in tocpage.body.find_all('tr', attrs = {'class' : 'ep_search_result'}):        
         for a in tr.find_all('a'):
@@ -77,13 +82,13 @@ for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.urlopen(rec['link'], context=ctx))
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+            artpage = BeautifulSoup(urllib2.open(rec['link'], context=ctx))
         except:
             print "no access to %s" % (rec['link'])
             continue
