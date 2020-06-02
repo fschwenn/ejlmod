@@ -127,7 +127,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '41114': ['lrr', 'Living Rev.Rel.', '', '', 'R'],
       '41365': ['nst', 'Nucl.Sci.Tech.', '', '', 'P'],
       '41467': ['natcomm', 'Nature Commun.', '', '', 'P'],
-      '41550': ['natastr', 'Nat.Astron.', '', '', 'P'],
+      '41550': ['natastr', 'Nature Astron.', '', '', 'P'],
       '41566': ['natphoton', 'Nature Photon.', '', '', 'P'],
       '41567': ['natphys', 'Nature Phys.', '', '', 'P'],
       '41586': ['nature', 'Nature', '', '', 'P'],
@@ -451,7 +451,8 @@ def convertarticle(journalnumber, filename, contlevel):
                 elif subjt in ['Editorial', 'News Q&A', 'Correspondence', 'News And Views', 'Career Q&A',
                                'Career News', 'Outlook', 'Technology Feature', 'Book Review', 'Obituary', 'News',
                                'Books And Arts', 'World View', 'Seven Days', 'Career Column', 'Career Brief',
-                               'Futures']:
+                               'Futures', 'Where I Work', 'Books & Arts', 'Expert Recommendation', 'Measure for Measure',
+                               'News Round-up', 'News & Views']:
                     return {}
                 #check whether article in fact is part of proceedings
                 elif re.search('Proceedings of ', subjt) and 'P' in rec['tc']:
