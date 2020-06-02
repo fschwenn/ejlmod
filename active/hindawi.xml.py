@@ -104,6 +104,9 @@ print articleIDs
 
 recs = []
 i = 0
+reendli = re.compile('<\/li>')
+restartli = re.compile(' *<li ')
+reol = re.compile('(<\/[ou]l>)')
 for articleID in articleIDs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(articleIDs), articleID)
@@ -115,9 +118,31 @@ for articleID in articleIDs:
         if not os.path.isfile(artfilename):
             os.system('wget  -T 300 -t 3 -q  -O %s "%s/%s"' % (artfilename, urltrunk, articleID))
             time.sleep(2)
-    artfil = open(artfilename,'r')
-    artpage = BeautifulSoup(''.join(artfil.readlines()))
-    artfil.close()
+        #artfil = open(artfilename, 'r')
+        artfil = codecs.EncodedFile(codecs.open(artfilename, mode='rb'), 'utf8')
+        artfilnew = open(artfilename + '.new', 'w')
+        artraw = ''
+        for line in artfil.readlines():
+            if restartli.search(line):
+                parts = restartli.split(line)
+                if len(parts) > 1:
+                    newline = parts[0]
+                    for part in parts[1:]:
+                        if reendli.search(part):
+                            newline += '<li ' + part.strip()
+                        elif reol.search(part):
+                            newline += '<li ' + reol.sub(r'</li>\1', part)
+                        else:
+                            newline += '<li ' + part.strip() + '</li>'
+                    artraw += newline + '\n'
+                else:
+                    artraw += line
+            else:
+                artraw += line
+        artfilnew.write(artraw)
+        artfil.close()
+        artfilnew.close()
+        artpage = BeautifulSoup(artraw)
     rec = {'year' : year, 'jnl' : jnlname, 'p1' : articleID, 'tc' : 'P', 'vol' : year, 
            'auts' : [], 'aff' : [], 'refs' : [], 'note' : [], 'refs' : []}
     for meta in artpage.head.find_all('meta'):
@@ -239,7 +264,7 @@ for articleID in articleIDs:
             lit = re.sub('Physical Review ([ABCDEX]),? (\d{1,3}), (no\.|p\.) (\d{3,6})', r'Phys.Rev., \1\2, \4', lit)
             lit = re.sub('Physics Letters B, B', 'Phys.Lett., B', lit)
             lit = re.sub('Physics of the Dark Universe, ', 'Phys.Dark Univ., ', lit)
-            lit = re.sub('The European Physical Journal Plus, (\d+), p\. (\d+)', 'Eur.Phys.J.Plus, \1, \2', lit)
+            lit = re.sub('The European Physical Journal Plus, (\d+), p\. (\d+)', r'Eur.Phys.J.Plus, \1, \2', lit)
             lit = re.sub('The European Physical Journal Plus, ', 'Eur.Phys.J.Plus, ', lit)
             lit = re.sub('Journal of Physics A: Mathematical and General, ', 'J.Phys., A', lit)
             lit = re.sub('Physics Letters.? A. General, Atomic [aA]nd Solid State Physics, ', 'Phys.Lett., A', lit)
@@ -269,9 +294,11 @@ for articleID in articleIDs:
             lit = re.sub('Nuclear Instruments and Methods in Physics Research Section B, ', 'Nucl.Instrum.Meth., B', lit)
             lit = re.sub('Nuclear Instruments and Methods in Physics Research Section A: Accelerators, Spectrometers, Detectors and Associated Equipment, ', 'Nucl.Instrum.Meth., A', lit)
             lit = re.sub(', pp. ', ', ', lit)
-            lit = re.sub(u',\u201d', '",', lit)
+            lit = re.sub(u'\u201d', '"', lit)
             lit = re.sub(u'\u201c', '"', lit)
             lit = re.sub(u'\u2013', '-', lit)
+            lit = re.sub(u'\u2018', "'", lit)
+            lit = re.sub(u'\u2019', "'", lit)
             if refnum:                
                 ref = '[%s] %s' % (refnum, lit)
             else:
@@ -281,8 +308,7 @@ for articleID in articleIDs:
         print 'skip Editorial'
     else:
         recs.append(rec)
-        print ' keys: ' + ', '.join(rec.keys())
-
+        print ' keys: ' + ', '.join(rec.keys()), '|', len(rec['refs']), 'refs'
 
 
 
