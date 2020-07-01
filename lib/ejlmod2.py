@@ -383,7 +383,7 @@ def writeXML(recs,dokfile,publisher):
                         alternateliste.append(('n', rec['alternateissue']))
                     else:
                         alternateliste.append(tup)
-                elif tup[0] != 'p':
+                else:
                     alternateliste.append(tup)
             xmlstring += marcxml('7731', alternateliste)
         if rec.has_key('jnl2') and rec.has_key('vol2'):
@@ -411,19 +411,20 @@ def writeXML(recs,dokfile,publisher):
             #special euclid:
             if re.search('^20.2000\/euclid\.', rec['doi']):
                 xmlstring += marcxml('035', [('9', 'EUCLID'), ('a', rec['doi'][8:])])
-        elif rec.has_key('hdl'):
+        if rec.has_key('hdl'):
             xmlstring += marcxml('0247',[('a',rec['hdl']), ('2','HDL'), ('9',publisher)])
-        elif rec.has_key('urn'):
+        if rec.has_key('urn'):
             xmlstring += marcxml('0247',[('a',rec['urn']), ('2','URN'), ('9',publisher)])
-        elif len(liste) > 2 or rec.has_key('isbn') or rec.has_key('isbns'):
-            pseudodoi = '20.2000/'+re.sub(' ','_','-'.join([tup[1] for tup in liste]))
-            if rec.has_key('isbn'):
-                pseudodoi += '_' + rec['isbn']
-            elif rec.has_key('isbns'):
-                for tupel in rec['isbns'][0]:
-                    if tupel[0] == 'a':
-                        pseudodoi += '_' + tupel[1]
-            xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
+        elif not 'doi' in rec.keys() and not 'hdl' in rec.keys():
+            if len(liste) > 2 or rec.has_key('isbn') or rec.has_key('isbns'):
+                pseudodoi = '20.2000/'+re.sub(' ','_','-'.join([tup[1] for tup in liste]))
+                if rec.has_key('isbn'):
+                    pseudodoi += '_' + rec['isbn']
+                elif rec.has_key('isbns'):
+                    for tupel in rec['isbns'][0]:
+                        if tupel[0] == 'a':
+                            pseudodoi += '_' + tupel[1]
+                xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
         if rec.has_key('pages'):
             if type(rec['pages']) == type('999'):
                 xmlstring += marcxml('300',[('a',rec['pages'])])
@@ -517,11 +518,14 @@ def writeXML(recs,dokfile,publisher):
                 entry.append(('u',rec['licence']['url']))
             if rec['licence'].has_key('organization'):
                 entry.append(('b',rec['licence']['organization']))
-            else:
+            elif entry:
                 entry.append(('b', publisher))
             if rec['licence'].has_key('material'):
                 entry.append(('3',rec['licence']['material']))
-            xmlstring += marcxml('540', entry)
+            try:
+                xmlstring += marcxml('540', entry)
+            except:
+                xmlstring += marcxml(marc, [(tup[0], unidecode.unidecode(tup[1])) for tup in entry])
         if rec.has_key('supervisor'):
             marc = '701'
             for autaff in rec['supervisor']:
@@ -687,8 +691,8 @@ def writeXML(recs,dokfile,publisher):
                     except:
                         print 'UTF8 Problem in Referenzen'
                         try:
-                            ref01 = unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', rawref)).encode('ascii','ignore'),'utf-8')
-                            extractedrefs = extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
+                            ref01 = unicode(unicodedata.normalize('NFKD', re.sub(u'ß', u'ss', rawref)).encode('ascii', 'ignore'), 'utf-8')
+                            extractedrefs = extract_references_from_string(ref01, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")                            
                             for ref2 in extractedrefs:
                                 #find additional reportnumbers
                                 additionalreportnumbers = []
