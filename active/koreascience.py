@@ -64,11 +64,15 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'clear'}):
         rec['tc'] = 'C'
         rec['cnum'] = sys.argv[4]
     for a in div.find_all('a'):
-        if a.has_attr('href') and re.search('society', a['href']):
-            rec['artlink'] = re.sub('.*=', 'http://koreascience.or.kr/article/', a['href']) + '.page'
-            if 'licence'  in journals[journal].keys():
-                rec['FFT'] = a['href']
-            recs.append(rec)
+        #if a.has_attr('href') and re.search('society', a['href']):
+        if a.has_attr('href'):
+            if re.search('doi.org', a['href']):
+                #rec['artlink'] = re.sub('.*=', 'http://koreascience.or.kr/article/', a['href']) + '.page'
+                rec['artlink'] = a['href']
+            elif re.search('pdf$', a['href']):
+                if 'licence' in journals[journal].keys(): 
+                    rec['FFT'] = a['href']
+    recs.append(rec)
 
 
 i = 0
