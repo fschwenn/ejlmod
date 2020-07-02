@@ -63,6 +63,12 @@ for rec in recs:
         print "retry %s in 180 seconds" % (rec['link'])
         time.sleep(180)
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+    #get rid of associated articles
+    for fieldset in artpage.body.find_all('fieldset'):
+        for legend in fieldset.find_all('legend'):
+            if re.search('Artigo', legend.text):
+                fieldset.decompose()
+                print '  removed related articles from theses metadata page'
     #title
     for td in artpage.body.find_all('td', attrs = {'class' : 'pubTitle'}):
         rec['tit'] = td.text.strip()
