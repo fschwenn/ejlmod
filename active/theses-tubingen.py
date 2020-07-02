@@ -28,12 +28,12 @@ publisher = 'U. Tubingen'
 typecode = 'T'
 
 startyear = str(now.year - 1)
-rpp = 20
+rpp = 50
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
 for fac in ['Physik', 'Sonstige+-+Mathematik+und+Physik', 'Mathematik']:
-    tocurl = 'https://publikationen.uni-tuebingen.de/xmlui/handle/10900/42126/discover?rpp=' + str(rpp) + '&filtertype_0=dateIssued&filtertype_1=fachbereich&filter_0=[' + startyear + '+TO+' + str(now.year) + ']&filter_relational_operator_1=equals&filter_1=' + fac + '&filter_relational_operator_0=equals&filtertype=type&filter_relational_operator=equals&filter=Dissertation'
+    tocurl = 'https://publikationen.uni-tuebingen.de/xmlui/handle/10900/42126/discover?rpp=' + str(rpp) + '&filtertype_0=dateIssued&filtertype_1=fachbereich&filter_0=[' + startyear + '+TO+' + str(now.year+1) + ']&filter_relational_operator_1=equals&filter_1=' + fac + '&filter_relational_operator_0=equals&filtertype=type&filter_relational_operator=equals&filter=Dissertation'
     
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
@@ -90,8 +90,9 @@ for fac in ['Physik', 'Sonstige+-+Mathematik+und+Physik', 'Mathematik']:
                 #keywords
                 elif meta['name'] == 'DC.subject':
                     for keyw in re.split(' *; *', meta['content']):
-                        if not keyw in rec['keyw']:
-                            rec['keyw'].append(keyw)
+                        for kw2 in re.split(' , ', keyw):
+                            if not kw2 in rec['keyw']:
+                                rec['keyw'].append(kw2)
                 #abstract
                 elif meta['name'] == 'DCTERMS.abstract':
                     if meta.has_attr('xml:lang'):
