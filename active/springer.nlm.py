@@ -622,9 +622,17 @@ def convertarticle(journalnumber, filename, contlevel):
                     rec['auts'].append('=%s' % (xref['rid']))
             #collaboration
             for coll in contrib.find_all('collab'):
-                for email in coll.find_all('email'):
-                    email.decompose()
-                rec['col'].append(coll.text.strip())
+                #safety check if authors are under collaboration
+                authorsundercoll = False
+                for bla in coll.find_all('contrib', attrs = {'contrib-type' : 'author'}):
+                    authorsundercoll = True
+                if authorsundercoll:
+                    for inst in coll.find_all('institution'):
+                        rec['col'].append(inst.text.strip())
+                else:
+                    for email in coll.find_all('email'):
+                        email.decompose()
+                    rec['col'].append(coll.text.strip())
     #references
     for rl in article.find_all('ref-list', attrs = {'id' : 'Bib1'}):
         rec['refs'] = get_references(rl)
