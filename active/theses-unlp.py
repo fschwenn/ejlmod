@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-#harvest theses from UNLP, La Plata (main)
-#FS: 2020-02-04
-
+#harvest theses from Universidad Nacional de La Plata
+#FS: 2020-06-30
 
 import getopt
 import sys
@@ -16,115 +15,119 @@ import datetime
 import time
 import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
-publisher = 'UNLP, La Plata (main)'
-
+publisher = 'UNLP, La Plata (main) '
 rpp = 50
-pages = 1
+pages = 2
+uninteresting = ['Qumica', 'Biologa', 'Bioqumica', 'Ciencias Sociales', 'Ciencias Veterinarias', 'Farmacia']
 
-departmentstoskip = ['Doctor en Ciencias Exactas, área Química; Universidad Nacional de La Plata',
-                     'Doctor en Ciencias Exactas, área Ciencias Biológicas; Universidad Nacional de La Plata',
-                     'Licenciado en Biotecnología y Biología Molecular; Universidad Nacional de La Plata',
-                     'Magister en Plantas Medicinales; Universidad Nacional de La Plata',
-                     'Magister en Física Contemporánea; Universidad Nacional de La Plata',
-                     'Magister en Tecnología e Higiene de los Alimentos']
-                     
+jnlfilename = 'THESES-UNLP-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
-recs = []
+prerecs = []
+handles = []
 for page in range(pages):
-    tocurl = 'http://sedici.unlp.edu.ar/handle/10915/23/discover?rpp=' + str(rpp) + '&etal=0&group_by=none&page=' + str(page) + '&sort_by=dc.date.issued_dt&order=desc'
-    print '---{ %i/%i }---{ %s }------' % (page+1, pages, tocurl)
+    tocurl = 'http://sedici.unlp.edu.ar/handle/10915/23/discover?rpp=' + str(rpp) + '&etal=0&group_by=none&page=' + str(page+1) + '&sort_by=dc.date.issued_dt&order=desc'
+    print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
-    divs = tocpage.body.find_all('li', attrs = {'class' : 'ds-artifact-item'})
-    for div in divs:
-        relevant = True
-        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
-        for a in div.find_all('a'):
-            rec['artlink'] = 'http://sedici.unlp.edu.ar' + a['href'] #+ '?show=full'
-            rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            rec['tit'] = a.text.strip()
-        for span in div.find_all('span', attrs = {'xmlns:ex' : 'ar.edu.unlp.sedici.xmlui.xsl.XslExtensions'}):
-            spant = span.text.strip()
-            if re.search('(Master|Qu.mica|Biol.gica|Medicin|Higiene|Licenciado)', spant):
-                #print '  skip', spant
-                relevant = False
-        if relevant:
-            recs.append(rec)
     time.sleep(3)
+    for li in tocpage.body.find_all('li', attrs = {'class' : 'ds-artifact-item'}):
+        for div in li.find_all('div', attrs = {'class' : 'type'}):
+            if re.search('maestria', div.text) or re.search('grado', div.text):
+                print '  skip', div.text.strip()
+            else:
+                for div in li.find_all('div', attrs = {'class' : 'artifact-description'}):
+                    rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : []}
+                    for a in div.find_all('a'):
+                        rec['artlink'] = 'http://sedici.unlp.edu.ar' + a['href'] + '?show=full'
+                        rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                        rec['tit'] = a.text.strip()
+                        if not rec['hdl'] in handles:
+                            prerecs.append(rec)
+                            handles.append(rec['hdl'])
 
+recs = []
 i = 0
-for rec in recs:
+for rec in prerecs:
     i += 1
-    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
+    print '---{ %i/%i }---{ %s }------' % (i, len(prerecs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
     except:
         try:
-            print "retry %s in 180 seconds" % (rec['artlink'])
+            print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
             artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         except:
-            print "no access to %s" % (rec['artlink'])
-            continue    
-    for meta in artpage.find_all('meta'):
+            print "no access to %s" % (rec['link'])
+            continue
+    for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
-            #date
-            if meta['name'] == 'citation_publication_date':
-                rec['date'] = meta['content']
-            #abstract
-            elif meta['name'] == 'DCTERMS.abstract':
-                rec['abs'] = meta['content']
-            #keywords
-            elif meta['name'] == 'citation_keywords':
-                rec['keyw'] = re.split('; ', meta['content'])
             #author
-            elif meta['name'] == 'citation_author':
-                rec['autaff'] = [[ meta['content'], publisher ]]
-            #doi
-            elif meta['name'] == 'DC.identifier':
-                if re.search('doi.org\/10', meta['content']):                
-                    rec['doi'] = re.sub('.*doi.org\/(10.*)', r'\1', meta['content'])
-            #pdf
-            elif meta['name'] == 'citation_pdf_url':
-                rec['citation_pdf_url'] = meta['content']
+            if meta['name'] == 'DC.creator':
+                author = re.sub(' *\[.*', '', meta['content'])
+                rec['autaff'] = [[ author, publisher ]]
+            #supervisor
+            elif meta['name'] == 'DC.contributor':
+                rec['supervisor'].append([meta['content']])
+            #title
+            elif meta['name'] == 'DC.title':
+                rec['tit'] = meta['content']
+            #date
+            elif meta['name'] == 'DCTERMS.issued':
+                rec['date'] = meta['content']
+            #keywords
+            elif meta['name'] == 'DC.subject':
+                for keyw in re.split(' *; *', meta['content']):
+                    rec['keyw'].append(keyw)
+                    rec['subject'] = keyw
             #language
             elif meta['name'] == 'DC.language':
                 if meta['content'] == 'es':
                     rec['language'] = 'spanish'
-    #license
-    for a in artpage.find_all('a'):
-        if a.has_attr('href') and re.search('creativecommons.org', a['href']):
-            rec['license'] = {'url' : a['href']}
-            if 'citation_pdf_url' in rec.keys():
-                rec['FFT'] = rec['citation_pdf_url']
-    #hiddenPDF
-    if not 'license' in rec.keys() and 'citation_pdf_url' in rec.keys():
-        rec['hidden'] = rec['citation_pdf_url']
+            #FFT
+            elif meta['name'] == 'citation_pdf_url':
+                rec['FFT'] = meta['content']
+            #abstract
+            elif meta['name'] == 'DCTERMS.abstract':
+                rec['abs'] = meta['content']
+            #license
+            elif meta['name'] == 'DC.rights':
+                if re.search('creativecommons.org', meta['content']):
+                    rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
+            #DOI
+            elif meta['name'] == 'DC.identifier':
+                if re.search('doi.org\/10', meta['content']):
+                    rec['doi'] = re.sub('.*doi.org\/(10.*)', r'\1', meta['content'])
+            #type
+            elif meta['name'] == 'DC.type':
+                rec['note'].append(meta['content'])
 
-    print '  ', rec.keys()
-
-
-jnlfilename = 'THESES-UNLP-%s' % (stampoftoday)
-
+    if 'subject' in rec.keys():
+        if rec['subject'].encode('ascii','ignore') in uninteresting:
+            print '  skip', rec['subject'].encode('ascii','ignore')
+        else:
+            rec['note'].append(rec['subject'].encode('ascii','ignore'))
+            recs.append(rec)
+    else:
+        recs.append(rec)	
 
 #closing of files and printing
-xmlf = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writeXML(recs, xmlfile, publisher)
 xmlfile.close()
 #retrival
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
+if not line in retfiles_text:
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
