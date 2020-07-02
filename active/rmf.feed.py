@@ -26,8 +26,9 @@ def tfstrip(x): return x.strip()
 publisher = 'Sociedad Mexicana de Fisica'
 
 datei = sys.argv[1]
-vol = re.sub('RevMexFis_(\d+).*', r'\1', datei)
-year = re.sub('RevMexFis_\d+_(\d+).*', r'\1', datei)
+vol = re.sub('.*?_(\d+).*', r'\1', datei)
+issue = re.sub('.*?_\d+_(\d+).*', r'\1', datei)
+year = re.sub('.*_([12]\d\d\d).*', r'\1', datei)
 jnlfilename = 'rmf' + re.sub('.xml$', '', datei)
 
 inf = os.path.join(rmfpath, datei)
@@ -39,8 +40,10 @@ feed = BeautifulSoup(''.join(lines))
 
 recs = []
 for article in feed.find_all('article'):
+    for sf in article.find_all('supplemental_file'):
+        sf.decompose()
     rec = {'jnl' : jnl, 'tc' : 'P', 'keyw' : [], 'autaff' : [],
-           'vol' : vol, 'year' : year}
+           'vol' : vol, 'year' : year, 'issue' : issue}
     #DOI
     for id in article.find_all('id', attrs = {'type' : 'doi'}):
         rec['doi'] = id.text.strip()
