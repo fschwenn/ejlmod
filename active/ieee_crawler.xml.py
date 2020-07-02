@@ -22,6 +22,7 @@ ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
+articlesperpage = 50
 
 def meta_with_name(tag):
     return tag.name == 'meta' and tag.has_attr('name')
@@ -96,6 +97,8 @@ def translatejnlname(ieeename):
         jnlname = 'IEEE Trans.Image Process.'
     elif ieeename in ['Computing in Science & Engineering']:
         jnlname = 'Comput.Sci.Eng.'
+    elif ieeename in ['IEEE Transactions on Circuits and Systems I: Regular Papers']:
+        jnlname = 'IEEE Trans.Circuits Theor.'
     elif ieeename in ["IEEE Symposium Conference Record Nuclear Science 2004.",
                       "IEEE Nuclear Science Symposium Conference Record, 2005"]:
         jnlname = 'BOOK'
@@ -110,12 +113,12 @@ def ieee(number):
     #get name of journal
     if number[0] == 'C': 
         #toclink = "/xpl/mostRecentIssue.jsp?punumber=%s&rowsPerPage=2000" % (number[1:])        
-        toclink = "/xpl/conhome/%s/proceeding?rowsPerPage=50" % (number[1:])
+        toclink = "/xpl/conhome/%s/proceeding?rowsPerPage=%i" % (number[1:], articlesperpage)
         tc = 'C'
         jnlname = 'IEEE Nucl.Sci.Symp.Conf.Rec.'
         jnlname = 'BOOK'
     else:
-        toclink = "/xpl/tocresult.jsp?isnumber=%s&rowsPerPage=50" % (number)
+        toclink = "/xpl/tocresult.jsp?isnumber=%s&rowsPerPage=%i" % (number, articlesperpage)
         tc = 'P'
         
     articlelinks = []
@@ -292,23 +295,23 @@ def ieee(number):
             driver.get(articlelink + 'references')
             WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'stats-reference-link-googleScholar')))
             refpage = BeautifulSoup(driver.page_source)
+            for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
+                for span in div.find_all('span', attrs = {'class' : 'number'}):
+                    for b in span.find_all('b'):
+                        refnumber = re.sub('\.', '', span.text.strip())
+                        span.replace_with('[%s] ' % (refnumber))
+                for a in div.find_all('a', attrs = {'class' : 'stats-reference-link-crossRef'}):
+                    rdoi = re.sub('.*doi.org\/(10.*)', r'\1', a['href'])
+                    a.replace_with(', DOI: %s' % (rdoi))
+                for a in div.find_all('a', attrs = {'class' : 'stats-reference-link-googleScholar'}):
+                    a.replace_with('')
+                ref = re.sub('[\n\t]', ' ', div.text.strip())
+                ref = re.sub('  +', ' ', ref)
+                rec['refs'].append([('x', ref)])
+            print '  found %i references' % (len(rec['refs']))
         except:
             print '  could not load "%s%s"' % (articlelink, 'references')
             #continue
-        for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
-            for span in div.find_all('span', attrs = {'class' : 'number'}):
-                for b in span.find_all('b'):
-                    refnumber = re.sub('\.', '', span.text.strip())
-                    span.replace_with('[%s] ' % (refnumber))
-            for a in div.find_all('a', attrs = {'class' : 'stats-reference-link-crossRef'}):
-                rdoi = re.sub('.*doi.org\/(10.*)', r'\1', a['href'])
-                a.replace_with(', DOI: %s' % (rdoi))
-            for a in div.find_all('a', attrs = {'class' : 'stats-reference-link-googleScholar'}):
-                a.replace_with('')
-            ref = re.sub('[\n\t]', ' ', div.text.strip())
-            ref = re.sub('  +', ' ', ref)
-            rec['refs'].append([('x', ref)])
-        print '  found %i references' % (len(rec['refs']))
         time.sleep(11)
 
                     
