@@ -34,27 +34,27 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 #journals have quite different number of articles per month
 if jnl == 'symmetry': #2211
-    numberofpages = 18 + 2 + 3
+    numberofpages = 18 + 2 + 5
 elif jnl == 'universe': #367
     numberofpages = 2 + 2 + 3
 elif jnl == 'sensors': #9570
-    numberofpages = 24 + 2 + 6 
+    numberofpages = 24 + 2 + 6 + 8
 elif jnl == 'instruments': #91
-    numberofpages = 2 + 2
+    numberofpages = 2 + 1
 elif jnl == 'galaxies': #231
     numberofpages = 2 + 2
 elif jnl == 'entropy': #2124
-    numberofpages = 8+4 + 2
+    numberofpages = 8+4 + 3
 elif jnl == 'particles': #53
     numberofpages = 2 + 2
 elif jnl == 'physics': #26
     numberofpages = 2 + 2
 elif jnl == 'condensedmatter': #139
-    numberofpages = 2 + 2
+    numberofpages = 2 + 1
 elif jnl == 'atoms': #173
-    numberofpages = 2 + 2
+    numberofpages = 2 + 1
 elif jnl == 'mathematics':
-    numberofpages = 5 + 2
+    numberofpages = 5 + 2 + 10
 
 
 if jnl == 'proceedings':
