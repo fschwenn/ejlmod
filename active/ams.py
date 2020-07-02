@@ -15,6 +15,7 @@ import urlparse
 import time
 from bs4 import BeautifulSoup
 import datetime
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 
@@ -91,6 +92,10 @@ jnldict = {'ecgd' : {'tit' : 'Conform.Geom.Dyn.',
 #           '' : {'tit' : 'Annales Sci.Ecole Norm.Sup.',
 
 
+#bad cerificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 
 #check embargo time
@@ -103,7 +108,7 @@ publisher = 'AMS'
 
 tocurl = 'http://www.ams.org/journals/%s/%s' % (jrnid, jnldict[jrnid]['link'])
 print tocurl
-tocpage = BeautifulSoup(urllib2.urlopen(tocurl))
+tocpage = BeautifulSoup(urllib2.urlopen(tocurl, context=ctx))
 
 
 
@@ -119,12 +124,12 @@ print artlinks
 recs = []
 for artlink in artlinks:
     try:
-        articlepage = BeautifulSoup(urllib2.urlopen(artlink))
+        articlepage = BeautifulSoup(urllib2.urlopen(artlink, context=ctx))
         time.sleep(10)
     except:
         print " - sleep -"
         time.sleep(300)
-        articlepage = BeautifulSoup(urllib2.urlopen(artlink))
+        articlepage = BeautifulSoup(urllib2.urlopen(artlink, context=ctx))
     rec = {'jnl' : jnldict[jrnid]['tit'], 'tc' : 'P', 'year' : year, 
            'autaff' : [], 'link' : artlink}
     if jrnid == 'spmj':
