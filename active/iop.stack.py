@@ -926,7 +926,7 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d-%02d-%02d' % (now.year, now.month, now.day, now.hour, now.minute)
 
 #get data from IOP stacks
-os.system('wget -O %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
+os.system('wget --no-check-certificate -O %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
 
 
 
