@@ -49,6 +49,8 @@ elif (jnl == 'gnpn20'):
     jnlname = 'Nucl.Phys.News'
 elif (jnl == 'tnmp20'):
     jnlname = 'J.Nonlin.Math.Phys.'
+elif (jnl == 'tapx20'):
+    jnlname = 'Adv.Phys.X'
 
 jnlfilename = "%s.%s.%s" % (jnl, vol, issue)
 
@@ -185,8 +187,11 @@ for adoi in page.body.find_all('a'):
                 rec['refs'].append([('x',  re.sub(',\s*,', ',', lit + rdoi))])
             else:
                 rec['refs'].append([('x', lit)])
-    if rec.has_key('note') and rec['note'][0] in ['Book reviews ', 'Essay reviews ']:
+    if rec.has_key('note') and rec['note'][0] in ['Book reviews', 'Essay reviews']:
         continue
+    elif rec.has_key('note') and rec['note'][0] in ['Review Article']:
+        rec['tc'] += 'R'
+        recs.append(rec)
     else:
         recs.append(rec)
 
