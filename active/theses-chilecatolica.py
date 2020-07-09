@@ -75,7 +75,10 @@ for rec in recs:
                     rec['keyw'].append(keyw)
             #abstract
             elif meta['name'] == 'DCTERMS.abstract':
-                if meta['xml:lang'] == 'en_US':
+                if meta.has_attr('xml:lang'):
+                    if meta['xml:lang'] == 'en_US':
+                        rec['abs'] = meta['content']
+                else:
                     rec['abs'] = meta['content']
             #FFT
             elif meta['name'] == 'citation_pdf_url':
