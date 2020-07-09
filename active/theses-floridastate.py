@@ -15,6 +15,7 @@ import codecs
 import datetime
 import time
 import json
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -27,21 +28,32 @@ publisher = 'Florida State U., Tallahassee (main)'
 
 typecode = 'T'
 
-jnlfilename = 'THESES-FLORIDASTATE-%salt' % (stampoftoday)
+jnlfilename = 'THESES-FLORIDASTATE-%s' % (stampoftoday)
 
 tocurls = ['https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Physics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc', 'https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Mathematics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc']
+#tocurls = ['https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?page=1&collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Mathematics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc', 'https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?page=2&collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Mathematics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc', 'https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?page=1&collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Physics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc', 'https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?page=2&collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Physics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc']
 
-tocurls = ['https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?page=1&collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Mathematics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc', 'https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?page=2&collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Mathematics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc', 'https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?page=1&collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Physics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc', 'https://diginole.lib.fsu.edu/islandora/search/%2A%3A%2A?page=2&collection=fsu%3Aresearch_repository&f%5B0%5D=RELS_EXT_hasModel_uri_ms%3A%22info%3Afedora/ir%3AthesisCModel%22&f%5B1%5D=RELS_EXT_isMemberOfCollection_uri_ms%3A%22info%3Afedora/fsu%3Aetds%22&f%5B2%5D=mods_subject_topic_ms%3A%22Physics%22&islandora_solr_search_navigation=0&sort=date_sort_dt%20desc']
+
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+hdr = {'User-Agent' : 'Magic Browser'}
+
+
 prerecs = []
 recs = []
 for tocurl in tocurls:
+    print '[]', tocurl
     try:
-        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+        req = urllib2.Request(tocurl, headers=hdr)
+        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
         time.sleep(5)
     except:
         print "retry %s in 180 seconds" % (tocurl)
         time.sleep(180)
-        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+        req = urllib2.Request(tocurl, headers=hdr)
+        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
 
     for div in tocpage.body.find_all('div', attrs = {'class' : 'islandora-solr-search-result-inner'}):
         for dl in div.find_all('dl', attrs = {'class' : 'solr-thumb'}):
@@ -55,12 +67,14 @@ for rec in prerecs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(prerecs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        req = urllib2.Request(rec['artlink'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
         time.sleep(3)
     except:
         print "retry %s in 180 seconds" % (rec['artlink'])
         time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        req = urllib2.Request(rec['artlink'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
         
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
