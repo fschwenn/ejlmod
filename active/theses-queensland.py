@@ -1,5 +1,8 @@
 # -*- coding: utf-8 -*-
 #harvest theses from Queensland U.
+#
+#the Firefox-Selenium only runs on FS' notebook :(
+#
 #FS: 2020-04-03
 
 import getopt
@@ -18,6 +21,8 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options
+
 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
@@ -29,7 +34,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Queensland U.'
 rpp = 100
-pages = 10 
+pages = 1 #blaettern funktioniert nicht
 startyear = now.year-1
 stopyear = now.year
 
@@ -37,7 +42,14 @@ stopyear = now.year
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 jnlfilename = 'THESES-QUEENSLAND-%s_%i-%i' % (stampoftoday, startyear, stopyear)
-driver = webdriver.PhantomJS()
+
+#driver
+opts = Options()
+opts.add_argument("--headless")
+caps = webdriver.DesiredCapabilities().FIREFOX
+caps["marionette"] = True
+driver  = webdriver.Firefox(options=opts, capabilities=caps)
+#webdriver.PhantomJS()
 driver.implicitly_wait(30)
 
 boringunits = ['School of Music,', 'Institute for Molecular Bioscience,',
@@ -297,6 +309,14 @@ for page in range(pages):
             print '  skip "%s"' % (rec['unit'])
         else:
             recs.append(rec)
+            print rec['doi']
+
+
+buttons = tocpage.body.find_all('button')
+
+
+
+            
     print len(recs), 'so far'
     if len(divs) < rpp:
         jnlfilename = 'THESES-QUEENSLAND-%s_%i-%i_TOCcompleted' % (stampoftoday, startyear, stopyear)
