@@ -12,6 +12,7 @@ import urlparse
 import codecs
 from bs4 import BeautifulSoup
 import time
+import datetime
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -37,7 +38,12 @@ elif jnl == 'eureka':
     publisher = 'Scientific Route OU'
     jnlname = 'Eureka'
     urltrunk = 'http://eu-jr.eu/engineering/issue/view/%s' % (vol)
-jnlfilename = '%s%s' % (jnl, vol)
+
+    
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
+jnlfilename = '%s%s_%s' % (jnl, vol, stampoftoday)
+
 
     
 print urltrunk
