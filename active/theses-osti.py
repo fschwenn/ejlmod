@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#harvest theses from Mississippi U.
+#harvest theses from OSTI
 #FS: 2020-05-26
 
 
@@ -17,16 +17,17 @@ import time
 import json
 import ssl
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'+'/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 numofpages = 1
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'OSTI'
-startyear = 2000
-pages = 300
+startyear = now.year - 2
+pages = 20
+chunksize = 100
 
 uninteresting = [re.compile('biolog'), re.compile('chemic'), re.compile('medic'),
                  re.compile('waste'), re.compile('wildlife'), re.compile('chemistry')]
@@ -128,6 +129,10 @@ for rec in prerecs:
                     if not 'doi' in rec.keys():
                         rec['doi'] = '20.2000/OSTI/' + dd.text.strip()
                         rec['link'] = rec['artlink']
+    #abstract
+    if not 'abs' in rec.keys():
+        for p in artpage.body.find_all('p', attrs = {'id' : 'citation-abstract'}):
+            rec['abs'] = p.text.strip()
     skipit = False
     for keyw in rec['keyw']:
         if not skipit:
@@ -141,7 +146,6 @@ for rec in prerecs:
         print '  ', rec.keys()
 
 
-chunksize = 100
 
 for i in range(len(recs)/chunksize + 2):
     jnlfilename = 'THESES-OSTI-%s_%02i' % (stampoftoday, i)
@@ -158,17 +162,6 @@ for i in range(len(recs)/chunksize + 2):
         retfiles.write(line)
         retfiles.close()
     
-
-
-
-
-
-
-
-
-
-
-
 
 
 
