@@ -13,6 +13,7 @@ import urlparse
 import codecs
 import time
 from bs4 import BeautifulSoup
+import datetime
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -21,6 +22,9 @@ def tfstrip(x): return x.strip()
 
 publisher = 'Cambridge University Press'
 
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
+
 tc = 'P'
 jid =  sys.argv[1]
 vol = sys.argv[2]
@@ -28,6 +32,8 @@ jnlfilename = 'cambridge'+jid + vol
 if len(sys.argv) > 3:
     iss = sys.argv[3]
     jnlfilename += '.' + iss
+else:
+    jnlfilename += '.' + stampoftoday
 
 if len(sys.argv) > 4:
     jnlfilename += '.' + sys.argv[4]
@@ -79,6 +85,7 @@ else:
 
 
 #toclink = "https://www.cambridge.org/core/journals/compositio-mathematica/issue/9AB804B5DBC553D5DD4916D1B7BDAA72"
+
         
 if not os.path.isfile('/tmp/%s.0.toc' % (jnlfilename)):
     os.system('wget -O /tmp/%s.0.toc "%s"' % (jnlfilename, toclink))
