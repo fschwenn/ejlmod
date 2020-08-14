@@ -17,6 +17,12 @@ from selenium.webdriver.support import expected_conditions as EC
 
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 jlist = '/afs/desy.de/user/l/library/lists/journals_to_check_regularly_by_hand'
+host = os.uname()[1]
+if host == 'inspire3.desy.de':
+    pythonkommando = '/home/library/.virtualenvs/inspire/bin/python'
+else:
+    pythonkommando = 'python'
+
 kommando = '/afs/desy.de/user/l/library/proc/ieee_crawler.xml.py'
 
 driver = webdriver.PhantomJS()
@@ -83,8 +89,8 @@ def harvest(todo):
     for (isn, jnl) in todo:
         print jnl, isn
         if isn > 0:
-            print '  python %s %s' % (kommando, isn)
-            os.system('python %s %s' % (kommando, isn))
+            print '  %s %s %s' % (pythonkommando, kommando, isn)
+            os.system('%s %s %s' % (pythonkommando, kommando, isn))
         inf = open(jlist, 'r')
         lines = inf.readlines()
         inf.close()
