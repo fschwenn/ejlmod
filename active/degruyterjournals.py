@@ -26,7 +26,9 @@ year  = sys.argv[2]
 vol = sys.argv[3]
 iss = sys.argv[4]
 
-jnlfilename = 'dg%s.%s.%s' %  (journal, vol, iss)
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
+jnlfilename = 'dg%s.%s.%s_%s' %  (journal, vol, iss, stampoftoday)
 if journal == 'phys':
     if int(vol) <= 12:
         jnl = 'Central Eur.J.Phys.'
