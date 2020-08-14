@@ -25,15 +25,16 @@ vol = sys.argv[1]
 issue = sys.argv[2]
 
 jnlname = 'New Phys.Sae Mulli'
-urltrunk = 'http://www.npsm-kps.org/journal'
+urltrunk = 'http://www.npsm-kps.org'
 
 jnlfilename = "npsm%s.%s" % (vol, issue)
 toclink = "%s/list.html?page=1&sort=&scale=500&all_k=&s_t=&s_a=&s_k=&s_v=%s&s_n=%s&spage=&pn=search&year=" % (urltrunk, vol, issue)
+toclink = "%s/journal/list.html?pn=vol&TG=vol&sm=&s_v=%s&s_n=%s&scale=500" % (urltrunk, vol, issue)
 
-print "get table of content..."
+print "get table of content... from %s" % (toclink)
 
 try:
-    tocpage = BeautifulSoup(urllib2.urlopen(toclink))
+    tocpage = BeautifulSoup(urllib2.urlopen(toclink), features="lxml")
 except:
     print '%s not found' % (toclink)
     sys.exit(0)
@@ -42,84 +43,76 @@ except:
 recs = []
 recc = re.compile('http.*creativecommons.org')
 repacs = re.compile('PACS numbers:? *')
-doneartlinks = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'list'}):
-    for table in div.find_all('table'):
-        for tr in table.find_all('tr'):
-            for td in tr.find_all('td', attrs = {'class' : 'j_ti'}):
-                rec = {'jnl' : jnlname, 'tc' : tc, 'issue' : issue, 'note' : [], 
-                       'auts' : [], 'aff' : [], 'keyw' : [], 'vol' : vol}
-                for a in td.find_all('a'):
-                    artlink = '%s/%s' % (urltrunk, a['href'])
-                    rec['tit'] = a.text.strip()
-                if artlink in doneartlinks:
-                    continue
+
+for h4 in tocpage.body.find_all('h4'):
+    rec = {'jnl' : jnlname, 'tc' : tc, 'issue' : issue, 'note' : [], 
+           'auts' : [], 'aff' : [], 'keyw' : [], 'vol' : vol}
+    for a in h4.find_all('a'):
+        artlink = '%s/%s' % (urltrunk, a['href'])
+        rec['tit'] = a.text.strip()
+        time.sleep(4)
+        try:
+            artpage = BeautifulSoup(urllib2.urlopen(artlink))
+        except:
+            print '%s not found' % (artlink)
+            sys.exit(0)
+        for meta in artpage.head.find_all('meta'):
+            if meta.has_attr('name'):
+                if meta['name'] == 'citation_doi':
+                    rec['doi'] = meta['content']
+                elif meta['name'] == 'citation_pdf_url':
+                    rec['fulltext'] = meta['content']
+                elif meta['name'] == 'citation_firstpage':
+                    rec['p1'] = meta['content']
+                elif meta['name'] == 'citation_lastpage':
+                    rec['p2'] = meta['content']
+                elif meta['name'] == 'citation_keywords':
+                    rec['keyw'].append(meta['content'])
+                elif meta['name'] == 'citation_online_date':
+                    rec['date'] = meta['content']
+        #check for licence
+        for a in artpage.body.find_all('a'):
+            if a.has_attr('href'):
+                if recc.search(a['href']):
+                    rec['licence'] = {'url' : a['href']}
+        #abstract
+        for dd in artpage.body.find_all('div', attrs = {'class' : 'go_section'}):
+            rec['abs'] = re.sub('Keywords:.*', '', dd.text.strip())
+        #authors
+        for diva in artpage.body.find_all('div', attrs = {'class' : 'origin_section02'}):
+            ps = diva.find_all('p')
+            for sup in ps[0].find_all('sup'):
+                aff = ''
+                for supp in re.split(',', sup.text.strip()):
+                    aff += ', =Aff' + supp
+                sup.replace_with(aff)
+            for author in re.split(' *, *', ps[0].text.strip()):
+                author = re.sub('\*', '', author)
+                if re.search('=Aff', author):
+                    rec['auts'].append(author)
                 else:
-                    doneartlinks.append(artlink)
-                time.sleep(10)
-                try:
-                    artpage = BeautifulSoup(urllib2.urlopen(artlink))
-                except:
-                    print '%s not found' % (artlink)
-                    sys.exit(0)
-                for meta in artpage.head.find_all('meta'):
-                    if meta.has_attr('name'):
-                        if meta['name'] == 'citation_doi':
-                            rec['doi'] = meta['content']
-                        elif meta['name'] == 'citation_pdf_url':
-                            rec['pdf'] = meta['content']
-                        elif meta['name'] == 'citation_firstpage':
-                            rec['p1'] = meta['content']
-                        elif meta['name'] == 'citation_lastpage':
-                            rec['p2'] = meta['content']
-                        elif meta['name'] == 'citation_keywords':
-                            rec['keyw'].append(meta['content'])
-                        elif meta['name'] == 'citation_online_date':
-                            rec['date'] = meta['content']
-                #check for licence
-                for a in artpage.body.find_all('a'):
-                    if a.has_attr('href'):
-                        if recc.search(a['href']):
-                            rec['licence'] = {'url' : a['href']}
-                            rec['FFT'] = rec['pdf']
-                            del rec['pdf']
-                #abstract
-                for dd in artpage.body.find_all('dd', attrs = {'style' : 'text-align:justify;'}):
-                    rec['abs'] = dd.text.strip()
-                #PACS
-                for dd in artpage.body.find_all('dd', attrs = {'class' : 'j_text_size'}):
-                    ddtext = dd.text.strip()
-                    if repacs.search(ddtext):
-                        rec['pacs'] = re.split(' *, *', repacs.sub('', ddtext))
-                #authors and affiliations
-                authorstructure = artpage.body.find_all('div', attrs = {'style' : 'padding:10px 0;'})[0]
-                for diva in authorstructure.find_all('div', attrs = {'class' : 'bold j_text_size'}):
-                    for sup in diva.find_all('sup'):
-                        aff = ', =Aff' + sup.text.strip()
-                        sup.replace_with(aff)
-                    for author in re.split(' *, *', diva.text.strip()):
-                        author = re.sub('\*', '', author)
-                        if re.search('=Aff', author):
-                            rec['auts'].append(author)
-                        else:
-                            rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', author))
-                for diva in authorstructure.find_all('div', attrs = {'class' : 'j_text_size'}):
-                    if 'bold' in diva['class']:
-                        continue
-                    for br in diva.find_all('br'):
-                        br.replace_with(';;;')
-                    for sup in diva.find_all('sup'):
-                        aff = 'Aff%s= ' % (sup.text.strip())
-                        sup.replace_with(aff)
-                    for divb in diva.find_all('div'):
-                        affi = divb.text.strip()
-                    if not rec['aff']:
-                        affi = diva.text.strip()
-                    for aff in re.split(';;;', affi):
-                        rec['aff'].append(aff)
-                        
-                recs.append(rec)
-                print rec['doi'], rec['tit']
+                    rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', author))
+            ps[0].decompose()
+            print 'XXX auts', rec['auts']
+        #affiliations
+        for diva in artpage.body.find_all('div', attrs = {'class' : 'inner_content'}):
+            for h2 in diva.find_all('h2'):
+                h2.replace_with('XXXX')
+            for sup in diva.find_all('sup'):
+                aff = ';;; Aff%s= ' % (sup.text.strip())
+                sup.replace_with(aff)
+            divat = re.sub('Correspondence to:.*', '', re.sub('[\n\t\r]', ' ', diva.text.strip()))
+            divat = re.sub('.*XXXX', '', divat)
+            divat = re.sub('Abstract *Go to Abstract.*', '', divat)
+            print divat
+            divat = re.sub('Received.*', '', divat)
+            
+            for aff in re.split(';;;', divat):
+                if len(aff) > 6:
+                    rec['aff'].append(aff.strip())
+            print 'XXXaff', rec['aff']
+        recs.append(rec)
+        print rec['doi'], rec.keys()
     
     
 #write xml
