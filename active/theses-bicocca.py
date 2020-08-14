@@ -40,7 +40,7 @@ for page in range(pages):
         for td in tr.find_all('td', attrs = {'headers' : 't1'}):
             for a in td.find_all('a'):
                 rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
-                rec['artlink'] = 'https://boa.unimib.it' + a['href']
+                rec['artlink'] = 'https://boa.unimib.it' + a['href'] + '?mode=full.716'
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
         for td in tr.find_all('td', attrs = {'headers' : 't2'}):
             rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', td.text.strip())
@@ -101,6 +101,52 @@ for rec in prerecs:
                 if meta['content'][:3] in ['FIS', 'INF', 'ING', 'MAT']: 
                     rec['note'].append(meta['content'])
                     interesting = True
+    # :( meta-tags now hidden in JavaScript
+    if not 'autaff' in rec.keys():
+        for table in artpage.body.find_all('table', attrs = {'class' : 'itemTagFields'}):
+            for tr in table.find_all('tr'):
+                for td in tr.find_all('td', attrs = {'class' : 'metadataFieldLabel'}):
+                    tdlabel = td.text.strip()
+                for td in tr.find_all('td', attrs = {'class' : 'metadataFieldValue'}):
+                    #author
+                    if re.search('^Autori', tdlabel):
+                        rec['autaff'] = [[td.text.strip()]]
+                    #supervisor
+                    elif re.search('^Tutore', tdlabel):
+                        rec['supervisor'] = [[td.text.strip()]]
+                    #title
+                    elif re.search('^Titolo', tdlabel):
+                        rec['tit'] = td.text.strip()
+                    #date
+                    elif re.search('^Data di', tdlabel):
+                        rec['date'] = re.sub('.*(\d\d\d\d).*', r'\1', td.text.strip())
+                    #abstract
+                    elif re.search('^Abstract', tdlabel):
+                        if re.search(' the ', td.text):
+                            rec['abs'] = td.text.strip()
+                    #language
+                    elif re.search('^Lingua', tdlabel):
+                        if re.search('Ital', td.text.strip()):
+                            rec['language'] = 'italian'
+                    #keywords
+                    elif re.search('^Parole.*Inglese', tdlabel):
+                        rec['keyw'] = re.split('; ', td.text.strip())
+                    #section
+                    elif re.search('^Settore', tdlabel):
+                        interesting = False
+                        if td.text.strip()[:3] in ['FIS', 'INF', 'ING', 'MAT']: 
+                            rec['note'].append(td.text.strip())
+                            interesting = True
+                        else:
+                            print '  skip', td.text.strip()
+        #FFT
+        for div in artpage.body.find_all('div', attrs = {'class' : 'itemTagBitstreams'}):
+            for span in div.find_all('span', attrs = {'class' : 'label'}):
+                if re.search('Open', span.text):
+                    for a in div.find_all('a'):
+                        if re.search('pdf$', a['href']):
+                            rec['FFT'] = 'https://boa.unimib.it' + a['href']
+        
     rec['autaff'][-1].append(publisher)
     #license            
     for table in artpage.body.find_all('table', attrs = {'class' : 'ep_block'}):
