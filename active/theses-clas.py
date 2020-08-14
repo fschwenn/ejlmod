@@ -16,7 +16,7 @@ import datetime
 import time
 import json
 from afftranslator2 import *
-from invenio.search_engine import search_pattern
+#from invenio.search_engine import search_pattern
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -50,9 +50,9 @@ for table in tocpage.body.find_all('table', attrs = {'class' : 'sortable'}):
             if len(tds) == 8:
                 rec = {'jnl' : 'BOOK', 'tc' : typecode, 'supervisor' : []}
                 rec['date'] = re.sub('(.*) (.*)', r'\2 \1', tds[2].text.strip())
-                icn = bestmatch(tds[3].text.strip(), 'ICN')[0][1]
+                inst = tds[3].text.strip()
                 for sv in re.split(' *[&,] ', tds[4].text.strip()):
-                    rec['supervisor'].append([sv, icn ])
+                    rec['supervisor'].append([sv])
                 rec['autaff'] = [ [ '%s, %s' % (tds[1].text.strip(), tds[0].text.strip()), tds[3].text.strip() ] ]
                 rec['tit'] = tds[5].text.strip()
                 for a in tds[5].find_all('a'):
@@ -62,14 +62,16 @@ for table in tocpage.body.find_all('table', attrs = {'class' : 'sortable'}):
                 rawexperiment = tds[7].text.strip()
                 if re.search('^E(\d+)\-(\d+)', rawexperiment):
                     exp = re.sub('^E\d?(\d\d)\-(\d+)', r'JLAB-E-\1-\2', rawexperiment)
-                    if search_pattern(p='980__a:EXPERIMENT 119__a:%s' % (exp)):
-                        rec['exp'] = exp
+                    #if search_pattern(p='980__a:EXPERIMENT 119__a:%s' % (exp)):
+                    #    rec['exp'] = exp
+                    rec['keyw'] = [exp]
                 if re.search('20\d\d', rec['date']):
                     year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
                 elif re.search('19\d\d', rec['date']):
                     year = int(re.sub('.*(19\d\d).*', r'\1', rec['date']))
                 if year >= now.year - 1:
                     recs.append(rec)
+                    print rec.keys()
 
     
 #closing of files and printing
