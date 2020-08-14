@@ -14,6 +14,7 @@ import codecs
 import datetime
 import time
 import json
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -104,13 +105,17 @@ boringdepartments = ['Department of Molecular and Cellular Biology',
 rpp = 100
 pages = 5
 
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
 for page in range(pages):
     tocurl = 'https://ir.stonybrook.edu/xmlui/handle/11401/73112/browse?order=DESC&rpp=' + str(rpp) + '&sort_by=2&etal=-1&offset=' + str(page*rpp) + '&type=dateissued'
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     divs = tocpage.body.find_all('div', attrs = {'class' : 'artifact-title'})
     for div in divs:
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : []}
@@ -126,13 +131,15 @@ for rec in prerecs:
     i += 1
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        req = urllib2.Request(rec['artlink'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
         time.sleep(3)
     except:
         try:
-            print "   retry %s in 5 seconds" % (rec['artlink'])
-            time.sleep(5)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            print "   retry %s in 15 seconds" % (rec['artlink'])
+            time.sleep(15)
+            req = urllib2.Request(rec['artlink'], headers=hdr)
+            artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
         except:
             print "   no access to %s" % (rec['artlink'])
             continue
