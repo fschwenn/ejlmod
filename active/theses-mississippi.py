@@ -42,7 +42,7 @@ uninteresting = [re.compile('M\.A\.'), re.compile('M\.S\.'), re.compile('Ed\.D\.
                  
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
-jnlfilename = 'THESES-MISSISSIPPI-%sold' % (stampoftoday)
+jnlfilename = 'THESES-MISSISSIPPI-%s' % (stampoftoday)
 for i in range(numofpages):
     if i == 0:
         tocurl = 'https://egrove.olemiss.edu/etd/index.html'
