@@ -24,7 +24,8 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
 def tfstrip(x): return x.strip()
 
-publisher = 'TÜBİTAK'
+publisher = u'TÜBİTAK'
+#publisher = 'TUBITAK'
 jnl = sys.argv[1]
 vol = sys.argv[2]
 year = str(int(vol)+1976)
@@ -73,7 +74,6 @@ for div in page.body.find_all('div', attrs = {'class' : 'panel-body'}):
         if len(divs) < 4:
             continue
         for a in divs[3].find_all('a'):
-            print a 
             if re.search('pdf$', a['href']):
                 rec['link'] = a['href']
                 rec['doi'] = re.sub('.*\/(.*?)\.pdf',r'\1',rec['link'])
@@ -92,10 +92,10 @@ for div in page.body.find_all('div', attrs = {'class' : 'panel-body'}):
                             rec['p2'] = meta['content']
                 for diva in abstract.body.find_all('div', attrs = {'class' : 'panel-body'}):
                     ps = diva.find_all('p', attrs = {'align' : 'justify'})
-                    print ps[1]
-                    print ps[1].text
+                    #print ps[1]
+                    #print ps[1].text
                     rec['abs'] = re.sub('Abstract.', '', ps[1].text).strip()
-        print rec
+        print rec.keys()
         recs.append(rec)
 
 
