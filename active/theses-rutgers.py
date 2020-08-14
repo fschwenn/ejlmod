@@ -31,7 +31,7 @@ jnlfilename = 'THESES-RUTGERS-%s' % (stampoftoday)
 recs = []
 hdr = {'User-Agent' : 'Magic Browser'}
 
-for page in range(15):
+for page in range(5):
     tocurl = 'https://rucore.libraries.rutgers.edu/search/results/?orderby=datedesc&ppage=50&numresults=50&key=ETD-RU&start=%i' % (50*page + 1)
     print '---{ %i }---{ %s }---' % (page, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
