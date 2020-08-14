@@ -49,7 +49,9 @@ for section in sections:
             for a in tr.find_all('a'):
                 if re.search('handle\/88435', a['href']):
                     rec['artlink'] = 'https://dataspace.princeton.edu' + a['href'] #+ '?show=full'
-                    rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                    #it's not a registered handle
+                    #rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                    rec['doi'] = '20.2000/PRINCETON/' + re.sub('.*handle\/', '', a['href'])
                     recs.append(rec)
     i = 0
     for rec in recs:
