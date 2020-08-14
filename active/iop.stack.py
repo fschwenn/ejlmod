@@ -16,6 +16,7 @@ import tarfile
 import shutil
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 iopdirtmp = '/afs/desy.de/group/library/publisherdata/iop/tmp'
 iopdirraw = '/afs/desy.de/group/library/publisherdata/iop/raw'
 iopdirdone = '/afs/desy.de/group/library/publisherdata/iop/done'
@@ -937,13 +938,14 @@ bookfeeds = []
 for datei in os.listdir(iopdirraw):
     if datei in os.listdir(iopdirdone):
         print '%s already in done' % (datei)
-    elif re.search('tar.gz', datei):
+    elif re.search('tar.gz$', datei):
         todo.append(datei)
 
 
 print '%i packages to do: %s' % (len(todo), ', '.join(todo))
 if not todo:
     sys.exit(0)
+
 
 #extract the feeds:
 for datei in todo:
@@ -1222,7 +1224,7 @@ def convertarticle(issn, vol, isu, artid):
         
 #scan extracted directories
 for issn in os.listdir(iopdirtmp):
-    if re.search('\d\d\d\d\-\d\d\d\d', issn):
+    if re.search('\d\d\d\d\-\d\d\d[\dX]', issn):
         for vol in os.listdir(os.path.join(iopdirtmp, issn)):
             if re.search('\d', vol):
                 recs = []
@@ -1401,7 +1403,6 @@ for bookfeed in bookfeeds:
         xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
         ejlmod2.writeXML(recs ,xmlfile,'IOP')
         xmlfile.close()
-        retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
         retfiles_text = open(retfiles_path,"r").read()
         line = iopf+'.xml'+ "\n"
         if not line in retfiles_text: 
@@ -1413,6 +1414,6 @@ for bookfeed in bookfeeds:
 #if everything went fine, move the files to done
 for datei in todo:
     os.system('cp %s/%s %s/%s' % (iopdirraw, datei, iopdirdone, datei))
-    shutil.rmtree(iopdirtmp)
+shutil.rmtree(iopdirtmp)
 print 'done :-)'
     
