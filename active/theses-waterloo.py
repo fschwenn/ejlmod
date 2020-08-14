@@ -15,6 +15,7 @@ import codecs
 import datetime
 import time
 import json
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -29,16 +30,19 @@ typecode = 'T'
 
 jnlfilename = 'THESES-WATERLOO-%s' % (stampoftoday)
 years = [str(now.year - 1), str(now.year)]
-#years = [str(now.year - 4), str(now.year - 3), str(now.year - 2), str(now.year - 1)]
 
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 hdr = {'User-Agent' : 'Magic Browser'}
 for year in years:
-    if year != year[0]:
+    if year != years[0]:
         time.sleep(300)
     tocurl = 'https://uwspace.uwaterloo.ca/handle/10012/6/discover?rpp=200&filtertype_0=dateIssued&filter_0=[' + year + '+TO+' + year + ']&filter_relational_operator_0=equals&filtertype=type&filter_relational_operator=equals&filter=Doctoral+Thesis'
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     recs = []
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
@@ -50,15 +54,17 @@ for year in years:
     i = 0
     for rec in recs:
         i += 1
-        print '---{ %s }---{ %i/%i}---{ %s }------' % (year, i, len(recs), rec['artlink'])
+        print '---{ %s }---{ %i/%i }---{ %s }------' % (year, i, len(recs), rec['artlink'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            req = urllib2.Request(rec['artlink'], headers=hdr)
+            artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
             time.sleep(3)
         except:
             try:
                 print "retry %s in 180 seconds" % (rec['artlink'])
                 time.sleep(180)
-                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+                req = urllib2.Request(rec['artlink'], headers=hdr)
+                artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
             except:
                 print "no access to %s" % (rec['artlink'])
                 continue    
