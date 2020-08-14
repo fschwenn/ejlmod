@@ -48,11 +48,11 @@ tocurls = []
 for div in startpage.body.find_all('div', attrs = {'class' : 'collapsed-content'}):
     for li in div.find_all('li'):
         lit = li.text.strip()
-        year = re.sub('.*(20\d\d).*', r'\1', lit)
         for searchterm in searchterms:
             if searchterm[1].search(lit):
                 for a in li.find_all('a'):
                     print ' -', lit
+                    year = re.sub('.*(20\d\d).*', r'\1', lit)
                     tocurls.append((searchterm[0], 'http://journal.sfu-kras.ru' + a['href']))
 
 i = 0
