@@ -29,7 +29,7 @@ recordsperpage = 50
 
 prerecs = []
 recs = []
-jnlfilename = 'THESES-HANNOVER-%sOLD' % (stampoftoday)
+jnlfilename = 'THESES-HANNOVER-%s' % (stampoftoday)
 for pn in range(numberofpages):
     tocurl = 'https://www.repo.uni-hannover.de/handle/123456789/2962/browse?rpp=' + str(recordsperpage) + '&sort_by=2&type=dateissued&offset=' + str(pn * recordsperpage) + '&etal=-1&order=DESC'
     print '==={ %i/%i }==={ %s }===' % (pn+1, numberofpages, tocurl)
