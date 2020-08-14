@@ -13,6 +13,7 @@ import codecs
 from bs4 import BeautifulSoup
 import datetime
 import time 
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -28,13 +29,20 @@ typecode = 'T'
 jnlfilename = 'THESES-KIT_ETP-%s' % (stampoftoday)
 pages = 18 
 #tocurl = 'https://publish.etp.kit.edu/search?page=1&size=20&q=resource_type.type:%20thesis&sort=-publication_date&subtype=phd-thesis'
-tocurl = 'https://publish.etp.kit.edu/oai2d?verb=ListRecords&metadataPrefix=marcxml&from=2019-01-01'
+tocurl = 'https://publish.etp.kit.edu/oai2d?verb=ListRecords&metadataPrefix=marcxml&from=%4d-01-01' % (now.year-1)
+
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+hdr = {'User-Agent' : 'Magic Browser'}
 
 records = []
 cls = 999
 for i in range(pages):
     if 100*i <= cls:
-        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+        req = urllib2.Request(tocurl, headers=hdr)
+        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
         for record in tocpage.find_all('record'):
             for df in record.find_all('datafield', attrs = {'tag' : '980'}):
                 for sf in df.find_all('subfield', attrs = {'code' : 'b'}):
@@ -139,7 +147,8 @@ for record in records:
                 rec['exp'] = 'CERN-LEP-DELPHI'    
     #check record page for more information
     if isnew:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        req = urllib2.Request(rec['link'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
         #keywords        
         for a in artpage.find_all('a', attrs = {'class' : 'label-link'}):
             for span in a.find_all('span'):
