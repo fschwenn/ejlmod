@@ -224,7 +224,7 @@ def ieee(number):
             for author in gdm['authors']:
                 autaff = [author['name']]
                 if author.has_key('affiliation'):
-                    autaff.append(author['affiliation'])
+                    autaff += author['affiliation']
                 if author.has_key('orcid'):
                     autaff.append('ORCID:'+author['orcid'])
                 rec['autaff'].append(autaff)
