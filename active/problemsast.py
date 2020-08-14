@@ -10,7 +10,10 @@ import re
 import sys
 import unicodedata
 import string
-from removehtmlgesocks import removehtmlgesocks
+import urllib2
+import urlparse
+import time
+from bs4 import BeautifulSoup
 
 
 
@@ -20,7 +23,6 @@ lproc = '/afs/desy.de/user/l/library/proc'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 tmpdir = '/tmp'
 
-def tfstrip(x): return x.strip()
 
 publisher = 'Kharkov Institute of Physics and Technology'
 year = sys.argv[1]
@@ -37,112 +39,60 @@ urltrunk = 'http://vant.kipt.kharkov.ua'
 recs = []
 recnr = 1
 print "get table of content ..."
-#os.system("lynx -source \"%s/CONTENTS/CONTENTS_%s_%s.html\"  > %s/%s.toc" % (urltrunk,year,issue,tmpdir,jnlfilename))
-os.system("lynx -dump \"%s/CONTENTS/CONTENTS_%s_%s.html\"  > %s/%s.toc" % (urltrunk,year,issue,tmpdir,jnlfilename))
-    
-tocfil = open("%s/%s.toc" % (tmpdir,jnlfilename),'r')
+tocurl = '%s/CONTENTS/CONTENTS_%s_%s.html' % (urltrunk, year, issue)
+hdr = {'User-Agent' : 'Magic Browser'}
 
-#tocline = re.sub('\s\s+',' ',' '.join(map(tfstrip,tocfil.readlines())))
-#for tline in re.split(' *<tr> *',tocline):    
-subject =  ''
-for tline in  map(tfstrip,tocfil.readlines()):
-    if re.search('^ *\([p@]',tline):
-        rec = {}
-        rec['auts'] = []
-        rec['aff'] = []
-        rec['vol'] = year
-        rec['issue'] = issue
-        rec['typ'] = ''
-        rec['jnl'] = jnlname        
-        rec['note'] = []
-        rec['year'] = year
-        if subject != '': rec['note'].append(subject)
-        rec['tc'] = 'P'
-        rec['tit'] = ''
-        pages = re.sub(' *\([p@]\. *(.*?)\).*',r'\1',tline)
-        rec['p1'] = re.sub('^(\d+) *\- *(\d+)',r'\1',pages)
-        rec['p2'] = re.sub('^(\d+) *\- *(\d+)',r'\2',pages)
-        print "%s%s (%s) %s-%s" %(jnlname,rec['vol'],year,rec['p1'],rec['p2'])
-        rec['pdf'] = "%s/ARTICLE/VANT_%s_%s/article_%s_%s_%s.pdf" % (urltrunk,year,issue,year,issue,rec['p1'])
-        doi1 = "article_%s_%s_%s" % (year,issue,rec['p1'])
-        link = "ANNOTAZII_%s/annotazii_%s_%s_%s.html" % (year,year,issue,rec['p1'])
-        artfilname = tmpdir+"/"+jnlfilename+"."+str(recnr)
-        if not os.path.isfile(artfilname):
-            print "lynx -source \"%s/%s\" > %s" %(urltrunk,link,artfilname)
-            #os.system("lynx -source \"%s/%s\" > %s" %(urltrunk,link,artfilname))
-            os.system("lynx -dump \"%s/%s\" > %s" %(urltrunk,link,artfilname))
-        artfil = open(artfilname,'r')
-        #artline = re.sub('\s\s+',' ',' '.join(map(tfstrip,artfil.readlines())))
-        #for aline in re.split(' *<tr> *',artline):
-        flagaut = flagabs = flagaff = flagtit = False        
-        affiliations =''
-        abstract = ''
-        for aline in map(tfstrip,artfil.readlines()):
-            if re.search('^ *(\(Received |\**E.mail)',aline):
-                aline = ''
-                flagaff = False
-                flagabs = True            
-            if re.search('^ *PAST.*'+year,aline):
-                flagtit = True
-            elif flagtit and re.search('[A-Z][A-Z][A-Z]+',aline):
-                if (len(re.sub('[A-Z ]','',aline)) / float(len(re.sub(' ','',aline))) < .3):
-                    rec['tit'] += aline 
-                #print "%6.3f %s" % ( len(re.sub('[A-Z ]','',aline)) / float(len(re.sub(' ','',aline))),aline)
-            elif (rec['tit'] != '') and (rec['auts'] == []) and re.search('[a-z]',aline):
-                flagaut = True
-                flagtit = False
-            if flagaff: 
-                aline = re.sub(' *\^(\d+)', r';Aff\1=',aline)
-                aline = re.sub(' *(\d)([A-Z])', r';Aff\1=\2',aline)
-                affiliations += ' '+aline
-                if re.search('^ *$',aline):
-                    flagaff = False
-                    flagabs = True            
-            if flagaut:
-                if not re.search(', *$',aline): 
-                    flagaut = False
-                    flagaff = True
-                aline = re.sub('^ *','',aline)
-                aline = re.sub('\*','',aline)
-                #workaround to distingiush komma between authors and markers
-                aline = re.sub(',(\d+)',r';\1',aline)
-                aline = re.sub(',(\d+)',r';\1',aline)
-                aline = re.sub(',(\d+)',r';\1',aline)
-                aline = re.sub(',(\d+)',r';\1',aline)
-                for aut in re.split(' *, *',aline):
-                    if re.search('\d',aut):
-                        marker = re.sub('.* *\^?(\d.*)',r'\1',aut)
-                    else:
-                        marker = ''
-                    aut = re.sub(' *\^?\d.*', '', aut)
-                    if (len(aut) > 2):
-                        rec['auts'].append(re.sub('^(.*) (.*?)$', r'\2, \1', aut))
-                        if not (marker == ''):
-                            for mark in re.split(' *; *',marker):
-                                if mark != '':
-                                    rec['auts'].append("=Aff"+mark)
-            if flagabs and re.search('[a-z]',aline):
-                if re.search('PACS\:',aline):
-                    flagabs = False
-                    rec['pacs'] = re.sub('.*PACS\: *(.*)',r'\1',aline)
-                    rec['pacs'] = re.sub('\. ','.',rec['pacs'])
-                    rec['pacs'] = re.sub('(\d\d)',r'\1.',rec['pacs'])
-                    rec['pacs'] = re.sub('\.+','.',rec['pacs'])
-                    rec['pacs'] = re.split(' *[;,]',rec['pacs'])
-                else:
-                    abstract += aline
-            if flagabs and (len(abstract) > 5) and re.search('^ *$',aline):
-                flagabs = False
-        #write record
-        rec['tit'] = re.sub('  +',' ',rec['tit'])
-        rec['abs'] = re.sub('  +',' ',abstract)
-        affiliations = re.sub('  +',' ',affiliations)
-        for aff in re.split(' *; *',affiliations):
-            if (len(aff) > 5):
-                rec['aff'].append(re.sub('^ *','',aff))
-        #print "REC",rec
-        recnr += 1
+req = urllib2.Request(tocurl, headers=hdr)
+tocpage = BeautifulSoup(urllib2.urlopen(req))
+section = False
+recs = []
+for tr in tocpage.body.find_all('tr'):
+    for h1 in tr.find_all('h1'):
+        section = h1.text.strip()
+    for h3 in tr.find_all('h3'):
+        rec = {'jnl' : jnlname, 'vol' : year, 'year' : year, 'issue' : issue,
+               'note' : [], 'tc' : 'P', 'auts' : []}
+        if section: rec['note'].append(section)
+        #title
+        rec['tit'] = re.sub('  ', ' ', re.sub('[\n\t\r]', ' ', h3.text.strip()))
+        for a in tr.find_all('a'):
+            if a.has_attr('href'):
+                #detailed page
+                if re.search('html$', a['href']):
+                    rec['link'] = 'https://vant.kipt.kharkov.ua' +  a['href'][2:]
+                #fulltext
+                elif re.search('pdf$', a['href']):
+                    rec['FFT'] = 'https://vant.kipt.kharkov.ua' +  a['href'][2:]
+        for p in tr.find_all('p'):
+            #pages
+            pages = re.sub('.*\(\D*(.*?)\).*', r'\1', re.sub('[\t\n\r]', '', p.text.strip()))
+            rec['p1'] = re.sub('^(\d+) *\- *(\d+)',r'\1',pages)
+            rec['p2'] = re.sub('^(\d+) *\- *(\d+)',r'\2',pages)
+            #auts
+            auts = re.sub('\(.*', '', re.sub('[\t\n\r]', '', p.text.strip())).strip()
+            for aut in re.split(', *', auts):
+                rec['auts'].append(re.sub('\.([A-Z][a-z])', r'. \1', aut))
+        print "%s %s (%s) %s-%s" % (jnlname, rec['vol'], year, rec['p1'], rec['p2'])
         recs.append(rec)
+
+for rec in recs:
+    time.sleep(2)
+    req = urllib2.Request(rec['link'], headers=hdr)
+    artpage = BeautifulSoup(urllib2.urlopen(req))
+    for p in artpage.find_all('p', attrs = {'align' : 'justify'}):
+        if not 'abs' in rec.keys():
+            pt =  re.sub('[\t\n\r]', ' ', p.text.strip())
+            #pacs
+            if re.search('PACS:', pt):
+                pacs = re.sub('.*PACS: *', '', pt)
+                rec['pacs'] = re.split(', *', pacs)
+                pt = re.sub('PACS:.*', '', pt)
+                pt = re.sub('PACS:.*', '', pt)
+            #abs
+            if len(pt) > 10:
+                rec['abs'] = pt
+        print rec.keys()
+        
 
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
