@@ -243,8 +243,18 @@ def convertToInspire(argv):
         
         # check the first URLs
         
-        if urls > 0:
+        url = ''
+        if len(urls) > 0:
             url = urls[0]
+        else:    
+            # construct url from DOI
+            dois = record_get_field_values(record, '024', '7', ' ', 'a')
+            if len(dois) > 0:
+                doi_parts = dois[0][9:].lower().split('-')
+                if len(doi_parts) == 3:
+                    url = "http://jacow.org/%s/papers/%s.pdf" % (doi_parts[1], doi_parts[2]) 
+        
+        if url:
             if url[-4:].lower() == '.pdf':
                 if nrec < 10:
                     url_type = urllib.urlopen(url).info().gettype()
@@ -273,8 +283,6 @@ def convertToInspire(argv):
                
             else:
                 record_add_field(record,'856','4',' ','',[('u', urls[0]),('y', 'JACOW')])            
-           
-        
         else:
             print 'No URL found!'
             print record
