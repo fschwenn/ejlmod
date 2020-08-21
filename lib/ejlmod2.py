@@ -321,14 +321,16 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('keyw'):
             for kw in rec['keyw']:
                 #xmlstring += marcxml('6531',[('a',kw), ('9','publisher')])
-                if kw: 
+                if kw.strip(): 
                     try:
                         xmlstring += marcxml('6531',[('a',kw), ('9','author')])
                     except:
-                        xmlstring += marcxml('6531', [('a', unidecode.unidecode(kw)), ('9','author')])
+                        if unidecode.unidecode(kw).strip():
+                            xmlstring += marcxml('6531', [('a', unidecode.unidecode(kw)), ('9','author')])
         if rec.has_key('authorkeyw'):
             for kw in rec['authorkeyw']:
-                xmlstring += marcxml('6531',[('a',kw), ('9','author')])
+                if kw:
+                    xmlstring += marcxml('6531',[('a',kw), ('9','author')])
         if rec.has_key('jnl'):
             liste = [('p',rec['jnl'])]
             if rec.has_key('year'):
@@ -362,7 +364,7 @@ def writeXML(recs,dokfile,publisher):
             if rec.has_key('motherisbn'): liste.append(('z',rec['motherisbn']))
             xmlstring += marcxml('773',liste)
         if 'alternatejnl' in rec.keys():
-            alternateliste = [('p',rec['alternatejnl'])]
+            alternateliste = [('p', rec['alternatejnl'])]
             for tup in liste:
                 if tup[0] == 'v':
                     if 'alternatevol' in rec.keys():
@@ -383,7 +385,7 @@ def writeXML(recs,dokfile,publisher):
                         alternateliste.append(('n', rec['alternateissue']))
                     else:
                         alternateliste.append(tup)
-                else:
+                elif tup[0] != 'p':
                     alternateliste.append(tup)
             xmlstring += marcxml('7731', alternateliste)
         if rec.has_key('jnl2') and rec.has_key('vol2'):
@@ -426,12 +428,13 @@ def writeXML(recs,dokfile,publisher):
                             pseudodoi += '_' + tupel[1]
                 xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
         if rec.has_key('pages'):
-            if type(rec['pages']) == type('999'):
-                xmlstring += marcxml('300',[('a',rec['pages'])])
-            elif type(rec['pages']) == type(u'999'):
-                xmlstring += marcxml('300',[('a',rec['pages'])])
-            elif type(rec['pages']) == type(999):
-                xmlstring += marcxml('300',[('a',str(rec['pages']))])
+            if rec['pages']:
+                if type(rec['pages']) == type('999'):
+                    xmlstring += marcxml('300',[('a',rec['pages'])])
+                elif type(rec['pages']) == type(u'999'):
+                    xmlstring += marcxml('300',[('a',rec['pages'])])
+                elif type(rec['pages']) == type(999):
+                    xmlstring += marcxml('300',[('a',str(rec['pages']))])
         if rec.has_key('date'):
             if re.search('[a-zA-Z] ', rec['date']):
                 rec['date'] = datetodate(rec['date'])
@@ -490,7 +493,11 @@ def writeXML(recs,dokfile,publisher):
             xmlstring += marcxml('980',[('a','arXiv')])
         if rec.has_key('rn'):
             for rn in rec['rn']:
-                xmlstring += marcxml('037', [('a', rn)])
+                #check for OSTI
+                if re.search('^OSTI\-', rn):
+                    xmlstring += marcxml('035', [('9', 'OSTI'), ('a', rn[5:])])
+                else:
+                    xmlstring += marcxml('037', [('a', rn)])
         if rec.has_key('exp'):
             xmlstring += marcxml('693',[('e',rec['exp'])])
         if rec.has_key('pdf'):
@@ -761,11 +768,14 @@ def shapeaut(author):
             author = re.sub('(.*) (van|van|de|von|del|du) (.*)',r'\2 \3, \1',author).strip()
         else:
             author = re.sub('(.*) (.*)',r'\2, \1',author).strip()
+    else:
+        author = re.sub('(.*) (van den|van der|van de|de la)$', r'\2 \1', author)
+        author = re.sub('(.*) (van|van|de|von|del|du)$', r'\2 \1', author)
     author = re.sub(' ([A-Z]) ',r' \1. ', author)
-    author = re.sub('([A-Z])$',r'\1.', author)
     author = re.sub('([A-Z] ?\.)[ \-]([A-Z] ?\.?)',r'\1\2', author)
     author = re.sub(', *', ', ', author.strip())
     if not re.search('[a-z]', author):
         author = author.title()
+    author = re.sub('([A-Z])$',r'\1.', author)
     return author
 
