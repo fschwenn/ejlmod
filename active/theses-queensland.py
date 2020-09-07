@@ -312,7 +312,7 @@ for page in range(pages):
             print rec['doi']
 
 
-buttons = tocpage.body.find_all('button')
+#buttons = tocpage.body.find_all('button')
 
 
 
