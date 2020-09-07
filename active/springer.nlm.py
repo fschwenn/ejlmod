@@ -254,10 +254,11 @@ def get_references(rl):
         (lt, refno) = ('', '')
         for label in ref.find_all('label'):
             lt = label.text.strip()
+            lt = re.sub('\W', '', lt)
             if re.search('\[', lt):
-                refno = '%s ' % (label.text.strip())
+                refno = '%s ' % (lt)
             else:
-                refno = '[%s] ' % (label.text.strip())
+                refno = '[%s] ' % (lt)
         #journal
         for mc in ref.find_all('mixed-citation', attrs = {'publication-type' : 'journal'}):
             (title, authors, pbn, doi) = ('', [], '', '')
