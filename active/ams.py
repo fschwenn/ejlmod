@@ -32,6 +32,11 @@ if len(sys.argv) > 3:
     if len(sys.argv) > 4:
         iss = sys.argv[4]
         jnlfilename += '.%s' % (iss)
+else:
+    now = datetime.datetime.now()
+    stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
+    jnlfilename += '_%s' % (stampoftoday)
+
     
 
 
