@@ -12,6 +12,7 @@ import urlparse
 import codecs
 from bs4 import BeautifulSoup
 import time
+import datetime
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -19,9 +20,12 @@ tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
 regexpref = re.compile('[\n\r\t]')
 
-publisher = 'Forschungszentrum Jülich'
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
+
+publisher = 'Forschungszentrum Julich'
 view = sys.argv[1]
-jnlfilename = 'jlsrf.%s' % (view)
+jnlfilename = 'jlsrf.%s_%s' % (view, stampoftoday)
 
     
 urltrunk = 'http://jlsrf.org/index.php/lsf/issue/view/%s' % (view)
@@ -77,6 +81,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'tocTitle'}):
             for p in refs.find_all('p')[:-1]:
                 rec['refs'].append([('x', p.text)])
         recs.append(rec)
+        #print rec
 
 
 
