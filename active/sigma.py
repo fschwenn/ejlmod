@@ -31,7 +31,7 @@ tocurl = 'http://www.emis.de/journals/SIGMA/%s/' % (year)
 hdr = {'User-Agent' : 'MagicBrowser'}
 
 req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
+tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
 
 prerecs = {}
 for dl in tocpage.body.find_all('dl'):
@@ -51,9 +51,10 @@ for dl in tocpage.body.find_all('dl'):
     if p1 >= firstarticle:
         time.sleep(1)
         artlink = 'https://www.emis.de/journals/SIGMA/%s/%03i/' % (year, p1)
+        print artlink
         req = urllib2.Request(artlink, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
-        for meta in tocpage.head.find_all('meta'):            
+        artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+        for meta in artpage.head.find_all('meta'):            
             if meta.has_attr('name'):
                 #volume
                 if meta['name'] == 'citation_volume':
@@ -73,7 +74,7 @@ for dl in tocpage.body.find_all('dl'):
                 #bull
                 elif meta['name'] == 'citation_arxiv_id':
                     rec['arxiv'] = meta['content']
-        bqs = tocpage.body.find_all('blockquote')
+        bqs = artpage.body.find_all('blockquote')
         #affiliations in superscripts
         for sup in bqs[0].find_all('sup'):    
             if re.search('\)', sup.text):
@@ -95,30 +96,33 @@ for dl in tocpage.body.find_all('dl'):
             if len(aff) > 2:
                 rec['aff'].append(aff)                        
         #abstract
-        for p in tocpage.body.find_all('p'):
+        for p in artpage.body.find_all('p'):
             for b in p.find_all('b'):
                 if b.text.strip() == 'Abstract':
                     b.decompose()
                     rec['abs'] = p.text.strip()
         #conference?
-        for i in tocpage.body.find_all('i'):
+        for i in artpage.body.find_all('i'):
             if  re.search('Contribution to.*Proceedings', i.text):
                 rec['note'].append(i.text.strip())
                 rec['tc'] = 'C'
         #refernces
-        for ol in tocpage.body.find_all('ol'):
+        for ol in artpage.body.find_all('ol'):
             rec['refs'] = []
             for li in ol.find_all('li'):
                 rdoi = False
                 for a in li.find_all('a'):
-                    if re.search('doi.org\/10', a['href']):
-                        rdoi = re.sub('.*org\/(10.*)', r', DOI: \1', a['href'])
+                    if a.has_attr('href'):
+                        if re.search('doi.org\/10', a['href']):
+                            rdoi = re.sub('.*org\/(10.*)', r', DOI: \1', a['href'])
+                    else:
+                        print '  non-linking anchor!?', a    
                 ref = li.text.strip()
                 if rdoi:
                     ref = re.sub('\.$', '', ref)
                     ref += rdoi
                 rec['refs'].append([('x', ref)])
-        print p1, rec['p1'], rec['doi'], rec.keys()
+        print '  ', p1, rec['p1'], rec['doi'], rec.keys()
         prerecs[p1] = rec
 
 keys = prerecs.keys()
