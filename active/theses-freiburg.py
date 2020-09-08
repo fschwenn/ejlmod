@@ -25,7 +25,7 @@ publisher = 'Freiburg U.'
 
 typecode = 'T'
 
-pages = 2
+pages = 4
 startyear = now.year - 1
 stopyear = now.year + 1
 
@@ -35,8 +35,9 @@ records = []
 for ddc in ['530', '500', '510']:
     cls = 999
     tocurl = 'https://freidok.uni-freiburg.de/oai/oai2.php?metadataPrefix=marcxml&verb=ListRecords&metadataPrefix=marcxml&set=ddc:%s&from=%i-01-01&until=%s-01-01' % (ddc, startyear, stopyear)
+    rpp = 1
     for i in range(pages):
-        if 100*i <= cls:
+        if rpp*i <= cls:
             tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
             for record in tocpage.find_all('record'):
                 for setspec in record.find_all('setspec'):
@@ -47,6 +48,8 @@ for ddc in ['530', '500', '510']:
             for rt in tocpage.find_all('resumptiontoken'):
                 tocurl = 'https://freidok.uni-freiburg.de/oai/oai2.php?verb=ListRecords&resumptionToken=' + rt.text.strip()
                 cls = int(rt['completelistsize'])
+                if rpp == 1:
+                    rpp = int(rt['cursor'])
             time.sleep(3)
 
 i = 0
