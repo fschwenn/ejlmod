@@ -124,7 +124,7 @@ def ieee(number):
     articlelinks = []
     driver = webdriver.PhantomJS()
     #driver = webdriver.Firefox()
-    driver.implicitly_wait(30)
+    driver.implicitly_wait(60)
     #driver.delete_all_cookies()
     gotallarticles = False
     allarticlelinks = []
@@ -138,9 +138,9 @@ def ieee(number):
         driver.get(urltrunc + toclink + pagecommand)
         if number[0] in ['C', '8', '9']:
 #        if number[0] in ['C']:
-            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
         else:
-            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
         #clicl to accept cookies
         if i == 1:
             try:
