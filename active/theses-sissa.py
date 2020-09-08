@@ -101,6 +101,7 @@ for rec in prerecs:
     for p in artpage.body.find_all('p', attrs = {'class' : 'abstractEng'}):
         rec['abs'] = p.text.strip()
     recs.append(rec)
+    print '  ', rec.keys()
 
 
 
