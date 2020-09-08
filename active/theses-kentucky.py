@@ -101,6 +101,11 @@ for rec in recs:
     for div in artpage.body.find_all('div', attrs = {'id' : 'advisor2'}):
         for p in div.find_all('p'):
             rec['supervisor'].append( [re.sub('^Dr. ', '', p.text.strip())] )
+    for div in artpage.body.find_all('div', attrs = {'id' : 'orcid'}):
+        for h4 in div.find_all('h4'):
+            if re.search('Author ORCID', h4.text):
+                for a in div.find_all('a'):
+                    rec['aff'].append(re.sub('.*\/', 'ORCID:', a.text.strip()))
     if not rec.has_key('doi'):
         rec['doi'] = '20.2000/KENTUCKY/' + re.sub('\W', '', re.sub('.*edu', '', rec['artlink']))
         rec['link'] = rec['artlink']
