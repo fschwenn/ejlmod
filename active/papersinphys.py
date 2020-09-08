@@ -152,21 +152,25 @@ for rec in recs:
         rec['licence'] = {'url' : a['href']}
     #references
     if jnl == 'pip':
+        reflink = False
         #reflink = re.sub('(.*)\/(.*)', r'https://www.papersinphysics.org/papersinphysics/article/download/\2/ref\2?inline=1', rec['artlink'])
         for a in artpage.body.find_all('a', attrs = {'class' : 'obj_galley_link file'}):
             if re.search('REFERENCES', a.text):
                 reflink = re.sub('view', 'download', a['href'])
-        print reflink
-        refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(reflink))
-        for a in refpage.body.find_all('a'):
-            if a.has_attr('href') and re.search('doi.org', a['href']):
-                rdoi = re.sub('.*doi.org\/', '', a['href'])
-                a.replace_with(', DOI: %s' % (rdoi))
-        allrefs = re.sub('[\n\t\r]', ' ', refpage.body.text.strip())
-        allrefs = re.sub('  +', ' ', allrefs)
-        allrefs = re.sub('\. *, DOI:', ', DOI:', allrefs)        
-        for ref in re.split('\[\d+\] +', allrefs):
-            rec['refs'].append([('x', ref)])
+        if reflink:
+            print reflink
+            refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(reflink))
+            for a in refpage.body.find_all('a'):
+                if a.has_attr('href') and re.search('doi.org', a['href']):
+                    rdoi = re.sub('.*doi.org\/', '', a['href'])
+                    a.replace_with(', DOI: %s' % (rdoi))
+            allrefs = re.sub('[\n\t\r]', ' ', refpage.body.text.strip())
+            allrefs = re.sub('  +', ' ', allrefs)
+            allrefs = re.sub('\. *, DOI:', ', DOI:', allrefs)        
+            for ref in re.split('\[\d+\] +', allrefs):
+                rec['refs'].append([('x', ref)])
+        else:
+            print '   no references!'    
     elif jnl in ['cip', 'eureka']:
         for div in artpage.body.find_all('div', attrs = {'id' : 'articleCitations'}):
             for p in div.find_all('p'):
