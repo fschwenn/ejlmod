@@ -28,11 +28,13 @@ url = 'https://ojs.cvut.cz/ojs/index.php/ap/issue/archive'
 page = BeautifulSoup(urllib2.urlopen(url))
 
 issues = []
-for div in page.find_all('div', attrs = {'id' : 'issues'}):
+#for div in page.find_all('div', attrs = {'id' : 'issues'}):
+for div in page.find_all('ul', attrs = {'class' : 'issues_archive'}):
     for a in div.find_all('a')[:issuesstodo]:
-        vol = re.sub('.*Vol (\d+).*', r'\1', a.text)
-        iss = re.sub('.*No (\d+).*', r'\1', a.text)
-        yr = re.sub('.*\((\d+)\).*', r'\1', a.text)
+        at = a.text.strip()
+        vol = re.sub('.*Vol\.? (\d+).*', r'\1', at)
+        iss = re.sub('.*No\.? (\d+).*', r'\1', at)
+        yr = re.sub('.*\((\d+)\).*', r'\1', at)
         nr = re.sub('.*\/', '', a['href'])
         jnlfilename = 'actapoly%s.%s_%s' % (vol, iss, nr)
         #check whether file already exists
@@ -45,49 +47,56 @@ for div in page.find_all('div', attrs = {'id' : 'issues'}):
             print 'Will process Acta Polytechnica (Prague), Volume %s, Issue %s' % (vol, iss)
             issues.append((vol, iss, yr, a['href'], jnlfilename))
         
-#issues = [('1', '1', '2014', 'https://ojs.cvut.cz/ojs/index.php/APP/issue/view/415', 'Frascati2013')]
-
+#issues = [('50', '3', '2010', 'https://ojs.cvut.cz/ojs/index.php/ap/issue/view/345', 'maybe_C09-05-05.1')]
 
 #individual issues
 for issue in issues:
+    print issue
     page = BeautifulSoup(urllib2.urlopen(issue[3]))
     jnlfilename = issue[4]
-    recs = []
-    for table in page.find_all('table', attrs = {'class' : 'tocArticle'}):
-        rec = {'jnl' : 'Acta Polytech.', 'vol' : issue[0], 'year' : issue[2], 'issue' : issue[1], 'tc' : 'P'}
-        for div in table.find_all('div', attrs = {'class' : 'tocTitle'}):
-            for a in div.find_all('a'):
+    recs = []    
+#    for table in page.find_all('table', attrs = {'class' : 'tocArticle'}):
+    for div in page.find_all('div', attrs = {'class' : 'obj_article_summary'}):
+        rec = {'jnl' : 'Acta Polytech.', 'vol' : issue[0], 'year' : issue[2], 'issue' : issue[1], 'tc' : 'P',
+               'keyw' : [], 'autaff' : []}
+        for h3 in div.find_all('h3', attrs = {'class' : 'title'}):            
+            for a in h3.find_all('a'):
                 link = a['href']
                 rec['tit'] = a.text
                 articlepage = BeautifulSoup(urllib2.urlopen(link))
-                for meta in articlepage.head.find_all('meta', attrs = {'name' : 'keywords'}):
-                    rec['keyw'] = re.split('; ', meta['content'])
-                for meta in articlepage.head.find_all('meta', attrs = {'name' : 'DC.Description'}):
-                    rec['abs'] = meta['content']
-                for meta in articlepage.head.find_all('meta', attrs = {'name' : 'DC.Rights'}):
-                    rec['licence'] = {'url' : meta['content']}
-                for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_firstpage'}):
-                    rec['p1'] = meta['content']
-                for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_lastpage'}):
-                    rec['p2'] = meta['content']
-                for meta in articlepage.head.find_all('meta', attrs = {'name' : 'DC.Identifier.DOI'}):
-                    rec['doi'] = meta['content']
-                for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_date'}):
-                    rec['date'] = meta['content']
-                for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
-                    rec['FFT'] = meta['content']
-                rec['autaff'] = []
-                autaff = []
                 for meta in articlepage.head.find_all('meta'):
-                    if meta.has_attr('name') :
-                        if meta['name'] == 'citation_author':
-                            if len(autaff) > 0:
-                                rec['autaff'].append(autaff)
-                            autaff = [ meta['content'] ]
+                    if meta.has_attr('name') and meta.has_attr('content'):
+                        #keywords
+                        if meta['name'] == 'citation_keywords':
+                            rec['keyw'] += re.split('; ', meta['content'])
+                        #author
+                        elif meta['name'] == 'citation_author':
+                            rec['autaff'].append([meta['content']])
                         elif meta['name'] == 'citation_author_institution':
-                            autaff.append(meta['content'])
-                        
-        recs.append(rec)
+                            rec['autaff'][-1].append(meta['content'])
+                        #citation_date
+                        elif meta['name'] == 'citation_date':
+                            rec['data'] = meta['content']
+                        #pages
+                        elif meta['name'] == 'citation_firstpage':
+                            rec['p1'] = meta['content']
+                        elif meta['name'] == 'citation_lastpage':
+                            rec['p2'] = meta['content']
+                        #DOI
+                        elif meta['name'] == 'citation_doi':
+                            rec['doi'] = meta['content']
+                        #abstract
+                        elif meta['name'] == 'DC.Description':
+                            rec['abs'] = meta['content']
+                        #FFT
+                        elif meta['name'] == 'citation_pdf_url':
+                            rec['FFT'] = meta['content']
+                for a in articlepage.body.find_all('a'):
+                    if a.has_attr('href'):
+                        if re.search('creativecommons.org', a['href']):
+                            rec['license'] = {'url' : a['href']}
+            recs.append(rec)
+            print rec.keys()
     #write xml
     xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
     xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
