@@ -48,7 +48,7 @@ for year in [now.year, now.year-1]:
     j = 0
     for rec in prerecs:
         j += 1
-        print '---{ %i }---%i/%i }---{ %s }------' % (year, j, len(prerecs), rec['artlink'])
+        print '---{ %i }---{ %i/%i }---{ %s }------' % (year, j, len(prerecs), rec['artlink'])
         try:
             req = urllib2.Request(rec['artlink'])
             artpage = BeautifulSoup(urllib2.urlopen(req))
