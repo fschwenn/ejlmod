@@ -56,13 +56,14 @@ for h3 in tocpage.find_all('h4'):
         if a.has_attr('href') and re.search('view\/', a['href']):
             i += 1
             vollink = 'https://www.degruyter.com' + a['href']
-            print vollink
+            print i, vollink
             rec = {'tc' : 'P', 'jnl' : jnl, 'year' : year, 'vol' : vol, 'issue' : iss,
                    'auts' : [], 'aff' : [], 'keyw' : [], 'pacs' : []}
             #title
             rec['tit'] = a.text.strip()
             #get details
             if not os.path.isfile('/tmp/dg%s.%i' % (jnlfilename, i)):
+                time.sleep(5)
                 os.system('wget -T 300 -t 3 -q -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0"  -O /tmp/dg%s.%i %s' % (jnlfilename, i, vollink))
             inf = open('/tmp/dg%s.%i' % (jnlfilename, i), 'r')
             artpage = BeautifulSoup(''.join(inf.readlines()))
@@ -84,27 +85,46 @@ for h3 in tocpage.find_all('h4'):
                         else:
                             rec['keyw'].append(meta['content'])
             #abstract
-            for div in artpage.find_all('div', attrs = {'class' : 'articleBody_abstract'}):
+            divs  = artpage.find_all('div', attrs = {'class' : 'articleBody_abstract'})
+            if not divs:
+                divs = artpage.find_all('section', attrs = {'class' : 'abstract'})
+            for div in divs:
                 for p in div.find_all('p'):
                     rec['abs'] = p.text.strip()
-            #authors
-            for div in artpage.find_all('div', attrs = {'class' : 'contributors'}):
-                for sup in artpage.find_all('sup'):
-                    for a in sup.find_all('a'):
-                        cont = a.text
-                        a.replace_with(' / =Aff%s ' % (cont))
-                for aut in re.split(' +\/ +', div.text):
-                    if re.search('=Aff', aut):
-                        rec['auts'].append(aut)
-                    else:
-                        rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', aut))
             #affiliations
             for div in artpage.find_all('div', attrs = {'class' : 'NLM_affiliations'}):                
                 for p in div.find_all('p'):
                     for sup in p.find_all('sup'):
                         cont = sup.text
                         sup.replace_with('Aff%s= ' % (cont))
-                    rec['aff'].append(p.text)
+                    rec['aff'].append(p.text.strip())
+            if not rec['aff']:
+                for ul in artpage.find_all('ul', attrs = {'class' : 'affiliation-list'}):
+                    for li in ul.find_all('li'):
+                        for sup in li.find_all('sup'):
+                            cont = sup.text
+                            sup.replace_with('Aff%s= ' % (cont))
+                        rec['aff'].append(li.text.strip())
+                ul.decompose()
+            #authors
+            divs = artpage.find_all('div', attrs = {'class' : 'contributors'})
+            if not divs:
+                divs = artpage.find_all('div', attrs = {'class' : 'component-content-contributors'})
+            for div in divs:
+                for span in div.find_all('span'):
+                    if span.text.strip() in [',', ', and']:
+                        span.replace_with(' / ')
+                    elif re.search('^,.*and$', span.text.strip()):
+                        span.replace_with(' / ')
+                for sup in div.find_all('sup'):
+                    for a in sup.find_all('a'):
+                        cont = a.text.strip()
+                        a.replace_with(' / =Aff%s ' % (cont))
+                for aut in re.split(' +\/ +', re.sub('[\n\t\r]+', ' ', div.text)):
+                    if re.search('=Aff', aut):
+                        rec['auts'].append(aut)
+                    else:
+                        rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', aut))
             #keywords / PACS
             for p in artpage.find_all('p', attrs = {'class' : 'articleBody_keywords'}):
                 for span in p.find_all('span'):
@@ -168,6 +188,7 @@ for h3 in tocpage.find_all('h4'):
                         rec['p2'] = re.sub('.*[pP]ages \d+\D(\d+).*', r'\1', pages)
             #authors
             if not rec['aff']:
+                print '   DEL AUTS'
                 del rec['auts']
                 rec['autaff'] = []
                 for span in artpage.find_all('span', attrs = {'class' : 'contrib'}):
@@ -186,11 +207,9 @@ for h3 in tocpage.find_all('h4'):
                         rec['autaff'].append([span.text.strip(), ' and '.join(affs)])
                                                     
             recs.append(rec)
-
-
-
             print rec
 
+    
 
 #write xml
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
