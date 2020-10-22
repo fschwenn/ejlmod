@@ -32,7 +32,7 @@ if jnl == 'pip':
     urltrunk = 'http://www.papersinphysics.org/papersinphysics/issue/view/%s' % (vol)
 elif jnl == 'cip':
     publisher = 'Publishing House for Science and Technology, Vietnam Academy of Science and Technology'
-    jnlname = 'Commun.Phys.'
+    jnlname = 'Commun.in Phys.'
     urltrunk = 'http://vjs.ac.vn/index.php/cip/issue/view/%s/showToc' % (vol)
 elif jnl == 'eureka':
     publisher = 'Scientific Route OU'
