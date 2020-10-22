@@ -56,8 +56,12 @@ for page in range(pages):
                 rec['artlink'] = universities[uni][1] + a['href'] + '?mode=full.716'
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
         for td in tr.find_all('td', attrs = {'headers' : 't2'}):
-            rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', td.text.strip())
-            if int(rec['year']) >= now.year - 2:
+            if re.search('[12]\d\d\d', td.text):
+                rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', td.text.strip())
+                if int(rec['year']) >= now.year - 2:
+                    prerecs.append(rec)
+            else:
+                print '(YEAR?)', td.text
                 prerecs.append(rec)
 
 i = 0
