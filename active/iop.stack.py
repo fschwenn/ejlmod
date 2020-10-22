@@ -22,6 +22,7 @@ iopdirraw = '/afs/desy.de/group/library/publisherdata/iop/raw'
 iopdirdone = '/afs/desy.de/group/library/publisherdata/iop/done'
 pdfdir = '/afs/desy.de/group/library/publisherdata/pdf'
 publisher = 'IOP'
+ftpdir = "/afs/desy.de/group/library/preprints/incoming/IOP"
 
 #ISSN to journal name
 jnl = {'1538-3881': 'Astron.J.',
@@ -124,7 +125,8 @@ cnumdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RP
             'RPC2018' : 'C18-02-19.3',
             'CHEF2019' : 'C19-11-25.3',
             'The International Conference Instrumentation for Colliding Beam Physics (INSTR2020)' : 'C20-02-24',
-            'RREPS-19' : 'C19-09-16.8'}
+            'RREPS-19' : 'C19-09-16.8',
+            'XV Workshop on Resistive Plate Chambers and Related Detectors (RPC2020)' : 'C20-02-10.1'}
 
 
 bisac = {'SCI000000' : 'SCIENCE / General',
@@ -935,31 +937,35 @@ os.system('wget --no-check-certificate -O %s/%s.tar.gz https://J9774:gIe^F83S@st
 #check for new ftp-feeds
 todo = []
 bookfeeds = []
+done = os.listdir(iopdirdone)
 for datei in os.listdir(iopdirraw):
-    if datei in os.listdir(iopdirdone):
+    if datei in done:
         print '%s already in done' % (datei)
+        os.system('rm %s/%s' % (iopdirraw, datei))
     elif re.search('tar.gz$', datei):
         todo.append(datei)
 
+for datei in os.listdir(ftpdir):
+    if datei in done:
+        print '%s already in done' % (datei)
+    elif re.search('xml$', datei):
+        bookfeeds.append(datei)
+    
+
 
 print '%i packages to do: %s' % (len(todo), ', '.join(todo))
-if not todo:
+if not todo and not bookfeeds:
     sys.exit(0)
+if not os.path.isdir(iopdirtmp):
+    os.system('mkdir %s' % (iopdirtmp))
 
 
 #extract the feeds:
 for datei in todo:
-    if not os.path.isdir(iopdirtmp):
-        os.system('mkdir %s' % (iopdirtmp))
-    if re.search('\.xml$', datei):
-        #not a directory with journal feeds but books in ONIX format
-        os.system('cp %s/%s %s/%s' % (ftpdir, directory, iopdirtmp, directory))
-        bookfeeds.append('%s/%s' % (iopdirtmp, directory))
-    else:
-        print 'extracting %s' % (os.path.join(iopdirraw, datei))
-        journalfeed = tarfile.open(os.path.join(iopdirraw, datei), 'r:gz')
-        journalfeed.extractall(path=iopdirtmp)
-        journalfeed.close()
+    print 'extracting %s' % (os.path.join(iopdirraw, datei))
+    journalfeed = tarfile.open(os.path.join(iopdirraw, datei), 'r:gz')
+    journalfeed.extractall(path=iopdirtmp)
+    journalfeed.close()
 
 #create base name
 iopftrunc = stampoftoday
@@ -1263,11 +1269,12 @@ for issn in os.listdir(iopdirtmp):
 
 #scan books
 for bookfeed in bookfeeds:    
+    os.system('cp %s/%s %s/%s' % (ftpdir, bookfeed, iopdirraw, bookfeed))
     products = []
     prerecs = {}
     print bookfeed
-    iopf = re.sub('.*\/(.*).xml', r'iopbooks_\1', bookfeed)
-    inf = open(bookfeed, 'r')
+    iopf = re.sub('.*_(.*).xml', r'iopbooks_\1', bookfeed)
+    inf = open('%s/%s' % (iopdirraw, bookfeed), 'r')
     product = False
     for line in inf.readlines():
         if '<Product>' in line:
@@ -1414,6 +1421,9 @@ for bookfeed in bookfeeds:
 #if everything went fine, move the files to done
 for datei in todo:
     os.system('cp %s/%s %s/%s' % (iopdirraw, datei, iopdirdone, datei))
+for bookfeed in bookfeeds:
+    os.system('mv %s/%s %s/%s' % (iopdirraw, bookfeed, iopdirdone, bookfeed))
+
 shutil.rmtree(iopdirtmp)
 print 'done :-)'
     
