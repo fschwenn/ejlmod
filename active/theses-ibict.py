@@ -14,6 +14,7 @@ import codecs
 import datetime
 import time
 import json
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = '/afs/desy.de/user/l/library/proc/retinspire/retfiles'
@@ -33,13 +34,18 @@ filters = {'physics' : (2, 'dc.subject.por.fl_str_mv%3A%22F%C3%ADsica%22'),
 hdr = {'User-Agent' : 'Magic Browser'}
 publisher = 'publisher'
 
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 numberofpages = filters[subject][0]*5
 recs = []
 for i in range(numberofpages):
     tocurl = 'http://bdtd.ibict.br/vufind/Search/Results?filter%5B%5D=format%3A%22doctoralThesis%22&filter%5B%5D=' + filters[subject][1] + '&filter%5B%5D=publishDate%3A%22%5B' + str(startyear) + '+TO+' + str(stopyear) + '%5D%22&lookfor=%2A%3A%2A&type=AllFields&page=' + str(i+1)
     print '---{ %i/%i }---{ %s }---'  % (i+1, numberofpages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     time.sleep(10)
     for div in tocpage.body.find_all('div', attrs = {'class' : 'result'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'notes' : []}
@@ -54,7 +60,8 @@ for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        req = urllib2.Request(rec['artlink'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
         time.sleep(3)
     except:
         try:
