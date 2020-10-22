@@ -27,7 +27,7 @@ publisher = 'Virginia Tech., Blacksburg'
 
 typecode = 'T'
 
-jnlfilename = 'THESES-VTECH-%sF' % (stampoftoday)
+jnlfilename = 'THESES-VTECH-%s' % (stampoftoday)
 rpp = 50
 pages = 4
 
