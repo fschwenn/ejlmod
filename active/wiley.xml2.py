@@ -14,6 +14,8 @@ import codecs
 import time
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+
 
 publisher = 'WILEY'
 jnl = sys.argv[1]
@@ -195,7 +197,7 @@ for rec in recs:
                 continue
             for span in li.find_all('span', attrs = {'class' : 'bullet'}):
                 refno = span.text
-                span.replace_with(refno + ') ')
+                span.decompose()
             for a in li.find_all('a'):
                 if a.text in ['CrossRef', 'Crossref']:
                     rdoi = re.sub('.*=', '', a['href'])
@@ -206,15 +208,24 @@ for rec in recs:
                     a.replace_with(', DOI: %s' % (rdoi))
                 else:
                     a.replace_with('')
-            ref = li.text.strip()
-            ref = re.sub(' ([12]\d\d\d); ([A-Z0-9\(\)]+): ', r'\2 (\1) ', ref)
-            rec['refs'].append([('x', ref)])
+            for div in li.find_all('div', attrs = {'class' : 'extra-links'}):
+                divt = div.text.strip()
+                div.replace_with(divt + ' XXXTRENNER ')
+            lit = re.sub('[\n\t\r]', ' ', li.text.strip())
+            lit = re.sub(' *XXXTRENNER$', '', lit)
+            refs = re.split(' XXXTRENNER ', lit)
+            for ref in refs:
+                ref = re.sub('; *, DOI', ', DOI', ref)
+                if len(refs) > 1 and re.search('^[a-z]\)', ref):
+                    #rec['refs'].append([('x', '[%s%s] %s' % (refno, ref[0], ref[2:]))])
+                    rec['refs'].append([('x', '[%s] %s' % (refno, ref[2:]))])
+                else:
+                    rec['refs'].append([('x', '[%s] %s' % (refno, ref[2:]))])
     if not jnl in ['puz']:
         rec['tc'] = typecode
     else:
         rec['tc'] = ''
     print rec.keys()
-
 
 
 
@@ -224,7 +235,6 @@ xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
 ejlmod2.writeXML(recs,xmlfile,publisher)
 xmlfile.close()
 #retrival
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text: 
