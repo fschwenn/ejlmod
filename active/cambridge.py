@@ -197,7 +197,7 @@ for rec in recs:
                 rec['p2'] = meta['content']
             elif meta['name'] == 'citation_volume':
                 if jid == 'IAU':
-                    rec['vol'] = iss[1:]
+                    rec['vol'] = vol
                 else:
                     rec['vol'] = meta['content']
             elif meta['name'] == 'citation_issue':
