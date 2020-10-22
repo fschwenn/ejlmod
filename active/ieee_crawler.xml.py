@@ -130,14 +130,14 @@ def ieee(number):
     allarticlelinks = []
     notproperarticles = 0
     numberofarticles = 1000000
-    i = 0
+    i = 0 #XYZ
     while not gotallarticles:
         i += 1
         pagecommand = '&pageNumber=%i' % (i)
         print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)        
         driver.get(urltrunc + toclink + pagecommand)
         if number[0] in ['C', '8', '9']:
-#        if number[0] in ['C']:
+#        if number[0] in ['D']:
             WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
         else:
             WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
@@ -148,7 +148,7 @@ def ieee(number):
             except:
                 print "\033[0;91mCould not click .cc-btn.cc-dismiss\033[0m"
         time.sleep(3)
-        page = BeautifulSoup(driver.page_source)
+        page = BeautifulSoup(driver.page_source, features="lxml")
         if i == 1:
             for div in page.body.find_all('div', attrs = {'class' : 'Dashboard-header'}):
                 divt = re.sub('[\n\t\r]', ' ', div.text.strip())
@@ -157,6 +157,7 @@ def ieee(number):
         #get links to individual articles
         articlelinks = []
         resultitems = page.body.find_all('h2', attrs = {'class' : 'result-item-title'})
+        print '   %i potential items' % (len(resultitems))
         for headline in resultitems:
             links = headline.find_all('a')
             if links:
@@ -205,9 +206,9 @@ def ieee(number):
         for script in articlepage.find_all('script', attrs = {'type' : 'text/javascript'}):
             #if re.search('global.document.metadata', script.text):
             if script.contents and len(script.contents):
-                if re.search('global.document.metadata', script.contents[0]):
+                if re.search('[gG]lobal.document.metadata', script.contents[0]):
                     gdm = re.sub('[\n\t]', '', script.contents[0]).strip()
-                    gdm = re.sub('.*global.document.metadata=(\{.*\}).*', r'\1', gdm)
+                    gdm = re.sub('.*[gG]lobal.document.metadata=(\{.*\}).*', r'\1', gdm)
                     gdm = json.loads(gdm)
         if gdm.has_key('publicationTitle'):
             if number[0] == 'C':
@@ -286,15 +287,17 @@ def ieee(number):
         #references
         #reffilename = '/tmp/ieee_%s.%i.ref' % (number, i)
         #if not os.path.isfile(reffilename):
+        #    print '  try to get references via %s' % (articlelink + 'references')
         #    time.sleep(20)
         #    os.system("wget -T 300 -t 3 -q -O %s %s" % (reffilename, articlelink + 'references'))
         #inf = open(reffilename, 'r')
-        #refpage = BeautifulSoup(''.join(inf.readlines()))
+        #refpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
         #inf.close()
         try:
+            print '  try to get references'
             driver.get(articlelink + 'references')
             WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'stats-reference-link-googleScholar')))
-            refpage = BeautifulSoup(driver.page_source)
+            refpage = BeautifulSoup(driver.page_source, features="lxml")
             for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
                 for span in div.find_all('span', attrs = {'class' : 'number'}):
                     for b in span.find_all('b'):
@@ -333,7 +336,7 @@ def ieee(number):
     if rec.has_key('vol'): oufname += '.'+rec['vol']
     if rec.has_key('issue'): oufname += '.'+rec['issue']
     if rec.has_key('cnum'): oufname += '.'+rec['cnum']
-    return (recs, oufname+'_'+number+'.xml')
+    return (recs, oufname+'_'+number+'.xml') #XYZ
 
 
 if __name__ == '__main__':
