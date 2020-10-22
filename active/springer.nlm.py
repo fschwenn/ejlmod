@@ -134,6 +134,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '41598': ['scirep', 'Sci.Rep.', '', '', 'P'],
       '41605': ['rdtm', 'Rad.Det.Tech.Meth.', '', '', 'P'],
       '41781': ['csbg', 'Comput.Softw.Big Sci.', '', '', 'P'],
+      '42005': ['communphys', 'Commun.Phys.', '', '', 'P'],
       '42254': ['natrp', 'Nature Rev.Phys.', '', '', 'P'],
 #Books
        '0304': ['lnm', 'Lect.Notes Math.', '', '', 'PS', ''],
