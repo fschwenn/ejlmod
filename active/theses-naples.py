@@ -57,7 +57,7 @@ for page in range(pages):
         for a in tr.find_all('a'):
             if a.has_attr('href') and re.search('unina.it.\d+', a['href']):
                 rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
-                rec['artlink'] = a['href']
+                rec['link'] = a['href']
                 rec['doi'] = '20.2000/NAPLES/' + re.sub('\D', '', a['href'])
                 prerecs.append(rec)
 
@@ -67,17 +67,17 @@ recs = []
 for rec in prerecs:
     interesting = True
     i += 1
-    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
+    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         time.sleep(3)
     except:
         try:
-            print "retry %s in 180 seconds" % (rec['artlink'])
+            print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         except:
-            print "no access to %s" % (rec['artlink'])
+            print "no access to %s" % (rec['link'])
             continue
     #author
     for meta in artpage.find_all('meta', attrs = {'name' : 'eprints.creators_name'}):
