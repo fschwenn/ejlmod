@@ -44,7 +44,7 @@ i = 0
 for p in ps:
     i += 1
     for span in p.find_all('span', attrs = {'class' : 'person_name'}):
-        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'pacs' : []}
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'pacs' : [], 'supervisor' : []}
         for a in p.find_all('a'):
             rec['artlink'] = a['href']
             rec['tit'] = a.text.strip()
@@ -87,6 +87,8 @@ for rec in prerecs:
             elif meta['name'] == 'DC.identifier':
                 if re.search('^DOI', meta['content']):
                     rec['doi'] = re.sub('DOI:', '', meta['content'])
+                elif re.search('^urn:', meta['content']):
+                    rec['urn'] = meta['content']
             #abstract
             elif meta['name'] == 'DC.description':
                 rec['abs'] = meta['content']
@@ -107,9 +109,17 @@ for rec in prerecs:
 
     if 'ddc' in rec.keys():
         if rec['ddc'][0] == '5':
-            rec['note'] = [' DDC: %s ' % (rec['ddc'])]
-            recs.append(rec)
-
+            if rec['ddc'] in ['540', '570']:
+                print 'skip Chemistry and Biology'
+            else:
+                rec['note'] = [' DDC: %s ' % (rec['ddc'])]
+                recs.append(rec)
+    for tr in artpage.body.find_all('tr', attrs = {'class' : 'eprint-field-advisor'}):
+        for span in tr.find_all('span', attrs = {'class' : 'person_name'}):
+            sv = re.sub('Prof\. *', '', span.text.strip())
+            sv = re.sub('Dr\. *', '', sv)
+            sv = re.sub('h\.c\. *', '', sv)
+            rec['supervisor'].append([sv])
     print rec
 
 
