@@ -25,24 +25,27 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Michigan U.'
 numofpages = 10
+rpp = 25
 
-jnlfilename = 'THESES-MICHIGAN-%s' % (stampoftoday)
+jnlfilename = 'THESES-MICHIGAN-b-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
 allrecs = []
 for i in range(numofpages):
-    tocurl = 'https://deepblue.lib.umich.edu/handle/2027.42/39366/recent-submissions?offset=%i' % (20*i)
+    #tocurl = 'https://deepblue.lib.umich.edu/handle/2027.42/39366/recent-submissions?offset=%i' % (20*i)
+    tocurl = 'https://deepblue.lib.umich.edu/handle/2027.42/39366/browse?order=DESC&rpp=' + str(rpp) + 'sort_by=3&etal=-1&offset=' + str(i*rpp) + '&type=dateissued'
     print '---{ %i/%i }---{ %s }------' % (i+1, numofpages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
-    time.sleep(30)
+    time.sleep(10)
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-title'}):
         for a in div.find_all('a'):
             rec = {'tc' : 'T', 'jnl' : 'BOOK'}
             rec['artlink'] = 'https://deepblue.lib.umich.edu' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('\/handle\/', '', a['href'])
             rec['tit'] = a.text.strip()
-            allrecs.append(rec)
+            if not rec['hdl'] in ['2027.42/145174']:
+                allrecs.append(rec)
 
 j = 0
 recsbysubject = {}
@@ -56,9 +59,12 @@ for rec in allrecs:
     except:
         print 'wait 10 minutes'
         time.sleep(600)
-        req = urllib2.Request(rec['artlink'])
-        artpage = BeautifulSoup(urllib2.urlopen(req))
-        time.sleep(30)        
+        try:
+            req = urllib2.Request(rec['artlink'])
+            artpage = BeautifulSoup(urllib2.urlopen(req))
+            time.sleep(30)
+        except:
+            continue
     tabelle = {}
     subject = ''
     for meta in artpage.find_all('meta'):
@@ -92,22 +98,25 @@ for rec in allrecs:
         subject = tabelle['dc.subject.hlbtoplevel'][0]
     if 'dc.identifier.orcid' in tabelle.keys():
         rec['autaff'][-1].append('ORCID:%s' % (tabelle['dc.identifier.orcid'][0]))
-    rec['autaff'][-1].append('Michigan U.')
+    rec['autaff'][-1].append(publisher)
     if 'dc.description.thesisdegreename' in tabelle.keys():
-        if tabelle['dc.description.thesisdegreename'][0] == 'PHD':
+        if tabelle['dc.description.thesisdegreename'][0] in ['Ph.D.', 'PHD']:
             if subject in recsbysubject.keys():
                 recsbysubject[subject].append(rec)
             else:
                 recsbysubject[subject] = [rec]
+        else:
+            print '  skip "%s"' % (tabelle['dc.description.thesisdegreename'][0])
     print '   ', len(recsbysubject.keys()), [len(recsbysubject[s]) for s in recsbysubject.keys()]
 
 for subject in recsbysubject.keys():
     if subject in ['Arts', 'Health Sciences', 'Humanities', 'Government Information and Law',
-                   'Engineering', 'Business and Economics', 'Social Sciences']:
+                   'Engineering', 'Business and Economics', 'Social Sciences', 'Education',
+                   'Business', 'Government  Politics and Law']:
         print 'skip', subject
     else:
         recs = recsbysubject[subject]
-        jnlfilename = 'THESES-MICHIGAN-%s--%s' % (stampoftoday, re.sub('\W', '_', subject))
+        jnlfilename = 'THESES-MICHIGAN-%s-b-%s' % (stampoftoday, re.sub('\W', '_', subject))
         #closing of files and printing
         xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
         xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
