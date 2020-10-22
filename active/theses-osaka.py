@@ -15,8 +15,8 @@ import datetime
 import time
 import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'+'/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -26,7 +26,7 @@ publisher = 'Osaka U. '
 jnlfilename = 'THESES-OSAKA_U-%s' % (stampoftoday)
 
 rpp = 200
-pages = 1
+pages = 2
 hdr = {'User-Agent' : 'Magic Browser'}
 
 #first get links of year pages
