@@ -34,11 +34,11 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 #journals have quite different number of articles per month
 if jnl == 'symmetry': #2211
-    numberofpages = 18 + 2 + 5
+    numberofpages = 18 + 2 + 5 + 2 
 elif jnl == 'universe': #367
     numberofpages = 2 + 2 + 3
 elif jnl == 'sensors': #9570
-    numberofpages = 24 + 2 + 6 + 8
+    numberofpages = 24 + 2 + 6 + 8 + 5 +2 
 elif jnl == 'instruments': #91
     numberofpages = 2 + 1
 elif jnl == 'galaxies': #231
@@ -56,6 +56,8 @@ elif jnl == 'atoms': #173
 elif jnl == 'mathematics':
     numberofpages = 5 + 2 + 10
 
+chunksize = 50
+
 
 if jnl == 'proceedings':
     starturl = 'http://www.mdpi.com/2504-3900/%s/%s' % (vol, iss)
@@ -72,8 +74,6 @@ else:
 
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/zu_punkten/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/zu_punkten/enriched/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
-
-
     
     print 'already done:', len(done)
 
@@ -108,6 +108,8 @@ else:
 
 #done = []
 
+
+numberofchunks = (len(artlinks)-1) / chunksize + 1 
 
 i=0
 recs = []
@@ -169,95 +171,97 @@ for artlink in artlinks:
         rec['doi'] = meta['content']
     if rec['doi'] in done and not rec['doi'] in refmissing:
         print '  %s already in done'  % (rec['doi'])
-        continue
-    ##abstract
-    for meta in page.head.find_all('meta', attrs = {'name' : 'dc.description'}):
-        rec['abs'] = meta['content']
-    ##special issue
-    for div in page.body.find_all('div', attrs = {'class' : 'belongsTo'}):
-        if re.search('Special Issue', div.text):
-            for a2 in div.find_all('a'):
-                rec['note'].append([ a2.text ])
-    ##authors and affiliations
-    for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):
-#        for div in diva.find_all('div', attrs = {'class' : 'author'}):
-            for sup in div.find_all('sup'):
-                newcont = ''
-                for cont in re.split(' *, *', sup.text):
-                    if re.search('\d', cont):
-                        newcont += ' , =Aff%s, ' % (cont.strip())
-                sup.replace_with(newcont)
-            for script in page.body.find_all('script'):
-                script.replace_with('')
-            #ORCIDs
-            for a in div.find_all('a', attrs = {'itemprop' : 'author'}):
-                if a.has_attr('href') and re.search('orcid=[0-9]', a['href']):
-                    orcid = re.sub('.*orcid=', 'ORCID:', a['href'])
-                    author = a.text.strip()
-                    a.replace_with('%s; %s' % (author, orcid))
-            authors = re.sub(' and ', ' , ', re.sub('\xa0', ' ', div.text))
-            authors = re.sub('[\n\t]', '', authors)
-            authors = re.sub('&nbsp;', ' ', authors)
-            authors = re.sub('^ *by *', '', authors)
-            authors = re.sub('\*', ' ', authors)
-            for author in re.split(' *, *', authors):
-                if len(author.strip()) > 2:
-                    if re.search('ORCID', author):
-                        parts = re.split(' *; *', author)
-                        rec['auts'].append('%s, %s' % (ejlmod2.shapeaut(parts[0]), parts[1]))
-                    else:
-                        rec['auts'].append(author.strip())
-    for diva in page.body.find_all('div', attrs = {'class' : 'art-affiliations'}):
-        for div in diva.find_all('div', attrs = {'class' : 'affiliation'}):
-            for sup in div.find_all('sup'):
-                sup.replace_with('Aff%s= ' % (sup.text))
-            for span in div.find_all('span'):
-                span.replace_with(';;;')
-            for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
-                rec['aff'].append(aff.strip())
-    #references
-    reflink = artlink[0]  + '/htm'
-    print '              ---{ %s }---' % (reflink)
-    try:
-        refreq = urllib2.Request(reflink, headers=hdr)
-        refpage = BeautifulSoup(urllib2.urlopen(refreq))
-    except:
-        print '   could not get references'
-    for section in refpage.body.find_all('section', attrs = {'id' : 'html-references_list'}):
-        for li in section.find_all('li'):
-            for a2 in li.find_all('a', attrs = {'class' : 'cross-ref'}):
-                rdoi = re.sub('.*doi\.org\/', 'doi: ', a2['href'])
-                a2.replace_with(rdoi)
-            for a2 in li.find_all('a'):
-                a2.replace_with('')
-            lit = re.sub('\[\]', '', li.text.strip())
-            lit = re.sub('\.? *\[(doi:.*?)\]', r', \1', lit)
-            lit = re.sub('\.? *\[(http.*?)\]', r', \1', lit)
-            lit = re.sub('\[Google Scholar\]', '', lit)
-            #Semikolon between authors
-            lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
-            lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
-            rec['refs'].append([('x', lit)])
-    #early access
-    for strong in page.body.find_all('strong'):
-        if re.search('is an early access version', strong.text):
-            print 'skip early acccess version'
     else:
-        recs.append(rec)
-        print '  ', rec.keys()
-    time.sleep(3)
-print '%i new records' % (len(recs))
-
-#write xml
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
-xmlfile.close()
-#retrival
-retfiles_text = open(retfiles_path,"r").read()
-line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text:
-    retfiles = open(retfiles_path,"a")
-    retfiles.write(line)
-    retfiles.close()
-
+        ##abstract
+        for meta in page.head.find_all('meta', attrs = {'name' : 'dc.description'}):
+            rec['abs'] = meta['content']
+        ##special issue
+        for div in page.body.find_all('div', attrs = {'class' : 'belongsTo'}):
+            if re.search('Special Issue', div.text):
+                for a2 in div.find_all('a'):
+                    rec['note'].append([ a2.text ])
+        ##authors and affiliations
+        for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):
+    #        for div in diva.find_all('div', attrs = {'class' : 'author'}):
+                for sup in div.find_all('sup'):
+                    newcont = ''
+                    for cont in re.split(' *, *', sup.text):
+                        if re.search('\d', cont):
+                            newcont += ' , =Aff%s, ' % (cont.strip())
+                    sup.replace_with(newcont)
+                for script in page.body.find_all('script'):
+                    script.replace_with('')
+                #ORCIDs
+                for a in div.find_all('a', attrs = {'itemprop' : 'author'}):
+                    if a.has_attr('href') and re.search('orcid=[0-9]', a['href']):
+                        orcid = re.sub('.*orcid=', 'ORCID:', a['href'])
+                        author = a.text.strip()
+                        a.replace_with('%s; %s' % (author, orcid))
+                authors = re.sub(' and ', ' , ', re.sub('\xa0', ' ', div.text))
+                authors = re.sub('[\n\t]', '', authors)
+                authors = re.sub('&nbsp;', ' ', authors)
+                authors = re.sub('^ *by *', '', authors)
+                authors = re.sub('\*', ' ', authors)
+                for author in re.split(' *, *', authors):
+                    if len(author.strip()) > 2:
+                        if re.search('ORCID', author):
+                            parts = re.split(' *; *', author)
+                            rec['auts'].append('%s, %s' % (ejlmod2.shapeaut(parts[0]), parts[1]))
+                        else:
+                            rec['auts'].append(author.strip())
+        for diva in page.body.find_all('div', attrs = {'class' : 'art-affiliations'}):
+            for div in diva.find_all('div', attrs = {'class' : 'affiliation'}):
+                for sup in div.find_all('sup'):
+                    sup.replace_with('Aff%s= ' % (sup.text))
+                for span in div.find_all('span'):
+                    span.replace_with(';;;')
+                for aff in re.split(' *;;; *', re.sub('[\n\t]', '', div.text)):
+                    rec['aff'].append(aff.strip())
+        #references
+        reflink = artlink[0]  + '/htm'
+        print '              ---{ %s }---' % (reflink)
+        try:
+            refreq = urllib2.Request(reflink, headers=hdr)
+            refpage = BeautifulSoup(urllib2.urlopen(refreq))
+        except:
+            print '   could not get references'
+        for section in refpage.body.find_all('section', attrs = {'id' : 'html-references_list'}):
+            for li in section.find_all('li'):
+                for a2 in li.find_all('a', attrs = {'class' : 'cross-ref'}):
+                    rdoi = re.sub('.*doi\.org\/', 'doi: ', a2['href'])
+                    a2.replace_with(rdoi)
+                for a2 in li.find_all('a'):
+                    a2.replace_with('')
+                lit = re.sub('\[\]', '', li.text.strip())
+                lit = re.sub('\.? *\[(doi:.*?)\]', r', \1', lit)
+                lit = re.sub('\.? *\[(http.*?)\]', r', \1', lit)
+                lit = re.sub('\[Google Scholar\]', '', lit)
+                #Semikolon between authors
+                lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
+                lit = re.sub('([A-Z]\.); ([A-Z][a-zA-Z\-]+), ([A-Z\.]+);', r'\1, \2 \3,', lit)
+                rec['refs'].append([('x', lit)])
+        #early access
+        for strong in page.body.find_all('strong'):
+            if re.search('is an early access version', strong.text):
+                print 'skip early acccess version'
+        else:
+            recs.append(rec)
+            print '  ', rec.keys()
+        time.sleep(3)
+    if (i % chunksize == 0) or (i == len(artlinks)):
+        #write xml
+        if recs:
+            xmlf = os.path.join(xmldir, '%s-%02i_of_%i.xml' % (jnlfilename, i/chunksize, numberofchunks))
+            xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+            ejlmod2.writeXML(recs, xmlfile, publisher)
+            xmlfile.close()
+            #retrival
+            retfiles_text = open(retfiles_path, "r").read()
+            line = '%s-%02i_of_%i.xml\n' % (jnlfilename, i/chunksize, numberofchunks)
+            print ' + wrote %s' % (line)
+            if not line in retfiles_text:
+                retfiles = open(retfiles_path,"a")
+                retfiles.write(line)
+                retfiles.close()
+        recs = []
+            
