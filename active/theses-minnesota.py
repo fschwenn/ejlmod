@@ -25,7 +25,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'Minnesota U.'
 
 rpp = 100
-pages = 1
+pages = 2
 
 hdr = {'User-Agent' : 'Magic Browser'}
 jnlfilename = 'THESES-MINNESOTA-%s' % (stampoftoday)
