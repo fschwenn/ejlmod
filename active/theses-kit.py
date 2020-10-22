@@ -42,12 +42,10 @@ for i in range(pages):
         time.sleep(300)
         tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
     for div in tocpage.body.find_all('div', attrs ={'class' : 'EXLSummaryContainer'}):
-        print 'd'
         for h3 in div.find_all('h3', attrs ={'class' : 'EXLResultFourthLine'}):
-            print 'h3'
             rec = {'jnl' : 'BOOK', 'tc' : 'T', 'note' : []}
             rec['year'] = h3.text.strip()
-            rec['date'] = h3.text.strip()
+            rec['date'] = re.sub('.*?([12]\d\d\d).*', r'\1', h3.text.strip())
             for h2 in div.find_all('h2'):
                 for a in h2.find_all('a'):
                     rec['artlink2'] = 'https://primo.bibliothek.kit.edu/primo_library/libweb/action/' + a['href']
