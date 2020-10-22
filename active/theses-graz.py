@@ -40,12 +40,16 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'miniTitleinfo'}):
             rec['link'] = 'https://unipub.uni-graz.at' + a['href']
             rec['tit'] = a.text.strip()
     for div2 in div.find_all('div', attrs = {'class' : 'origin'}):
-        rec['year'] = re.sub('.*?([12]\d\d\d).*', r'\1', div2.text.strip())
-        rec['date'] = rec['year']
-        if int(rec['year']) > now.year-2:
-            recs.append(rec)
+        if re.search('[12]\d\d\d', div2.text):
+            rec['year'] = re.sub('.*?([12]\d\d\d).*', r'\1', div2.text.strip())
+            rec['date'] = rec['year']
+            if int(rec['year']) > now.year-2:
+                recs.append(rec)
+            else:
+                print '  skip', rec['year']
         else:
-            print '  skip', rec['year']
+            print '(YEAR?)', div2.text
+            recs.append(rec)
 
             
 i = 0
