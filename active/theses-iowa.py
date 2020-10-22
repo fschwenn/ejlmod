@@ -23,7 +23,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'Iowa State U. (main)'
 hdr = {'User-Agent' : 'Magic Browser'}
 
-recs = []
+prerecs = []
 jnlfilename = 'THESES-IOWASTATE-%s' % (stampoftoday)
 
 tocurl = 'https://lib.dr.iastate.edu/physastro_etd/'
@@ -50,14 +50,16 @@ for div in tocpage.body.find_all('div', attrs = {'id' : 'series-home'}):
                                'year' : str(year), 'supervisor' : []}
                         rec['tit'] = a.text.strip()
                         rec['doi'] = '20.2000/IowaStateU/' + re.sub('.*\/', '', a['href'])
-                        recs.append(rec)
+                        prerecs.append(rec)
             else:
                 break
 
 i = 0
-for rec in recs:
+recs = []
+for rec in prerecs:
+    keepit = True
     i += 1
-    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
+    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
         time.sleep(10)
@@ -88,7 +90,10 @@ for rec in recs:
                 rec['hidden'] = meta['content']
             #degree
             elif meta['name'] == 'bepress_citation_dissertation_name':
-                rec['note'].append(meta['content'])
+                if meta['content'] in ['Master of Science']:
+                    keepit = False
+                else:
+                    rec['note'].append(meta['content'])
     rec['autaff'][-1].append(publisher)
     #subject
     for div in artpage.body.find_all('id', attrs = {'id' : 'major'}):
@@ -105,7 +110,9 @@ for rec in recs:
     for div in artpage.body.find_all('id', attrs = {'id' : 'file_size'}):
         for p in div.find_all('p'):
             rec['pages'] = re.sub('\D', '', p.text.strip())
-    print '  ', rec.keys()
+    if keepit:
+        print '  ', rec.keys()
+        recs.append(rec)
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
