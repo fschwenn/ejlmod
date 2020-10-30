@@ -15,8 +15,8 @@ import datetime
 import time
 import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
 
 now = datetime.datetime.now()
@@ -37,7 +37,7 @@ subdomains = ["stat.ml", "stat.ap", "stat.co",
               "phys.hthe", "phys.hphe", "phys.grqc", "phys.hlat",
               "math.math-ap", "math.math-pr", "math.math-ag", "math.math-co", "math.math-dg",
               "math.math-nt", "math.math-at", "math.math-rt", "math.math-ca", "math.math-gt",
-              "math.math-oa", "math.math-sg", "math.math-qa", "math.math-ra",
+              "math.math-oa", "math.math-sg", "math.math-qa", "math.math-ra", "math.math-ph",
               "info.info-ni", "info.info-se", "info.info-dc", "info.info-cv", "info.info-lg",
               "info.info-it", "info.info-sc", "info.info-ms", "info.info-dl"]
 subdomains += ["phys.phys"]
@@ -104,7 +104,7 @@ for year in years:
                 for div in divs:
                     for a in div.find_all('a', attrs = {'data-toggle' : 'tooltip'}):
                         rec = {'tc' : 'T', 'jnl' : 'BOOK', 'year' : str(year), 'keyw' : [], 
-                               'note' : [ subdom ], 'rn' : [], 'refs' : []}
+                               'note' : [ subdom ], 'rn' : [], 'refs' : [], 'supervisor' : []}
                         rec['link'] = 'https://tel.archives-ouvertes.fr' + a['href']
                         rec['tit'] = a.text.strip()
                     if a['href'][1:] in telnrs:
