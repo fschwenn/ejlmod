@@ -15,8 +15,8 @@ import time
 from bs4 import BeautifulSoup
 import datetime
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
 
@@ -58,7 +58,7 @@ elif jid == 'PLA':
 elif jid == 'IJA':
     jnlname = 'Int.J.Astrobiol.'
 elif jid == 'GMJ':
-    jnlname = 'Glasgow Math.J.'
+    jnlname = 'Glasgow Math.J.'    
 #--
 elif jid == 'BAZ':
     jnlname = 'Bull.Austral.Math.Soc.'
@@ -74,6 +74,9 @@ elif jid == 'JOG':
     jnlname = 'J.Glaciol.'
 elif jid == 'CJM':
     jnlname = 'Can.J.Math.'
+#
+elif jid == 'SIC':
+    jnlname = 'Sci.Context'
 
 if len(sys.argv) > 5:
     toclink = explicittoclink
