@@ -13,7 +13,6 @@ import codecs
 import urllib2
 import urlparse
 import time
-#import cookielib
 from bs4 import BeautifulSoup
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
@@ -21,7 +20,7 @@ tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
 jnl = sys.argv[1]
 publisher = 'Physical Society of Japan'
-urltrunc = 'http://journals.jps.jp'
+urltrunc = 'https://journals.jps.jp'
 if jnl == 'jpsj':
     jnlname = 'J.Phys.Soc.Jap.'
     vol = sys.argv[2]
@@ -69,15 +68,12 @@ def fsunwrap(tag):
         print 'fsunwrap-form-problem'
     return tag
 
-
-
-try:
-    print toclink
-    toc = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
-except:
-    print "retry '%s' in 180 seconds" % (toclink)
-    time.sleep(180)
-    toc = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
+tocfile = '/tmp/%s.toc' % (jnlfilename)
+if not os.path.isfile(tocfile):
+    os.system('wget -O %s "%s"' % (tocfile, toclink))
+inf = open(tocfile, 'r')
+toc = BeautifulSoup(''.join(inf.readlines()))
+inf.close()
 
 #check licence
 licenseurl =False
@@ -115,20 +111,20 @@ for tag in toc.body.find_all():
                     rec['cnum'] = sys.argv[3]
                     if licenseurl:
                         rec['licence'] = {'url' : licenseurl}
-                        rec['FFT'] = 'http://journals.jps.jp/doi/pdf/%s' % (rec['doi'])
+                        rec['FFT'] = '%s/doi/pdf/%s' % (urltrunc, rec['doi'])
                     elif len(sys.argv) > 4:
                         rec['licence'] = {'statement' : sys.argv[4]}
-                        rec['FFT'] = 'http://journals.jps.jp/doi/pdf/%s' % (rec['doi'])
+                        rec['FFT'] = '%s/doi/pdf/%s' % (urltrunc, rec['doi'])
             rec['p1'] = re.sub('.*\.', '', rec['doi'])\
             #check abstract page
-            try:
+            absfile = '/tmp/%s.abs' % (re.sub('\/', '_', rec['doi']))
+            if not os.path.isfile(absfile):
                 time.sleep(23)
+                os.system('wget -O %s "%s"' % (absfile, abslink))
                 print abslink
-                abs = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(abslink))
-            except:
-                print "retry '%s' in 180 seconds" % (abslink)
-                time.sleep(180)
-                abs = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(abslink))
+            inf = open(absfile, 'r')
+            abs = BeautifulSoup(''.join(inf.readlines()))
+            inf.close()
             #abstract
             for div in abs.body.find_all('div', attrs = {'class' : 'NLM_abstract'}):
                 for p in div.find_all('p'):
@@ -164,18 +160,18 @@ for tag in toc.body.find_all():
                         rec['licence'] = {'url' : a['href']}
             if jnl == 'jpsjcp':
                 rec['licence'] = {'url' : 'http://creativecommons.org/licenses/by/4.0/'}
-                rec['FFT'] = 'http://journals.jps.jp/doi/pdf/%s' % (rec['doi'])
+                rec['FFT'] = '%s/doi/pdf/%s' % (urltrunc, rec['doi'])
             #references
             #if jnl == 'jpsj':
             if True:
-                try:
+                reffile = '/tmp/%s.ref' % (re.sub('\/', '_', rec['doi']))
+                if not os.path.isfile(reffile):
+                    time.sleep(23)
+                    os.system('wget -O %s "%s"' % (reffile, reflink))
                     print reflink
-                    time.sleep(11)
-                    ref = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(reflink))
-                except:
-                    print "retry '%s' in 180 seconds" % (reflink)
-                    time.sleep(180)
-                    ref = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(reflink))
+                inf = open(reffile, 'r')
+                ref = BeautifulSoup(''.join(inf.readlines()))
+                inf.close()
                 for li in ref.find_all('li'):                
                     if li.has_attr('id'):
                         iref = [('o', li['id'])]
@@ -190,7 +186,7 @@ for tag in toc.body.find_all():
                             iref= [('x', li.text.strip())]
                         rec['refs'].append(iref)
             else:
-                rec['FFT'] = 'http://journals.jps.jp/doi/pdf/%s' % (rec['doi'])
+                rec['FFT'] = '%s/doi/pdf/%s' % (urltrunc, rec['doi'])
 
         print '  ', rec.keys()
         recs.append(rec)
