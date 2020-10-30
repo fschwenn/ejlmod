@@ -29,31 +29,38 @@ issues = sys.argv[3]
 if jnl == 'mp':
     jnlname = 'J.Sib.Fed.U.'
     starturl = 'http://journal.sfu-kras.ru/en/series/mathematics_physics'
-
     
 jnlfilename = 'sibfed_%s.%s.%s' % (jnl, vol, re.sub(',', '_', issues))
 def tfstrip(x): return x.strip()
 
 
-print starturl
-req = urllib2.Request(starturl, headers=hdr)
-startpage = BeautifulSoup(urllib2.urlopen(req))
+if len(sys.argv) > 4:
+    year = str(2007+int(vol))
+    tus = re.split(',', sys.argv[4])
+    iss = re.split(',', sys.argv[3])
+    tocurls = []
+    for i in range(len(iss)):
+        tocurls.append([iss[i], tus[i]])
+else:
+    print starturl
+    req = urllib2.Request(starturl, headers=hdr)
+    startpage = BeautifulSoup(urllib2.urlopen(req))
 
-#searchterms to find toclink on startpage
-searchterms = []
-for issue in re.split(',', issues):
-    searchterms.append((issue, re.compile('Vol. %s, Issue %s' % (vol, issue))))
+    #searchterms to find toclink on startpage
+    searchterms = []
+    for issue in re.split(',', issues):
+        searchterms.append((issue, re.compile('Vol. %s, Issue %s' % (vol, issue))))
 
-tocurls = []
-for div in startpage.body.find_all('div', attrs = {'class' : 'collapsed-content'}):
-    for li in div.find_all('li'):
-        lit = li.text.strip()
-        for searchterm in searchterms:
-            if searchterm[1].search(lit):
-                for a in li.find_all('a'):
-                    print ' -', lit
-                    year = re.sub('.*(20\d\d).*', r'\1', lit)
-                    tocurls.append((searchterm[0], 'http://journal.sfu-kras.ru' + a['href']))
+    tocurls = []
+    for div in startpage.body.find_all('div', attrs = {'class' : 'collapsed-content'}):
+        for li in div.find_all('li'):
+            lit = li.text.strip()
+            for searchterm in searchterms:
+                if searchterm[1].search(lit):
+                    for a in li.find_all('a'):
+                        print ' -', lit
+                        year = re.sub('.*(20\d\d).*', r'\1', lit)
+                        tocurls.append((searchterm[0], 'http://journal.sfu-kras.ru' + a['href']))
 
 i = 0
 prerecs = []
