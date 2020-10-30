@@ -51,8 +51,8 @@ inf.close()
 #get volumes
 recs = []
 i = 0
-for h3 in tocpage.find_all('h4'):
-    for a in h3.find_all('a'):
+for h4 in tocpage.find_all('h4'):
+    for a in h4.find_all('a'):
         if a.has_attr('href') and re.search('view\/', a['href']):
             i += 1
             vollink = 'https://www.degruyter.com' + a['href']
@@ -61,6 +61,8 @@ for h3 in tocpage.find_all('h4'):
                    'auts' : [], 'aff' : [], 'keyw' : [], 'pacs' : []}
             #title
             rec['tit'] = a.text.strip()
+            if rec['tit'] in ['Frontmatter', 'Backmatter', 'Contents', 'Editorial']:
+                continue
             #get details
             if not os.path.isfile('/tmp/dg%s.%i' % (jnlfilename, i)):
                 time.sleep(5)
@@ -207,7 +209,7 @@ for h3 in tocpage.find_all('h4'):
                         rec['autaff'].append([span.text.strip(), ' and '.join(affs)])
                                                     
             recs.append(rec)
-            print rec
+            #print rec
 
     
 
