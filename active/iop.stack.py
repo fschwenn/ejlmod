@@ -1417,10 +1417,9 @@ for bookfeed in bookfeeds:
             retfiles.write(line)
             retfiles.close()
     
-
 #if everything went fine, move the files to done
 for datei in todo:
-    os.system('cp %s/%s %s/%s' % (iopdirraw, datei, iopdirdone, datei))
+    os.system('mv %s/%s %s/%s' % (iopdirraw, datei, iopdirdone, datei))
 for bookfeed in bookfeeds:
     os.system('mv %s/%s %s/%s' % (iopdirraw, bookfeed, iopdirdone, bookfeed))
 
