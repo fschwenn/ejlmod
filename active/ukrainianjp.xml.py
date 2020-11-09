@@ -34,7 +34,8 @@ except:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
 
 recs = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'title'}):
+#for div in tocpage.body.find_all('div', attrs = {'class' : 'title'}):
+for div in tocpage.body.find_all('h3', attrs = {'class' : 'title'}):
     rec = {'jnl' : jnlname, 'tc' : tc, 'autaff' : [], 'keyw' : []}
     for a in div.find_all('a'):
         rec['artlink'] = a['href']
