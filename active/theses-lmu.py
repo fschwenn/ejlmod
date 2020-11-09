@@ -37,7 +37,7 @@ reyear = re.compile('.*\(([12]\d\d\d)\):.*')
 for p in tocpage.body.find_all('p'):
     for a in p.find_all('a'):
         rec = {'tc' : 'T',  'jnl' : 'BOOK'}
-        rec['link'] = a['href']
+        rec['artlink'] = a['href']
         pt = re.sub('[\n\t\r]', '', p.text.strip())
         if reyear.search(pt):
             rec['year'] = reyear.sub(r'\1', pt)
@@ -54,15 +54,15 @@ for year in [ now.year-1, now.year ]:
         i = 0
         for rec in recs:
             i += 1
-            print '---{ %i }---{ %i/%i }---{ %s }------' % (year, i, len(recs), rec['link'])
+            print '---{ %i }---{ %i/%i }---{ %s }------' % (year, i, len(recs), rec['artlink'])
             try:
-                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
                 time.sleep(3)
             except:
                 try:
                     print "retry %s in 180 seconds" % (rec['artlink'])
                     time.sleep(180)
-                    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+                    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
                 except:
                     print "no access to %s" % (rec['artlink'])
                     continue    
@@ -98,6 +98,17 @@ for year in [ now.year-1, now.year ]:
                     elif meta['name'] == 'eprints.language':
                         if meta['content'] == 'ger':
                             rec['language'] = 'german'
+            #DOI
+            for div in artpage.body.find_all('div', attrs = {'class' : 'ep_block_doi'}):
+                for a in div.find_all('a'):
+                    if a.has_attr('href') and re.search('doi.org', a['href']):
+                        rec['doi'] = re.sub('.*doi.org\/', '', a['href'])
+            if not 'doi' in rec.keys():
+                rec['link'] = rec['artlink']
+            #license
+            for a in artpage.body.find_all('a'):
+                if a.has_attr('href') and re.search('creativecommons.org', a['href']):
+                    rec['license'] = {'url' : a['href']}
             print '    ', rec.keys()
             
         #closing of files and printing
