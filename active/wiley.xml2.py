@@ -193,6 +193,7 @@ for rec in recs:
     for ul in uls:
         rec['refs'] = []
         for li in ul.find_all('li'):
+            refno = False
             if not li.has_attr('data-bib-id'):
                 continue
             for span in li.find_all('span', attrs = {'class' : 'bullet'}):
@@ -217,10 +218,16 @@ for rec in recs:
             for ref in refs:
                 ref = re.sub('; *, DOI', ', DOI', ref)
                 if len(refs) > 1 and re.search('^[a-z]\)', ref):
-                    #rec['refs'].append([('x', '[%s%s] %s' % (refno, ref[0], ref[2:]))])
-                    rec['refs'].append([('x', '[%s] %s' % (refno, ref[2:]))])
+                    if refno:
+                        #rec['refs'].append([('x', '[%s%s] %s' % (refno, ref[0], ref[2:]))])
+                        rec['refs'].append([('x', '[%s] %s' % (refno, ref[2:]))])
+                    else:
+                        rec['refs'].append([('x', ref)])
                 else:
-                    rec['refs'].append([('x', '[%s] %s' % (refno, ref[2:]))])
+                    if refno:
+                        rec['refs'].append([('x', '[%s] %s' % (refno, ref[2:]))])
+                    else:
+                        rec['refs'].append([('x', ref)])
     if not jnl in ['puz']:
         rec['tc'] = typecode
     else:
