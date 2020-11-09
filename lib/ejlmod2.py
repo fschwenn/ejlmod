@@ -279,7 +279,6 @@ def writeXML(recs,dokfile,publisher):
         if rec['jnl'] in ['Astron.Astrophys.', 'Mon.Not.Roy.Astron.Soc.', 
                           'Astronom.J.', 'Adv.Astron.', 'Astron.Nachr.']:
             arXivfromADS(rec)
-
         liste = []
         i += 1
         if 'doi' in rec.keys():
@@ -438,7 +437,7 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('date'):
             if re.search('[a-zA-Z] ', rec['date']):
                 rec['date'] = datetodate(rec['date'])
-            recdate = re.sub('\/','-',rec['date'])
+            recdate = re.sub('\/', '-', rec['date'])
             if re.search('\d\d\-\d\d\-\d\d\d\d', recdate):
                 parts = re.split('\-', recdate)
                 recdate = '%s-%s-%s' % (parts[2], parts[1], parts[0])
@@ -517,9 +516,12 @@ def writeXML(recs,dokfile,publisher):
             if rec['licence'].has_key('statement'):
                 entry.append(('a',rec['licence']['statement']))
             elif rec['licence'].has_key('url') and re.search('creativecommons.org', rec['licence']['url']):
-                statement = re.sub('.*licen[cs]es', 'CC', rec['licence']['url']).upper()
-                statement = re.sub('.LEGALCODE', '', statement)
-                statement = re.sub('.DEED...', '', statement)
+                if re.search('\/zero\/', rec['licence']['url'].lower()):
+                    statement = 'CC-0'
+                else:
+                    statement = re.sub('.*licen[cs]es', 'CC', rec['licence']['url']).upper()
+                    statement = re.sub('.LEGALCODE', '', statement)
+                    statement = re.sub('.DEED...', '', statement)
                 entry.append(('a', re.sub('\/', '-', re.sub('\/$', '', statement))))
             if rec['licence'].has_key('url'):
                 entry.append(('u',rec['licence']['url']))
