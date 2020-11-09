@@ -31,7 +31,7 @@ jnlfilename = 'THESES-DURHAM-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
-for i in range(2):
+for i in range(3):
     tocurl = 'http://etheses.dur.ac.uk/cgi/search/advanced?exp=0|1|-date/creators_name/title|archive|-|department_dur:department_dur:ANY:EQ:DDD21%20DDD25|thesis_qualification_name:thesis_qualification_name:ANY:EQ:PhD|-|eprint_status:eprint_status:ALL:EQ:archive|metadata_visibility:metadata_visibility:ALL:EX:show&_action_search=1&screen=Public::EPrintSearch&cache=9194761&search_offset=' + str(20*i)
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
