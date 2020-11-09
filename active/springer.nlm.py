@@ -136,6 +136,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '41781': ['csbg', 'Comput.Softw.Big Sci.', '', '', 'P'],
       '42005': ['communphys', 'Commun.Phys.', '', '', 'P'],
       '42254': ['natrp', 'Nature Rev.Phys.', '', '', 'P'],
+      '43538': ['pinsa', 'Proc.Indian Natl.Sci.Acad.', '', '', 'RP'],
 #Books
        '0304': ['lnm', 'Lect.Notes Math.', '', '', 'PS', ''],
        '0361': ['spprph', 'Springer Proc.Phys.', '', '', 'C', ''],
@@ -367,8 +368,8 @@ def get_references(rl):
                         arxiv = re.sub('(\d)\]$', r'\1', arxiv)
                         if re.search('^\d{4}\.\d', arxiv):
                             arxiv = 'arXiv:' + arxiv
-                        elif re.search('ar[xX]iv\:[a-z]+\/\d',  arxiv):
-                            arxiv = arxiv[6]
+                        elif re.search('ar[xX]iv\:[a-z\-]+\/\d',  arxiv):
+                            arxiv = arxiv[6:]
                         el.decompose()
             #missing spaces?
             for bold in mc.find_all('bold'):
@@ -391,6 +392,8 @@ def get_references(rl):
             refs.append(reference)
     return refs
 
+confdict = {'0361' : {'248' : 'C19-10-14.3',
+                      '250' : 'C19-06-10'}}
 ###convert individual JATS file to record
 def convertarticle(journalnumber, filename, contlevel):
     rec = {'jnl' : jc[journalnumber][1], 'tc' : jc[journalnumber][4],
@@ -644,6 +647,10 @@ def convertarticle(journalnumber, filename, contlevel):
             sissarefs = getrefsfromsissa(rec['doi'])
             (comment, rec['refs']) = combinerefs(springerrefs, sissarefs)
             rec['note'].append(comment)
+    #known conferences
+    if journalnumber in confdict.keys():
+        if 'vol' in rec.keys() and rec['vol'] in confdict[journalnumber].keys():
+            rec['cnum'] = confdict[journalnumber][rec['vol']]
     return rec
 
 #combine Springer and SISSA references
