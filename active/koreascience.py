@@ -15,6 +15,7 @@ import urlparse
 from bs4 import BeautifulSoup
 import datetime
 import time
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
@@ -46,16 +47,16 @@ if not journals.has_key(journal):
 publisher = journals[journal]['publisher']
 
 jnlfilename = '%s%s.%s' % (journal, vol, iss)
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+hdr = {'User-Agent' : 'Magic Browser'}
 
-#starturl = 'http://koreascience.or.kr/journal/JournalIssueList.jsp?kojic=%s&volno=%s&issno=%s' % (journals[journal]['kojic'], vol, iss)
 starturl = 'http://koreascience.or.kr/journal/%s/v%sn%s.page' % (journals[journal]['kojic'], vol, iss)
 print starturl
-#tocpage = BeautifulSoup(urllib2.urlopen(starturl, timeout=300))
-if not os.path.isfile('/tmp/%s.toc' % (jnlfilename)):
-    os.system('lynx -source "%s" > /tmp/%s.toc' % (starturl, jnlfilename))
-tocf = open('/tmp/%s.toc' % (jnlfilename), 'r')
-tocpage = BeautifulSoup(''.join(tocf.readlines()))
-tocf.close()
+req = urllib2.Request(starturl, headers=hdr)
+tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'clear'}):
     rec = {'jnl' : journals[journal]['jnl'], 'vol' : vol, 'issue' : iss, 
@@ -79,13 +80,8 @@ i = 0
 for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
-    if not os.path.isfile('/tmp/%s.%i' % (jnlfilename, i)):
-        time.sleep(3)
-        os.system('lynx -source "%s" > /tmp/%s.%i' % (rec['artlink'], jnlfilename, i))
-    artf = open('/tmp/%s.%i' % (jnlfilename, i), 'r')
-    #page = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=300))
-    page = BeautifulSoup(''.join(artf.readlines()))
-    artf.close()
+    req = urllib2.Request(rec['artlink'], headers=hdr)
+    page = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
     #pbn
     for meta in page.head.find_all('meta', attrs = {'name' : 'citation_firstpage'}):
         rec['p1'] = meta['content']
