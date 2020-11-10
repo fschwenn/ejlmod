@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
-#harvest theses from Niels Bohr Institute, Københavns Universitet
-#FS: 2020-02-03
-
+#harvest theses from Bohr Institute
+#FS: 2020-11-09
 
 import getopt
 import sys
@@ -14,80 +13,76 @@ import ejlmod2
 import codecs
 import datetime
 import time
-import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Bohr Inst.'
+startyear = now.year - 1
+
+jnlfilename = 'THESES-BOHR-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
-repacs = re.compile('.*(\d\d\.\d\d\...).*')
 recs = []
-jnlfilename = 'THESES-NIELSBOHR-%s' % (stampoftoday)
-for year in [now.year, now.year-1]:
-    try:
-        tocurl = 'https://www.nbi.ku.dk/english/theses/phd-theses/phd_theses_%i' % (year)
-        print tocurl
-        req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
-        time.sleep(5)
-        for div in tocpage.body.find_all('div', attrs = {'class' : 'media-body'}):
-            rec = {'tc' : 'T', 'jnl' : 'BOOK', 'keyw' : [], 'year' : str(year)}
-            for h2 in div.find_all('h2'):
-                for a in h2.find_all('a'):
-                    rec['link'] = 'https://www.nbi.ku.dk' + a['href']
-                    rec['doi'] = '20.2000/NielsBohr/' + re.sub('\W', '', a['href'][31:])
-                    recs.append(rec)
-    except:
-        print year, '?'
+tocurl = 'https://www.nbi.ku.dk/english/theses/phd-theses/'
+print '==={ %s }===' % (tocurl)
+req = urllib2.Request(tocurl, headers=hdr)
+tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+time.sleep(2)
+for article in tocpage.find_all('article', attrs = {'class' : 'tilebox'}):
+    print article
+    rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
+    for h2 in article.find_all('h2'):
+        rec['autaff'] = [[ h2.text.strip(), publisher ]]
+    for a in article.find_all('a'):
+        rec['link'] = 'https://www.nbi.ku.dk' + a['href']
+        rec['doi'] = '20.2000/NielsBohrInst/' + re.sub('\W', '', a['href'][26:])
+    for div in article.find_all('div', attrs = {'class' : 'date'}):
+        rec['date'] = re.sub('\.', '-', div.text.strip())
+        rec['year'] = rec['date'][:4]
+        if int(rec['year']) >= startyear:
+            recs.append(rec)
 
-
-i = 0
+j = 0
 for rec in recs:
-    i += 1
-    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['link'])
+    j += 1
+    print '---{ %i/%i }---{ %s }------' % (j, len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
-        time.sleep(10)
+        req = urllib2.Request(rec['link'])
+        artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+        time.sleep(2)
     except:
+        print 'wait 10 minutes'
+        time.sleep(600)
         try:
-            print "retry %s in 180 seconds" % (rec['link'])
-            time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+            req = urllib2.Request(rec['link'])
+            artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+            time.sleep(30)
         except:
-            print "no access to %s" % (rec['link'])
             continue
-    for meta in artpage.head.find_all('meta'):
-        if meta.has_attr('name'):
-            #author
-            if meta['name'] == 'Title':
-                rec['autaff'] = [[ meta['content'], publisher ]]
-            #title
-            elif meta['name'] == 'Description':
-                rec['tit'] = meta['content']
-    for table in artpage.body.find_all('table', attrs = {'id' : 'table7'}):
-        #pdf
-        for a in table.find_all('a'):
-            if a.has_attr('href') and re.search('Download', a.text):
-                rec['hidden'] = 'https://www.nbi.ku.dk' + a['href']
-                a.replace_with('')
-        #supervisor
-        for p in table.find_all('p'):
-            pt = p.text.strip()
-            if re.search('^Supervisor', pt):
-                rec['supervisor'] = []
-                for sv in re.split(', ', re.sub('.*: *', '', pt)):
-                    rec['supervisor'].append([re.sub('Prof\. ', '', sv)])
-        #abstract
-        for td in table.find_all('td'):
-            for h2 in td.find_all('h2'):
-                h2.replace_with('')
-                rec['abs'] = td.text.strip()
-    print rec.keys()
+    for p in artpage.find_all('p'):
+        for strong in p.find_all('strong'):
+            st = strong.text.strip()
+            strong.decompose()
+            #title and PDF
+            if re.search('[pP]\.?h\.? *[dD]', st):
+                for a in p.find_all('a'):
+                    at = a.text.strip()
+                    if len(at) > 5:
+                        rec['hidden'] = 'https://www.nbi.ku.dk' + a['href']
+                        rec['tit'] = at
+                if not 'tit' in rec.keys():
+                    rec['tit'] = p.text.strip()
+            #supervisor
+            elif st in ['Supervisor:', 'Primary Supervisor:']:
+                rec['supervisor'] = [[ re.sub('[Pp]rof\. *', '', re.sub('Dr\. *', '', p.text.strip())) ]]
+    print '  ', rec.keys()
+    if not 'tit' in rec.keys():
+        for meta in artpage.find_all('meta', attrs = {'name' : 'DC.Description'}):
+            rec['tit'] = meta['content']
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -97,8 +92,7 @@ xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
+if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
-    
