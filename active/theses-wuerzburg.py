@@ -70,8 +70,11 @@ for inst in ['Physikalisches+Institut', 'Institut+f%C3%BCr+Theoretische+Physik+u
                 #keywords
                 elif meta['name'] == 'DC.subject':
                     rec['keyw'].append(meta['content'])
+                #doi
+                elif meta['name'] == 'citation_doi':
+                    rec['doi'] = meta['content']
                 #urn
-                elif meta['name'] == 'DC.Identifier':
+                elif meta['name'] == 'DC.identifier':
                     if re.search('^urn:', meta['content']):
                         rec['urn'] = meta['content']
                 #license
