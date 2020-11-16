@@ -24,21 +24,22 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'OhioLink'
 jnlfilename = 'THESES-OHIO-%s' % (stampoftoday)
+subjects = [(369, '17lhTpxPDBKmMz_It4eqKqNs9zNtX0qcAU_qbPefkoYRwHJKxDJ_rb35lruEesyxv-kroW8Z5tLjaspD9aU_lfA'),
+            (1010, '1OMmFJtiSfwjRziKmFB4Cm4Jnu-jQrJzHJI66MDnvKKtb18VeZlBDSrIARHhwrjnnW_JDTRW0vMy3dm57iDLAYQ'),
+            (343, '1mzhIi3yLXYvXb2vI0z4zIcCvZMlcG40OLGlU42xcQU7W-v5IyszGNydbLvPmJ00tGdAdQLIWhToKPPGsCQmHgw'),
+            (913, '1pvnFdlF4FLWOUXOCYLdm8HUtoQs90sCCGzAKf9Nr4jUQfDyQ1ZsuCrZfrNxHBYpaMFB5NE0pXjRAQ0tb_REgzg'),
+            (836, '1YoHx2N5yBKt5O2icId_Uc72DheKPEAQhqPxPDA5OJIvHqoUug3dBILbE4LML8hxSa00jCKly9FIU4KgESaMh5w'),
+            (53, '1UmO8xMgdJ7ZKKjkMuFhHKU4iIhP-Gjk4kpUoXQegKhNAUmvB4YD3riY7vX0HI95XTgNT_C0Z9dnbya8tM8Ux8g'),
+            (116, '1ip3vNhON-CMKmICh8I9nIbPyig8gUmlZSObE89LW7Fc9fmeXUMojYA-NDyUaaWFP1dzdzaFbuMtgerQ9BNza-A'),
+            (482, '1EmR9IYHFy8fr4Tx94tRv_m3L36VSEBbCwUnp17VXVr7dAwTPDJEDvZ7Mbi77t3YFjMeaaz4I2kxvhCFecbgTBw')]
 
-subjects = [(53, '16b9Ha_jPi6yDWBOja2oGR8t981X4iiwFs47DRvxsC0EbsLIhSYWJ0V31gFEB0Tqv-r4Y5zFPSTlHVAWzaj-CYw'),
-            (116, '1a3bLgLKpCz8mgr_PZ-S07AJVqSieKMh3qHqKTJi29q02sXyFvYw8gNDRGVEsdP8-OAh3AqiC6T40jW10wiK2MA'),
-            (369, '1GciHxMdVBFxBmQzZTvpE4kQ8w5Ll2gM7DUGXQt_woDPn9TVnyQzNiWoPjEH53XQ-BBHUYq1DAvdJaIdIJO-PrA'),
-            (482, '1SviNibu3VrYUyluim7dfU1Ywo7-JaTFqvwjfrmb9MTVYBm-otV2PbP73ISBs5EffjkMiLU8nzALLNBaO54wv-w'),
-            (343, '1Xw965YI7-9AVMKyoA2X_qbyFKKsNJCAfmmsRjP4dXCmqCM2i9vqUd7N26-uAnCN_xu2rCsEyOcG-FUiqEuy4Dw'),
-            (1010, '1lvDzRD8EHGPYFPs1B49UpuxUpZMhE_YfHQwCf-jhAodyhWj69PL5XhrynE0jrPtXWYkLKQlkXR1eZkqL3_ddug'),
-            (913, '1zDor5dC5sGzOITi5vdVvEgU0Iz9zd7wxFyHLUObx3mZ4ykViwtI8RCcNf_nzr2HNqUJMCI3lgb2Gtedf0zSqiQ'),
-            (394, '19idUBDPQS1QR34G3FZL1zc2RM4bOcrSY5ihXt4i1SXyKpp5hGEyKDSPJtwz86FwI-0gFp0qpSif_z116VhLWqg')]
 
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 links = []
 for (subjnr, checksum)  in subjects:
     tocurl = 'https://etd.ohiolink.edu/pg_6?::NO:6:P6_ABSTRACT,P6_ACCESSION_NUM,P6_AUTHOR,P6_COMMITTEE_MEMBER,P6_DEGREE_NAME,P6_DEGREE_YEAR_FROM,P6_DEGREE_YEAR_TO,P6_ETD_INST_DEPTID,P6_INSTID,P6_KEYWORDS,P6_SUBJECTS,P6_TITLE,P6_ETD_LANGUAGEID,P6_PAGE,P6_ORCID:,,,,,2019,2040,,,,%i,,,1,&cs=%s' % (subjnr, checksum)
+    tocurl = 'https://etd.ohiolink.edu/apexprod/rws_olink/r/1501/6?p6_abstract=&p6_accession_num=&p6_author=&p6_committee_member=&p6_degree_name=&p6_degree_year_from=2019&p6_degree_year_to=2040&p6_etd_inst_deptid=&p6_instid=&p6_keywords=&p6_subjects=%i&p6_title=&p6_etd_languageid=&p6_page=1&p6_orcid=&clear=6&cs=%s'  % (subjnr, checksum)
     print '==={ %s }===' % (tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
@@ -53,7 +54,7 @@ for (subjnr, checksum)  in subjects:
             recs.append(rec)
             links.append(rec['link'])
             
-    print '  %i records do far' % (len(recs))
+    print '  %i records so far' % (len(recs))
     time.sleep(10)
 
 
