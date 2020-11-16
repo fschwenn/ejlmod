@@ -82,7 +82,7 @@ for rec in prerecs:
             elif meta['name'] == 'citation_author_email':
                 rec['autaff'][-1].append( 'EMAIL:' + meta['content'] )
             #title
-            elif meta['name'] == 'citation_title':
+            elif meta['name'] in ['DC.title', 'citation_title']:
                 rec['tit'] = meta['content']
             #date
             elif meta['name'] == 'DCTERMS.issued':
@@ -102,7 +102,7 @@ for rec in prerecs:
         rec['abs'] = p.text.strip()
     recs.append(rec)
     print '  ', rec.keys()
-
+    print rec
 
 
 	
