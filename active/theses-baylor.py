@@ -29,14 +29,14 @@ typecode = 'T'
 
 jnlfilename = 'THESES-BAYLOR-%s' % (stampoftoday)
 rpp = 50
-pages = 1
+pages = 3
 
 
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 for page in range(pages):
     tocurl = 'https://baylor-ir.tdl.org/handle/2104/9221/discover?rpp=' + str(rpp) + '&etal=0&group_by=none&page=' + str(page+1) + '&sort_by=dc.date.issued_dt&order=desc'
-    print '---{ %i/%i }---{ %s }---' % (page+1, pages, tocurl)
+    print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
