@@ -32,7 +32,7 @@ jnlfilename = 'THESES-CAMBRIDGE-%s' % (stampoftoday)
 
 tocurl = 'https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=500&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis&filtertype=dateIssued&filter_relational_operator=equals&filter=[%i+TO+2040]' % (startyear)
 
-recs = []
+prerecs = []
 try:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
     time.sleep(3)
@@ -48,12 +48,14 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description
             rec['tit'] = a.text.strip()
             rec['link'] = 'https://www.repository.cam.ac.uk' + a['href']
             rec['doi'] = '20.2000/OXFORD/' + re.sub('\W', '', a['href'])
-            recs.append(rec)
+            prerecs.append(rec)
 
 i = 0
-for rec in recs:
+recs = []
+for rec in prerecs:
+    keepit = True
     i += 1
-    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
+    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
         time.sleep(3)
@@ -97,8 +99,17 @@ for rec in recs:
             aff += [div2.text.strip() for div2 in div.find_all('div')]
         elif h5text == 'Qualification':
             for div2 in div.find_all('div'):
-                rec['note'] = [ div2.text.strip() ]
+                dt = div2.text.strip()
+                if dt in ['MPhil']:
+                    print '  skip "%s"' % (dt)
+                    keepit = False
+                else:
+                    rec['note'] = [ dt ]
+                
     rec['aff'] = [ ', '.join(aff) ]
+    if keepit:
+        recs.append(rec)
+        print '   ', rec.keys()
                                                           
         
     
