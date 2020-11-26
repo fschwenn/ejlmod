@@ -16,13 +16,20 @@ from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from multiprocessing import Process
+
 
 absdir = '/afs/desy.de/group/library/abs'
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
 articlesperpage = 50
+
+driver = webdriver.PhantomJS()
+driver.implicitly_wait(60)
+driver.set_page_load_timeout(30)
+
 
 def meta_with_name(tag):
     return tag.name == 'meta' and tag.has_attr('name')
@@ -99,6 +106,14 @@ def translatejnlname(ieeename):
         jnlname = 'Comput.Sci.Eng.'
     elif ieeename in ['IEEE Transactions on Circuits and Systems I: Regular Papers']:
         jnlname = 'IEEE Trans.Circuits Theor.'
+    elif ieeename in ['IEEE Transactions on Information Theory']:
+        jnlname = 'IEEE Trans.Info.Theor.'
+    elif ieeename in ['IEEE Transactions on Computers']:
+        jnlname = 'IEEE Trans.Comput.'
+    elif ieeename in ['Journal on Selected Areas in Information Theory (JSAIT)', 'IEEE Journal on Selected Areas in Information Theory']:
+        jnlname = 'IEEE J.Sel.Areas Inf.Theory'
+    elif ieeename in ['IEEE Journal of Selected Topics in Quantum Electronics']:
+        jnlname = 'IEEE J.Sel.Top.Quant.Electron.'
     elif ieeename in ["IEEE Symposium Conference Record Nuclear Science 2004.",
                       "IEEE Nuclear Science Symposium Conference Record, 2005"]:
         jnlname = 'BOOK'
@@ -107,6 +122,28 @@ def translatejnlname(ieeename):
         print 'unknown journal', ieeename
         sys.exit(0)
     return jnlname
+
+#get references
+def addreferences(rec, articlelink):
+    print '    ... from %s%s' % (articlelink, 'references')
+    driver.get(articlelink + 'references')
+    WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'stats-reference-link-googleScholar')))
+    refpage = BeautifulSoup(driver.page_source, features="lxml")
+    for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
+        for span in div.find_all('span', attrs = {'class' : 'number'}):
+            for b in span.find_all('b'):
+                refnumber = re.sub('\.', '', span.text.strip())
+                span.replace_with('[%s] ' % (refnumber))
+        for a in div.find_all('a', attrs = {'class' : 'stats-reference-link-crossRef'}):
+            rdoi = re.sub('.*doi.org\/(10.*)', r'\1', a['href'])
+            a.replace_with(', DOI: %s' % (rdoi))
+        for a in div.find_all('a', attrs = {'class' : 'stats-reference-link-googleScholar'}):
+            a.replace_with('')
+        ref = re.sub('[\n\t]', ' ', div.text.strip())
+        ref = re.sub('  +', ' ', ref)
+        rec['refs'].append([('x', ref)])
+    print '  found %i references' % (len(rec['refs']))
+    return
 
 def ieee(number):
     urltrunc = "http://ieeexplore.ieee.org"
@@ -122,9 +159,10 @@ def ieee(number):
         tc = 'P'
         
     articlelinks = []
-    driver = webdriver.PhantomJS()
+    #driver = webdriver.PhantomJS()
     #driver = webdriver.Firefox()
-    driver.implicitly_wait(60)
+    #driver.implicitly_wait(60)
+    #driver.set_page_load_timeout(30)
     #driver.delete_all_cookies()
     gotallarticles = False
     allarticlelinks = []
@@ -137,7 +175,7 @@ def ieee(number):
         print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)        
         driver.get(urltrunc + toclink + pagecommand)
         if number[0] in ['C', '8', '9']:
-#        if number[0] in ['D']:
+#        if number[0] in ['8', '9']:
             WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
         else:
             WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
@@ -180,7 +218,7 @@ def ieee(number):
         else:
             break
         time.sleep(10)
-
+    
     print 'found %i article links' % (len(allarticlelinks))
     if not allarticlelinks:
         print page
@@ -188,6 +226,7 @@ def ieee(number):
     i = 0
     for articlelink in allarticlelinks:
         i += 1
+        hasreferencesection = False
         print '---{ %i/%i }---{ %s }---' % (i, len(allarticlelinks), articlelink)
         #rec['note'] = ['Konferenz ?']
         artfilename = '/tmp/ieee_%s.%i' % (number, i)
@@ -210,6 +249,10 @@ def ieee(number):
                     gdm = re.sub('[\n\t]', '', script.contents[0]).strip()
                     gdm = re.sub('.*[gG]lobal.document.metadata=(\{.*\}).*', r'\1', gdm)
                     gdm = json.loads(gdm)
+        if gdm.has_key('sections'):
+            if gdm['sections'].has_key('references'):
+                if gdm['sections']['references'] in ['true', 'True']:
+                    hasreferencesection = True
         if gdm.has_key('publicationTitle'):
             if number[0] == 'C':
                 jnlname = 'BOOK'
@@ -229,7 +272,7 @@ def ieee(number):
                 if author.has_key('orcid'):
                     autaff.append('ORCID:'+author['orcid'])
                 rec['autaff'].append(autaff)
-        if jnlname in ['IEEE Trans.Magnetics', 'IEEE Trans.Appl.Supercond.']:
+        if jnlname in ['IEEE Trans.Magnetics', 'IEEE Trans.Appl.Supercond.', 'IEEE J.Sel.Top.Quant.Electron.']:
             if gdm.has_key('externalId'):
                 rec['p1'] = gdm['externalId']
             elif gdm.has_key('articleNumber'):
@@ -285,40 +328,21 @@ def ieee(number):
             rec['cnum'] = args[1]  
             rec['tc'] = 'C'
         #references
-        #reffilename = '/tmp/ieee_%s.%i.ref' % (number, i)
-        #if not os.path.isfile(reffilename):
-        #    print '  try to get references via %s' % (articlelink + 'references')
-        #    time.sleep(20)
-        #    os.system("wget -T 300 -t 3 -q -O %s %s" % (reffilename, articlelink + 'references'))
-        #inf = open(reffilename, 'r')
-        #refpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
-        #inf.close()
-        try:
-            print '  try to get references'
-            driver.get(articlelink + 'references')
-            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'stats-reference-link-googleScholar')))
-            refpage = BeautifulSoup(driver.page_source, features="lxml")
-            for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
-                for span in div.find_all('span', attrs = {'class' : 'number'}):
-                    for b in span.find_all('b'):
-                        refnumber = re.sub('\.', '', span.text.strip())
-                        span.replace_with('[%s] ' % (refnumber))
-                for a in div.find_all('a', attrs = {'class' : 'stats-reference-link-crossRef'}):
-                    rdoi = re.sub('.*doi.org\/(10.*)', r'\1', a['href'])
-                    a.replace_with(', DOI: %s' % (rdoi))
-                for a in div.find_all('a', attrs = {'class' : 'stats-reference-link-googleScholar'}):
-                    a.replace_with('')
-                ref = re.sub('[\n\t]', ' ', div.text.strip())
-                ref = re.sub('  +', ' ', ref)
-                rec['refs'].append([('x', ref)])
-            print '  found %i references' % (len(rec['refs']))
-        except:
-            print '  could not load "%s%s"' % (articlelink, 'references')
-            #continue
-        time.sleep(11)
+        if hasreferencesection:
+                print '  try to get references'
+                action_process = Process(target=addreferences, args=(rec, articlelink))
+                action_process.start()
+                #action_process.join(timeout=5)
+                action_process.join(60)
+                if action_process.is_alive():
+                    action_process.terminate()
+                    action_process.join()
+                    print '  killed reference extraction'
+                else:
+                    print '  finished reference extraction'
 
                     
-        if jnlname == 'IEEE Nucl.Sci.Symp.Conf.Rec.':
+        if jnlname in ['BOOK', 'IEEE Nucl.Sci.Symp.Conf.Rec.']:
             try:
                 print '%3i/%3i %s (%s) %s, %s' % (i,len(allarticlelinks),rec['conftitle'],rec['year'],rec['doi'],rec['tit'])
             except: 
@@ -336,6 +360,7 @@ def ieee(number):
     if rec.has_key('vol'): oufname += '.'+rec['vol']
     if rec.has_key('issue'): oufname += '.'+rec['issue']
     if rec.has_key('cnum'): oufname += '.'+rec['cnum']
+    #driver.quit()
     return (recs, oufname+'_'+number+'.xml') #XYZ
 
 
