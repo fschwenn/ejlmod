@@ -55,7 +55,8 @@ elif jnl == 'atoms': #173
     numberofpages = 2 + 1
 elif jnl == 'mathematics':
     numberofpages = 5 + 2 + 10
-
+elif jnl == 'quantumrep':
+    numberofpages = 4
 chunksize = 50
 
 
@@ -129,6 +130,8 @@ for artlink in artlinks:
         rec['jnl'] = 'Condens.Mat.'
     elif jnl == 'physics':
         rec['jnl'] = 'MDPI Physics'
+    elif jnl == 'quantumrep':
+        rec['jnl'] = 'Quantum Rep.'
     print '---{ %3i/%3i }---{ %s }---' % (i, len(artlinks), artlink[0])
     rec['FFT'] = artlink[0] + '/pdf'
     rec['tit'] = artlink[1]
