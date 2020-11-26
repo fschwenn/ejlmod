@@ -13,8 +13,8 @@ import ejlmod2
 import codecs
 import time
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 publisher = 'WILEY'
@@ -79,8 +79,14 @@ elif (jnl == 'mtk'):
     issn = '2041-7942'
     doitrunk = '10.1112/mtk.'
     jnlname = 'Mathematika'
-
-
+elif (jnl == 'aqt'):
+    issn = '2511-9044'
+    doitrunk = '10.1002/qute.'
+    jnlname = 'Adv.Quantum Technol.'
+elif (jnl == 'quanteng'):
+    issn = '2577-0470'
+    doitrunk = '10.1002/que'
+    jnlname = 'Quantum Eng.'
 
 
 
