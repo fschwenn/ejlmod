@@ -29,7 +29,8 @@ publisher = 'U. Valencia (main)'
 numberofpages = 2
 recordsperpage = 20
 
-for subj in [('164', 'math'), ('165', 'astro'), ('166', 'phys')]:
+#for subj in [('164', 'math'), ('165', 'astro'), ('166', 'phys')]:
+for subj in [('165', 'astro'), ('166', 'phys')]:
     prerecs = []
     recs = []
     jnlfilename = 'THESES-VALENCIA-%s_%s' % (stampoftoday, subj[1])
@@ -79,7 +80,7 @@ for subj in [('164', 'math'), ('165', 'astro'), ('166', 'phys')]:
                 time.sleep(180)
                 artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
             except:
-                print "no access to %s" % (rec['link'])
+                print "no access to %s" % (rec['artlink'])
                 continue     
         for span in artpage.find_all('span', attrs = {'class' : 'bold'}):
             spant = span.text.strip()
