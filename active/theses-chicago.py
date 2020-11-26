@@ -124,7 +124,7 @@ for rec in recs:
             inf = open(doifilename, 'r')
             doipage = BeautifulSoup(''.join(inf.readlines()))
             inf.close()
-            for meta in doipage.head.find_all('meta'):
+            for meta in doipage.find_all('meta'):
                 if meta.has_attr('name'):
                     #keywords
                     if meta['name'] == 'citation_keywords':
@@ -134,7 +134,7 @@ for rec in recs:
                     elif meta['name'] == 'citation_pdf_url':
                         rec['FFT'] = meta['content']
             #license
-            for div in doipage.body.find_all('div', attrs = {'class' : 'metadata-row'}):
+            for div in doipage.find_all('div', attrs = {'class' : 'metadata-row'}):
                 spans = div.find_all('span')
                 if len(spans) == 2:
                     if re.search('Standard Rights Statement', spans[0].text):
