@@ -76,16 +76,17 @@ for year in [str(now.year-1), str(now.year)]:
                 div2.replace_with('')
             for li in div.find_all('li'):
                 for a in li.find_all('a'):
-                    rec = {'tc' : 'T', 'jnl' : 'BOOK', 'oa' : False}
-                    rec['artlink'] = 'https://www.narcis.nl' + a['href']
-                    rec['tit'] = re.sub(' \(\d\d\d\d\)$', '', a.text.strip())
-                    rec['note'] = [ rec['artlink'], '%i of %i' % (len(recs) + 1, ntarget) ]
-                    for img  in li.find_all('img', attrs = {'class' : 'open-access-logo'}):
-                        rec['oa'] = True
-                if re.sub('(.*id).*', r'\1', rec['artlink']) in bereitsin:
-                    print '   skip %s' % (rec['artlink'])
-                else:
-                    recs.append(rec)
+                    if a.has_attr('href'):
+                        rec = {'tc' : 'T', 'jnl' : 'BOOK', 'oa' : False}
+                        rec['artlink'] = 'https://www.narcis.nl' + a['href']
+                        rec['tit'] = re.sub(' \(\d\d\d\d\)$', '', a.text.strip())
+                        rec['note'] = [ rec['artlink'], '%i of %i' % (len(recs) + 1, ntarget) ]
+                        for img  in li.find_all('img', attrs = {'class' : 'open-access-logo'}):
+                            rec['oa'] = True
+                    if re.sub('(.*id).*', r'\1', rec['artlink']) in bereitsin:
+                        print '   skip %s' % (rec['artlink'])
+                    else:
+                        recs.append(rec)
         print '---{ %i | %s }---{ %i/%i }---{ %s }---' % (page, tocurl, len(recs), ntarget, rec['artlink'])
         time.sleep(10)
         page += 1
