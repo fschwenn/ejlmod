@@ -13,8 +13,8 @@ import codecs
 from bs4 import BeautifulSoup
 import time
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
 regexpref = re.compile('[\n\r\t]')
@@ -62,12 +62,16 @@ elif (jnl == 'jva'):
     jnlname = 'J.Vac.Sci.Tech.'
 elif (jnl == 'jvb'):
     jnlname = 'J.Vac.Sci.Tech.'
+elif (jnl == 'aqs'):
+    jnlname = 'AVS Quantum Sci.'
 
 
     
     
 tocfilname = '%s/%s.toc' % (tmpdir, jnlfilename)
 urltrunk = 'http://aip.scitation.org/toc/%s/%s/%s?size=all' % (jnl,vol,iss)
+if jnl in ['aqs']:
+    urltrunk = 'https://avs.scitation.org/toc/%s/%s/%s?size=all' % (jnl,vol,iss)
 print urltrunk
 if not os.path.isfile(tocfilname):
     os.system('wget -T 300 -t 3 -q  -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" -O %s "%s"' % (tocfilname, urltrunk))
@@ -86,6 +90,8 @@ inf.close()
 
 def getarticle(href, sec, subsec, p1):
     artlink = 'http://aip.scitation.org%s' % (href)
+    if jnl in ['aqs']:
+        artlink = 'http://avs.scitation.org%s' % (href)
     artfilname = '%s/%s.%s' % (tmpdir, jnlfilename, re.sub('\W', '', p1))
     if not os.path.isfile(artfilname):
         os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilname, artlink))
