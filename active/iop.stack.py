@@ -30,12 +30,12 @@ jnl = {'1538-3881': 'Astron.J.',
        '1538-4357': 'Astrophys.J.Lett.',
        '2041-8205': 'Astrophys.J.Lett.',
        '0067-0049': 'Astrophys.J.Supp.',
-       '0264-9381': 'Class.Quant.Grav.',
        '1009-9271': 'Chin.J.Astron.Astrophys.',
        '1009-1963': 'Chin.Phys.',
        '1674-1056': 'Chin.Phys.',
        '1674-1137': 'Chin.Phys.',
        '0256-307X': 'Chin.Phys.Lett.',
+       '0264-9381': 'Class.Quant.Grav.',
        '0253-6102': 'Commun.Theor.Phys.',
        '0143-0807': 'Eur.J.Phys.',
        '0295-5075': 'EPL',
@@ -60,11 +60,25 @@ jnl = {'1538-3881': 'Astron.J.',
        '1063-7869': 'Phys.Usp.',
        '0741-3335': 'Plasma Phys.Control.Fusion',
        '1538-3873': 'Publ.Astron.Soc.Pac.',
-       '0034-4885': 'Rep.Prog.Phys.',
+       '0034-4885': 'Rept.Prog.Phys.',
+       '1361-6633': 'Rept.Prog.Phys.',
        '1674-4527': 'Res.Astron.Astrophys.',
        '0036-0279': 'Russ.Math.Surveys',
        '0953-2048': 'Supercond.Sci.Technol.'}
-jnl['2516-1067'] = 'Plasma Res.Express'
+jnl['2516-1067'] = 'Plasma Res.Express' #Plasma Research Express
+jnl['2632-2153'] = 'Mach.Learn.Sci.Tech.' #Machine Learning: Science and Technology
+jnl['2058-9565'] = 'Quantum Sci.Technol.' #Quantum Science and Technology  (quanth-ph)
+jnl['1674-4527'] = 'Res.Astron.Astrophys.' #Research in Astronomy and Astrophysics
+jnl['0266-5611'] = 'Inverse Prob.' #Inverse Problems
+jnl['0957-4484'] = 'Nanotechnol.' #Nanotechnology
+jnl['0253-6102'] = 'Commun.Theor.Phys.' #Communications in Theoretical Physics
+jnl['0004-6256'] = 'Nucl.Fusion' #Nuclear Fusion
+jnl['0029-5515'] = 'Nucl.Fusion' #Nuclear Fusion
+jnl['2040-8986'] = 'J.Opt.' #Journal of Optics
+jnl['1749-4699'] = 'Comput.Sci.Dis.' #Computational Science & Discovery
+jnl['1555-6611'] = 'Laser Phys.' #Laser Physics
+jnl['1612-202X'] = 'Laser Phys.Lett.' #Laser Physics Letters 
+
 
 #uninteresting journals in feed
 jnlskip = {'2058-8585' : 'Flexible and Printed Electronics'}
