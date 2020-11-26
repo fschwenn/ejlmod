@@ -26,7 +26,8 @@ jnlfilename = 'sigma'+year+'_'+str(firstarticle)
 
 
 
-tocurl = 'http://www.emis.de/journals/SIGMA/%s/' % (year)
+tocurl = 'https://www.emis.de/journals/SIGMA/%s/' % (year)
+print tocurl
 
 hdr = {'User-Agent' : 'MagicBrowser'}
 
