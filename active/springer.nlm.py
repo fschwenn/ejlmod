@@ -170,6 +170,14 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '10502': ['fimono', 'Fields Inst.Monogr.', '', '', 'S', ''], #Fields Institute Monographs
       '10503': ['ficomm', 'Fields Inst.Commun.', '', '', 'S']} #Fields Institute Communications
 
+jc['11253'] = ['umj', 'Ukr.Math.J.', '', '', 'P']
+jc['11128'] = ['qif', 'Quant.Inf.Proc.', '', '', 'P']
+jc['41534'] = ['natquantinf', 'npj Quantum Inf.', '', '', 'P']
+jc['10955'] = ['jstatphys', 'J.Statist.Phys.', '', '', 'P']
+jc['10946'] = ['jrlr', 'J.Russ.Laser Res.', '', '', 'P']
+jc['11449'] = ['opsp', 'Opt.Spectrosc.', '', '', 'P']
+
+
 #known conferences
 confdict = {'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30'}
 
