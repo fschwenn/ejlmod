@@ -49,7 +49,7 @@ def getdone():
     regscience = re.compile('science\d+\.\d+')
     ejldir = '/afs/desy.de/user/l/library/dok/ejl'
     issues = []
-    for directory in [ejldir+'/onhold', ejldir+'/backup', ejldir+'/backup/' + str(now.year-1)]:
+    for directory in [ejldir+'/onhold', ejldir+'/zu_punkten/enriched', ejldir+'/backup', ejldir+'/backup/' + str(now.year-1)]:
         for datei in os.listdir(directory):
             if regscience.search(datei):
                 vol = re.sub('.*science(\d+).*', r'\1', datei)
