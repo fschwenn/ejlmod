@@ -15,12 +15,15 @@ import urlparse
 import codecs
 from bs4 import BeautifulSoup
 import time
-
+import datetime
 
 
 tmpdir = '/tmp'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 
 publisher = 'The Abdus Salam International Centre for Theoretical Physics'
@@ -28,7 +31,7 @@ jnl = 'arp'
 vol = sys.argv[1]
 year = sys.argv[2]
 
-jnlfilename = jnl+vol
+jnlfilename = '%s%s_%s' % (jnl, vol, stampoftoday)
 jnlname = 'Afr.Rev.Phys.'
 
 urltrunk = 'http://aphysrev.ictp.it/index.php/aphysrev/issue/view/%i' % (int(vol)+22)
