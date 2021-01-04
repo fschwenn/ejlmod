@@ -16,7 +16,8 @@ import time
 from bs4 import BeautifulSoup
 
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special/'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
 def fsunwrap(tag):
@@ -89,6 +90,8 @@ elif (jnl == 'nsr'):
     jnlname = "Natl.Sci.Rev."
 elif (jnl == 'astrogeo'):
     jnlname = 'Astron.Geophys.'
+elif (jnl == 'integrablesystems'):
+    jnlname = 'J.Integrab.Syst.'
     
 else:
     print 'Dont know journal %s!' % (jnl)
@@ -432,7 +435,6 @@ ejlmod2.writeXML(recs,xmlfile,publisher)
 xmlfile.close()
 
 #retrival
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text: 
