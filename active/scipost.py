@@ -14,30 +14,68 @@ import urllib2
 import urlparse
 import time
 from bs4 import BeautifulSoup
+import datetime
 
 regexpsubm1 = re.compile('[sS]ubmissions')
 regexpsubm2 = re.compile('.*\/(\d\d\d\d\.\d\d\d\d\d).*')
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'SciPost Fundation'
 jnl = sys.argv[1]
-vol = sys.argv[2]
-issue = sys.argv[3]
+if jnl in ['spsln']:
+    jnlfilename = "%s.%s" % (jnl, stampoftoday)
+    vol = '0'
+else:
+    vol = sys.argv[2]
+    issue = sys.argv[3]
+    jnlfilename = "%s%s.%s" % (jnl, vol, issue)
+tc = 'P'
 if   (jnl == 'sps'): 
     jnlname = 'SciPost Phys.'
-    #urltrunk = 'https://scipost.org/10.21468/SciPostPhys'
     urltrunk = 'https://scipost.org/SciPostPhys'    
     toclink = "%s.%s.%s" % (urltrunk, vol, issue)
-elif   (jnl == 'spsp'): 
+elif (jnl == 'spsp'): 
     jnlname = 'SciPost Phys.Proc.'
     urltrunk = 'https://scipost.org/SciPostPhysProc'
     toclink = "%s.%s" % (urltrunk, vol)
+    tc = 'C'
+elif (jnl == 'spsc'):
+    jnlname = 'SciPost Phys.Core'
+    urltrunk = 'https://scipost.org/SciPostPhysCore' 
+    toclink = "%s.%s.%s" % (urltrunk, vol, issue)
+elif (jnl == 'spsln'):
+    jnlname = 'SciPost Phys.Lect.Notes'
+    urltrunk = 'https://scipost.org/SciPostPhysLectNotes'
+    toclink = urltrunk
+    tc = 'L'
+#elif (jnl == 'spscb'):
+#    jnlname = 'SciPost ???'
+#    urltrunk = 'https://scipost.org/SciPostPhysCodeb' 
+#    toclink = "%s.%s.%s" % (urltrunk, vol, issue)
+#elif (jnl == 'spa'):
+#    jnlname = 'SciPost Astro.'
+#    urltrunk = 'https://scipost.org/SciPostAstro' 
+#    toclink = "%s.%s.%s" % (urltrunk, vol, issue)
+#elif (jnl == ''):
+#    jnlname = 'SciPost ???'
+#    urltrunk = 'https://scipost.org/SciPostAstroCore' 
+#    toclink = "%s.%s.%s" % (urltrunk, vol, issue)
+#elif (jnl == ''):
+#    jnlname = 'SciPost ???'
+#    urltrunk = 'https://scipost.org/SciPostMathCore' 
+#    toclink = "%s.%s.%s" % (urltrunk, vol, issue)
+#elif (jnl == ''):
+#    jnlname = 'SciPost ???'
+#    urltrunk = 'https://scipost.org/SciPostMath' 
+#    toclink = "%s.%s.%s" % (urltrunk, vol, issue)
 
-jnlfilename = "%s%s.%s" % (jnl, vol, issue)
+    
 
-print "%s%s, Issue %s" %(jnlname,vol,issue)
+
 print "get table of content... from %s" % (toclink)
 
 tocpage = BeautifulSoup(urllib2.urlopen(toclink))
@@ -52,12 +90,11 @@ i = 0
 for div  in divs:
     i += 1
     print '---{ %i/%i }---' % (i, len(divs))
-    rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'auts' : []}
+    rec = {'jnl' : jnlname, 'tc' : tc, 'vol' : vol, 'auts' : []}
     if (jnl == 'sps'):
         rec['issue'] = issue
     elif (jnl == 'spsp'):
         rec['cnum'] = issue
-        rec['tc'] = 'C'
     for h3 in div.find_all('h3'):
         for a in h3.find_all('a'):
             artlink = 'https://scipost.org' + a['href']
@@ -79,7 +116,11 @@ for div  in divs:
         if meta.has_attr('name'):
             #article ID
             if meta['name'] == 'citation_firstpage':
-                rec['p1'] = meta['content']
+                if jnl in ['spsln']:
+                    rec['vol'] = re.sub('^0*', '', meta['content'])
+                    rec['p1'] = '1'
+                else:
+                    rec['p1'] = meta['content']
             #DOI
             elif meta['name'] == 'citation_doi':
                 rec['doi'] = meta['content']
@@ -92,6 +133,7 @@ for div  in divs:
             #date
             elif meta['name'] == 'citation_publication_date':
                 rec['date'] = meta['content']
+            
     #arXiv-number
     for a in artpage.body.find_all('a'):
         if a.has_attr('href'):
