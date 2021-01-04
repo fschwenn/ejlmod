@@ -43,7 +43,7 @@ def get_records(url):
     recs = []
     print('get_records:'+url)
     try:
-        page = urllib2.urlopen(url)
+        page = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(url)
         pages = {url : BeautifulSoup(page)}
     except:
         print('failed to open %s' % (url))
@@ -58,13 +58,13 @@ def get_records(url):
                     tocurl = '%s/page/%i' % (url, i+1)  
                     if not tocurl in pages.keys():
                         print(tocurl)
-                        page = urllib2.urlopen(tocurl)
+                        page = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl)
                         pages[tocurl] = BeautifulSoup(page)
                 except:
                     tocurl = '%s?page=%i' % (url, i+1) 
                     if not tocurl in pages.keys():
                         print(tocurl)
-                        page = urllib2.urlopen(tocurl)
+                        page = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl)
                         pages[tocurl] = BeautifulSoup(page)
         else:
             print("number of pages %s not an integer" % (numpag[0].string))
@@ -78,13 +78,13 @@ def get_records(url):
                     tocurl = '%s/page/%i' % (url, i+1) 
                     if not tocurl in pages.keys():
                         print(tocurl)
-                        page = urllib2.urlopen(tocurl)
+                        page = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl)
                         pages[tocurl] = BeautifulSoup(page)
                 except:
                     tocurl = '%s?page=%i' % (url, i+1)
                     if not tocurl in pages.keys():
                         print(tocurl)
-                        page = urllib2.urlopen(tocurl)
+                        page = urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl)
                         pages[tocurl] = BeautifulSoup(page)
     links = []
     for tocurl in pages.keys():
@@ -136,7 +136,7 @@ i = 0
 for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
-    artpage = BeautifulSoup(urllib2.urlopen(rec['artlink']))
+    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             if meta['name'] == 'citation_firstpage':
