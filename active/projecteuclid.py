@@ -19,7 +19,8 @@ import datetime
 now = datetime.datetime.now()
 lastyear = now.year - 1
 llastyear = now.year - 2
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
 
 volumestodo = 5
@@ -35,6 +36,7 @@ journals = {#'aaa'   : ('Abstr.Appl.Anal. ', 'Hindawi'),
             'hokmj' : ('Hokkaido Math.J.', 'Hokkaido University, Department of Mathematics'),
             #'jam'   : ('J.Appl.Math.', 'Hindawi'),
             'jdg'   : ('J.Diff.Geom.', 'Lehigh University'),
+            'jgsp' : ('J.Geom.Symmetry Phys.', 'Bulgarian Academy of Sciences'),
             'jmsj'  : ('J.Math.Soc.Jap.', 'Mathematical Society of Japan'),
             'jpm'   : ('J.Phys.Math.', 'OMICS International'),
             #'maa'   : ('Methods Appl.Anal.', 'International Press'),
@@ -43,12 +45,13 @@ journals = {#'aaa'   : ('Abstr.Appl.Anal. ', 'Hindawi'),
             'facm'  : ('Funct.Approx.Comment.Math.', 'Adam Mickiewicz University, Faculty of Mathematics and Computer Science'),
             'pgiq'  : ('Proc.Geom.Int.Quant.', 'Institute of Biophysics and Biomedical Engineering, Bulgarian Academy of Sciences')}
 
-#journals = {'jdg'   : ('J.Diff.Geom.', 'Lehigh University')}
+#journals = {'jgsp' : ('J.Geom.Symmetry Phys.', 'Bulgarian Academy of Sciences')}
 
 
 
-
+j = 0
 for jnl in journals.keys():
+    j += 1
 #for jnl in temp.keys():
 
     print jnl
@@ -75,8 +78,10 @@ for jnl in journals.keys():
                     break
     #todo = temp[jnl]
     #individual volumes
+    i = 0 
     for link in todo:
-        print '.link=%s' % (link)
+        i += 1
+        print '---{ %s (%i/%i) }---{ %i/%i }---{ %s }---' % (jnl, j, len(journals.keys()), i, len(todo), link)
         jnlfilename = re.sub('.*euclid.(.*?)\/(.*)', r'projecteuclid_\1.\2', link)
         #check whether file already exists
         goahead = True
@@ -149,6 +154,8 @@ for jnl in journals.keys():
                     ptext = p.text.strip()
                     if re.search('Digital Object Identifier.*10\.....\/', ptext):
                         rec['doi'] = re.sub('.*doi: *(10\..*)', r'\1', ptext)
+            if rec['doi'][0] == '2':
+                rec['link'] = 'http://projecteuclid.org' + article
             #title
             for section in articlepage.body.find_all('section', attrs = {'class' : 'publication-content'}):
                 rec['tit'] = section.find('h3').text
@@ -171,7 +178,6 @@ for jnl in journals.keys():
             ejlmod2.writeXML(recs,xmlfile,publisher)
             xmlfile.close()
             #retrival
-            retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
             retfiles_text = open(retfiles_path,"r").read()
             line = jnlfilename+'.xml'+ "\n"
             if not line in retfiles_text: 
