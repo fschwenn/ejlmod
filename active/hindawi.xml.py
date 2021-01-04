@@ -109,14 +109,14 @@ restartli = re.compile(' *<li ')
 reol = re.compile('(<\/[ou]l>)')
 for articleID in articleIDs:
     i += 1
-    print '---{ %i/%i }---{ %s }---' % (i, len(articleIDs), articleID)
+    print '---{ %i/%i }---{ %s%s }---' % (i, len(articleIDs), urltrunk, articleID)
     if re.search('isrn',jnl):
         artpage = BeautifulSoup(urllib2.urlopen('https://www.hindawi.com/journals/isrn/%s/%s' % (year, articleID)))
     else:
         #artpage = BeautifulSoup(urllib2.urlopen('%s/%s' % (urltrunk, articleID)))
         artfilename = '/tmp/hindawi.%s' % (articleID)
         if not os.path.isfile(artfilename):
-            os.system('wget  -T 300 -t 3 -q  -O %s "%s/%s"' % (artfilename, urltrunk, articleID))
+            os.system('wget  -T 300 -t 3 -q  -O %s "%s%s"' % (artfilename, urltrunk, articleID))
             time.sleep(2)
         #artfil = open(artfilename, 'r')
         artfil = codecs.EncodedFile(codecs.open(artfilename, mode='rb'), 'utf8')
