@@ -23,7 +23,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 abbr = sys.argv[1]
 
-numberofpages = 5
+numberofpages = 5-2
 articlesperpage = 100
 subjectstoskip = ['Biochemistry', 'LGBTQstudies', 'Classicalstudies', 'Microbiology', 'Informationscience', 
                   'Remotesensing', 'Filmstudies', 'Organicchemistry', 'Internationallaw', 
