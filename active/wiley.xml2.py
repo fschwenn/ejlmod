@@ -87,11 +87,28 @@ elif (jnl == 'quanteng'):
     issn = '2577-0470'
     doitrunk = '10.1002/que'
     jnlname = 'Quantum Eng.'
+#
+elif (jnl == 'mana'):
+    issn = '1522-2616'
+    doitrunk = '10.1002/mana'
+    jnlname = 'Math.Nachr.'
+elif (jnl == 'pssa'):
+    issn = '1862-6319'
+    doitrunk = '10.1002/pssa'
+    jnlname = 'Phys.Status Solidi'
+elif (jnl == 'pssr'):
+    issn = '1862-6270'
+    doitrunk = '10.1002/pssr'
+    jnlname = 'Phys.Status Solidi RRL'
+elif (jnl == 'qua'):
+    issn = '1097-461x'
+    doitrunk = '10.1002/qua'
+    jnlname = 'Int.J.Quant.Chem.'
 
 
 
 urltrunk = 'http://onlinelibrary.wiley.com/doi'
-print "%s%s, Issue %s" %(jnlname,vol,issue)
+print "%s %s, Issue %s" %(jnlname,vol,issue)
 if re.search('1111',doitrunk):
     toclink = '%s/%s.%s.%s.issue-%s/issuetoc' % (urltrunk,doitrunk,year,vol,issue)
 else:
@@ -104,7 +121,7 @@ if 1 > 0:
     if not os.path.isfile(tocfile):
         os.system('wget  -T 300 -t 3 -q -O %s "%s"' % (tocfile, toclink))
     inf = open(tocfile, 'r')
-    tocpage = BeautifulSoup(''.join(inf.readlines()))
+    tocpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
     inf.close()
     #tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
     #tocpage = BeautifulSoup(urllib2.urlopen(toclink,timeout=300))
@@ -115,6 +132,7 @@ if 1 > 0:
 
 
 recs = []
+alldois = []
 for div in tocpage.find_all('div', attrs = {'class' : 'issue-item'}):
     for h2 in div.find_all('h2'):
         tit = h2.text.strip()
@@ -122,10 +140,14 @@ for div in tocpage.find_all('div', attrs = {'class' : 'issue-item'}):
         continue
     rec = {'tit' : tit, 'year' : year, 'jnl' : jnlname, 'autaff' : [],
            'note' : [], 'vol' : vol, 'issue' : issue, 'keyw' : []}
+    if jnl == 'pssa':
+        rec['vol'] = 'A'+vol
     for a in div.find_all('a', attrs = {'class' : 'issue-item__title'}):
         rec['doi'] = re.sub('.*\/(10\..*)', r'\1', a['href'])
         rec['artlink'] = 'https://onlinelibrary.wiley.com' + a['href']
-    recs.append(rec)
+    if not rec['doi'] in alldois:
+        recs.append(rec)
+        alldois.append(rec['doi'])
     
 i = 0
 for rec in recs:
@@ -136,10 +158,20 @@ for rec in recs:
     artfile = '/tmp/wiley%s.%s.%s.%s.%04i' % (jnl, year, vol, issue, i)
     if not os.path.isfile(artfile):
         os.system('wget  -T 300 -t 3 -q -O %s "%s"' % (artfile, rec['artlink']))
-        time.sleep(2)
+        time.sleep(3) 
     inf = open(artfile, 'r')
-    artpage = BeautifulSoup(''.join(inf.readlines()))
+    artpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
     inf.close()    
+    try:
+        completenesscheck = artpage.body.find_all('section', attrs = {'class' : 'article-section__abstract'})
+    except:
+        print '   download seems incomplete, retrying in 180s...'
+        time.sleep(180)
+        os.system('wget  -T 300 -t 3 -q -O %s "%s"' % (artfile, rec['artlink']))
+        time.sleep(3)
+        inf = open(artfile, 'r')
+        artpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
+        inf.close()    
     #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     autaff = False
     for meta in artpage.head.find_all('meta'):
