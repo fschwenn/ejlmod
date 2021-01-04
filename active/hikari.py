@@ -37,7 +37,11 @@ elif (jnl == 'aap'):
     issn = ''
     year = str(int(vol) + 2012)
     typecode = "P"
-
+elif (jnl == 'ces'):
+    jnlname = 'Contemp.Eng.Sci.'
+    issn = '1314-7641'
+    year = str(int(vol) + 2007)
+    typecode = "P"
 
 urltrunk = 'http://www.m-hikari.com/%s/%s%s/%s%s-%s' % (jnl,jnl,year,jnl,isu,year)
 
@@ -84,6 +88,8 @@ for tline in re.split(' *<p> *',tocline):
         if len(parts) > 3 and re.search('http.*doi.org',parts[3]):
             rec['doi'] = re.sub('.*doi.org.(10.*?)".*',r'\1',parts[3])
             rec['doi'] = re.sub('<\/a>.*', '', rec['doi'])
+        elif re.search('doi: 10.12988\/[a-z]+\.\d\d\d\d\.\d+', tline):
+            rec['doi'] = re.sub('.*doi: (10.12988/.*?\.\d\d\d\d\.\d+).*', r'\1', tline.strip())
         else:
             rec['doi'] = '40.4000/%s%i' % (jnlfilename, recnr)
         recs.append(rec)
