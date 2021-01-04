@@ -30,25 +30,33 @@ typecode = 'T'
 
 jnlfilename = 'THESES-CAMBRIDGE-%s' % (stampoftoday)
 
-tocurl = 'https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=500&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis&filtertype=dateIssued&filter_relational_operator=equals&filter=[%i+TO+2040]' % (startyear)
+
+tocurls = []
+tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=100&etal=0&scope=&group_by=none&page=1&sort_by=dc.date.issued_dt&order=desc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis')
+tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=100&etal=0&scope=&group_by=none&page=2&sort_by=dc.date.issued_dt&order=desc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis')
+tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=100&etal=0&scope=&group_by=none&page=1&sort_by=dc.date.issued_dt&order=asc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis')
+tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=100&etal=0&scope=&group_by=none&page=2&sort_by=dc.date.issued_dt&order=asc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis')
+tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=100&etal=0&scope=&group_by=none&page=3&sort_by=dc.date.issued_dt&order=asc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis')
 
 prerecs = []
-try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
-    time.sleep(3)
-except:
-    print "retry %s in 180 seconds" % (tocurl)
-    time.sleep(180)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+for tocurl in tocurls:
+    try:
+        print tocurl
+        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+        time.sleep(3)
+    except:
+        print "retry %s in 180 seconds" % (tocurl)
+        time.sleep(180)
+        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
 
-for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
-    rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : []}
-    for h4 in div.find_all('h4'):
-        for a in h4.find_all('a'):
-            rec['tit'] = a.text.strip()
-            rec['link'] = 'https://www.repository.cam.ac.uk' + a['href']
-            rec['doi'] = '20.2000/OXFORD/' + re.sub('\W', '', a['href'])
-            prerecs.append(rec)
+    for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
+        rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : []}
+        for h4 in div.find_all('h4'):
+            for a in h4.find_all('a'):
+                rec['tit'] = a.text.strip()
+                rec['link'] = 'https://www.repository.cam.ac.uk' + a['href']
+                rec['doi'] = '20.2000/OXFORD/' + re.sub('\W', '', a['href'])
+                prerecs.append(rec)
 
 i = 0
 recs = []
