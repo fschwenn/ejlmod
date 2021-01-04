@@ -14,8 +14,8 @@ from bs4 import BeautifulSoup
 import time
 import datetime
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'+'/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
 regexpref = re.compile('[\n\r\t]')
