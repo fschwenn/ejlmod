@@ -19,8 +19,8 @@ import time
 
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 tmpdir = '/tmp'
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 def tfstrip(x): return x.strip()
 
@@ -51,6 +51,12 @@ elif (jnl == 'tnmp20'):
     jnlname = 'J.Nonlin.Math.Phys.'
 elif (jnl == 'tapx20'):
     jnlname = 'Adv.Phys.X'
+elif (jnl == 'uexm20'):
+    jnlname = 'Exper.Math.'
+elif (jnl == 'gitr20'):
+    jnlname = 'Integral Transform.Spec.Funct.'
+elif (jnl == 'glma20'):
+    jnlname = 'Linear Multilinear Alg.'
 
 jnlfilename = "%s.%s.%s" % (jnl, vol, issue)
 
