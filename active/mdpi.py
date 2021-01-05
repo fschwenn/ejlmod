@@ -16,9 +16,9 @@ from bs4 import BeautifulSoup
 import datetime
 import time
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special/'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special/'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
 def tfstrip(x): return x.strip()
 
@@ -57,17 +57,20 @@ elif jnl == 'mathematics':
     numberofpages = 5 + 2 + 10
 elif jnl == 'quantumrep':
     numberofpages = 4
+elif jnl == 'axioms':
+    numberofpages = 6
 chunksize = 50
 
-
+rpp = 10
+startyear = now.year-1
 if jnl == 'proceedings':
     starturl = 'http://www.mdpi.com/2504-3900/%s/%s' % (vol, iss)
     #starturl = 'https://www.mdpi.com/journal/universe/special_issues/quantum_fields'
     jnlfilename = 'mdpi_proc%s.%s_%s' % (vol, iss, cnum)
     done = []
 else:
-    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=2018&year_to=2150&page_count=10&sort=pubdate&view=default' % (jnl)
-    jnlfilename = '%s.%s_%i' % (jnl, stampoftoday, 10*numberofpages)
+    starturl = 'http://www.mdpi.com/search?journal=%s&year_from=%i&year_to=2150&page_count=%i&sort=pubdate&view=default' % (jnl, startyear, rpp)
+    jnlfilename = '%s.%s_%i' % (jnl, stampoftoday, rpp*numberofpages)
     done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%4d/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1, jnl)))
     done +=  map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*%s*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, jnl)))
@@ -96,7 +99,7 @@ if jnl == 'proceedings':
             artlinks.append(('http://www.mdpi.com' + a['href'], a.text))
 else:
     for j in range(numberofpages):
-        print '%s&page_no=%i' % (starturl, j+1)
+        print '==={ %i/%i }==={ %s&page_no=%i }===' % (j+1, numberofpages, starturl, j+1)
         req = urllib2.Request('%s&page_no=%i' % (starturl, j+1), headers=hdr)
         tocpage = BeautifulSoup(urllib2.urlopen(req))
         divs = tocpage.body.find_all('div', attrs = {'class' : 'article-content'})
@@ -137,6 +140,7 @@ for artlink in artlinks:
     rec['tit'] = artlink[1]
     #get detailed page
     try:
+        time.sleep(1)
         artreq = urllib2.Request(artlink[0], headers=hdr)
         page = BeautifulSoup(urllib2.urlopen(artreq))
     except:
@@ -254,13 +258,17 @@ for artlink in artlinks:
     if (i % chunksize == 0) or (i == len(artlinks)):
         #write xml
         if recs:
-            xmlf = os.path.join(xmldir, '%s-%02i_of_%i.xml' % (jnlfilename, i/chunksize, numberofchunks))
+            if i % chunksize == 0:
+                xmlfilename = '%s-%02i_of_%i.xml' % (jnlfilename, i/chunksize, numberofchunks)
+            else:
+                xmlfilename = '%s-fin_of_%i.xml' % (jnlfilename, numberofchunks)
+            xmlf = os.path.join(xmldir, xmlfilename)
             xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
             ejlmod2.writeXML(recs, xmlfile, publisher)
             xmlfile.close()
             #retrival
             retfiles_text = open(retfiles_path, "r").read()
-            line = '%s-%02i_of_%i.xml\n' % (jnlfilename, i/chunksize, numberofchunks)
+            line = '%s\n' % (xmlfilename)
             print ' + wrote %s' % (line)
             if not line in retfiles_text:
                 retfiles = open(retfiles_path,"a")
