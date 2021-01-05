@@ -1,5 +1,8 @@
 # -*- coding: UTF-8 -*-
 # crawls iop web page to get metadata of journal issue
+#
+#the Firefox-Selenium only runs on FS' notebook :(
+#
 # FS 2017-05-15
 
 import os
@@ -15,14 +18,31 @@ import codecs
 from bs4 import BeautifulSoup
 import urllib2
 import urlparse
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-lproc = '/afs/desy.de/user/l/library/proc'
+
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special/'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
+
 publisher = 'IOP'
 regexpiopurl = re.compile('http...iopscience.iop.org.')
 regexpdxdoi = re.compile('http...dx.doi.org.')
 #collapseWs = re.compile('[\n \t]+')
 #initialEnd = re.compile(r'([A-Z])\b')
+
+#driver
+opts = Options()
+opts.add_argument("--headless")
+caps = webdriver.DesiredCapabilities().FIREFOX
+caps["marionette"] = True
+driver  = webdriver.Firefox(options=opts, capabilities=caps)
+#webdriver.PhantomJS()
+driver.implicitly_wait(30)
+
 
 starturls = re.split(',', sys.argv[1])
 issns = [re.sub('.*\/(\d\d\d\d\-\d\d\d.)\/.*', r'\1', starturl) for starturl in starturls]
@@ -36,7 +56,7 @@ else:
 jnls = {'1538-3881': 'Astron.J.',
         '0004-637X': 'Astrophys.J.',
         '1538-4357': 'Astrophys.J.',
-        '2041-8205': 'Astrophys.J.',
+        '2041-8205': 'Astrophys.J.Lett.',
         '0067-0049': 'Astrophys.J.Supp.',
         '0264-9381': 'Class.Quant.Grav.',
         '1009-9271': 'Chin.J.Astron.Astrophys.',
@@ -74,6 +94,7 @@ jnls = {'1538-3881': 'Astron.J.',
         '1538-3873': 'Publ.Astron.Soc.Pac.',
         '2399-6528': 'J.Phys.Comm.',
         '0741-3335': 'Plasma Phys.Control.Fusion',
+        '2515-5172': 'Res.Notes AAS',
         '0026-1394': 'Metrologia'}
 jnls['2516-1067'] = 'Plasma Res.Express'
 if jnls.has_key(issn):
@@ -85,15 +106,31 @@ tocpages = []
 j = 0
 for starturl in starturls:
     j += 1
-    try:
-        print '---{ %i/%i }---{ %s }---' % (j, len(starturls), starturl)
-        tocpages.append(BeautifulSoup(urllib2.urlopen(starturl, timeout=300)))
-        time.sleep(10)
-    except:
-        print 'try "%s" again after 5 minutes' % (starturl)
-        time.sleep(300)
-        tocpages.append(BeautifulSoup(urllib2.urlopen(starturl, timeout=300)))
+    #tocfile = '/tmp/iop_' + re.sub('\/', '_', re.sub('.*issue\/', '', starturl)) + '.toc'
+    #if not os.path.isfile(tocfile):
+    #    os.system('wget -q -T 300 -O %s "%s"' % (tocfile, starturl))
+    #inf = open(tocfile, 'r')
+    #tocpages.append(BeautifulSoup(''.join(inf.readlines())))
+    driver.get(starturl)
+    tocpages.append(BeautifulSoup(driver.page_source, features="lxml"))
+    time.sleep(30)
+#    inf.close()
+#    try:
+#        print '---{ %i/%i }---{ %s }---' % (j, len(starturls), starturl)
+#        tocpages.append(BeautifulSoup(urllib2.urlopen(starturl, timeout=300)))
+#        time.sleep(10)
+#    except:
+#        print 'try "%s" again after 5 minutes' % (starturl)
+#        time.sleep(300)
+#        tocpages.append(BeautifulSoup(urllib2.urlopen(starturl, timeout=300)))
     
+hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+       'Accept-Encoding': 'none',
+       'Accept-Language': 'en-US,en;q=0.8',
+       'Connection': 'keep-alive'}
+
 recs = []
 voliss = []
 vols = []
@@ -110,12 +147,22 @@ for tocpage in tocpages:
     divs = tocpage.find_all('div', attrs = {'id' : 'wd-jnl-issue-art-list'})
     if not divs:
         divs = tocpage.find_all('div', attrs = {'class' : 'art-list'})
+    print len(divs)
+    if len(divs) == 0:
+        print tocpage.text
     for div in divs:
-        for child in div.children:
+        children = div.children
+        (k, kmax) = (0, 0)
+        for child in children:
+            kmax += 1
+        children = div.children
+        for child in children:
+            k += 1
             try:
                 child.name
             except:
                 continue
+            print '      -{ %i/%i }-{ %s }-' % (k, kmax, child.name)
             if child.name == 'h3':
                 h4note = False
                 h3note = child.text
@@ -125,7 +172,8 @@ for tocpage in tocpages:
                 print '---%s---' % (h4note)
             elif child.name == 'div':
                 for a in child.find_all('a', attrs = {'class' : 'art-list-item-title'}):
-                    time.sleep(30)
+                    preface = False
+                    time.sleep(20)
                     rec = {'jnl' : jnl, 'note' : [], 'tc' : 'P', 'autaff' : [], 'refs' : []}
                     orcidsfound = False
                     if len(sys.argv) > 2:
@@ -133,19 +181,41 @@ for tocpage in tocpages:
                         rec['tc'] = 'C'
                     elif issn in ['1742-6596', '1757-899X']:
                         rec['tc'] = 'C'
+                    elif issn in ['2515-5172']:
+                        rec['tc'] = ' '
                     if issnote: rec['note'].append(issnote)
                     if h3note: rec['note'].append(h3note)
                     if h4note: rec['note'].append(h4note)
                     artlink = 'http://iopscience.iop.org' + a['href']
-                    if artlink in ['http://iopscience.iop.org/article/10.1088/0953-4075/48/23/239501']:
-                        rec = recs[-1]
-                        continue
+                    print '     (%i) %s ' % (len(recs), artlink)
+                    #artfile =  '/tmp/iop_' + re.sub('\W', '', a['href'])
+                    #if not os.path.isfile(artfile):
+                    #    os.system('lynx -source "%s" > %s' % (artlink, artfile))
+                    #inf = open(artfile, 'r')
+                    #artpage = BeautifulSoup(''.join(inf.readlines()))
+                    #inf.close()
+                    
+                                   
                     try:
-                        artpage = BeautifulSoup(urllib2.urlopen(artlink, timeout=300))
+                        #req = urllib2.Request(artlink, headers=hdr)
+                        #artpage = BeautifulSoup(urllib2.urlopen(req))
+                        driver.get(artlink)
+                        artpage = BeautifulSoup(driver.page_source, features="lxml")
                     except:
                         print 'try "%s" again after 5 minutes' % (artlink)
                         time.sleep(300)
-                        artpage = BeautifulSoup(urllib2.urlopen(artlink, timeout=300))
+                        #req = urllib2.Request(artlink, headers=hdr)
+                        #artpage = BeautifulSoup(urllib2.urlopen(req))
+                        driver.get(artlink)
+                        artpage = BeautifulSoup(driver.page_source, features="lxml")
+                    #roboter check
+                    doimeta = artpage.find_all('meta', attrs = {'name' : 'citation_doi'})
+                    if not doimeta:
+                        print '\n !!! ROBO CHECK !!!\n'
+                        print 'try "%s" again after 20 minutes' % (artlink)
+                        time.sleep(1200)
+                        driver.get(artlink)
+                        artpage = BeautifulSoup(driver.page_source, features="lxml")
                     autaff = False
                     #licence
                     for divl in artpage.body.find_all('div', attrs = {'class' : 'col-no-break wd-jnl-art-license media'}):
@@ -158,6 +228,8 @@ for tocpage in tocpages:
                         if meta.has_attr('name'):
                             if meta['name'] == 'citation_title':
                                 rec['tit'] = meta['content']
+                                if re.search('^Preface ', meta['content']):
+                                    preface = True
                             elif meta['name'] == 'citation_online_date':
                                 rec['date'] = meta['content']
                             elif meta['name'] == 'citation_volume':
@@ -177,6 +249,8 @@ for tocpage in tocpages:
                                 rec['issue'] = meta['content']
                             elif meta['name'] == 'citation_firstpage':
                                 rec['p1'] = meta['content']
+                                if issn == '1748-0221' and rec['p1'][0] == 'C':
+                                    rec['tc'] = 'C'
                             elif meta['name'] == 'citation_doi':
                                 rec['doi'] = meta['content']
                             elif meta['name'] == 'citation_pdf_url' and rec.has_key('licence'):
@@ -195,6 +269,8 @@ for tocpage in tocpages:
                             elif meta['name'] == 'citation_author_email':
                                 email = meta['content']
                                 autaff.append('EMAIL:%s' % (email))
+                    if preface:
+                        continue
                     #JCAP
                     if issn == '1475-7516':
                         rec['vol'] = '%s%02i' % (rec['date'][2:4], int(rec['issue']))
@@ -302,7 +378,6 @@ ejlmod2.writeXML(recs ,xmlfile,'IOP')
 xmlfile.close()
 
 #retrival
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
 line = iopf+'.xml'+ "\n"
 if not line in retfiles_text: 
