@@ -17,8 +17,8 @@ from bs4 import BeautifulSoup
 
 
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'+'/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 publisher = 'International Physics and Control Society'
 volume = sys.argv[1]
