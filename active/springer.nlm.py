@@ -66,7 +66,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '10773': ['ijtp', 'Int.J.Theor.Phys.', '', '', 'P'],
       '10781': ['fias', 'FIAS Interdisc.Sci.Ser.', '', '', 'P'],
       '10786': ['iet', 'Instrum.Exp.Tech.', '', '', 'P'],
-      '10853': ['jmsme', 'J.Mater.Sci.', '', '', 'P'],
+      '10853': ['jmsme', 'J.Materials Sci.', '', '', 'P'],
       '10909': ['jltp', 'J.Low Temp.Phys.', '', '', 'P'],
       '10955': ['jstatphys', 'J.Statist.Phys.', '', '', 'P'],
       '10958': ['jms', 'J.Math.Sci.', '', 'Zap.Nauchn.Semin.', 'P'],
@@ -155,12 +155,10 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
        '6316': ['mpstud', 'Math.Phys.Stud.', '', '', 'S', ''],
        '7395': ['assp', 'Astrophys.Space Sci.Proc.', '', '', 'C', ''],
 
-
        '5584': ['aemb', 'BOOK', '', '', 'S', 'Advances in Experimental Medicine and Biology'], #whole book
        '4848': ['pim', 'Progress in Mathematics' , '', '', 'S', ''], #whole book (327)
       '15602': ['sscml', 'BOOK', '', '', 'S', 'The Springer Series on Challenges in Machine Learning'], #Einzelaufnah
       '15585': ['icme', 'BOOK', '', '', 'C', ''], #einzelaufnahmen
-
 
        '8389': ['nophsc', 'Nonlin.Phys.Sci.', '', '', 'S', ''], # stopped 2013?
        '8431': ['gtip', 'BOOK', '', '', 'S', 'Grad.Texts Math.'],
@@ -169,14 +167,34 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
        '8902': ['sprbip', 'BOOK', '', '', 'S', 'SpringerBriefs in Physics'],
       '10502': ['fimono', 'Fields Inst.Monogr.', '', '', 'S', ''], #Fields Institute Monographs
       '10503': ['ficomm', 'Fields Inst.Commun.', '', '', 'S']} #Fields Institute Communications
+#42005 Commun.Phys.
+#41605 Rad.Det.Tech.Meth.
 
-jc['11253'] = ['umj', 'Ukr.Math.J.', '', '', 'P']
-jc['11128'] = ['qif', 'Quant.Inf.Proc.', '', '', 'P']
-jc['41534'] = ['natquantinf', 'npj Quantum Inf.', '', '', 'P']
-jc['10955'] = ['jstatphys', 'J.Statist.Phys.', '', '', 'P']
+jc['00029'] = ['selmat', 'Selecta Math.', '', '', 'P']
+jc['00222'] = ['invmat', 'Invent.Math.', '', '', 'P']
+jc['00526'] = ['cvpde', 'Calc.Var.Part.Differ.Equ', '', '', 'P']
+jc['10440'] = ['acapma', 'Acta Appl.Math.', '', '', 'P']
+jc['10699'] = ['fosi', 'Found.Sci.', '', '', 'P']
 jc['10946'] = ['jrlr', 'J.Russ.Laser Res.', '', '', 'P']
+jc['10947'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P']
+jc['10955'] = ['jstatphys', 'J.Statist.Phys.', '', '', 'P']
+jc['11128'] = ['qif', 'Quant.Inf.Proc.', '', '', 'P']
+jc['11253'] = ['umj', 'Ukr.Math.J.', '', '', 'P']
+jc['11139'] = ['ramanajuan', 'Ramanujan J.', '', '', 'P']
+jc['11229'] = ['synthese', 'Synthese', '', '', 'P']
 jc['11449'] = ['opsp', 'Opt.Spectrosc.', '', '', 'P']
-
+jc['12045'] = ['resonance', 'Reson.', '', '', 'P']
+jc['12220'] = ['jganal', 'J.Geom.Anal.', '', '', 'P']
+jc['12607'] = ['pauaa', 'p Adic Ultra.Anal.Appl.', '', '', 'P']
+jc['13194'] = ['ejphilsci', 'Eur.J.Phil.Sci.', '', '', 'P']
+jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P']
+jc['40507'] = ['epjgt', 'EPJ Quant.Technol.', '', '', 'P']
+jc['40818'] = ['apde', 'Ann.PDE', '', '', 'P']
+jc['41534'] = ['natquantinf', 'npj Quantum Inf.', '', '', 'P']
+jc['00332'] = ['jnonlinsci', 'J.Nonlin.Sci.', '', 'P']
+jc['00229'] = ['manusmat', 'Manuscr.Math.', '', 'P']
+jc['41614'] = ['rmplasmap', 'Rev.Mod.Plasma Phys.', '', 'P']#ereugen in jnl
+jc['13370'] = ['afrmat', 'Afr.Math.', '', 'P']#ereugen in jnl
 
 #known conferences
 confdict = {'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30'}
@@ -491,11 +509,17 @@ def convertarticle(journalnumber, filename, contlevel):
                     for st in ttg.find_all('subtitle', attrs = {'xml:lang' : 'en'}):
                         rec['transtit'] += ': %s' % (cleanformulas(st))
         #year
-        for pd in meta.find_all('pub-date', attrs = {'date-type' : 'collection'}):
+        pds = meta.find_all('pub-date', attrs = {'date-type' : 'collection'})
+        if not pds:
+            pds = meta.find_all('pub-date', attrs = {'date-type' : 'pub', 'publication-format' : 'print'})
+        for pd in pds:
             for year in pd.find_all('year'):
                 rec['year'] = year.text.strip()
         #date
-        for pd in meta.find_all('pub-date', attrs = {'date-type' : 'epub'}):
+        pds = meta.find_all('pub-date', attrs = {'date-type' : 'epub'})
+        if not pds:
+            pds = meta.find_all('pub-date', attrs = {'date-type' : 'pub', 'publication-format' : 'electronic'})
+        for pd in pds:
             for year in pd.find_all('year'):
                 rec['date'] = year.text.strip()
             for month in pd.find_all('month'):
@@ -608,6 +632,10 @@ def convertarticle(journalnumber, filename, contlevel):
             if meta.find_all('contrib', attrs = {'contrib-type' : 'editor'}):
                 authortype = 'editor'
         for contrib in meta.find_all('contrib', attrs = {'contrib-type' : authortype}):
+            #check for big collaborations disguised as author
+            if contrib.find_all('contrib-group'):
+                print "!!! big collaborations disguised as author !!!"
+                continue
             #authors
             for name in contrib.find_all('name'):
                 for sn in name.find_all('surname'):
@@ -970,6 +998,8 @@ for dirlev1 in os.listdir(sprdir):
         print 'journal skipped: ' + journalnumber
         os.system('echo "check www.springer.com/journal/%s" | mail -s "[SPRINGER] unknown journal" %s' % (journalnumber, 'florian.schwennsen@desy.de'))
         continue
+    else:
+        print dirlev1fullpath, journalnumber, jc[journalnumber]
     #crawl through directories of volumes (to check for online first)
     for dirlev2 in os.listdir(dirlev1fullpath):
         dirlev2fullpath = os.path.join(dirlev1fullpath, dirlev2)
