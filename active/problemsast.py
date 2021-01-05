@@ -73,9 +73,15 @@ for tr in tocpage.body.find_all('tr'):
             for aut in re.split(', *', auts):
                 rec['auts'].append(re.sub('\.([A-Z][a-z])', r'. \1', aut))
         print "%s %s (%s) %s-%s" % (jnlname, rec['vol'], year, rec['p1'], rec['p2'])
-        recs.append(rec)
+        if 'link' in rec.keys():
+            recs.append(rec)
+        else:
+            print '   ... no link!?'
 
+i = 0
 for rec in recs:
+    i += 1
+    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['link'])
     time.sleep(2)
     req = urllib2.Request(rec['link'], headers=hdr)
     artpage = BeautifulSoup(urllib2.urlopen(req))
