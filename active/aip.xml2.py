@@ -64,7 +64,13 @@ elif (jnl == 'jvb'):
     jnlname = 'J.Vac.Sci.Tech.'
 elif (jnl == 'aqs'):
     jnlname = 'AVS Quantum Sci.'
-
+elif (jnl == 'app'):
+    jnlname = 'APL Photonics?'
+elif (jnl == 'sci'):
+    jnlname = 'Scilight?'
+elif (jnl == 'pto'): #authors messy
+    jnlname = 'Phys.Today'
+    typecode = ''
 
     
     
@@ -77,7 +83,7 @@ if not os.path.isfile(tocfilname):
     os.system('wget -T 300 -t 3 -q  -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" -O %s "%s"' % (tocfilname, urltrunk))
     time.sleep(5)
 inf = open(tocfilname, 'r')
-tocpage = BeautifulSoup(''.join(inf.readlines()))
+tocpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
 inf.close()
 #try:
 #    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
@@ -102,7 +108,7 @@ def getarticle(href, sec, subsec, p1):
             os.system('wget -T 300 -t 3 -q  -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" -O %s "%s"' % (artfilname, artlink))
             time.sleep(10)
     inf = open(artfilname, 'r')
-    artpage = BeautifulSoup(''.join(inf.readlines()))
+    artpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
     inf.close()
 
 #    try:
@@ -113,7 +119,7 @@ def getarticle(href, sec, subsec, p1):
 #        print "retry %s in 180 seconds" % (artlink)
 #        time.sleep(180)
 #        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
-    rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : iss, 'tc' : typecode, 
+    rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : iss, 'tc' : typecode, 'keyw' : [],
            'note' : [], 'auts' : [], 'aff' : [], 'p1' : p1}
     if jnl == 'jva':
         rec['vol'] = 'A%s' % (vol)
@@ -238,7 +244,17 @@ def getarticle(href, sec, subsec, p1):
                     rec['auts'].append('=Aff%s' % (aff))
     if len(rec['auts']) == 1 and not re.search('EMAIL', rec['auts'][0]) and emails.has_key('NOAFFNR'):
         if re.search('@', emails['NOAFFNR']):
-            rec['auts'][0] += ', EMAIL:%s' % (emails['NOAFFNR'])        
+            rec['auts'][0] += ', EMAIL:%s' % (emails['NOAFFNR'])
+    #special case Physics Today
+    if jnl == 'pto':
+        rec['auts'] = []
+        for meta in artpage.head.find_all('meta', attrs = {'name' : 'citation_author'}):
+            rec['auts'].append(meta['content'])
+    for div in artpage.body.find_all('div', attrs = {'class' : 'topic-list'}):
+        for a in div.find_all('a'):
+            kw = a.text.strip()
+            if not kw in rec['keyw']:
+                rec['keyw'].append(kw)
     #abstract
     for div in artpage.body.find_all('div', attrs = {'class' : 'abstractSection abstractInFull'}):
         rec['abs'] = div.text.strip()
@@ -246,6 +262,9 @@ def getarticle(href, sec, subsec, p1):
         for div in artpage.body.find_all('div', attrs = {'class' : 'hlFld-Abstract'}):
             for div2 in div.find_all('div', attrs = {'class' : 'NLM_paragraph'}):
                 rec['abs'] = div2.text.strip()
+    if not rec.has_key('abs'):
+        for meta in artpage.head.find_all('meta', attrs = {'name' : 'dc.Description'}):
+            rec['abs'] = meta['content']
     #references
     for div in artpage.body.find_all('div', attrs = {'class' : 'article-paragraphs'}):
         for h4 in div.find_all('h4'):
@@ -262,6 +281,25 @@ def getarticle(href, sec, subsec, p1):
                     rawref = li.text.strip()
                     if not rawref in ['Published by AIP Publishing.']:
                         rec['refs'].append([('x', regexpref.sub(' ', rawref))])
+    if not 'refs' in rec.keys():
+        for ol in artpage.body.find_all('ol'):
+            rec['possiblerefs'] = []
+            indicator = False
+            for li in ol.find_all('li'):
+                for a in li.find_all('a'):
+                    if a.has_attr('href') and re.search('doi.org', a['href']):
+                        rdoi = re.sub('htt.*doi.org.', ', DOI: ', a['href'])
+                        a.replace_with(rdoi)
+                        indicator = True
+                    elif not re.search('arxiv.org', a['href']):
+                        a.replace_with('')
+                rawref = li.text.strip()
+                if not rawref in ['Published by AIP Publishing.']:
+                    rec['possiblerefs'].append([('x', regexpref.sub(' ', rawref))])
+            if indicator:
+                rec['refs'] = rec['possiblerefs']
+            
+            
     print '  ', rec['doi'] + ': ' + ' '.join(['%s[%i]' % (k, len(rec[k])) for k in rec.keys()])
     time.sleep(2)
     return rec
@@ -307,9 +345,13 @@ for (href, sec, subsec, p1) in tocheck:
         print 'skip %s' % (href)
     else:
         print '---{ %i/%i }---{ %s %s %s %s }---' % (i, len(tocheck), href, sec, subsec, p1)
-        rec = getarticle(href, sec, subsec, p1)
-        if rec['auts']:
-            recs.append(rec)
+        if sec in ['From the Editor', "Readers' Forum", 'Issues and Events', 'Books',
+                   'New Products', 'Obituaries', 'Quick Study', 'Back Scatter']:
+            print '     skip "%s"' % (sec)
+        else:
+            rec = getarticle(href, sec, subsec, p1)
+            if rec['auts']:
+                recs.append(rec)
 print '%i records for %s' % (len(recs), jnlfilename)
 
 
