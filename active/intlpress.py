@@ -17,7 +17,9 @@ from bs4 import BeautifulSoup
 
 
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
+
 tmpdir = '/tmp'
 printer = "l00ps5 "
 def tfstrip(x): return x.strip()
@@ -54,6 +56,7 @@ elif (jnl == 'cag'):
     jnlname = 'Commun.Anal.Geom.'
     issn = '1019-8385'
     url = "http://www.intlpress.com/%s/%s-v%s.php" % (jnl.upper(),jnl.upper(),vol)
+    url = 'https://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/%04i/%04i/index.php' % (jnl,int(vol),int(re.sub('\D.*', '', isu)))
 elif (jnl == 'cjm'): #fall 2012
     jnlname = 'Cambridge J.Math.'
     issn = '2168-0930'
@@ -71,9 +74,16 @@ elif (jnl == 'mrl'): # fulltext via http://www.intlpress.com/_newsite/site/pub/f
     jnlname = 'Math.Res.Lett.'
     issn = '1073-2780'
     url = "http://www.intlpress.com/_newsite/site/pub/pages/journals/items/%s/content/vols/00%s/000%s/index.php" % (jnl,vol,isu)
-
+elif (jnl == 'pamq'):
+    jnlname = 'Pure Appl.Math.Quart.'
+    issn = '1558-8599'
+    url = 'https://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/%04i/%04i/index.php' % (jnl,int(vol),int(re.sub('\D.*', '', isu)))
+elif (jnl == 'iccm'):
+    jnlname = 'ICCM Not.'
+    issn = '2326-4810'
+    url = 'https://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/%04i/%04i/index.php' % (jnl,int(vol),int(re.sub('\D.*', '', isu)))
 if len(vol) == 1: vol = '0'+vol
-url = "http://intlpress.com/site/pub/pages/journals/items/%s/content/vols/00%s/000%s/body.html" % (jnl,vol,isu)
+#url = "http://intlpress.com/site/pub/pages/journals/items/%s/content/vols/00%s/000%s/body.html" % (jnl,vol,isu)
 
 
 print "get table of content of %s%s.%s ..." %(jnlname,vol,isu)
@@ -128,6 +138,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'list_item'}):
         for p in artpage.body.find_all('p', attrs = {'class' : 'contentitem_keywords'}):
             rec['keyw'] = re.split(', ', p.text)
         recs.append(rec)
+        print '   ', rec.keys()
 
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -137,7 +148,6 @@ ejlmod2.writeXML(recs,xmlfile,publisher)
 xmlfile.close()
 
 #retrival
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path,"r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text: 
