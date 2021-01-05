@@ -49,39 +49,59 @@ driver.get(tocurl)
 tocpage = BeautifulSoup(driver.page_source)
 #print tocpage.text
 recs = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'tocContent'}):
+#for div in tocpage.body.find_all('div', attrs = {'class' : 'tocContent'}):
+for div in tocpage.body.find_all('ul', attrs = {'class' : 'table-of-content__section-body'}):
     section = ''
     for child in div.children:
         try:
             child.name
+            print child.name
         except:
             continue
         if child.name == 'h2':
             section = child.text.strip()
             print section
-        elif child.name == 'table' and not section in ['Book Reviews', 'Discussions', '', 'Essay Reviews']:
+        elif child.name == 'h4':
+            section = child.text.strip()
+            print section
+#        elif child.name == 'table' and not section in ['Book Reviews', 'Discussions', '', 'Essay Reviews']:
+        elif child.name == 'li' and not section in ['Book Reviews', 'Discussions', 'Essay Reviews']:
+            #print child
             rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : issue, 'year' : year, 'tc' : 'P', 'auts' : []}
             if section:
                 rec['note'] = [section]
             #title
             for span in child.find_all('span', attrs = {'class' : 'hlFld-Title'}):
                 rec['tit'] = span.text.strip()
+            for h5 in child.find_all('h5', attrs = {'class' : 'issue-item__title'}):
+                rec['tit'] = h5.text.strip()
             #authors
             for span in child.find_all('span', attrs = {'class' : 'hlFld-ContribAuthor'}):
                 rec['auts'].append(span.text.strip())                
             #pages
-            for div in child.find_all('div', attrs = {'class' : 'art_meta citation'}):
+            divs = child.find_all('div', attrs = {'class' : 'art_meta citation'})
+            if not divs:
+                divs = child.find_all('div', attrs = {'class' : 'issue-item__pages'})
+            for div in divs:
                 divt = re.sub('[\n\t\r]', '', div.text.strip())
                 pages = re.sub('.*pp. (\d.*\d).*', r'\1', divt)
                 rec['p1'] = re.sub('\D.*', '', pages)
                 rec['p2'] = re.sub('.*\D', '', pages)
             #DOI
-            for a in child.find_all('a', attrs = {'class' : 'ref'}):
+            links = child.find_all('a', attrs = {'class' : 'ref'})
+            if not links:
+                links = child.find_all('a', attrs = {'class' : 'issue-item__btn', 'title' : 'Full Text'})                
+            for a in links:
                 if re.search('10.1086', a['href']):
                     rec['doi'] = re.sub('.*(10.1086)', r'\1', a['href'])
-                    if re.search('\/abs\/', a['href']):
+                    if re.search('\/(abs|full)\/', a['href']):
                         rec['artlink'] = 'https://www.journals.uchicago.edu' + a['href']
-            recs.append(rec)
+            #abstract
+            for div in child.find_all('div', attrs = {'class' : 'issue-item__abstract'}):
+                for div2 in div.find_all('div', attrs = {'class' : 'accordion__content'}):
+                    rec['abs'] = div2.text.strip()
+            if 'artlink' in rec.keys():
+                recs.append(rec)
 
 i = 0
 for rec in recs:
@@ -90,8 +110,13 @@ for rec in recs:
     time.sleep(10)
     driver.get(rec['artlink'])
     artpage = BeautifulSoup(driver.page_source)
-    for meta in artpage.head.find_all('meta', attrs = {'name' : 'dc.Description'}):
-        rec['abs'] = meta['content']
+    #abstract
+    if not 'abs' in rec.keys():
+        for meta in artpage.head.find_all('meta', attrs = {'name' : 'dc.Description'}):
+            rec['abs'] = meta['content']
+    #references
+    #would need selenium or so
+            
 
 
 
