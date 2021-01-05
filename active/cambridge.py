@@ -59,11 +59,8 @@ elif jid == 'IJA':
     jnlname = 'Int.J.Astrobiol.'
 elif jid == 'GMJ':
     jnlname = 'Glasgow Math.J.'    
-#--
 elif jid == 'BAZ':
     jnlname = 'Bull.Austral.Math.Soc.'
-elif jid == 'CPH':
-    jnlname = 'Commun.Comput.Phys.'
 elif jid == 'COM':
     jnlname = 'Compos.Math.'
 elif jid == 'FMP':
@@ -74,9 +71,13 @@ elif jid == 'JOG':
     jnlname = 'J.Glaciol.'
 elif jid == 'CJM':
     jnlname = 'Can.J.Math.'
-#
 elif jid == 'SIC':
     jnlname = 'Sci.Context'
+elif jid == 'JMJ':
+    jnlname = 'J.Inst.Math.Jussieu'
+#Now at Global Science Press
+#elif jid == 'CPH':
+#    jnlname = 'Commun.Comput.Phys.'
 
 if len(sys.argv) > 5:
     toclink = explicittoclink
@@ -86,8 +87,7 @@ else:
         toclink += '&issueId=%s' % (iss)
         print toclink
 
-
-#toclink = "https://www.cambridge.org/core/journals/compositio-mathematica/issue/9AB804B5DBC553D5DD4916D1B7BDAA72"
+#toclink = "https://www.cambridge.org/core/journals/glasgow-mathematical-journal/issue/FF36FC6AD93313180F0F572188FA2F70"
 
         
 if not os.path.isfile('/tmp/%s.0.toc' % (jnlfilename)):
@@ -98,7 +98,7 @@ tocf.close()
 
 #check number of toc-pages
 for meta in toc.head.find_all('meta', attrs = {'property' : 'og:url'}):
-    baseurl = 'https://www.cambridge.org' + meta['content']
+    baseurl = 'https://www.cambridge.org' + re.sub('http.*?www.cambridge.org', '', meta['content'])
     numpages = 1
     for div in toc.body.find_all('div', attrs = {'class' : 'results'}):
         for p in div.find_all('p', attrs = {'class' : 'paragraph_05'}):
