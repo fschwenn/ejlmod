@@ -17,6 +17,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from multiprocessing import Process
+from multiprocessing import Manager
 
 
 absdir = '/afs/desy.de/group/library/abs'
@@ -52,7 +53,7 @@ def fsunwrap(tag):
             cont = sup.string
             sup.replace_with('^'+cont)
     except:
-        print 'fsunwrap-sup-problem'
+         'fsunwrap-sup-problem'
     try: 
         for sub in tag.find_all('sub'):
             cont = sub.string
@@ -124,11 +125,14 @@ def translatejnlname(ieeename):
     return jnlname
 
 #get references
-def addreferences(rec, articlelink):
+def addreferences(refsdict, articlelink):
     print '    ... from %s%s' % (articlelink, 'references')
     driver.get(articlelink + 'references')
     WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'stats-reference-link-googleScholar')))
     refpage = BeautifulSoup(driver.page_source, features="lxml")
+    arefs = []
+    refsdict[articlelink] = []
+    reffile = codecs.EncodedFile(codecs.open('/tmp/ieee.%s.refs' % re.sub('\D', '', articlelink), mode='wb'), 'utf8')
     for div in refpage.find_all('div', attrs = {'class' : 'reference-container'}):
         for span in div.find_all('span', attrs = {'class' : 'number'}):
             for b in span.find_all('b'):
@@ -141,11 +145,19 @@ def addreferences(rec, articlelink):
             a.replace_with('')
         ref = re.sub('[\n\t]', ' ', div.text.strip())
         ref = re.sub('  +', ' ', ref)
-        rec['refs'].append([('x', ref)])
-    print '  found %i references' % (len(rec['refs']))
-    return
+        if not ref in arefs:
+            #print ' + ', ref        
+            refsdict[articlelink].append([('x', ref)])
+            arefs.append(ref)
+            reffile.write(ref.encode('utf-8')+'\n')
+    reffile.close()
+    print '  found %i references' % (len(arefs))
+    
+
 
 def ieee(number):
+    manager = Manager()
+    refsdict = manager.dict()
     urltrunc = "http://ieeexplore.ieee.org"
     #get name of journal
     if number[0] == 'C': 
@@ -240,7 +252,7 @@ def ieee(number):
         inf = open(artfilename, 'r')
         articlepage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
         inf.close()
-        rec = {'keyw' : [], 'autaff' : [], 'refs' : []}
+        rec = {'keyw' : [], 'autaff' : []}
         #metadata now in javascript
         for script in articlepage.find_all('script', attrs = {'type' : 'text/javascript'}):
             #if re.search('global.document.metadata', script.text):
@@ -330,17 +342,27 @@ def ieee(number):
         #references
         if hasreferencesection:
                 print '  try to get references'
-                action_process = Process(target=addreferences, args=(rec, articlelink))
-                action_process.start()
-                #action_process.join(timeout=5)
-                action_process.join(60)
-                if action_process.is_alive():
-                    action_process.terminate()
-                    action_process.join()
-                    print '  killed reference extraction'
-                else:
-                    print '  finished reference extraction'
-
+                refilename = '/tmp/ieee.%s.refs' % re.sub('\D', '', articlelink)
+                if not os.path.isfile(refilename):
+                    action_process = Process(target=addreferences, args=(refsdict, articlelink))
+                    action_process.start()
+                    #action_process.join(timeout=5)
+                    action_process.join(60)
+                    if action_process.is_alive():
+                        action_process.terminate()
+                        action_process.join()
+                        print '  killed reference extraction'
+                    else:
+                        print '  finished reference extraction'
+                        #print refsdict[articlelink]
+                if os.path.isfile(refilename):
+                    reffile = codecs.EncodedFile(codecs.open(refilename, mode='rb'), 'utf8')
+                    rec['refs'] = []
+                    for line in reffile.readlines():
+                        rec['refs'].append([('x', line.decode('utf-8'))])
+                    reffile.close()
+        #print '    ' + ', '.join( ['%s (%i)' % (k, len(rec[k])) for k in rec.keys()] ) + '\n'
+        print '   ', rec.keys()
                     
         if jnlname in ['BOOK', 'IEEE Nucl.Sci.Symp.Conf.Rec.']:
             try:
@@ -382,8 +404,8 @@ if __name__ == '__main__':
     publisher = 'IEEE'
 
     (recs,outfile) = ieee(number)
-    dokf = open(os.path.join(xmldir,outfile),'w')
-    ejlmod2.writeXML(recs,dokf,publisher)
+    dokf = codecs.EncodedFile(codecs.open(os.path.join(xmldir, outfile), mode='wb'), 'utf8')
+    ejlmod2.writeXML(recs, dokf, publisher)
     dokf.close()
 
 #os.system('rm /tmp/ieee_%s*' % (number))
