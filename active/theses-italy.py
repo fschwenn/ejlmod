@@ -26,15 +26,15 @@ universities = {'milanbicocca' : ('Milan Bicocca U.', 'https://boa.unimib.it', '
                 'pavia' : ('Pavia U.', 'https://iris.unipv.it', '/handle/11571/1198268', 10),
                 'turinpoly' : ('Turin Polytechnic', 'https://iris.polito.it', '/handle/11583/2614423', 10),
                 'milan' : ('Milan U.', 'https://air.unimi.it', '/handle/2434/146884', 20),
-                'udine' : ('Udine U.', 'https://air.uniud.it', '/handle/11390/1123314', 7), 
+                'udine' : ('Udine U.', 'https://air.uniud.it', '/handle/11390/1123314', 7),
                 'genoa' : ('Genoa U.', 'https://iris.unige.it', '/handle/11567/928192', 20),
                 'ferrara' : ('Ferrara U.', 'https://iris.unife.it', '/handle/11392/2380873', 7),
+                'trieste' : ('Trieste U', 'https://arts.units.it', '/handle/11368/2907477', 10),
                 'siena' : ('Siena U.', 'https://usiena-air.unisi.it', '/handle/11365/973085', 5),
-                'verona' : ('Verona U.', 'https://iris.univr.it', '/handle/11562/924246', 7),                
-                'cagliari' : ('Cagliari U.', 'https://iris.unica.it', '/handle/11584/207612', 8),                
+                'verona' : ('Verona U.', 'https://iris.univr.it', '/handle/11562/924246', 7),
+                'cagliari' : ('Cagliari U.', 'https://iris.unica.it', '/handle/11584/207612', 8),
                 'sns' : ('Pisa, Scuola Normale Superiore', 'https://ricerca.sns.it', '/handle/11384/78634', 5),
                 'cagliarieprints' : ('Cagliari U.', 'https://iris.unica.it', '/handle/11584/265854', 8)}
-
 
 uni = sys.argv[1]
 publisher = universities[uni][0]
@@ -80,7 +80,7 @@ for rec in prerecs:
             artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         except:
             print "no access to %s" % (rec['artlink'])
-            continue      
+            continue
     for meta in artpage.find_all('meta'):
         if meta.has_attr('name') and meta.has_attr('content'):
             #author
@@ -123,13 +123,13 @@ for rec in prerecs:
             #keywords
             elif meta['name'] == 'DC.subject':
                 if re.search(';.*;', meta['content']):
-                    rec['keyw'] = re.split('; ', meta['content'])                    
+                    rec['keyw'] = re.split('; ', meta['content'])
             #department
             elif meta['name'] == 'citation_keywords':
                 section = re.sub('Settore ', '', meta['content'])
                 if re.search('^[A-Z][A-Z][A-Z]', section):
                     interesting = False
-                    if section[:3] in ['FIS', 'INF', 'ING', 'MAT']: 
+                    if section[:3] in ['FIS', 'INF', 'ING', 'MAT']:
                         rec['note'].append(section)
                         interesting = True
                     else:
@@ -178,7 +178,7 @@ for rec in prerecs:
                     section = re.sub('Settore ', '', td.text.strip())
                     if re.search('^[A-Z][A-Z][A-Z]', section):
                         interesting = False
-                        if section[:3] in ['FIS', 'INF', 'ING', 'MAT']: 
+                        if section[:3] in ['FIS', 'INF', 'ING', 'MAT']:
                             rec['note'].append(td.text.strip())
                             interesting = True
                         else:
@@ -195,7 +195,7 @@ for rec in prerecs:
         rec['autaff'][-1].append(publisher)
         #year might be the year of deposition
         rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
-        #license            
+        #license
         for table in artpage.body.find_all('table', attrs = {'class' : 'ep_block'}):
             for a in table.find_all('a'):
                 if a.has_attr('href') and re.search('creativecommons.org', a['href']):
@@ -205,12 +205,12 @@ for rec in prerecs:
             for p in artpage.find_all('p', attrs = {'class' : 'abstractIta'}):
                 rec['abs'] = p.text.strip()
         #link
-        if not 'doi' in rec.keys():
+        if not 'doi' in rec.keys() and not 'hdl' in rec.keys():
             rec['link'] = rec['artlink']
         if interesting:
             recs.append(rec)
     else:
-        print '---[ NO AUTHOR! ]---  '  
+        print '---[ NO AUTHOR! ]---  '
 
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -220,7 +220,7 @@ xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
+if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
