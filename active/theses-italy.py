@@ -34,7 +34,8 @@ universities = {'milanbicocca' : ('Milan Bicocca U.', 'https://boa.unimib.it', '
                 'verona' : ('Verona U.', 'https://iris.univr.it', '/handle/11562/924246', 7),
                 'cagliari' : ('Cagliari U.', 'https://iris.unica.it', '/handle/11584/207612', 8),
                 'sns' : ('Pisa, Scuola Normale Superiore', 'https://ricerca.sns.it', '/handle/11384/78634', 5),
-                'cagliarieprints' : ('Cagliari U.', 'https://iris.unica.it', '/handle/11584/265854', 8)}
+                'cagliarieprints' : ('Cagliari U.', 'https://iris.unica.it', '/handle/11584/265854', 8),
+                'parma' : ('Parma U.', 'https://www.repository.unipr.it', '/handle/1889/636', 1)}
 
 uni = sys.argv[1]
 publisher = universities[uni][0]
@@ -50,11 +51,18 @@ for page in range(pages):
     tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     time.sleep(5)
     for tr in tocpage.body.find_all('tr'):
+        rec = False
         for td in tr.find_all('td', attrs = {'headers' : 't1'}):
             for a in td.find_all('a'):
                 rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
                 rec['artlink'] = universities[uni][1] + a['href'] + '?mode=full.716'
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+        if not rec:
+            for td in tr.find_all('td', attrs = {'headers' : 't3'}):
+                for a in td.find_all('a'):
+                    rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
+                    rec['artlink'] = universities[uni][1] + a['href'] + '?mode=full.716'
+                    rec['hdl'] = re.sub('.*handle\/', '', a['href'])
         for td in tr.find_all('td', attrs = {'headers' : 't2'}):
             if re.search('[12]\d\d\d', td.text):
                 rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', td.text.strip())
@@ -194,7 +202,10 @@ for rec in prerecs:
     if 'autaff' in rec.keys():
         rec['autaff'][-1].append(publisher)
         #year might be the year of deposition
-        rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
+        if 'date' in rec.keys() and not 'year' in rec.keys():
+            rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
+        if 'year' in rec.keys() and not 'date' in rec.keys():
+            rec['date'] = rec['year']
         #license
         for table in artpage.body.find_all('table', attrs = {'class' : 'ep_block'}):
             for a in table.find_all('a'):
