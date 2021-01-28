@@ -40,7 +40,8 @@ for i in range(pagestocheck):
             if re.search('thesis.library.caltech.edu\/\d\d', a['href']):
                 rec = {'tc' : 'T', 'jnl' : 'BOOK'}
                 rec['artlink'] = a['href']
-                recs.append(rec)
+                if not rec['artlink'] in ['https://thesis.library.caltech.edu/13784/']:
+                    recs.append(rec)
 
 #check individual thesis pages
 i = 0
