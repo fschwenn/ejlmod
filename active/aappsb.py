@@ -13,6 +13,10 @@ import ejlmod2
 import codecs
 import datetime
 import time
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
@@ -22,6 +26,8 @@ iss = sys.argv[2]
 
 publisher = 'Association of Asia Pacific Physical Societies'
 
+driver = webdriver.PhantomJS()
+driver.implicitly_wait(30)
 
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
@@ -38,8 +44,10 @@ for option in startpage.find_all('option'):
 recs = []
 if tocurl:
     print '==={ %s }===' % (tocurl)
-    req = urllib2.Request(tocurl)
-    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+    driver.get(tocurl)
+    tocpage =  BeautifulSoup(driver.page_source)
+    #req = urllib2.Request(tocurl)
+    #tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     for div in tocpage.find_all('div', attrs = {'id' : 'featurearticles'}):
         for a in div.find_all('a'):
             if a.has_attr('href') and re.search('Board=featurearticles', a['href']):
