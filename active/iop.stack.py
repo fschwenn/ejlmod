@@ -1012,11 +1012,11 @@ def convertarticle(issn, vol, isu, artid):
         if  jnl[issn] == 'Astrophys.J.Lett.':
             rec['alternatejnl'] = 'Astrophys.J.'
         if issn in ['1742-6596']:
-            tc = ['C']
+            tc = 'C'
         elif issn in ['0034-4885']:
-            tc = ['PR']
+            tc = 'PR'
         else:
-            tc = ['P']
+            tc = 'P'
     elif issn in jnlskip.keys():
         print 'skip journal "%s"' % (jnlskip[issn])
         return []
@@ -1194,7 +1194,8 @@ def convertarticle(issn, vol, isu, artid):
                     ref = [('x', x.text.strip())]
                 #detailed only if there is a DOI to 'ensure' that it is matched
                 for refdoi in reference.find_all('ref_doi'):
-                    ref.append(('a', 'doi:' + refdoi.text.strip()))
+                    rdoi = re.sub('^https?:\/\/doi.org\/', '' ,refdoi.text.strip())
+                    ref.append(('a', 'doi:' + rdoi))
                     for ref_year in reference.find_all('refyear'):
                         ref.append(('y', refyear.text.strip()))
                     for ref_authors in reference.find_all('refauthors'):
@@ -1265,7 +1266,8 @@ for issn in os.listdir(iopdirtmp):
                         else:
                             iopf = 'iop-%s-%s%s_%s' % (iopftrunc, re.sub(' ', '', jnl[issn]), vol, '.'.join(issues))                 
                     else:
-                        iopf = 'iop-%s-%s%s_%s' % (iopftrunc, re.sub(' ', '', issn), vol, '.'.join(issues))
+                        iopf = 'iop-%s-%s%s_%s' % (iopftrunc,
+                                                   re.sub(' ', '', issn), vol, '.'.join(issues))
                     if not issn in jnlskip.keys():
                         xmlf = os.path.join(xmldir,iopf+'.xml')
                         xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
