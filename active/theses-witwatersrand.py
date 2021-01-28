@@ -125,7 +125,7 @@ for rec in prerecs:
                         deg = re.sub('.*[De]gree of ', '', mc)
                         deg = re.sub('[,\.].*', '', deg)
                         deg = re.sub(' \d.*', '', deg)
-                        if re.search('Master of', deg):
+                        if re.search('Masters? of', deg):
                             keepit = False
                         else:
                             rec['note'].append(deg)
