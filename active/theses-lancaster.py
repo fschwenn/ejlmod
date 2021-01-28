@@ -29,7 +29,7 @@ hdr = {'User-Agent' : 'Magic Browser'}
 jnlfilename = 'THESES-LANCASTER-%s' % (stampoftoday)
 recs = []
 
-startyear = now.year-1
+startyear = now.year-2
 stopyear = now.year+1
 rpp = 20
 pages = 1
@@ -38,9 +38,7 @@ pages = 1
 recs = []
 for section in ['Physics&organisations=5227', 'Mathematics+and+Statistics&organisations=5198']:
     for page in range(pages):
-        tocurl = 'http://www.research.lancs.ac.uk/portal/en/publications/search.html?search=&uri=&advanced=true&organisationName=' + section + '&type=%2Fdk%2Fatira%2Fpure%2Fresearchoutput%2Fresearchoutputtypes%2Fthesis%2Fdoc&language=+&publicationYearsFrom=' + str(startyear) + '&publicationYearsTo=' + str(stopyear) + '2020&publicationstatus=published&publicationcategory=&documents=+&peerreview=&pageSize=' + str(rpp) + 'page=' + str(page+1)
-
-        tocurl = 'http://www.research.lancs.ac.uk/portal/en/publications/search.html?publicationYearsFrom=' + str(startyear) + '&publicationstatus=published&advanced=true&documents=%20&pageSize=' + str(rpp) + '&language=%20&publicationYearsTo=' + str(stopyear) + '&type=%2Fdk%2Fatira%2Fpure%2Fresearchoutput%2Fresearchoutputtypes%2Fthesis%2Fdoc&uri=&search=&organisationName=' + section + '&publicationcategory=&peerreview=&page=' + str(page+1)
+        tocurl = 'http://www.research.lancs.ac.uk/portal/en/publications/search.html?publicationYearsFrom=' + str(startyear) + '&publicationstatus=published&advanced=true&documents=%20&pageSize=' + str(rpp) + '&language=%20&publicationYearsTo=' + str(stopyear) + '&type=%2Fdk%2Fatira%2Fpure%2Fresearchoutput%2Fresearchoutputtypes%2Fthesis%2Fdoc&uri=&search=&organisationName=' + section + '&publicationcategory=&peerreview=&page=' + str(page)
 
 
         
