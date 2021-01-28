@@ -42,7 +42,7 @@ for year in years:
     tocurl = 'https://uwspace.uwaterloo.ca/handle/10012/6/discover?rpp=200&filtertype_0=dateIssued&filter_0=[' + year + '+TO+' + year + ']&filter_relational_operator_0=equals&filtertype=type&filter_relational_operator=equals&filter=Doctoral+Thesis'
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
     recs = []
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
@@ -57,14 +57,14 @@ for year in years:
         print '---{ %s }---{ %i/%i }---{ %s }------' % (year, i, len(recs), rec['artlink'])
         try:
             req = urllib2.Request(rec['artlink'], headers=hdr)
-            artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
+            artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
             time.sleep(3)
         except:
             try:
                 print "retry %s in 180 seconds" % (rec['artlink'])
                 time.sleep(180)
                 req = urllib2.Request(rec['artlink'], headers=hdr)
-                artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
+                artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
             except:
                 print "no access to %s" % (rec['artlink'])
                 continue    
