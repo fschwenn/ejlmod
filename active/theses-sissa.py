@@ -72,7 +72,7 @@ for rec in prerecs:
         except:
             print "no access to %s" % (rec['link'])
             continue      
-    for meta in artpage.head.find_all('meta'):
+    for meta in artpage.find_all('meta'):
         if meta.has_attr('name'):
             #author
             if meta['name'] == 'citation_author':
