@@ -30,7 +30,7 @@ hdr = {'User-Agent' : 'Magic Browser'}
 
 for (subj, dep) in departments:
     prerecs = []
-    jnlfilename = 'THESES-SeoulNatlU-%s-%sB' % (stampoftoday, subj)
+    jnlfilename = 'THESES-SeoulNatlU-%s-%s' % (stampoftoday, subj)
     for page in range(pages):
         tocurl = 'http://s-space.snu.ac.kr/handle/10371/' + dep + '?page=' + str(page+1) + '&offset=' + str(rpp*page)
         print '==={ %s %i/%i }==={ %s }===' % (subj, page+1, pages, tocurl)
