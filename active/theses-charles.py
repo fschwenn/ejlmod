@@ -35,7 +35,7 @@ else:
 
 hdr = {'User-Agent' : 'Magic Browser'}
 for year in years:
-    if year != year[0]:
+    if year != years[0]:
         time.sleep(300)
     tocurl = 'https://dspace.cuni.cz/discover?filtertype_1=ds_uk_faculty&filter_relational_operator_1=equals&filter_1=Matematicko-fyzik%C3%A1ln%C3%AD+fakulta&filtertype_2=ds_thesesDefenceYear&filter_relational_operator_2=equals&filter_2=' + year + '&filtertype_3=ds_uk_language_iso&filter_relational_operator_3=equals&filter_3=en_US&submit_apply_filter=&rpp=500&locale-attribute=en'
     print tocurl
