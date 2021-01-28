@@ -508,6 +508,12 @@ def convertarticle(journalnumber, filename, contlevel):
                         rec['transtit'] = cleanformulas(tt)
                     for st in ttg.find_all('subtitle', attrs = {'xml:lang' : 'en'}):
                         rec['transtit'] += ': %s' % (cleanformulas(st))
+        if contlevel == 'book':
+            for tg in meta.find_all('book-title-group'):
+                for bt in tg.find_all(['book-title', 'title']):
+                    rec['tit'] = cleanformulas(bt)
+                for st in tg.find_all('subtitle'):
+                    rec['tit'] += ': %s' % (cleanformulas(st))
         #year
         pds = meta.find_all('pub-date', attrs = {'date-type' : 'collection'})
         if not pds:
@@ -991,8 +997,8 @@ for dirlev1 in os.listdir(sprdir):
     journalnumber = dirlev1[4:]
     #skip uninteresting journals
     if journalnumber in juninteresting:
-            print journalnumber, 'uninteresting'
-            continue
+        print journalnumber, 'uninteresting'
+        continue
     #journal not in list
     if not journalnumber in jc.keys():
         print 'journal skipped: ' + journalnumber
@@ -1027,10 +1033,10 @@ for dirlev1 in os.listdir(sprdir):
             retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
             retfiles_text = open(retfiles_path, "r").read()
             line = jnlfilename+'.xml'+ "\n"
-#            if not line in retfiles_text:
-#                retfiles = open(retfiles_path, "a")
-#                retfiles.write(line)
-#                retfiles.close()
+            if not line in retfiles_text:
+                retfiles = open(retfiles_path, "a")
+                retfiles.write(line)
+                retfiles.close()
         #Journal: crawl through directories of issues
         else:
             for dirlev3 in os.listdir(dirlev2fullpath):
