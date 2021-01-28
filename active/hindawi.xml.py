@@ -26,6 +26,8 @@ month = sys.argv[3]
 
 jnlfilename = jnl+year+'.'+month
 
+pages = 5
+
 if   (jnl == 'ahep'): 
     issn = '1687-7357'
     jnlname = 'Adv.High Energy Phys.'
@@ -62,6 +64,8 @@ elif (jnl == 'jam'):
     jnlname = 'J.Appl.Math.'
 elif (jnl == 'acmp'):
     jnlname = 'Adv.Cond.Mat.Phys.'
+elif (jnl == 'sv'):
+    jnlname = 'Shock and Vibration'
 
 if re.search('isrn',jnl):
     if re.search('astro',jnl):
@@ -78,27 +82,36 @@ print "Already done:"
 for dd in done:
     print dd
 #done = []
+
+#problematic articles
+done.append('8812964')
  
-print "get table of content of %s%s via %s ..." % (jnlname, year, urltrunk)
+articleIDs = []
+for page in range(pages):
+    tocurl = 'https://www.hindawi.com/journals/%s/contents/year/%s/page/%i/' % (re.sub('isrn','',jnl), year, page+1)
+    print "get table of content of %s%s via %s ..." % (jnlname, year, tocurl)
 
 #tocpage = BeautifulSoup(urllib2.urlopen(urltrunk))
 #tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
-tocfilename = '/tmp/%s.toc' % (jnlfilename)
-if not os.path.isfile(tocfilename):
-    os.system('wget  -T 300 -t 3 -q  -O %s "%s"' % (tocfilename, urltrunk))
-    time.sleep(2)
-tocfil = open(tocfilename,'r')
-tocpage = BeautifulSoup(''.join(tocfil.readlines()))
-tocfil.close()
+    tocfilename = '/tmp/%s.toc.%i' % (jnlfilename, page+1)
+    if not os.path.isfile(tocfilename):
+        os.system('wget  -T 300 -t 3 -q  -O %s "%s"' % (tocfilename, tocurl))
+        time.sleep(2)
+    tocfil = open(tocfilename,'r')
+    tocpage = BeautifulSoup(''.join(tocfil.readlines()))
+    tocfil.close()
 
-articleIDs = []
-for li in tocpage.body.find_all('li'):
-    for a in li.find_all('a'):
-        if re.search('.*\/(\d+)', a['href']):
-            articleID = re.sub('.*\/(\d+).*', r'\1', a['href'])
-            if not articleID in done:
-                if not articleID in articleIDs:
-                    articleIDs.append(articleID)
+    newarticleIDs = []
+    for li in tocpage.body.find_all('li'):
+        for a in li.find_all('a'):
+            if re.search('.*\/(\d+)', a['href']):
+                articleID = re.sub('.*\/(\d+).*', r'\1', a['href'])
+                if not articleID in done:
+                    if not articleID in articleIDs:
+                        articleIDs.append(articleID)
+                        newarticleIDs.append(articleID)
+    if not newarticleIDs:
+        break
 print articleIDs
 
 
@@ -117,7 +130,7 @@ for articleID in articleIDs:
         artfilename = '/tmp/hindawi.%s' % (articleID)
         if not os.path.isfile(artfilename):
             os.system('wget  -T 300 -t 3 -q  -O %s "%s%s"' % (artfilename, urltrunk, articleID))
-            time.sleep(2)
+            time.sleep(5)
         #artfil = open(artfilename, 'r')
         artfil = codecs.EncodedFile(codecs.open(artfilename, mode='rb'), 'utf8')
         artfilnew = open(artfilename + '.new', 'w')
