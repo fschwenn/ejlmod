@@ -186,11 +186,21 @@ def ieee(number):
         pagecommand = '&pageNumber=%i' % (i)
         print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)        
         driver.get(urltrunc + toclink + pagecommand)
-        if number[0] in ['C', '8', '9']:
+        try:
+            if number[0] in ['C', '8', '9']:
 #        if number[0] in ['8', '9']:
-            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
-        else:
-            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
+                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
+            else:
+                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
+        except:
+            print ' wait a minute'
+            time.sleep(60)
+            driver.get(urltrunc + toclink + pagecommand)
+            if number[0] in ['C', '8', '9']:
+#        if number[0] in ['8', '9']:
+                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
+            else:
+                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
         #clicl to accept cookies
         if i == 1:
             try:
@@ -243,12 +253,12 @@ def ieee(number):
         #rec['note'] = ['Konferenz ?']
         artfilename = '/tmp/ieee_%s.%i' % (number, i)
         if not os.path.isfile(artfilename):
-            time.sleep(10)
+            time.sleep(20)
             try:
                 os.system("wget -T 300 -t 3 -q -O %s %s" % (artfilename, articlelink))
             except:
-                print "retry in 600 seconds"
-                time.sleep(60)
+                print "retry in 300 seconds"
+                time.sleep(300)
         inf = open(artfilename, 'r')
         articlepage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
         inf.close()
