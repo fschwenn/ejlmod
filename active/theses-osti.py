@@ -96,7 +96,7 @@ for rec in prerecs:
             #    rec['autaff'][-1].append(meta['content'])
             #DOI
             elif meta['name'] == 'citation_doi':
-                rec['doi'] = meta['content']
+                rec['doi'] = re.sub('.*doi.org\/', '', meta['content'])
             #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['FFT'] = meta['content']
