@@ -41,6 +41,9 @@ elif jnlid == 'cyrsp':
 elif jnlid == 'cyrcp':
     tc = 'C'
     jnl = 'CERN Yellow Rep.Conf.Proc.'
+elif jnlid == 'cyrm':
+    tc = 'S'
+    jnl = 'CERN Yellow Rep.Monogr.'
 else:
     print 'does not know journal ID "%s"' % (jnlid)
     sys.exit(0)
@@ -58,10 +61,12 @@ except:
 
 
 recs = []
-for table in tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'}):
+#for table in tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'}):
+for table in tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summary'}):
     rec = {'jnl' : jnl, 'tc' : tc, 'keyw' : [], 'autaff' : []}
-    for div in table.find_all('div', attrs = {'class' : 'tocTitle'}):
-        rec['tit'] = div.text.strip()
+#    for div in table.find_all('div', attrs = {'class' : 'tocTitle'}):
+    for div in table.find_all('div', attrs = {'class' : 'title'}):
+        rec['tit'] = re.sub('[\n\t]', '', div.text.strip())
         for a in div.find_all('a'):
             rec['artlink'] = a['href']
             recs.append(rec)
