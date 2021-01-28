@@ -117,7 +117,7 @@ for rec in prerecs:
                     for div in child.find_all('div'):
                         for a in div.find_all('a'):
                             if a.has_attr('href'):
-                                if re.search('field1=dai', a['href']):
+                                if re.search('search', a['href']):
                                     rec['supervisor'].append([ a.text.strip() ])
                                 elif re.search('orcid.org', a['href']):
                                     rec['supervisor'][-1].append(re.sub('.*orcid.org\/', 'ORCID:', a['href']))
