@@ -384,8 +384,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
             refdois = []
             for a in ref.find_all('a'):
                 atext = a.text                
-                if re.search('Cross[rR]ef', atext) or re.search('https?...dx.doi.org.', atext):
-                    refdoi = re.sub('https?...dx.doi.org.', ', DOI: ', a['href']+' ')
+                if re.search('Cross[rR]ef', atext) or re.search('https?...doi.org.', atext):
+                    refdoi = re.sub('http.*doi.org.', ', DOI: ', a['href']+' ')
                     if not refdoi in refdois:
                         a.replace_with(refdoi)
                         refdois.append(refdoi)
