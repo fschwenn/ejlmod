@@ -43,10 +43,12 @@ elif (jnl == 'cntp'):
     jnlname = 'Commun.Num.Theor.Phys.'
     issn = '1931-4523'
     url = "http://www.intlpress.com/%s/%s-vol-%s.php" % (jnl.upper(),jnl.upper(),vol)
+    url = 'https://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/%04i/%04i/index.php' % (jnl,int(vol),int(re.sub('\D.*', '', isu)))
 elif (jnl == 'ajm'):
     jnlname = 'Asian J.Math.'
     issn = '1093-6106'
     url = "http://www.intlpress.com/%s/%s-v%s.php" % (jnl.upper(),jnl.upper(),vol)
+    url = 'https://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/%04i/%04i/index.php' % (jnl,int(vol),int(re.sub('\D.*', '', isu)))
 elif (jnl == 'jdg'):
     jnlname = 'J.Diff.Geom.'
     issn = '0022-040X'
@@ -73,7 +75,7 @@ elif (jnl == 'jsg'):
 elif (jnl == 'mrl'): # fulltext via http://www.intlpress.com/_newsite/site/pub/files/_fulltext/journals/mrl/
     jnlname = 'Math.Res.Lett.'
     issn = '1073-2780'
-    url = "http://www.intlpress.com/_newsite/site/pub/pages/journals/items/%s/content/vols/00%s/000%s/index.php" % (jnl,vol,isu)
+    url = "http://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/00%s/000%s/index.php" % (jnl,vol,isu)
 elif (jnl == 'pamq'):
     jnlname = 'Pure Appl.Math.Quart.'
     issn = '1558-8599'
