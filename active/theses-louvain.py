@@ -19,7 +19,7 @@ xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special/'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
-stampoftoday = '%4d-%02d-%02d_boring' % (now.year, now.month, now.day)
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Louvain U.'
                                                                                 
@@ -37,13 +37,13 @@ boringdeps = ['SSH/IACS', 'SSH/ILC', 'SSH/ILC/PCOM', 'SSH/ILC/PLIN', 'SSH/INCA',
 
 hdr = {'User-Agent' : 'Magic Browser'}
 for year in [now.year, now.year-1]:
-#for year in [now.year, now.year-1, now.year-2, now.year-3, now.year-4, now.year-5, now.year-6, now.year-7, now.year-8, now.year-9, now.year-10]:
     prerecs = []
     jnlfilename = 'THESES-LOUVAIN-%s_%i' % (stampoftoday, year)
     tocurl = 'https://dial.uclouvain.be/pr/boreal/en/search/site/%2A%3A%2A?page=1&f%5B0%5D=sm_type%3ATh%C3%A8se%20%28Dissertation%29&f%5B1%5D=sm_date%3A' + str(year) + '&solrsort=ss_date%20desc'
     print '---{ %i }---{ 1 }---{ %s }---' % (year, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpages = [BeautifulSoup(urllib2.urlopen(req))]
+    numofpages = 0
     for div in tocpages[0].body.find_all('div', attrs = {'class' : 'result-label'}):
         numofrecs = int(re.sub('.*of *(\d+).*', r'\1', div.text.strip()))
         numofpages = (numofrecs-1) / 25 + 1
