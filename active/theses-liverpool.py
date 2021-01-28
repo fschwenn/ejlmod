@@ -132,7 +132,7 @@ for year in [now.year-1, now.year]:
                 print 'no access to %s' % (rec['link'])
                 continue
         for meta in artpage.head.find_all('meta'):
-            if meta.has_attr('name'):
+            if meta.has_attr('name') and meta.has_attr('content'):
                 #author
                 if meta['name'] == 'eprints.creators_name':
                     rec['autaff'] = [[ meta['content'] ]]
