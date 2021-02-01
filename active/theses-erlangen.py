@@ -62,17 +62,17 @@ for rec in recs:
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #abs
-            if meta['name'] == 'DC.Description':
+            if meta['name'] in ['DC.Description', 'DC.description']:
                 rec['abs'] =  meta['content']
             #keywords
-            elif meta['name'] == 'DC.subject':
+            elif meta['name'] in ['DC.Subject', 'DC.subject']:
                 rec['keyw'] =  re.split(', ', meta['content'])
             #URN
-            elif meta['name'] == 'DC.Identifier':
+            elif meta['name'] in ['DC.Identifier', 'DC.identifier']:
                 if re.search('^urn:nbn', meta['content']):
                     rec['urn'] =  meta['content']
             #license
-            elif meta['name'] == 'DC.rights':
+            elif meta['name'] in ['DC.Rights', 'DC.rights']:
                 url = re.sub('\/deed.de', '', meta['content'])
                 if re.search('creativecommons', url):
                     rec['license'] = {'url' : url}
@@ -112,6 +112,7 @@ for rec in recs:
                     for a in td.find_all('a', attrs = {'class' : 'orcid-link'}):
                         orcid = re.sub('.*\/', 'ORCID:', a['href'])
                         a.replace_with('')
+                    tdt = td.text.strip()
                     if orcid: 
                         rec['autaff'] = [[ tdt, orcid, 'Erlangen - Nuremberg U.']]
                     else:
