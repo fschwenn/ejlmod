@@ -224,6 +224,14 @@ def concert(rawrecs):
                     if affdict.has_key(xref['rid']):
                         autaff.append(affdict[xref['rid']])
                 rec['autaff'].append(autaff)
+        #year
+        for date in wsprecord.find_all('pub-date', attrs = {'pub-type' : 'ppub'}):
+            for year in date.find_all('year'):
+                rec['year'] = year.text.strip()
+        if not 'year' in rec.keys():
+            for cry in wsprecord.find_all('copyright-year'):
+                if cry.text.strip():
+                    rec['year'] = cry.text.strip()
         #date
         for date in wsprecord.find_all('date', attrs = {'date-type' : 'published'}):
             try:
