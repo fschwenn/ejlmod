@@ -100,7 +100,7 @@ for department in ['Physics', 'Mathematics']:
                                 if re.search('Restricted', divt):
                                     print divt
                                 else:
-                                    rec['FFT'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+                                    rec['FFT'] = 'https://repositories.lib.utexas.edu' + re.sub('\?.*', '', a['href'])
         #upload PDF at least hidden
         if not 'FFT' in rec.keys() and 'pdf_url' in rec.keys():
             rec['hidden'] = rec['pdf_url']
