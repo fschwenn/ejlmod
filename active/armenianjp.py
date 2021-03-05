@@ -13,7 +13,7 @@ import urllib2
 import urlparse
 from bs4 import BeautifulSoup
 import time
-
+import ssl
 
 
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
@@ -35,10 +35,15 @@ urltrunk = 'http://www.flib.sci.am/eng/journal/Phys'
 #urltrunk = 'http://ajp.asj-oa.am'
 tocurl = '%s/PV%sIss%s.html' % (urltrunk, vol, issue)
 
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 hdr = {'User-Agent' : 'Magic Browser'}
 print "get table of content of %s %s,  No. %s via %s ..." % (jnlname, vol, issue, tocurl)
 req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
+tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
 time.sleep(1)
 recs = []
 for tr in tocpage.body.find_all('tr'):
@@ -54,7 +59,8 @@ i = 0
 for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
-    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+    req = urllib2.Request(rec['link'])
+    artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     time.sleep(3)
     #license
     for a in artpage.find_all('a'):
