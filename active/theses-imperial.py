@@ -70,6 +70,10 @@ for rec in recs:
             #title
             elif meta['name'] == 'DC.title':
                 rec['tit'] = meta['content']
+            #DOI
+            elif meta['name'] == 'DC.identifier':
+                if re.search('doi.org\/10', meta['content']):
+                    rec['doi'] = re.sub('.*doi.org\/', '', meta['content'])
             #date
             elif meta['name'] == 'DCTERMS.issued':
                 rec['date'] = meta['content']
