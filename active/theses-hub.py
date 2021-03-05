@@ -79,10 +79,12 @@ for rec in prerecs:
                 author = re.sub(' *\[.*', '', meta['content'])
                 rec['autaff'] = [[ author ]]
                 rec['autaff'][-1].append('Humboldt U., Berlin')
-            #DOI
             elif meta['name'] == 'DC.identifier':
+                #DOI
                 if re.search('doi.org', meta['content']):
                     rec['doi'] = re.sub('.*doi.org\/', '', meta['content'])
+                elif re.search('urn:nbn', meta['content']):
+                    rec['urn'] = meta['content']
             #title
             elif meta['name'] == 'citation_title':
                 rec['tit'] = meta['content']
