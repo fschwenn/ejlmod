@@ -37,7 +37,6 @@ boringschools = ['Biochemistry & Immunology', 'Business', 'Chemistry',
                  'Social Sciences & Philosophy', 'Social Work & Social Policy']
 
 hdls = []
-re
 for year in years:
     prerecs = []
     jnlfilename = 'THESES-TrinityCollegeDublin-%s_%i' % (stampoftoday, year)
