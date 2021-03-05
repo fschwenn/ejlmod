@@ -51,7 +51,7 @@ elif (jnl == 'spsln'):
     jnlname = 'SciPost Phys.Lect.Notes'
     urltrunk = 'https://scipost.org/SciPostPhysLectNotes'
     toclink = urltrunk
-    tc = 'L'
+    tc = 'LP'
 #elif (jnl == 'spscb'):
 #    jnlname = 'SciPost ???'
 #    urltrunk = 'https://scipost.org/SciPostPhysCodeb' 
