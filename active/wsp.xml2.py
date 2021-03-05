@@ -13,7 +13,8 @@ from bs4 import BeautifulSoup
 import zipfile
 from ftplib import FTP
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 tmpdir = '/tmp'
 wspdir = '/afs/desy.de/group/library/publisherdata/wsp'
 feeddir = '/afs/desy.de/group/library/preprints/incoming/WSP'
@@ -169,7 +170,7 @@ def concert(rawrecs):
             for sup in aff.find_all('sup'):
                 sup.replace_with('')
             if aff.has_attr('id'):
-                affdict[aff['id']] = aff.text
+                affdict[aff['id']] = re.sub('[\n\t\r]', ' ', aff.text.strip())
         #authors
         for c in wsprecord.find_all('contrib', attrs = {'contrib-type' : 'author'}):
             author = ''
@@ -237,14 +238,21 @@ def concert(rawrecs):
             try:
                 rec['date'] = '%s-%s-%s' % (date.year.text, date.month.text, date.day.text)
             except:
+                print ' (date.year.text, date.month.text, date.day.text) failed'
+            if not 'date' in rec.keys():
                 try:
                     rec['date'] = '%s-%s' % (date.year.text, date.month.text)
                 except:
-                    try:
-                        rec['date'] = date.year.text
-                    except:
-                        for sd in date.find_all('string-date'):
-                            rec['date'] = re.sub('.* (\d\d\d\d) .*', r'\1', sd.text)
+                    print ' (date.year.text, date.month.text) failed'
+            if not 'date' in rec.keys():
+                try:
+                    rec['date'] = date.year.text
+                except:
+                    print ' (date.year.text) failed'
+            if not 'date' in rec.keys():
+                for sd in date.find_all('string-date'):
+                    if re.search(' [12]\d\d\d', sd.text):
+                        rec['date'] = re.sub('.* ([12]\d\d\d).*', r'\1', sd.text)
         if not rec.has_key('date'):
             for date in wsprecord.find_all('pub-date', attrs = {'pub-type' : 'ppub'}):
                 try:
@@ -308,6 +316,7 @@ def concert(rawrecs):
 os.chdir(feeddir)
 done = os.listdir(os.path.join(wspdir, 'done'))
 filestodo = []
+
 ftp = FTP("ftp.wspc.com.sg")
 ftp.login("inspire", "Ins!539Ws%")
 files = ftp.nlst()  #list of the zip.files
@@ -321,6 +330,7 @@ for filename in files:
         f2.close()
         if re.search('.zip$', filename):
             filestodo.append(filename)
+
 print 'found %i new WSP zip-files to digest' % (len(filestodo))
 
 
@@ -362,7 +372,6 @@ for datei in os.listdir(wspdir):
             ejlmod2.writeXML(recs,xmlfile,publisher)
             xmlfile.close()
             #retrival
-            retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
             retfiles_text = open(retfiles_path,"r").read()
             line = jnlfilename+'.xml'+ "\n"
             if not line in retfiles_text: 
