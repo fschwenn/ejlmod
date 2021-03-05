@@ -191,11 +191,12 @@ jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P']
 jc['40507'] = ['epjgt', 'EPJ Quant.Technol.', '', '', 'P']
 jc['40818'] = ['apde', 'Ann.PDE', '', '', 'P']
 jc['41534'] = ['natquantinf', 'npj Quantum Inf.', '', '', 'P']
-jc['00332'] = ['jnonlinsci', 'J.Nonlin.Sci.', '', 'P']
-jc['00229'] = ['manusmat', 'Manuscr.Math.', '', 'P']
-jc['41614'] = ['rmplasmap', 'Rev.Mod.Plasma Phys.', '', 'P']#ereugen in jnl
-jc['13370'] = ['afrmat', 'Afr.Math.', '', 'P']#ereugen in jnl
-
+jc['00332'] = ['jnonlinsci', 'J.Nonlin.Sci.', '', '', 'P']
+jc['00229'] = ['manusmat', 'Manuscr.Math.', '', '', 'P']
+jc['41614'] = ['rmplasmap', 'Rev.Mod.Plasma Phys.', '', '', 'P']
+jc['13370'] = ['afrmat', 'Afr.Math.', '', '', 'P']#ereugen in jnl
+#
+jc['10512'] = ['atenerg', 'At.Energ.', '', '', 'P']
 #known conferences
 confdict = {'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30'}
 
