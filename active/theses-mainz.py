@@ -86,6 +86,10 @@ for rec in recs:
             elif tdt == 'Extent:':
                 if re.search('\d\d', td.text):
                     rec['pages'] = re.sub('.*?(\d\d+).*', r'\1', td.text.strip())
+            #DOI
+            elif tdt == 'DOI:':
+                for a in td.find_all('a'):
+                    rec['doi'] = re.sub('.*org\/', '', a['href'])                    
         #FFT
         for td in tr.find_all('td', attrs = {'class' : 'standard'}):
             for a in td.find_all('a'):
