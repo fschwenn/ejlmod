@@ -81,6 +81,10 @@ for rec in recs:
             #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['FFT'] = meta['content']
+            #DOI
+            elif meta['name'] == 'DC.identifier':
+                if re.search('doi.org\/', meta['content']):
+                    rec['doi'] = re.sub('.*org\/', '', meta['content'])
             #supervisor
             #elif meta['name'] == 'DC.contributor':
             #    supervisor = re.sub(' *\[.*', '', meta['content'])
