@@ -16,8 +16,8 @@ import datetime
 import time
 import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
 
 now = datetime.datetime.now()
@@ -77,10 +77,16 @@ for fac in ['Physik', 'Sonstige+-+Mathematik+und+Physik', 'Mathematik']:
                 elif meta['name'] == 'DC.language':
                     if meta['content'] == 'de':
                         rec['language'] = 'german'
-                #DOI
                 elif meta['name'] == 'DC.identifier':
-                    if re.search('dx.doi.org', meta['content']):
+                    #DOI
+                    if re.search('doi.org.10', meta['content']):
                         rec['doi'] = re.sub('.*org.(10.*)', r'\1', meta['content'])
+                    #HDL
+                    elif re.search('handle.net', meta['content']):
+                        rec['hdl'] = re.sub('.*handle.net\/', '',  meta['content'])
+                    #URN
+                    elif re.search('nbn-resolving.de\/urn', meta['content']):
+                        rec['urn'] = re.sub('.*nbn-resolving.de\/', '',  meta['content'])
                 #title
                 elif meta['name'] == 'DC.title':
                     rec['tit'] = meta['content']
