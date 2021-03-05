@@ -30,22 +30,23 @@ typecode = 'T'
 jnlfilename = 'THESES-CAPETOWN-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
-tocurl = 'https://open.uct.ac.za/handle/11427/29121/discover?sort_by=dc.date.issued_dt&order=desc&rpp=10&filtertype=department&filter_relational_operator=equals&filter=Department+of+Physics'
-print tocurl
-req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
 recs = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
-    rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
-    for a in div.find_all('a'):
-        rec['artlink'] = 'https://open.uct.ac.za' + a['href'] #+ '?show=full'
-        rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-        recs.append(rec)
+for dep in ['Department+of+Physics', 'Department+of+Mathematics+and+Applied+Mathematics', 'Department+of+Astronomy', 'Department+of+Maths+and+Applied+Maths']:
+    tocurl = 'https://open.uct.ac.za/handle/11427/29121/discover?sort_by=dc.date.issued_dt&order=desc&rpp=10&filtertype=department&filter_relational_operator=equals&filter=' + dep
+    print tocurl
+    req = urllib2.Request(tocurl, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+        for a in div.find_all('a'):
+            rec['artlink'] = 'https://open.uct.ac.za' + a['href'] #+ '?show=full'
+            rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+            recs.append(rec)
 
 i = 0
 for rec in recs:
     i += 1
-    print '---{ %i/%i}---{ %s }------' % (i, len(recs), rec['artlink'])
+    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
