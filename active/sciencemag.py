@@ -122,7 +122,7 @@ def harvestissue(jnl, vol, issue):
                     orcid = re.sub('.*/', 'ORCID:', meta['content'])
                     rec['autaff'][-1].append(orcid)
                 #abstract
-                elif 'citation_abstract':
+                elif meta['name'] == 'citation_abstract':
                     if not meta.has_attr('scheme'):
                         rec['abs'] = meta['content']
         #strange page
