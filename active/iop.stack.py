@@ -65,21 +65,22 @@ jnl = {'1538-3881': 'Astron.J.',
        '1674-4527': 'Res.Astron.Astrophys.',
        '0036-0279': 'Russ.Math.Surveys',
        '0953-2048': 'Supercond.Sci.Technol.'}
-jnl['2516-1067'] = 'Plasma Res.Express' #Plasma Research Express
-jnl['2632-2153'] = 'Mach.Learn.Sci.Tech.' #Machine Learning: Science and Technology
-jnl['2058-9565'] = 'Quantum Sci.Technol.' #Quantum Science and Technology  (quanth-ph)
-jnl['1674-4527'] = 'Res.Astron.Astrophys.' #Research in Astronomy and Astrophysics
-jnl['0266-5611'] = 'Inverse Prob.' #Inverse Problems
-jnl['0957-4484'] = 'Nanotechnol.' #Nanotechnology
-jnl['0253-6102'] = 'Commun.Theor.Phys.' #Communications in Theoretical Physics
-jnl['0004-6256'] = 'Nucl.Fusion' #Nuclear Fusion
-jnl['0029-5515'] = 'Nucl.Fusion' #Nuclear Fusion
-jnl['2040-8986'] = 'J.Opt.' #Journal of Optics
+jnl['2516-1067'] = 'Plasma Res.Express' #Plasma Research Express#yepp
+jnl['2632-2153'] = 'Mach.Learn.Sci.Tech.' #Machine Learning: Science and Technology#yepp
+jnl['2058-9565'] = 'Quantum Sci.Technol.' #Quantum Science and Technology  (quanth-ph)#yepp
+jnl['1674-4527'] = 'Res.Astron.Astrophys.' #Research in Astronomy and Astrophysics#yepp
+jnl['0266-5611'] = 'Inverse Prob.' #Inverse Problems#yepp
+jnl['0957-4484'] = 'Nanotechnol.' #Nanotechnology#yepp
+jnl['0253-6102'] = 'Commun.Theor.Phys.' #Communications in Theoretical Physics#yepp
+jnl['0004-6256'] = 'Nucl.Fusion' #Nuclear Fusion#yepp
+jnl['0029-5515'] = 'Nucl.Fusion' #Nuclear Fusion#yepp
+jnl['2040-8986'] = 'J.Opt.' #Journal of Optics#yepp
 jnl['1749-4699'] = 'Comput.Sci.Dis.' #Computational Science & Discovery
-jnl['1555-6611'] = 'Laser Phys.' #Laser Physics
-jnl['1612-202X'] = 'Laser Phys.Lett.' #Laser Physics Letters 
+jnl['1555-6611'] = 'Laser Phys.' #Laser Physics#yepp
+jnl['1612-202X'] = 'Laser Phys.Lett.' #Laser Physics Letters #yepp
 ##
 jnl['2515-5172'] = 'Res.Notes AAS'
+jnl['1347-4065'] = 'Jap.J.Appl.Phys.'
 
 #uninteresting journals in feed
 jnlskip = {'2058-8585' : 'Flexible and Printed Electronics'}
@@ -944,8 +945,8 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d-%02d-%02d' % (now.year, now.month, now.day, now.hour, now.minute)
 
 #get data from IOP stacks
-os.system('wget --no-check-certificate -O %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
-
+#os.system('wget --no-check-certificate -O %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
+os.system('curl -o %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
 
 
 
