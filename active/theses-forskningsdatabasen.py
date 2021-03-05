@@ -13,6 +13,7 @@ import ejlmod2
 import codecs
 import datetime
 import time
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
@@ -28,11 +29,15 @@ hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 rpp = 10
 
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 tocurl = 'https://www.forskningsdatabasen.dk/en/catalog?f%5Bformat_orig_s%5D%5B%5D=dtd&f%5Bresearch_area_ss%5D%5B%5D=Science%2Ftechnology&per_page=' + str(rpp) + '&q=&search_field=publications&sort=pub_date_tsort+desc%2C+journal_vol_tsort+desc%2C+journal_issue_tsort+desc%2C+journal_page_start_tsort+asc%2C+title_sort+asc'
 print '==={ %s }===' % (tocurl)
 req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
 time.sleep(2)
 for div in tocpage.find_all('div', attrs = {'class' : 'document'}): 
     rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
@@ -76,14 +81,14 @@ for rec in recs:
     print '---{ %i/%i }---{ %s }------' % (j, len(recs), rec['artlink'])
     try:
         req = urllib2.Request(rec['artlink'])
-        artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
         time.sleep(2)
     except:
         print 'wait 10 minutes'
         time.sleep(600)
         try:
             req = urllib2.Request(rec['artlink'])
-            artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+            artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
             time.sleep(30)
         except:
             continue
