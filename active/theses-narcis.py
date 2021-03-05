@@ -83,10 +83,12 @@ for year in [str(now.year-1), str(now.year)]:
                         rec['note'] = [ rec['artlink'], '%i of %i' % (len(recs) + 1, ntarget) ]
                         for img  in li.find_all('img', attrs = {'class' : 'open-access-logo'}):
                             rec['oa'] = True
-                    if re.sub('(.*id).*', r'\1', rec['artlink']) in bereitsin:
+                    ihttp = re.sub('(.*id).*', r'\1', rec['artlink'])
+                    if ihttp in bereitsin:
                         print '   skip %s' % (rec['artlink'])
                     else:
                         recs.append(rec)
+                        bereitsin.append(ihttp)
         print '---{ %i | %s }---{ %i/%i }---{ %s }---' % (page, tocurl, len(recs), ntarget, rec['artlink'])
         time.sleep(10)
         page += 1
