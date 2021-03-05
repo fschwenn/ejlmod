@@ -16,8 +16,8 @@ import datetime
 import time
 import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 numofpages = 1
 
 now = datetime.datetime.now()
@@ -28,19 +28,26 @@ publisher = 'Erlangen - Nuremberg U.'
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 jnlfilename = 'THESES-ERLANGEN-%s' % (stampoftoday)
-for year in [now.year-1, now.year]:
-    tocurl = 'https://opus4.kobv.de/opus4-fau/solrsearch/index/search/searchtype/simple/query/%2A%3A%2A/browsing/true/doctypefq/doctoralthesis/start/0/rows/100/institutefq/Naturwissenschaftliche+Fakult%C3%A4t/yearfq/' + str(year)
-    print tocurl
-    req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
-    time.sleep(3)
-    for div in tocpage.body.find_all('div', attrs = {'class' : 'results_title'}):
-        for a in div.find_all('a'):
-            rec = {'tc' : 'T', 'jnl' : 'BOOK'}
-            rec['link'] = 'https://opus4.kobv.de' + a['href']
-            rec['tit'] = a.text.strip()
-            recs.append(rec)
-
+links = []
+for dep in ['Department+Physik', 'Naturwissenschaftliche+Fakult%C3%A4t', 'Department+Mathematik']:
+    for year in [now.year-1, now.year]:
+        tocurl = 'https://opus4.kobv.de/opus4-fau/solrsearch/index/search/searchtype/simple/query/%2A%3A%2A/browsing/true/doctypefq/doctoralthesis/start/0/rows/100/institutefq/' + dep + '/yearfq/' + str(year)
+        print '---{ %i %s }---{ %s }---' % (year, dep, tocurl)
+        req = urllib2.Request(tocurl, headers=hdr)
+        tocpage = BeautifulSoup(urllib2.urlopen(req))
+        time.sleep(3)
+        for div in tocpage.body.find_all('div', attrs = {'class' : 'results_title'}):
+            for a in div.find_all('a'):
+                rec = {'tc' : 'T', 'jnl' : 'BOOK'}
+                rec['link'] = 'https://opus4.kobv.de' + a['href']
+                rec['tit'] = a.text.strip()
+                if rec['link'] in links:
+                    print '  already in list'
+                else:
+                    recs.append(rec)
+                    links.append(rec['link'])
+        print ' %i records so far' % (len(recs))
+                
 
             
 i = 0
