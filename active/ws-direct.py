@@ -54,7 +54,7 @@ print "get table of content of %s (%s) ..." % (jnlfilename,url)
 if not os.path.isfile("/tmp/%s.toc" % (jnlfilename)):
     os.system("wget -T 300 -t 3 -q -O /tmp/%s.toc %s" % (jnlfilename, url))
 inf = open('/tmp/%s.toc' % (jnlfilename), 'r')
-tocpage = BeautifulSoup(''.join(inf.readlines()))
+tocpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
 inf.close()
 
 
@@ -109,7 +109,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
         rec['vol'] = re.sub('.*?(\d+).*',r'\1',url)
     elif re.search('ijqi',url):
         rec['vol'] = re.sub('.*?(\d+).*',r'\1',url)
-        rec['iss'] = re.sub('.*\/(\d+).*',r'\1',url)
+        rec['issue'] = re.sub('.*\/(\d+).*',r'\1',url)
     elif jnlname == 'Ser.Adv.Quant.Many Body Theor.':
         rec['vol'] = re.sub('.*?(\d+)', r'\1', jnlfilename)
     elif jnlname == 'Adv.Ser.Direct.High Energy Phys.':
@@ -131,7 +131,7 @@ for i in range(len(recs)):
         os.system("wget -T 300 -t 3 -q -O /tmp/%s.%i %s" % (jnlfilename, i, recs[i]['artlink']))
         time.sleep(3)
     inf = open('/tmp/%s.%i' % (jnlfilename, i), 'r')
-    artpage = BeautifulSoup(''.join(inf.readlines()))
+    artpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
     inf.close()
 
     #author
@@ -156,6 +156,8 @@ for i in range(len(recs)):
                     at = re.sub(r'(?i) COLLABORATION.*', '', at)
                     recs[i]['col'] = at
                     continue
+                elif re.search('E\-mail Address', at):
+                    continue
                 else:                
                     autaff.append(at)
             if not autaff:
@@ -167,24 +169,50 @@ for i in range(len(recs)):
                     at = re.sub(r'(?i) COLLABORATION.*', '', at)
                     recs[i]['col'] = at
                     continue
-                else:                
+                elif re.search('E\-mail Address.*protected', at):
+                    continue
+                else:                    
                     autaff.append(at)
             if autaff:
                 for p in div.find_all('p'):
                     pt = p.text.strip()
                     if len(pt) > 1:
-                        autaff.append(pt)
+                        if not re.search('E\-mail Address.*protected', pt):
+                            autaff.append(pt)
                 recs[i]['autaff'].append(autaff)
+        
+                
 
     #abstract
     for div in artpage.body.find_all('div', attrs = {'class' : 'NLM_abstract'}):
         for p in div.find_all('p'): 
-            recs[i]['abs'] = p.text.strip()    
+            recs[i]['abs'] = p.text.strip()
+    if not 'abs' in recs[i].keys():
+        for div in artpage.body.find_all('div', attrs = {'class' : ['abstractSection', 'abstractInFull']}):
+            recs[i]['abs'] = div.text.strip()
     #keywords
     for div in artpage.body.find_all('div', attrs = {'class' : 'hlFld-keywords'}):
         recs[i]['keyw'] = []
         for li in div.find_all('li'):
             recs[i]['keyw'].append(li.text.strip())
+    #PACS
+    for div in artpage.body.find_all('div'):
+        for b in div.find_all('b'):
+            divt = div.text.strip()
+            if re.search('^PACS: *\d\d\.', divt):
+                b.decompose()
+                recs[i]['pacs'] = re.split(' *[,;] *', div.text.strip())
+    #license
+    for div in artpage.body.find_all('div', attrs = {'class' : 'section__body'}):
+        for p in div.find_all('p'):
+            if re.search('\(CC\-', p.text):
+                recs[i]['license'] = {'statement' : re.sub('.*\((CC.*?)\).*', r'\1', p.text.strip())}
+    #FFT
+    if 'license' in recs[i].keys():
+        for div in artpage.body.find_all('div', attrs = {'class' : 'section__body'}):
+            for a in div.find_all('a'):
+                if re.search('PDF download', a.text):
+                    recs[i]['FFT'] = urltrunk + a['href']
             
             
 
