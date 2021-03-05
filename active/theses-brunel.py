@@ -24,7 +24,7 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Brunel U.'
-jnlfilename = 'THESES-BRUNEL-%sA' % (stampoftoday)
+jnlfilename = 'THESES-BRUNEL-%s' % (stampoftoday)
 
 rpp = 50
 pages = 1
@@ -63,7 +63,9 @@ for rec in prerecs:
             artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
         except:
             print "no access to %s" % (rec['link'])
-            continue    
+            continue
+    #check whether really thesis
+    
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #author
@@ -72,7 +74,10 @@ for rec in prerecs:
                     rec['autaff'][-1].append('ORCID:' + meta['content'])
                 else:
                     author = re.sub(' *\[.*', '', meta['content'])
-                    rec['autaff'] = [[ author ]]
+                    rec['autaff'].append([ author ])
+            #description
+            elif meta['name'] == 'DC.description':
+                rec['note'].append(meta['content'])
             #title
             elif meta['name'] == 'DC.title':
                 rec['tit'] = meta['content']
@@ -89,7 +94,7 @@ for rec in prerecs:
             #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['pdf_url'] = meta['content']
-    if rec['autaff']:
+    if len(rec['autaff']) == 1:
         rec['autaff'][-1].append(publisher)
         #license
         for a in artpage.find_all('a'):
@@ -109,7 +114,10 @@ for rec in prerecs:
         if not 'FFT' in rec.keys() and 'pdf_url' in rec.keys():
             rec['hidden'] = rec['pdf_url'] 
         print '  ', rec.keys()
-        recs.append(rec)
+        if 'note' in rec.keys() and not re.search('[th]hesis', rec['note'][0]):
+            print ' skip "%a"' % (rec['note'][0])
+        else:
+            recs.append(rec)
 
 #closing of files and printing
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
