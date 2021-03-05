@@ -131,7 +131,7 @@ for rec in prerecs:
             #keywords
             elif meta['name'] == 'DC.subject':
                 if re.search(';.*;', meta['content']):
-                    rec['keyw'] = re.split('; ', meta['content'])
+                    rec['keyw'] = re.split(' *; *', meta['content'])
             #department
             elif meta['name'] == 'citation_keywords':
                 section = re.sub('Settore ', '', meta['content'])
@@ -220,6 +220,10 @@ for rec in prerecs:
             rec['link'] = rec['artlink']
         if interesting:
             recs.append(rec)
+        #abstract
+        if not 'abs' in rec.keys():
+            for p in artpage.body.find_all('p', attrs = {'class' : 'abstractEng'}):
+                rec['abs'] = p.text.strip()
     else:
         print '---[ NO AUTHOR! ]---  '
 
