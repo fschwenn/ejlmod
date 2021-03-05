@@ -16,9 +16,9 @@ from bs4 import BeautifulSoup
 import datetime
 import time
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special/'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special/'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 
 def tfstrip(x): return x.strip()
 
@@ -34,31 +34,33 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 #journals have quite different number of articles per month
 if jnl == 'symmetry': #2211
-    numberofpages = 18 + 2 + 5 + 2 
+    numberofpages = 27
 elif jnl == 'universe': #367
-    numberofpages = 2 + 2 + 3
+    numberofpages = 7
 elif jnl == 'sensors': #9570
-    numberofpages = 24 + 2 + 6 + 8 + 5 +2 
+    numberofpages = 60
 elif jnl == 'instruments': #91
-    numberofpages = 2 + 1
+    numberofpages = 3
 elif jnl == 'galaxies': #231
-    numberofpages = 2 + 2
+    numberofpages = 4
 elif jnl == 'entropy': #2124
-    numberofpages = 8+4 + 3
+    numberofpages = 16
 elif jnl == 'particles': #53
-    numberofpages = 2 + 2
+    numberofpages = 4
 elif jnl == 'physics': #26
-    numberofpages = 2 + 2
+    numberofpages = 4
 elif jnl == 'condensedmatter': #139
-    numberofpages = 2 + 1
+    numberofpages = 3
 elif jnl == 'atoms': #173
-    numberofpages = 2 + 1
+    numberofpages = 3
 elif jnl == 'mathematics':
-    numberofpages = 5 + 2 + 10
+    numberofpages = 35
 elif jnl == 'quantumrep':
     numberofpages = 4
 elif jnl == 'axioms':
     numberofpages = 6
+elif jnl == 'applsci':
+    numberofpages = 80
 chunksize = 50
 
 rpp = 10
@@ -135,7 +137,9 @@ for artlink in artlinks:
         rec['jnl'] = 'MDPI Physics'
     elif jnl == 'quantumrep':
         rec['jnl'] = 'Quantum Rep.'
-    print '---{ %3i/%3i }---{ %s }---' % (i, len(artlinks), artlink[0])
+    elif jnl == 'applsci':
+        rec['jnl'] = 'Appl.Sciences'
+    print '---{ %3i/%3i (%i) }---{ %s }---' % (i, len(artlinks), len(recs), artlink[0])
     rec['FFT'] = artlink[0] + '/pdf'
     rec['tit'] = artlink[1]
     #get detailed page
