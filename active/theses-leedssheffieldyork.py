@@ -106,29 +106,44 @@ boringaffs = ['University of Leeds, Department of Colour and Polymer Chemistry (
               'University of Sheffield, Psychology (Sheffield), Faculty of Science (Sheffield), United Kindgom',
               'University of Sheffield, Psychology (Sheffield), Music (Sheffield), United Kindgom',
               'University of Sheffield, Psychology (Sheffield), United Kindgom']
+boringaffs += ['The University of Sheffield, Faculty of Science (Sheffield), Animal and Plant Sciences (Sheffield), United Kindgom',
+               'The University of Sheffield, Faculty of Arts and Humanities (Sheffield), Archaeology (Sheffield)The University of Sheffield, Faculty of Science (Sheffield), Archaeology (Sheffield), United Kindgom',
+               'The University of Sheffield, Faculty of Science (Sheffield), Biomedical Science (Sheffield), United Kindgom',
+               'The University of Sheffield, Faculty of Science (Sheffield), Psychology (Sheffield), United Kindgom',
+               'The University of Leeds, Faculty of Maths and Physical Sciences (Leeds), School of Chemistry (Leeds)The University of Leeds, Faculty of Maths and Physical Sciences (Leeds), Department of Colour and Polymer Chemistry (Leeds), United Kindgom',
+               'The University of Leeds, Faculty of Maths and Physical Sciences (Leeds), School of Chemistry (Leeds)The University of Leeds, University of Leeds Research Centres and Institutes, Astbury Centre for Structural Molecular Biology (Leeds), United Kindgom',
+               'The University of Leeds, Faculty of Maths and Physical Sciences (Leeds), School of Chemistry (Leeds), United Kindgom',
+               'The University of Sheffield, Faculty of Science (Sheffield), Molecular Biology and Biotechnology (Sheffield), United Kindgom',
+               'The University of Sheffield, Faculty of Science (Sheffield)The University of Sheffield, Faculty of Science (Sheffield), Molecular Biology and Biotechnology (Sheffield), United Kindgom',
+               'The University of Sheffield, Faculty of Science (Sheffield)The University of Sheffield, Faculty of Science (Sheffield), Psychology (Sheffield), United Kindgom',
+               'The University of Sheffield, Faculty of Science (Sheffield), Chemistry (Sheffield), United Kindgom']
 
 
 
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
+dois = []
 for i in range(pages):
     tocurl = 'http://etheses.whiterose.ac.uk/cgi/search/archive/advanced?exp=0|1|-date%2Fcreators_name%2Ftitle|archive|-|iau%3Aiau%3AANY%3AEQ%3ALeeds.FA-MAPH+Leeds.RC-MATH+Leeds.SU-MTHA+Leeds.SU-MTHP+Leeds.RC-PHAS+Sheffield.FCP+Sheffield.PHY+Sheffield.SOM+York.YOR16+York.YOR21|-|eprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive|metadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow&_action_search=1&order=-date%2Fcreators_name%2Ftitle&screen=Search&search_offset=' + str(20*i)
-    print tocurl
-    req = urllib2.Request(tocurl, headers=hdr)
+    print '==={ %i/%i }==={ %s }===' % (i, pages, tocurl)
+    req = urllib2.Request(tocurl, headers=hdr)    
     tocpage = BeautifulSoup(urllib2.urlopen(req))
+    time.sleep(2)
     for tr in tocpage.body.find_all('tr', attrs = {'class' : 'ep_search_result'}):
         if re.search('MSc ', tr.text) or re.search('MPhil ', tr.text):
             print '  skip Master'
         else:
-            rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : []}
             for td in tr.find_all('td'):
                 for span in td.find_all('span'):
                     for a in td.find_all('a'):
-                        rec['link'] = a['href']
-                        rec['doi'] = '20.2000/' + re.sub('\W', '', a['href'])
-                        prerecs.append(rec)
+                        if a.has_attr('href') and re.search('etheses.whiterose.ac.uk', a['href']):
+                            rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : []}
+                            rec['link'] = a['href']
+                            rec['doi'] = '20.2000/' + re.sub('\W', '', a['href'])
+                            if not rec['doi'] in dois:
+                                prerecs.append(rec)
+                                dois.append(rec['doi'])
 
-                
 i = 0
 recs = []
 for rec in prerecs:
@@ -156,6 +171,9 @@ for rec in prerecs:
                 author = re.sub(' *, *', ' ', author)
                 author = re.sub(';', ',', author)
                 rec['autaff'] = [[ author ]]
+            #orcid
+            elif meta['name'] == 'eprints.creators_orcid':
+                rec['autaff'][-1].append('ORCID:' + meta['content'])            
             #email
             elif meta['name'] == 'eprints.creators_id':
                 rec['autaff'][-1].append('EMAIL:' + meta['content'])
@@ -172,6 +190,12 @@ for rec in prerecs:
                     rec['keyw'] += parts
                 else:
                     rec['keyw'] += re.split('[;\n] ', meta['content'])
+            #rights
+            elif meta['name'] == 'DC.rights':
+                if re.search('cc_.*', meta['content']):
+                    rec['license'] = {'statement' : re.sub('_', '-', meta['content'].upper())}
+                else:
+                    rec['note'].append(meta['content'])
             #thesis type
             elif meta['name'] == 'eprints.thesis_type':
                 rec['note'].append(meta['content'])
@@ -191,10 +215,26 @@ for rec in prerecs:
             #references
             elif meta['name'] == 'eprints.referencetext':
                 rec['refs'] = []
-                for ref in re.split('\n', meta['content']):
+                bulk = re.sub('\n', ' ', meta['content'])
+                bulk = re.sub('\[(\d+)\]', r'XXXX[\1]', bulk)
+                lines = re.split('XXXX', bulk)
+                if len(lines) > 50:
+                    lines = lines[1:]
+                else:
+                    lines = re.split('\n', meta['content'])
+                for ref in lines:
                      rec['refs'].append([('x', ref)])
-    aff.append('United Kindgom')
-    combinedaff = ', '.join(aff)
+
+    if aff:
+        aff.append('United Kindgom')
+        combinedaff = ', '.join(aff)
+    else:
+        for tr in artpage.body.find_all('tr'):
+            for th in tr.find_all('th'):
+                if th.text.strip() == 'Academic Units:':                    
+                    for td in tr.find_all('td'):
+                        combinedaff = re.sub(' > ', ', ', td.text.strip()) + ', United Kindgom'
+
     if combinedaff in boringaffs:
         print '  skip "%s"' % (combinedaff)
     else:
@@ -216,7 +256,7 @@ for rec in prerecs:
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(prerecs,xmlfile,publisher)
+ejlmod2.writeXML(recs,xmlfile,publisher)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
