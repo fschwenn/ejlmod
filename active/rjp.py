@@ -14,8 +14,7 @@ import urllib2
 import urlparse
 import codecs
 from bs4 import BeautifulSoup
-
-
+import ssl
 
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 tmpdir = '/tmp'
@@ -37,9 +36,15 @@ xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 
 url = 'http://www.nipne.ro/%s/%s_%s_%s.html' % (jnl, year, vol, issue)
 
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 print "get table of content of %s%s.%s ... via %s" %(jnlname, vol, issue, url)
-tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(url))
+hdr = {'User-Agent' : 'Magic Browser'}
+req = urllib2.Request(url, headers=hdr)
+tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
 
 tsection = ''
 recs = []
