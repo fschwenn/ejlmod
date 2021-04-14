@@ -14,6 +14,7 @@ import codecs
 import datetime
 import time
 import json
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
@@ -22,6 +23,11 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Izmir Inst. Tech.'
+
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 rpp = 50
 pages = 1
@@ -40,12 +46,12 @@ for page in range(pages):
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     try:
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
+        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     except:
         print "retry in 300 seconds"
         time.sleep(300)
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
+        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     time.sleep(3)
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : [], 'supervisor'  : []}
@@ -61,7 +67,8 @@ for rec in prerecs:
     i += 1
     print '---{ %i/%i (%i) }---{ %s }---' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        req = urllib2.Request(rec['artlink'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
         time.sleep(3)
     except:
         try:
