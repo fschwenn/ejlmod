@@ -36,6 +36,7 @@ deps = ['Mathematics,%20Department%20of&campus=UBCV',
 
 recs = []
 jnlfilename = 'THESES-BRITISHCOLUMBIA-%s' % (stampoftoday)
+dois = []
 for dep in deps:
     for page in range(pages):
         tocurl = 'https://open.library.ubc.ca/search?q=*&p=' + str(page) + '&sort=6&view=0&circle=y&dBegin=&dEnd=&c=1&affiliation=' + dep + '&degree=Doctor%20of%20Philosophy%20-%20PhD'
@@ -53,7 +54,9 @@ for dep in deps:
                 rec['doi'] = '20.2000/BritishColumbia/' + re.sub('.*items\/', '', a['href'])
                 if 'UBCO' in dep:
                     rec['note'].append('Okanagan Campus')
-                recs.append(rec)
+                if not rec['doi'] in dois:
+                    recs.append(rec)
+                    dois.append(rec['doi'])
             
 
 i = 0
