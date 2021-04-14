@@ -20,8 +20,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'+'/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 publisher = 'National University of Lviv'
 tc = 'P'
