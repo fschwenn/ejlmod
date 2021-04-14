@@ -137,6 +137,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '42005': ['communphys', 'Commun.Phys.', '', '', 'P'],
       '42254': ['natrp', 'Nature Rev.Phys.', '', '', 'P'],
       '43538': ['pinsa', 'Proc.Indian Natl.Sci.Acad.', '', '', 'RP'],
+      '43673': ['aappsb', 'AAPPS Bull.', '', '', ''],
 #Books
        '0304': ['lnm', 'Lect.Notes Math.', '', '', 'PS', ''],
        '0361': ['spprph', 'Springer Proc.Phys.', '', '', 'C', ''],
@@ -170,33 +171,36 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
 #42005 Commun.Phys.
 #41605 Rad.Det.Tech.Meth.
 
-jc['00029'] = ['selmat', 'Selecta Math.', '', '', 'P']
+jc['00029'] = ['selmat', 'Selecta Math.', '', '', 'P'] #yepp
 jc['00222'] = ['invmat', 'Invent.Math.', '', '', 'P']
-jc['00526'] = ['cvpde', 'Calc.Var.Part.Differ.Equ', '', '', 'P']
+jc['00526'] = ['cvpde', 'Calc.Var.Part.Differ.Equ', '', '', 'P']#yepp
 jc['10440'] = ['acapma', 'Acta Appl.Math.', '', '', 'P']
 jc['10699'] = ['fosi', 'Found.Sci.', '', '', 'P']
 jc['10946'] = ['jrlr', 'J.Russ.Laser Res.', '', '', 'P']
 jc['10947'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P']
-jc['10955'] = ['jstatphys', 'J.Statist.Phys.', '', '', 'P']
-jc['11128'] = ['qif', 'Quant.Inf.Proc.', '', '', 'P']
+jc['10955'] = ['jstatphys', 'J.Statist.Phys.', '', '', 'P'] #yepp
+jc['11128'] = ['qif', 'Quant.Inf.Proc.', '', '', 'P']#yepp
 jc['11253'] = ['umj', 'Ukr.Math.J.', '', '', 'P']
 jc['11139'] = ['ramanajuan', 'Ramanujan J.', '', '', 'P']
-jc['11229'] = ['synthese', 'Synthese', '', '', 'P']
-jc['11449'] = ['opsp', 'Opt.Spectrosc.', '', '', 'P']
+jc['11229'] = ['synthese', 'Synthese', '', '', 'P']#yepp
+jc['11449'] = ['opsp', 'Opt.Spectrosc.', '', '', 'P']#yepp
 jc['12045'] = ['resonance', 'Reson.', '', '', 'P']
-jc['12220'] = ['jganal', 'J.Geom.Anal.', '', '', 'P']
+jc['12220'] = ['jganal', 'J.Geom.Anal.', '', '', 'P']#yepp
 jc['12607'] = ['pauaa', 'p Adic Ultra.Anal.Appl.', '', '', 'P']
-jc['13194'] = ['ejphilsci', 'Eur.J.Phil.Sci.', '', '', 'P']
-jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P']
-jc['40507'] = ['epjgt', 'EPJ Quant.Technol.', '', '', 'P']
+jc['13194'] = ['ejphilsci', 'Eur.J.Phil.Sci.', '', '', 'P'] #yepp
+jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P'] #now at New publisher: Please contact Islamic Azad University
+jc['40507'] = ['epjgt', 'EPJ Quant.Technol.', '', '', 'P']#yepp
 jc['40818'] = ['apde', 'Ann.PDE', '', '', 'P']
-jc['41534'] = ['natquantinf', 'npj Quantum Inf.', '', '', 'P']
+jc['41534'] = ['natquantinf', 'npj Quantum Inf.', '', '', 'P']#yepp
 jc['00332'] = ['jnonlinsci', 'J.Nonlin.Sci.', '', '', 'P']
-jc['00229'] = ['manusmat', 'Manuscr.Math.', '', '', 'P']
+jc['00229'] = ['manusmat', 'Manuscr.Math.', '', '', 'P']#yepp
 jc['41614'] = ['rmplasmap', 'Rev.Mod.Plasma Phys.', '', '', 'P']
 jc['13370'] = ['afrmat', 'Afr.Math.', '', '', 'P']#ereugen in jnl
+jc['10512'] = ['atenerg', 'At.Energ.', '', '', 'P']#yepp
 #
-jc['10512'] = ['atenerg', 'At.Energ.', '', '', 'P']
+jc['43673'] = ['aappsbul', 'AAPPS Bull.', '', '', '']
+
+
 #known conferences
 confdict = {'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30'}
 
@@ -975,7 +979,7 @@ def convertissue(journalnumber, dirname):
     if recs:
         if 'vol' in rec.keys():
             if 'issue' in rec.keys():
-                jnlfilename = '%s%s.%s.%s' % (jc[journalnumber][0], rec['vol'], rec['issue'], cday)
+                jnlfilename = re.sub(' ', '_', '%s%s.%s.%s' % (jc[journalnumber][0], rec['vol'], rec['issue'], cday))
             else:
                 jnlfilename = '%s%s.%s' % (jc[journalnumber][0], rec['vol'], cday)
         else:
