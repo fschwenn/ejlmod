@@ -66,6 +66,8 @@ elif (jnl == 'acmp'):
     jnlname = 'Adv.Cond.Mat.Phys.'
 elif (jnl == 'sv'):
     jnlname = 'Shock and Vibration'
+elif (jnl == 'ijmms'):
+    jnlname = 'Int.J.Math.Math.Sci.'
 
 if re.search('isrn',jnl):
     if re.search('astro',jnl):
@@ -73,7 +75,7 @@ if re.search('isrn',jnl):
     else:
         urltrunk = "https://www.hindawi.com/journals/isrn/%s/%s/" % (year,re.sub('isrn','',jnl))
         urltrunk = re.sub('\/mp','/mathematical.physics',urltrunk)
-else:
+else: 
     urltrunk = "https://www.hindawi.com/journals/%s/%s/" % (jnl,year)
 
 directoriestocheck = '%s/backup/%s*doki %s/backup/%i/%s*doki %s/backup/%i/%s*doki ' % (ejdir,jnl, ejdir, int(year), jnl, ejdir, int(year)-1, jnl)
