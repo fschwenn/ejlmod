@@ -25,7 +25,9 @@ year = sys.argv[1]
 issue = sys.argv[2]
 jnlfilename = 'actaphyssin%s.%s' % (year, issue)
 
-urltrunk = 'http://wulixb.iphy.ac.cn/en/custom/%s/%s' % (year, issue)HTTPCookieProcessor).open(urltrunk), features="lxml")
+urltrunk = 'http://wulixb.iphy.ac.cn/en/custom/%s/%s' % (year, issue)
+try:
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk), features="lxml")
     time.sleep(3)
 except:
     print "retry %s in 180 seconds" % (urltrunk)
