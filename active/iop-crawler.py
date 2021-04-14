@@ -182,7 +182,7 @@ for tocpage in tocpages:
                     elif issn in ['1742-6596', '1757-899X']:
                         rec['tc'] = 'C'
                     elif issn in ['2515-5172']:
-                        rec['tc'] = ' '
+                        rec['tc'] = ''
                     if issnote: rec['note'].append(issnote)
                     if h3note: rec['note'].append(h3note)
                     if h4note: rec['note'].append(h4note)
