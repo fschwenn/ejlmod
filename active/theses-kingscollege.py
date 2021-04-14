@@ -26,13 +26,13 @@ publisher = "King's Coll. London"
 jnlfilename = 'THESES-KINGS_COLLEGE-%s' % (stampoftoday)
 
 rpp = 50
-pages = 1
+pages = 1+3
 hdr = {'User-Agent' : 'Magic Browser'}
 
 recs = []
 #first get links of year pages
 for page in range(pages):
-    tocurl = 'https://kclpure.kcl.ac.uk/portal/en/theses/search.html?search=theses&ordering=studentThesisOrderByAwardYear&pageSize=' + str(rpp) + '&page=' + str(page) + '&type=%2Fdk%2Fatira%2Fpure%2Fstudentthesis%2Fstudentthesistypes%2Fstudentthesis%2Fdoc%2Fdsc&type=%2Fdk%2Fatira%2Fpure%2Fstudentthesis%2Fstudentthesistypes%2Fstudentthesis%2Fdoc%2Fphd&descending=true'
+    tocurl = 'https://kclpure.kcl.ac.uk/portal/en/theses/search.html?search=&field=all&ordering=studentThesisOrderByAwardYear&pageSize=' + str(rpp) + '&page=' + str(page) + '&type=%2Fdk%2Fatira%2Fpure%2Fstudentthesis%2Fstudentthesistypes%2Fstudentthesis%2Fdoc%2Fdsc&type=%2Fdk%2Fatira%2Fpure%2Fstudentthesis%2Fstudentthesistypes%2Fstudentthesis%2Fdoc%2Fphd&descending=true'
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
