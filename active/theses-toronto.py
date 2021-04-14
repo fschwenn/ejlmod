@@ -38,7 +38,7 @@ for i in range(pages):
     tocpage = BeautifulSoup(urllib2.urlopen(req))
     for tr in tocpage.body.find_all('tr'):
         for td in tr.find_all('td', attrs = {'headers' : 't2'}):
-            rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : []}
+            rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : []}
             for a in td.find_all('a'):
                 rec['artlink'] = 'https://tspace.library.utoronto.ca' + a['href'] #+ '?show=full'
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
@@ -105,6 +105,7 @@ for rec in recs:
                         rec['supervisor'].append([at, publisher])
                     #department
                     elif spant == 'Department:':
+                        rec['note'].append(at)
                         if at in deprecs.keys():
                             deprecs[at].append(rec)
                         else:
@@ -114,21 +115,35 @@ for rec in recs:
         if i % 10 == 0:
             print ', '.join(['%s (%s)' % (dep, len(deprecs[dep])) for dep in deprecs.keys()])
 
-for dep in deprecs.keys():
-    if dep in ['Astronomy and Astrophysics', 'Physics', 'Mathematics']:
-        print '+', dep
-        jnlfilename = 'THESES-TORONTO-%s_%s' % (stampoftoday, re.sub('\W', '', dep))
-        #closing of files and printing
-        xmlf = os.path.join(xmldir,jnlfilename+'.xml')
-        xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-        ejlmod2.writeXML(deprecs[dep], xmlfile, publisher)
-        xmlfile.close()
-        #retrival
-        retfiles_text = open(retfiles_path,"r").read()
-        line = jnlfilename+'.xml'+ "\n"
-        if not line in retfiles_text: 
-            retfiles = open(retfiles_path,"a")
-            retfiles.write(line)
-            retfiles.close()
-    else:
-        print '-', dep
+jnlfilename = 'THESES-TORONTO-%s' % (stampoftoday)
+#closing of files and printing
+xmlf = os.path.join(xmldir,jnlfilename+'.xml')
+xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+ejlmod2.writeXML(deprecs[dep], xmlfile, publisher)
+xmlfile.close()
+#retrival
+retfiles_text = open(retfiles_path,"r").read()
+line = jnlfilename+'.xml'+ "\n"
+if not line in retfiles_text: 
+    retfiles = open(retfiles_path,"a")
+    retfiles.write(line)
+    retfiles.close()
+
+#for dep in deprecs.keys():
+#    if dep in ['Astronomy and Astrophysics', 'Physics', 'Mathematics']:
+#        print '+', dep
+#        jnlfilename = 'THESES-TORONTO-%s_%s' % (stampoftoday, re.sub('\W', '', dep))
+#        #closing of files and printing
+#        xmlf = os.path.join(xmldir,jnlfilename+'.xml')
+#        xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+#        ejlmod2.writeXML(deprecs[dep], xmlfile, publisher)
+#        xmlfile.close()
+#        #retrival
+#        retfiles_text = open(retfiles_path,"r").read()
+#        line = jnlfilename+'.xml'+ "\n"
+#        if not line in retfiles_text: 
+#            retfiles = open(retfiles_path,"a")
+#            retfiles.write(line)
+#            retfiles.close()
+#    else:
+#        print '-', dep
