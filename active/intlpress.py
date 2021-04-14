@@ -39,6 +39,7 @@ elif (jnl == 'amsa'):
     jnlname = 'Ann.Math.Sci.Appl.'
     issn = '2380-288X'
     url = "http://www.intlpress.com/%s/%s-vol-%s.php" % (jnl.upper(),jnl.upper(),vol)
+    url = 'https://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/%04i/%04i/index.php' % (jnl,int(vol),int(re.sub('\D.*', '', isu)))
 elif (jnl == 'cntp'):
     jnlname = 'Commun.Num.Theor.Phys.'
     issn = '1931-4523'
