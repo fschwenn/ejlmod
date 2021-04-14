@@ -24,7 +24,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Wayne State U., Detroit'
 
-pages = 1 
+pages = 2
 
 jnlfilename = 'THESES-WAYNESTATE-%s' % (stampoftoday)
 
