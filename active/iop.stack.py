@@ -20,6 +20,8 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 iopdirtmp = '/afs/desy.de/group/library/publisherdata/iop/tmp'
 iopdirraw = '/afs/desy.de/group/library/publisherdata/iop/raw'
 iopdirdone = '/afs/desy.de/group/library/publisherdata/iop/done'
+iopdirarchive = ['/afs/desy.de/group/library/publisherdata/iop2019',
+                 '/afs/desy.de/group/library/publisherdata/iop2020']
 pdfdir = '/afs/desy.de/group/library/publisherdata/pdf'
 publisher = 'IOP'
 ftpdir = "/afs/desy.de/group/library/preprints/incoming/IOP"
@@ -954,6 +956,8 @@ os.system('curl -o %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/llo
 todo = []
 bookfeeds = []
 done = os.listdir(iopdirdone)
+for directory in iopdirarchive:
+    done += os.listdir(directory)
 for datei in os.listdir(iopdirraw):
     if datei in done:
         print '%s already in done' % (datei)
@@ -1303,7 +1307,6 @@ for bookfeed in bookfeeds:
             products.append(product)
             product = False
     inf.close()
-    print '%i products found' % (len(products))
     i = 0
     for product in products:
         bproduct = BeautifulSoup(product)
@@ -1313,6 +1316,16 @@ for bookfeed in bookfeeds:
         #get rid of Related Material
         for rema in bproduct.find_all('relatedmaterial'):
             rema.replace_with('')
+        #title
+        for tit in bproduct.find_all('title'):
+            for titt in tit.find_all('titletext'):
+                rec['tit'] = titt.text
+        if not 'tit' in rec.keys():
+            for td in bproduct.find_all('titledetail'):
+                for tel in td.find_all('titleelementlevel'):
+                    if tel.text == '01':
+                        for twp in td.find_all('titlewithoutprefix'):
+                            rec['tit'] = twp.text
         #DOI
         for wi in bproduct.find_all('workidentifier'):
             for wit in wi.find_all('workidtype'):
@@ -1351,16 +1364,6 @@ for bookfeed in bookfeeds:
         #series
         for tos in bproduct.find_all('titleofseries'):
             rec['series'] = tos.text
-        #title
-        for tit in bproduct.find_all('title'):
-            for titt in tit.find_all('titletext'):
-                rec['tit'] = titt.text
-        if not 'tit' in rec.keys():
-            for td in bproduct.find_all('titledetail'):
-                for tel in td.find_all('titleelementlevel'):
-                    if tel.text == '01':
-                        for twp in td.find_all('titlewithoutprefix'):
-                            rec['tit'] = twp.text
         #authors
         for contributor in bproduct.find_all('contributor'):
             for cr in contributor.find_all('contributorrole'):
