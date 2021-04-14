@@ -22,8 +22,8 @@ from multiprocessing import Manager
 
 absdir = '/afs/desy.de/group/library/abs'
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 
 articlesperpage = 50
 
@@ -185,23 +185,15 @@ def ieee(number):
         i += 1
         pagecommand = '&pageNumber=%i' % (i)
         print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)        
-        driver.get(urltrunc + toclink + pagecommand)
         try:
-            if number[0] in ['C', '8', '9']:
-#        if number[0] in ['8', '9']:
-                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
-            else:
-                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
+            driver.get(urltrunc + toclink + pagecommand)
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
         except:
             print ' wait a minute'
             time.sleep(60)
             driver.get(urltrunc + toclink + pagecommand)
-            if number[0] in ['C', '8', '9']:
-#        if number[0] in ['8', '9']:
-                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
-            else:
-                WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
-        #clicl to accept cookies
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'global-content-wrapper')))
+        #click to accept cookies
         if i == 1:
             try:
                 driver.find_element_by_css_selector('.cc-btn.cc-dismiss').click()
@@ -294,7 +286,7 @@ def ieee(number):
                 if author.has_key('orcid'):
                     autaff.append('ORCID:'+author['orcid'])
                 rec['autaff'].append(autaff)
-        if jnlname in ['IEEE Trans.Magnetics', 'IEEE Trans.Appl.Supercond.', 'IEEE J.Sel.Top.Quant.Electron.']:
+        if jnlname in ['IEEE Trans.Magnetics', 'IEEE Trans.Appl.Supercond.', 'IEEE J.Sel.Top.Quant.Electron.']:#+['IEEE Trans.Instrum.Measur.']:
             if gdm.has_key('externalId'):
                 rec['p1'] = gdm['externalId']
             elif gdm.has_key('articleNumber'):
@@ -376,12 +368,12 @@ def ieee(number):
                     
         if jnlname in ['BOOK', 'IEEE Nucl.Sci.Symp.Conf.Rec.']:
             try:
-                print '%3i/%3i %s (%s) %s, %s' % (i,len(allarticlelinks),rec['conftitle'],rec['year'],rec['doi'],rec['tit'])
+                print '%3i/%3i %s (%s) %s, %s' % (i,len(allarticlelinks),rec['conftitle'],rec['year'],rec['doi'],'') #rec['tit'])
             except: 
                 print '%3i/%3i %s' % (i,len(allarticlelinks),rec['tit'])
         else:
             try:
-                print '%3i/%3i %s %s (%s) %s, %s' % (i,len(allarticlelinks),jnlname,rec['vol'],rec['year'],rec['p1'],rec['tit'])
+                print '%3i/%3i %s %s (%s) %s, %s' % (i,len(allarticlelinks),jnlname,rec['vol'],rec['year'],rec['p1'],'') #rec['tit'])
             except:
                 print rec
         recs.append(rec)
