@@ -41,7 +41,7 @@ for dep in ['8623']:
         tocpage = BeautifulSoup(urllib2.urlopen(req))
         for tr in tocpage.body.find_all('tr'):
             for td in tr.find_all('td', attrs = {'headers' : 't2'}):
-                rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'autaff' : []}
+                rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'autaff' : [], 'note' : []}
                 for a in td.find_all('a'):
                     rec['link'] = 'https://bura.brunel.ac.uk' + a['href'] #+ '?show=full'
                     rec['doi'] = '20.2000/BRUNEL' + a['href']
