@@ -72,7 +72,8 @@ for tr in tocpage.body.find_all('tr'):
             auts = re.sub('\(.*', '', re.sub('[\t\n\r]', '', p.text.strip())).strip()
             for aut in re.split(', *', auts):
                 rec['auts'].append(re.sub('\.([A-Z][a-z])', r'. \1', aut))
-        print "%s %s (%s) %s-%s" % (jnlname, rec['vol'], year, rec['p1'], rec['p2'])
+        if 'p2' in rec.keys() and 'p1' in rec.keys():
+            print "%s %s (%s) %s-%s" % (jnlname, rec['vol'], year, rec['p1'], rec['p2'])
         if 'link' in rec.keys():
             recs.append(rec)
         else:
@@ -97,7 +98,7 @@ for rec in recs:
             #abs
             if len(pt) > 10:
                 rec['abs'] = pt
-        print rec.keys()
+    print rec.keys()
         
 
 #closing of files and printing
