@@ -14,6 +14,10 @@ import urllib2
 import urlparse
 import time
 from bs4 import BeautifulSoup
+import datetime
+
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
@@ -49,10 +53,18 @@ elif (jnl == 'aandas'):
     jnlname = 'Astron.Astrophys.Suppl.Ser.'
     urltrunk = 'https://aas.aanda.org/articles/aas/abs/'
     tc = 'P'
+elif (jnl == '4open'):
+    jnlname = '4open'
+    urltrunk = 'https://www.4open-sciences.org/articles/fopen/abs/'
+    tc = 'P'
 
 
-jnlfilename = "%s%s.%s" % (jnl, year, issue)
-toclink = "%s%s/%s/contents/contents.html" % (urltrunk, year, issue)
+if (jnl == '4open'):
+    jnlfilename = "%s%s.%s_%s" % (jnl, year, issue, stampoftoday)
+    toclink = "%s%s/%02i/contents/contents.html" % (urltrunk, year, int(issue))
+else:
+    jnlfilename = "%s%s.%s" % (jnl, year, issue)
+    toclink = "%s%s/%s/contents/contents.html" % (urltrunk, year, issue)
 
 print "get table of content..."
 
