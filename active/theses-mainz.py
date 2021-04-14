@@ -29,7 +29,7 @@ hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 
 rpp = 40
-pages = 2
+pages = 3
 
 for page in range(pages):
     tocurl = 'https://openscience.ub.uni-mainz.de/simple-search?query=&filter_field_1=organisationalUnit&filter_type_1=equals&filter_value_1=FB+08+Physik%2C+Mathematik+u.+Informatik&filter_field_2=publicationType&filter_type_2=equals&filter_value_2=Dissertation&sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp) + '&etal=0&start=' + str(page*rpp)
@@ -40,12 +40,12 @@ for page in range(pages):
         for td in tr.find_all('td', attrs = {'headers' : 't1'}):
             rec['year'] = td.text.strip()
             rec['date'] = td.text.strip()
-        for td in tr.find_all('td', attrs = {'headers' : 't2'}):
+        for td in tr.find_all('td', attrs = {'headers' : 't3'}):
             for a in td.find_all('a'):
                 rec['tit'] = a.text.strip()
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
                 rec['artlink'] = 'https://openscience.ub.uni-mainz.de' + a['href']
-            recs.append(rec)
+                recs.append(rec)
     time.sleep(10)
 
 i = 0
@@ -98,7 +98,7 @@ for rec in recs:
                         rec['FFT'] = 'https://openscience.ub.uni-mainz.de' + a['href']
                     else:
                         rec['hidden'] = 'https://openscience.ub.uni-mainz.de' + a['href']
-        print '  ', rec.keys()
+    print '  ', rec.keys()
 
 #closing of files and printing
 xmlf    = os.path.join(xmldir, jnlfilename+'.xml')
