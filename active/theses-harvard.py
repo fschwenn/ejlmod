@@ -15,6 +15,10 @@ import codecs
 import datetime
 import time
 import json
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -28,6 +32,8 @@ rpp = 50
 numofpages = 2
 departments = ['Mathematics', 'Physics']
 
+driver = webdriver.PhantomJS()
+driver.implicitly_wait(30)
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 for dep in departments:
@@ -50,13 +56,14 @@ j = 0
 for rec in recs:
     j += 1
     print '---{ %i/%i }---{ %s }------' % (j, len(recs), rec['link'])
-    req = urllib2.Request(rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.urlopen(req))
+        driver.get(rec['link'])
+        artpage = BeautifulSoup(driver.page_source)
     except:
         time.sleep(60)
         print 'wait a minute'
-        artpage = BeautifulSoup(urllib2.urlopen(req))
+        driver.get(rec['link'])
+        artpage = BeautifulSoup(driver.page_source)
     time.sleep(5)
     #author
     for meta in artpage.find_all('meta', attrs = {'name' : 'citation_author'}):
