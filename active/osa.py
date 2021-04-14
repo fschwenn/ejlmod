@@ -59,6 +59,7 @@ except:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
 
 
+done = ['https://www.osapublishing.org/josab/abstract.cfm?uri=josab-36-7-E112']
 (level0note, level1note) = (False, False)
 recs = []
 divs = tocpage.body.find_all('div', attrs = {'class' : 'osap-accordion'})
@@ -82,8 +83,9 @@ for div in divs:
             for a in p.find_all('a'):
                 rec['tit'] = p.text.strip()
                 rec['artlink'] = 'https://www.osapublishing.org' + a['href']
-            if not rec['artlink'] in ['https://www.osapublishing.org/josab/abstract.cfm?uri=josab-36-7-E112']:
+            if not rec['artlink'] in done:                
                 recs.append(rec)
+                done.append(rec['artlink'])
 
 i = 0
 for rec in recs:
