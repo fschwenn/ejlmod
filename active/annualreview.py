@@ -124,6 +124,14 @@ for div in tocpage.find_all('article', attrs = {'class' : 'teaser'}):
                 afftext = 'Aff%s= ' % (sup.text)
                 sup.replace_with(afftext)
             rec['aff'].append(re.sub(' email.*', '', p.text.strip()))
+    #License
+    for div in artpage.body.find_all('div', attrs = {'class' : 'article-tools'}):
+        for a in div.find_all('a'):
+            if a.has_attr('href'):
+                if re.search('creativecommons.org', a['href']):
+                    rec['license'] = {'url' : a['href']}
+                elif re.search('doi\/pdf', a['href']):
+                    rec['FFT'] = 'https://www.annualreviews.org' + a['href']
     #Reference
     for div in artpage.body.find_all('div', attrs = {'class' : 'lit-cited'}):
         for ul in div.find_all('ul', attrs = {'class' : 'otherReviewsList'}):
