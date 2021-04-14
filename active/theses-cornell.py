@@ -29,19 +29,23 @@ typecode = 'T'
 
 
 rpp = 20
-yearstocover = 1
+yearstocover = 2
 
 hdr = {'User-Agent' : 'Magic Browser'}
 allhdls = []
-for filter in ['Physics', 'Quantum+physics', 'Theoretical+physics', 'physics', 'Cosmology', 'Mathematics', 'Applied+mathematics', 'Astronomy', 'Astrophysics', 'Particle+physics']:
+recs = []
+for filter in ['Physics', 'Quantum+physics', 'Theoretical+physics', 'physics', 'Physics', 'Cosmology',
+               'LHC', 'CMS', 'Higgs', 'Dark+Matter', 'Supersymmetry', 'Large+Hadron+Collider',
+               'String+Theory', 'Compact+Muon+Solenoid', 'Baryogenesis', 'Neutrinos',
+               'Electroweak',
+               'Mathematics', 'Applied+mathematics', 'Astronomy', 'Astrophysics', 'Particle+physics']:
     tocurl = 'https://ecommons.cornell.edu/handle/1813/47/discover?field=subject&filtertype=subject&filter_relational_operator=equals&filter=' + filter + '&sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp)
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
-    recs = []
     divs = tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'})
     for div in divs:
-        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : [filter]}
         for span in div.find_all('span', attrs = {'class' : 'date'}):
             rec['date'] = span.text.strip()
             if int(rec['date'][:4]) >= now.year - yearstocover:
@@ -127,18 +131,17 @@ for filter in ['Physics', 'Quantum+physics', 'Theoretical+physics', 'physics', '
                             else:
                                 rec['hidden'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
                                     
-    jnlfilename = 'THESES-CORNELL-%s_%s' % (stampoftoday, re.sub('\W', '', filter))
+jnlfilename = 'THESES-CORNELL-%s' % (stampoftoday)
 
-
-    #closing of files and printing
-    xmlf = os.path.join(xmldir,jnlfilename+'.xml')
-    xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-    ejlmod2.writeXML(recs,xmlfile,publisher)
-    xmlfile.close()
-    #retrival
-    retfiles_text = open(retfiles_path,"r").read()
-    line = jnlfilename+'.xml'+ "\n"
-    if not line in retfiles_text: 
-        retfiles = open(retfiles_path,"a")
-        retfiles.write(line)
-        retfiles.close()
+#closing of files and printing
+xmlf = os.path.join(xmldir,jnlfilename+'.xml')
+xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+ejlmod2.writeXML(recs,xmlfile,publisher)
+xmlfile.close()
+#retrival
+retfiles_text = open(retfiles_path,"r").read()
+line = jnlfilename+'.xml'+ "\n"
+if not line in retfiles_text: 
+    retfiles = open(retfiles_path,"a")
+    retfiles.write(line)
+    retfiles.close()
