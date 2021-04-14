@@ -499,16 +499,26 @@ def writeXML(recs,dokfile,publisher):
                     xmlstring += marcxml('037', [('a', rn)])
         if rec.has_key('exp'):
             xmlstring += marcxml('693',[('e',rec['exp'])])
-        if rec.has_key('pdf'):
+        if 'pdf' in rec.keys():
             xmlstring += marcxml('8564',[('u',rec['pdf']), ('y','Fulltext')])
-        if rec.has_key('FFT'):
+            if not re.search('^http', rec['pdf']):
+                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['pdf']))])
+        if 'FFT' in rec.keys():
             xmlstring += marcxml('FFT',[('a',rec['FFT']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
-        elif rec.has_key('fft'):
-            xmlstring += marcxml('FFT',[('a',rec['FFT']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
-        elif rec.has_key('hidden'):
+            if not re.search('^http', rec['FFT']) and not re.search('^\/afs\/cern', rec['FFT']):
+                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['FFT']))])
+        elif 'fft' in rec.keys():
+            xmlstring += marcxml('FFT',[('a',rec['fft']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
+            if not re.search('^http', rec['fft']) and not re.search('^\/afs\/cern', rec['fft']):
+                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['fft']))])
+        elif 'hidden' in rec.keys():
             xmlstring += marcxml('FFT',[('a',rec['hidden']), ('d','Fulltext'), ('o', 'HIDDEN')])
-        if rec.has_key('link'):
+            if not re.search('^http', rec['hidden']) and not re.search('^\/afs\/cern', rec['hidden']):
+                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['hidden']))])
+        if 'link' in rec.keys():
             xmlstring += marcxml('8564',[('u', rec['link'])])
+            if not re.search('^http', rec['link']):
+                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['link']))])
         if 'license' in rec.keys() and not 'licence' in rec.keys():
             rec['licence'] = rec['license']
         if rec.has_key('licence'):
@@ -555,6 +565,7 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('autaff'):
             marc = '100'
             for autaff in rec['autaff']:
+                grids = []
                 #check for collaborations
                 if re.search('Collaboration', autaff[0], re.IGNORECASE):
                     newcolls = []
@@ -583,7 +594,10 @@ def writeXML(recs,dokfile,publisher):
                         #GRID hier
                         if re.search(', GRID:', aff):
                             autlist.append(('v',  re.sub(', GRID:.*', '', aff)))
-                            autlist.append(('t',  re.sub('.*, GRID:', 'GRID:', aff)))
+                            grid = re.sub('.*, GRID:', 'GRID:', aff)
+                            if not grid in grids:
+                                autlist.append(('t', grid))
+                                grids.append(grid)
                         else:
                             autlist.append(('v', aff))
                 xmlstring += marcxml(marc, autlist)
@@ -652,10 +666,14 @@ def writeXML(recs,dokfile,publisher):
                         tempaffs = [('v',affdict[affdict.keys()[0]])]
                     #GRID hier
                     ntempaffs = []
+                    grids = []
                     for ta in tempaffs:
                         if re.search(', GRID:', ta[1]):
                             ntempaffs.append(('v', re.sub(', GRID:.*', '', ta[1])))
-                            ntempaffs.append(('t', re.sub('.*, GRID:', 'GRID:', ta[1])))
+                            grid = re.sub('.*, GRID:', 'GRID:', ta[1])
+                            if not grid in grids:
+                                ntempaffs.append(('t', grid))
+                                grids.append(grid)
                         else:
                             ntempaffs.append(ta)
                     longauts.insert(0,aut+ntempaffs)
