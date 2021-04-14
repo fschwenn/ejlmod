@@ -72,8 +72,12 @@ def comparewebwithbackup(tocheck):
         if oldisns:
             print ' done:', oldisns, 'todo:', newisns
             #new ones found and sure there is no gap
-            if newisns:
-                todo += newisns
+            if newisns and len(newisns) >= 2:
+                minisn = min([int(isn[0]) for isn in newisns])
+                for isn in newisns:
+                    if int(isn[0]) != minisn:
+                        todo.append(isn)
+                        print ' added ', isn
             #nothing new found
             else:
                 todo.append((0, jnl))                
