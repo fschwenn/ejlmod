@@ -27,15 +27,15 @@ publisher = 'Shodhganga'
 pages = 2
 years = 3
 recsperxml = 50
-#server = 'shodhganga.inflibnet.ac.in'
-server = 'sg.inflibnet.ac.in'
+server = 'shodhganga.inflibnet.ac.in'
+#server = 'sg.inflibnet.ac.in'
 
 kw = sys.argv[1]
 start = int(sys.argv[2])
 ende = int(sys.argv[3])
 
 
-
+fourofour = 0
 #check list of departments for physics and math
 comlistlink = 'https://%s/community-list' % (server)
 comlistfile = '/tmp/shodganga.community.list-%4i-%02i' % (now.year, now.month)
@@ -120,11 +120,19 @@ for (hdl, uni, dep) in departments[kw]:
             tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
             time.sleep(5)
         except:
-            #print "retry %s in 180 seconds" % (tocurl)
-            #time.sleep(180)
-            #tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
-            print ' +++ 404 +++'
-            break
+            if not fourofour:
+                try:
+                    print "retry %s in 300 seconds" % (tocurl)
+                    time.sleep(300)
+                    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+                except:
+                    print ' +++ 404 +++'
+                    fourofour += 1
+                    break
+            else:
+                print ' +++ 404 +++'
+                fourofour += 1
+                break
         #pick individual links            
         for tr in tocpage.body.find_all('tr'):
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : [], 'keyw' : [], 'note' : []}
@@ -214,8 +222,11 @@ for (hdl, uni, dep) in departments[kw]:
                 nall = re.sub('.* \d+ of (\d+).*', r'\1', divt)
                 if nsofar == nall: gotall = True
     print '        picked %s of %s (total %s)' % (pickedfromuni, nall, len(recs))
-if recs: 
-    jnlfilename = 'THESES-SHODHGANGA-%s_%s_%02i-%i_%i-%i_%i_fin' % (stampoftoday, kw, k, start, ende, i, len(departments[kw]))
+if recs:
+    if fourofour:
+        jnlfilename = 'THESES-SHODHGANGA-%s_%s_%02i-%i_%i-%i_%i_fin_%isites_not_reached' % (stampoftoday, kw, k, start, ende, i, len(departments[kw]), fourofour)
+    else:
+        jnlfilename = 'THESES-SHODHGANGA-%s_%s_%02i-%i_%i-%i_%i_fin' % (stampoftoday, kw, k, start, ende, i, len(departments[kw]))
     #closing of files and printing
     xmlf    = os.path.join(xmldir, jnlfilename+'.xml')
     xmlfile  = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
