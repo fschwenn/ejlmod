@@ -21,8 +21,8 @@ import urllib3
 import ssl
 
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -30,6 +30,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 wordsperquery = 10
 chunksize = 50
 years = [now.year-1, now.year]
+#years = [2012, 2011, 2010, 2009]
 #whether to check ALL sources or only those where we do not have a dedicated harvester
 checkall = False 
 
@@ -481,7 +482,7 @@ for rec in recs:
                             rec['language'] = 'Croatian'
                         elif tdt == 'fi':
                             rec['language'] = 'Finnish'
-                        elif tdt == 'it':
+                        elif tdt in ['it', 'ita']:
                             rec['language'] = 'Italian'
                         elif tdt == 'gre':
                             rec['language'] = 'Greek'
@@ -489,6 +490,10 @@ for rec in recs:
                             rec['language'] = 'Spanish'
                         elif tdt == 'por':
                             rec['language'] = 'Portuguese'
+                        elif tdt in ['de', 'ger']:
+                            rec['language'] = 'German'
+                        elif tdt == 'dan':
+                            rec['language'] = 'Danish'
                         else:
                             print '!unknown language', tdt
                             rec['language'] = tdt
