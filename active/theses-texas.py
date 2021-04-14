@@ -85,6 +85,10 @@ for department in ['Physics', 'Mathematics']:
                 #FFT
                 elif meta['name'] == 'citation_pdf_url':
                     rec['pdf_url'] = meta['content']
+                #DOI
+                elif meta['name'] == 'DC.identifier':
+                    if re.search('10.26153', meta['content']):
+                        rec['doi'] = re.sub('.*(10.26153.*)', r'\1', meta['content'])
         rec['autaff'][-1].append(publisher)
         #license
         for a in artpage.find_all('a'):
