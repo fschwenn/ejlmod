@@ -29,7 +29,7 @@ typecode = 'T'
 
 jnlfilename = 'THESES-TDX-%s' % (stampoftoday)
 
-sections = ['396268', '65']
+sections = ['396268', '65', '668603']
 
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
