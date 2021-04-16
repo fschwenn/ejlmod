@@ -22,7 +22,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-numopages = 3
+numopages = 5
 articlesperpage = 50
 
 hdr = {'User-Agent' : 'Magic Browser'}
