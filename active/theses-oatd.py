@@ -22,8 +22,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 #from selenium.webdriver.firefox.options import Options
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl' + '/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" + '_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -78,16 +78,16 @@ dedicatedharvester = ['alberta', 'arizona-diss', 'barcelona', 'baylor', 'bielefe
                       'goettingen', 'harvard', 'heid-diss', 'houston', 'humboldt-diss', 'ksu',
                       'ku', 'liverpool', 'lmu-germany', 'lund', 'manchester', 'mcgill', 'melbourne',
                       'mississippi', 'montstate', 'narcis', 'neu', 'ohiolink', 'princeton', 
-                      'qucosa-diss', 'regensburg-diss', 'rutgers', 'giessen-diss', 'tamu', 'toronto-diss',
+                      'qucosa-diss', 'regensburg-diss', 'rochester', 'rutgers', 'giessen-diss', 'tamu', 'toronto-diss',
                       'ttu', 'ubc', 'uky-diss', 'umich', 'valencia', 'vcu', 'vt', 'washington', 'wayne',
                       'whiterose', 'wm-mary', 'wurz-diss']
 dedicatedsuboptimalharvester = ['eth', 'fsu', 'cornell', 'karlsruhe-diss', 'stanford', 'texas']
 nodedicatedharvester = ['aberdeen', 'arkansas', 'bremen', 'brazil', 'bu', 'colorado', 'colostate',
-                        'darmstadt', 'duquesne', 'ethos', 'florida', 'gatech', 'georgia-state', 
+                        'darmstadt', 'duquesne', 'ethos', 'fiu', 'florida', 'gatech', 'georgia-state', 
                         'groningen', 'guelph', 'hokkaido', 'iowa', 'lehigh', 'liberty', 'lsu-diss', 'macquarie-phd',
-                        'montana', 'msstate', 'odu', 'oviedo', 'rice', 'rit', 'rochester', 'siu-diss',
+                        'maynooth', 'montana', 'msstate', 'odu', 'oviedo', 'rice', 'rit', 'siu-diss',
                         'south-carolina', 'star-france', 'stellenbosch', 'syracuse-diss', 'temple', 'uconn',
-                        'udel', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'virginia', 'vrije',
+                        'udel', 'uiuc', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'virginia', 'vrije',
                         'wustl', 'wvu', 'york']
 dontcheckforpdf = ['ethos']
 
@@ -98,8 +98,8 @@ for j in range((len(singlewords)-1)/wordsperquery + 1):
     searches.append('"' + '" OR "'.join(words) + '"')
 for words in multwords:
     searches.append(' AND '.join(words))
-startyear = str(now.year-1)
-stopyear = str(now.year+1)
+startyear = str(now.year-1 - 4)
+stopyear = str(now.year+1 - 1)
 startsearch = int(sys.argv[1])
 stopsearch = int(sys.argv[2])
 rpp = 30
@@ -155,7 +155,7 @@ for search in searches[startsearch:stopsearch]:
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'citeFormatName')))
         tocpages = [BeautifulSoup(driver.page_source, features="lxml")]
     except:
-        print '\\\| wait 2 minutes |///'
+        print '   \ wait 2 minutes /'
         time.sleep(120)
         driver.get(tocurl)
         #WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'citeFormatName')))
@@ -175,7 +175,7 @@ for search in searches[startsearch:stopsearch]:
                 WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'citeFormatName')))
                 tocpages.append(BeautifulSoup(driver.page_source, features="lxml"))
             except:
-                print '\\\| wait 10s |///'
+                print '   \ wait 10s /'
                 time.sleep(10)
                 driver.get(tocurl)
                 #WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'citeFormatName')))
@@ -188,6 +188,7 @@ for search in searches[startsearch:stopsearch]:
             if type(desce) == type(comment) and re.search('Repository', desce.string):
                 rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : [search]}
                 repo = re.sub('Repository: (.*?) \|.*', r'\1', desce.string).strip()
+                rec['repo'] = repo
                 tid = re.sub('.*\| ID: (.*?) \|.*', r'\1', desce.string)
                 tid = re.sub(':', '\:', tid)
                 tid = re.sub('/', '\%2F', tid)
@@ -225,7 +226,7 @@ recc = re.compile('.*(http.*?creativecommons.org.*?)[ ,\.;$].*')
 for rec in prerecs:
     keepit = True
     i += 1
-    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
+    print '---{ %i/%i (%i) }---{ %s : %s }------' % (i, len(prerecs), len(recs), rec['repo'], rec['artlink'])
     try:
         time.sleep(10)
         driver.get(rec['artlink'])
@@ -273,15 +274,18 @@ for rec in prerecs:
                         hdl = repothdl.sub(r'\1', mc)
                         if not re.search('123456789\/', hdl):
                             #verify
-                            driver.get('http://hdl.handle.net/' + hdl)
-                            hdlpage = BeautifulSoup(driver.page_source, features="lxml")
-                            for title in hdlpage.find_all('title'):
-                                if title.text.strip() == 'Not Found':
-                                    rec['note'].append('%s seems not to be a proper HDL' % (hdl))
-                                    rec['link'] = mc
-                                else:
-                                    rec['hdl'] = hdl
-                                    rec['note'].append('%s seems to be a proper HDL' % (hdl))
+                            try:
+                                driver.get('http://hdl.handle.net/' + hdl)
+                                hdlpage = BeautifulSoup(driver.page_source, features="lxml")
+                                for title in hdlpage.find_all('title'):
+                                    if title.text.strip() == 'Not Found':
+                                        rec['note'].append('%s seems not to be a proper HDL' % (hdl))
+                                        rec['link'] = mc
+                                    else:
+                                        rec['hdl'] = hdl
+                                        rec['note'].append('%s seems to be a proper HDL' % (hdl))
+                            except:
+                                print 'could not check handle %s' % (hdl)
                     else:
                         rec['link'] = mc
             #abstract
@@ -315,6 +319,10 @@ for rec in prerecs:
                             rec['language'] = 'Portuguese'
                         elif lang == 'de':
                             rec['language'] = 'German'
+                        elif lang == 'pl':
+                            rec['language'] = 'Polish'
+                        elif re.search('ingl.s', lang):
+                            pass
                         else:
                             print '!unknown language', lang
                             rec['language'] = lang
