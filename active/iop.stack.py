@@ -80,9 +80,9 @@ jnl['2040-8986'] = 'J.Opt.' #Journal of Optics#yepp
 jnl['1749-4699'] = 'Comput.Sci.Dis.' #Computational Science & Discovery
 jnl['1555-6611'] = 'Laser Phys.' #Laser Physics#yepp
 jnl['1612-202X'] = 'Laser Phys.Lett.' #Laser Physics Letters #yepp
-##
 jnl['2515-5172'] = 'Res.Notes AAS'
 jnl['1347-4065'] = 'Jap.J.Appl.Phys.'
+##
 
 #uninteresting journals in feed
 jnlskip = {'2058-8585' : 'Flexible and Printed Electronics'}
