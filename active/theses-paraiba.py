@@ -48,7 +48,7 @@ boringdeps = ['Arquitetura e Urbanismo', 'Administrao', 'Antropologia', 'Artes C
               'Nutrio', 'Qumica', 'Relaes Internacionais']
               
 
-jnlfilename = 'THESES-PARAIBA-%sD' % (stampoftoday)
+jnlfilename = 'THESES-PARAIBA-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
