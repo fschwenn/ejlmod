@@ -15,6 +15,8 @@ import codecs
 import datetime
 import time
 import json
+import ssl
+
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -30,10 +32,15 @@ typecode = 'T'
 jnlfilename = 'THESES-CHILECATOLICA-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 tocurl = 'https://repositorio.uc.cl/handle/11534/22400'
 print tocurl
 req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
+tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
     rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'autaff' : [], 'supervisor' : []}
