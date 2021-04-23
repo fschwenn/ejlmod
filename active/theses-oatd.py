@@ -73,21 +73,24 @@ multwords = [['AdS', 'CFT'], ['quantum', 'field', 'theory'],
              ['Quantum', 'Cosmology'], ['quantum', 'electrodynamics'],
              ['quantum', 'gravity'], ['string', 'theory'],
              ['wakefield', 'acceleration']]
-dedicatedharvester = ['alberta', 'arizona-diss', 'barcelona', 'baylor', 'bielefeld', 'brown', 'caltech', 'cambridge',
-                      'columbia-diss', 'dortmund-diss', 'durham', 'freiburg-diss', 'glasgow',
+dedicatedharvester = ['alberta', 'arizona-diss', 'asu', 'barcelona', 'baylor', 'bielefeld', 'brown', 'caltech', 'cambridge',
+                      'colorado', 'columbia-diss', 'dortmund-diss', 'durham', 'freiburg-diss', 'glasgow',
                       'goettingen', 'harvard', 'heid-diss', 'houston', 'humboldt-diss', 'ksu',
                       'ku', 'liverpool', 'lmu-germany', 'lund', 'manchester', 'mcgill', 'melbourne',
-                      'mississippi', 'montstate', 'narcis', 'neu', 'ohiolink', 'princeton', 
+                      'mississippi', 'montstate', 'narcis', 'neu', 'ohiolink', 'oregon', 'princeton', 
                       'qucosa-diss', 'regensburg-diss', 'rochester', 'rutgers', 'giessen-diss', 'tamu', 'toronto-diss',
                       'ttu', 'ubc', 'uky-diss', 'umich', 'valencia', 'vcu', 'vt', 'washington', 'wayne',
                       'whiterose', 'wm-mary', 'wurz-diss']
+dedicatedaffiliations = ['Imperial College London', 'University of Edinburgh',
+                         'University College London (University of London)',
+                         "King's College London (University of London)", 'University of Manchester']
 dedicatedsuboptimalharvester = ['eth', 'fsu', 'cornell', 'karlsruhe-diss', 'stanford', 'texas']
-nodedicatedharvester = ['aberdeen', 'arkansas', 'bremen', 'brazil', 'bu', 'colorado', 'colostate',
-                        'darmstadt', 'duquesne', 'ethos', 'fiu', 'florida', 'gatech', 'georgia-state', 
-                        'groningen', 'guelph', 'hokkaido', 'iowa', 'lehigh', 'liberty', 'lsu-diss', 'macquarie-phd',
-                        'maynooth', 'montana', 'msstate', 'odu', 'oviedo', 'rice', 'rit', 'siu-diss',
-                        'south-carolina', 'star-france', 'stellenbosch', 'syracuse-diss', 'temple', 'uconn',
-                        'udel', 'uiuc', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'virginia', 'vrije',
+nodedicatedharvester = ['aberdeen', 'ankara', 'arkansas', 'bremen', 'brazil', 'bu', 'cardiff',  'colo-mines','colostate',
+                        'darmstadt', 'delaware', 'duquesne', 'ethos', 'fiu', 'florida', 'gatech', 'georgia-state', 
+                        'groningen', 'guelph', 'hokkaido', 'iowa', 'jairo', 'lehigh', 'liberty', 'lsu-diss', 'macquarie-phd',
+                        'maynooth', 'montana', 'msstate', 'ncsu', 'odu', 'oviedo', 'regina', 'rice', 'rit', 'siu-diss',
+                        'south-carolina', 'star-france', 'stellenbosch', 'st-andrews', 'syracuse-diss', 'temple', 'uconn',
+                        'udel', 'uiuc', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'vandy', 'virginia', 'vrije',
                         'wustl', 'wvu', 'york']
 dontcheckforpdf = ['ethos']
 
@@ -170,7 +173,7 @@ for search in searches[startsearch:stopsearch]:
             tocurl = 'https://oatd.org/oatd/search?q=(' + search + ') AND ' + date + '&level.facet=doctoral&start=' + str(page*rpp+1)
             print ' =={ %i/%i | %i/%i }==={ %s }===' % (i, stopsearch-startsearch, page+1, numofpages, tocurl)
             try:
-                time.sleep(1)
+                time.sleep(5)
                 driver.get(tocurl)
                 WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'citeFormatName')))
                 tocpages.append(BeautifulSoup(driver.page_source, features="lxml"))
@@ -254,6 +257,9 @@ for rec in prerecs:
             #institution
             elif meta['name'] == 'citation_dissertation_institution':
                 aff = meta['content']
+                if aff in dedicatedaffiliations:
+                    keepit = False
+                    print '   skip "%s"' % (aff)
             #license
             elif meta['name'] == 'DC.rights':
                 if re.search('creativecommons.org', meta['content']):
@@ -286,6 +292,7 @@ for rec in prerecs:
                                         rec['note'].append('%s seems to be a proper HDL' % (hdl))
                             except:
                                 print 'could not check handle %s' % (hdl)
+                                rec['link'] = mc
                     else:
                         rec['link'] = mc
             #abstract
@@ -338,14 +345,14 @@ for rec in prerecs:
         #try to get pdf
         serverlink = False
         if 'link' in rec.keys() and re.search('pdf$', rec['link']):
-                rec['FFT'] = rec['link']
+            rec['FFT'] = rec['link']
         elif 'hdl' in rec.keys():
             serverlink = 'http://hdl.handle.net/' + rec['hdl']
         elif 'doi' in rec.keys():
             serverlink = 'http://dx.doi.org/' + rec['doi']
         elif 'link' in rec.keys():
             serverlink = rec['link']
-        if serverlink and not repo in dontcheckforpdf:
+        if serverlink and not rec['repo'] in dontcheckforpdf:
             rec['note'].append('REPOLINK:'+serverlink)
             print '    ... check for PDF at %s' % (serverlink)
             try:
@@ -356,6 +363,22 @@ for rec in prerecs:
                         if meta['content']:
                             rec['FFT'] = meta['content']
                             print '          ', meta['content']
+                if not 'doi' in rec.keys():
+                    print '    ... check for DOI at %s' % (serverlink)
+                    for meta in serverpage.find_all('meta', attrs = {'name' : ['citation_doi', 'bepress_citation_doi', 'eprints.doi', 'eprints.doi_name', 'DC.Identifier.doi']}):
+                        rec['doi'] = meta['content']
+                        rec['note'].append('DOI from reposerver')
+                        print '          ', meta['content']
+                    if not 'doi' in rec.keys():
+                        for meta in serverpage.find_all('meta', attrs = {'name' : 'DC.identifier'}):
+                            if re.search('doi.org', meta['content']):
+                                rec['doi'] = re.sub('.*doi.org\/', '', meta['content'])
+                                print '          ', rec['doi']
+                                rec['note'].append('DOI from reposerver')
+                            elif re.search('handle.net', meta['content']) and not 'hdl' in rec.keys():
+                                rec['hdl'] = re.sub('.*handle.net\/', '', meta['content'])
+                                print '          ', rec['hdl']
+                                rec['note'].append('HDL from reposerver')
             except:
                 print '           failed'
         #pseudoDOI?
