@@ -95,6 +95,7 @@ def harvest(todo):
         if isn > 0:
             print '  %s %s %s' % (pythonkommando, kommando, isn)
             os.system('%s %s %s' % (pythonkommando, kommando, isn))
+            time.sleep(60)
         inf = open(jlist, 'r')
         lines = inf.readlines()
         inf.close()
