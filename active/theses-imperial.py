@@ -16,8 +16,8 @@ import datetime
 import time
 import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
@@ -28,27 +28,31 @@ publisher = 'Imperial Coll., London'
 typecode = 'T'
 
 jnlfilename = 'THESES-IMPERIAL-%s' % (stampoftoday)
+startyear = str(now.year-1)
+pages = 1
+rpp = 20
 
 hdr = {'User-Agent' : 'Magic Browser'}
-tocurl = 'https://spiral.imperial.ac.uk/handle/10044/1/1240/simple-search?location=10044%2F1%2F1240&query=&filter_field_1=dateIssued&filter_type_1=equals&filter_value_1=%5B' + str(now.year-1) + '+TO+2040%5D&rpp=20&sort_by=dc.date.issued_dt&order=DESC&etal=5&submit_search=Update'
-#tocurl = 'https://spiral.imperial.ac.uk/handle/10044/1/1240/simple-search?location=10044%2F1%2F1240&query=&filter_field_1=dateIssued&filter_type_1=equals&filter_value_1=%5B' + str(now.year-10) + '+TO+2040%5D&rpp=500&sort_by=dc.date.issued_dt&order=DESC&etal=5&submit_search=Update'
 
 
-print tocurl
-req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
 recs = []
-for tr in tocpage.body.find_all('tr'):
-    rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : []}
-    for a in tr.find_all('a'):
-        rec['artlink'] = 'https://spiral.imperial.ac.uk' + a['href'] #+ '?show=full'
-        rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-        recs.append(rec)
+for page in range(pages):
+    tocurl = 'https://spiral.imperial.ac.uk/handle/10044/1/1240/simple-search?location=10044%2F1%2F1240&query=&filter_field_1=dateIssued&filter_type_1=equals&filter_value_1=%5B' + startyear + '+TO+2040%5D&rpp=' + str(rpp) + '&sort_by=dc.date.issued_dt&order=DESC&etal=5&submit_search=Update&start=' + str(rpp*page)
+    print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
+    req = urllib2.Request(tocurl, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    for tr in tocpage.body.find_all('tr'):
+        rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : []}
+        for a in tr.find_all('a'):
+            rec['artlink'] = 'https://spiral.imperial.ac.uk' + a['href'] #+ '?show=full'
+            rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+            recs.append(rec)
+    time.sleep(5)
 
 i = 0
 for rec in recs:
     i += 1
-    print '---{ %i/%i}---{ %s }------' % (i, len(recs), rec['artlink'])
+    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
@@ -100,7 +104,7 @@ for rec in recs:
                 for td2 in tr.find_all('td', attrs = {'class' : 'metadataFieldValue'}):
                     for supervisor in re.split(' *BRBRBR *', td2.text.strip()):
                         rec['supervisor'].append([ supervisor,  'Imperial Coll., London'])
-
+    print '    ', rec.keys()
 
 
 
