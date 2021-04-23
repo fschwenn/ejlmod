@@ -175,18 +175,18 @@ jc['00029'] = ['selmat', 'Selecta Math.', '', '', 'P'] #yepp
 jc['00222'] = ['invmat', 'Invent.Math.', '', '', 'P']
 jc['00526'] = ['cvpde', 'Calc.Var.Part.Differ.Equ', '', '', 'P']#yepp
 jc['10440'] = ['acapma', 'Acta Appl.Math.', '', '', 'P']
-jc['10699'] = ['fosi', 'Found.Sci.', '', '', 'P']
+jc['10699'] = ['fosi', 'Found.Sci.', '', '', 'P']#yepp
 jc['10946'] = ['jrlr', 'J.Russ.Laser Res.', '', '', 'P']
 jc['10947'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P']
 jc['10955'] = ['jstatphys', 'J.Statist.Phys.', '', '', 'P'] #yepp
 jc['11128'] = ['qif', 'Quant.Inf.Proc.', '', '', 'P']#yepp
-jc['11253'] = ['umj', 'Ukr.Math.J.', '', '', 'P']
+jc['11253'] = ['umj', 'Ukr.Math.J.', '', '', 'P']#yepp
 jc['11139'] = ['ramanajuan', 'Ramanujan J.', '', '', 'P']
 jc['11229'] = ['synthese', 'Synthese', '', '', 'P']#yepp
 jc['11449'] = ['opsp', 'Opt.Spectrosc.', '', '', 'P']#yepp
 jc['12045'] = ['resonance', 'Reson.', '', '', 'P']
 jc['12220'] = ['jganal', 'J.Geom.Anal.', '', '', 'P']#yepp
-jc['12607'] = ['pauaa', 'p Adic Ultra.Anal.Appl.', '', '', 'P']
+jc['12607'] = ['pauaa', 'p Adic Ultra.Anal.Appl.', '', '', 'P']#yepp
 jc['13194'] = ['ejphilsci', 'Eur.J.Phil.Sci.', '', '', 'P'] #yepp
 jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P'] #now at New publisher: Please contact Islamic Azad University
 jc['40507'] = ['epjgt', 'EPJ Quant.Technol.', '', '', 'P']#yepp
@@ -197,7 +197,6 @@ jc['00229'] = ['manusmat', 'Manuscr.Math.', '', '', 'P']#yepp
 jc['41614'] = ['rmplasmap', 'Rev.Mod.Plasma Phys.', '', '', 'P']
 jc['13370'] = ['afrmat', 'Afr.Math.', '', '', 'P']#ereugen in jnl
 jc['10512'] = ['atenerg', 'At.Energ.', '', '', 'P']#yepp
-#
 jc['43673'] = ['aappsbul', 'AAPPS Bull.', '', '', '']
 
 
