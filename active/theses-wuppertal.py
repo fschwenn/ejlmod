@@ -25,8 +25,10 @@ publisher = 'Wuppertal U.'
 hdr = {'User-Agent' : 'Magic Browser'}
 
 docthresh = 1
+years = 2
 
 recs = []
+prerecs = []
 jnlfilename = 'THESES-WUPPERTAL-%s' % (stampoftoday)
 tocfilname = '/tmp/%s.toc' % (jnlfilename)
 
@@ -53,12 +55,13 @@ for ol in tocpage.find_all('ol', attrs = {'class' : 'results'}):
             elif div.text.strip() == 'Habilitation':
                 rec['MARC'][0][1].append(('b', 'Habilitation'))
         if rec['docnr'] > docthresh:
-            recs.append(rec)
+            prerecs.append(rec)
 
 i = 0
-for rec in recs:
+for rec in prerecs:
     i += 1
-    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
+    keepit = False
+    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
         time.sleep(10)
@@ -112,7 +115,11 @@ for rec in recs:
             if re.search('Datum der Promotion', div2t):
                 datum = True
     rec['autaff'][-1].append(publisher)
-    print '  ', rec.keys()
+    if 'year' in rec.keys() and int(rec['year']) < now.year - years:
+        print '  skip', rec['year']
+    else:
+        print '  ', rec.keys()
+        recs.append(rec)
                 
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
