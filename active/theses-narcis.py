@@ -54,7 +54,7 @@ for ejldir in ejldirs:
 hdr = {'User-Agent' : 'Magic Browser'}
 
 recs = []
-for year in [str(now.year-1), str(now.year)]:
+for year in [str(now.year), str(now.year-1)]:
     page = 0
     complete = False
     while not complete:
@@ -95,7 +95,7 @@ for year in [str(now.year-1), str(now.year)]:
         if len(recs) >= ntarget or 10*page >= ntarget:
             complete = True
 
-        
+
 time.sleep(3)
 
 i = 0
@@ -106,7 +106,7 @@ for rec in recs:
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
     #req = urllib2.Request(rec['artlink'], headers=hdr)    
     #artpage = BeautifulSoup(urllib2.urlopen(req))
-    artfilename = '/tmp/%s_%08i' % (jnlfilename, i)
+    artfilename = '/tmp/THESES-NARCIS_%s' % (re.sub('\W', '', rec['artlink']))
     if not os.path.isfile(artfilename):
         os.system('wget -T 300 -O %s "%s"' % (artfilename, rec['artlink']))
         time.sleep(5)
