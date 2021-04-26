@@ -28,6 +28,7 @@ hdr = {'User-Agent' : 'Magic Browser'}
 
 rpp = 50
 pages = 4
+years = 2
 boringdisciplines = ['Department+of+Geography', 'Department+of+Educational+Methodology%2C+Policy%2C+and+Leadership',
                      'Department+of+Psychology', 'School+of+Music+and+Dance', 'Department+of+Geological+Sciences',
                      'Department+of+Biology', 'Department+of+Linguistics', 'Department+of+Anthropology',
@@ -58,7 +59,7 @@ for page in range(pages):
         for span in div.find_all('span', attrs = {'class' : 'date'}):
             if re.search('[12]\d\d\d', span.text):
                 rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', span.text.strip())
-                if int(rec['year']) < now.year - 20:
+                if int(rec['year']) < now.year - years:
                     keepit = False
                     print '  skip',  rec['year']
         for span in div.find_all('span', attrs = {'class' : 'Z3988'}):
