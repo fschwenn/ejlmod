@@ -114,7 +114,7 @@ for rec in recs:
         for sv in tabelle['dc.contributor.advisor']:
             rec['supervisor'].append([sv])
     #references
-    if 'dc.identifier.bibliographicCitation':
+    if 'dc.identifier.bibliographicCitation' in tabelle.keys():
         if len(tabelle['dc.identifier.bibliographicCitation']) > 10:
             for ref in tabelle['dc.identifier.bibliographicCitation']:
                 rec['refs'].append([('x', ref)])
