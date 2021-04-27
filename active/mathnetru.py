@@ -143,7 +143,8 @@ for table in tocpage.body.find_all('table', attrs = {'cellpadding' : '5'}):
             artlinks.append(b.text)
         for a in td.find_all('a', attrs = {'class' : 'SLink'}):
             if a.has_attr('href') and not re.search('^ *Editorial', a.text) and not re.search('php\/getFT.phtml', a['href']):
-                artlinks.append('http://www.mathnet.ru' + a['href'])
+                if not a.has_attr('title'):
+                    artlinks.append('http://www.mathnet.ru' + a['href'])
 
 
 print artlinks 
