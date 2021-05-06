@@ -62,7 +62,7 @@ for rec in recs:
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
-        time.sleep(3)
+        time.sleep(13)
     except:
         print "retry %s in 180 seconds" % (rec['artlink'])
         time.sleep(180)
