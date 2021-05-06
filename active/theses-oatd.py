@@ -22,8 +22,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 #from selenium.webdriver.firefox.options import Options
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl' + '/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" + '_special'
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -84,11 +84,11 @@ dedicatedharvester = ['alberta', 'arizona-diss', 'asu', 'barcelona', 'baylor', '
 dedicatedaffiliations = ['Imperial College London', 'University of Edinburgh',
                          'University College London (University of London)',
                          "King's College London (University of London)", 'University of Manchester']
-dedicatedsuboptimalharvester = ['eth', 'fsu', 'cornell', 'karlsruhe-diss', 'stanford', 'texas']
-nodedicatedharvester = ['aberdeen', 'ankara', 'arkansas', 'bremen', 'brazil', 'bu', 'cardiff',  'colo-mines','colostate',
+dedicatedsuboptimalharvester = ['eth', 'fsu', 'cornell', 'karlsruhe-diss', 'stanford', 'texas', 'thueringen']
+nodedicatedharvester = ['aberdeen', 'ankara', 'arkansas', 'bremen', 'brazil', 'bu', 'cardiff',  'clemson', 'colo-mines','colostate',
                         'darmstadt', 'delaware', 'duquesne', 'ethos', 'fiu', 'florida', 'gatech', 'georgia-state', 
-                        'groningen', 'guelph', 'hokkaido', 'iowa', 'jairo', 'lehigh', 'liberty', 'lsu-diss', 'macquarie-phd',
-                        'maynooth', 'montana', 'msstate', 'ncsu', 'odu', 'oviedo', 'regina', 'rice', 'rit', 'siu-diss',
+                        'groningen', 'guelph', 'hokkaido', 'iowa', 'jairo', 'jamescook', 'lehigh', 'liberty', 'lsu-diss', 'macquarie-phd',
+                        'maynooth', 'montana', 'msstate', 'mtu', 'ncsu', 'odu', 'oviedo', 'potsdam-diss', 'regina', 'rice', 'rit', 'siu-diss',
                         'south-carolina', 'star-france', 'stellenbosch', 'st-andrews', 'syracuse-diss', 'temple', 'uconn',
                         'udel', 'uiuc', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'vandy', 'virginia', 'vrije',
                         'wustl', 'wvu', 'york']
@@ -98,11 +98,14 @@ wordsperquery = 10
 searches = []
 for j in range((len(singlewords)-1)/wordsperquery + 1):
     words = singlewords[j*wordsperquery:(j+1)*wordsperquery]
-    searches.append('"' + '" OR "'.join(words) + '"')
+    if len(words) > 1:
+        searches.append('("' + '" OR "'.join(words) + '")')
+    else:
+        searches.append('"' + words[0]+ '"')
 for words in multwords:
-    searches.append(' AND '.join(words))
-startyear = str(now.year-1 - 4)
-stopyear = str(now.year+1 - 1)
+    searches.append('(' + ' AND '.join(words) + ')')
+startyear = str(now.year-1)
+stopyear = str(now.year+1)
 startsearch = int(sys.argv[1])
 stopsearch = int(sys.argv[2])
 rpp = 30
@@ -131,7 +134,8 @@ for ejldir in ejldirs:
                         nodoi = renodoi.sub(r'\1', line.strip())
                         if not nodoi in bereitsin:
                             bereitsin.append(nodoi)
-            print '  %6i %s' % (len(bereitsin), datei)
+            #print '  %6i %s' % (len(bereitsin), datei)
+print '   %i theses already in backup or pipeline' % (len(bereitsin))
 
 i = 0
 recs = []
@@ -151,7 +155,7 @@ driver.set_page_load_timeout(30)
 for search in searches[startsearch:stopsearch]:
     i += 1
     page = 0
-    tocurl = 'https://oatd.org/oatd/search?q=(' + search + ') AND ' + date + '&level.facet=doctoral&start=' + str(page*rpp+1)
+    tocurl = 'https://oatd.org/oatd/search?q=' + search + ' AND ' + date + '&level.facet=doctoral&sort=author&start=' + str(page*rpp+1)
     print '==={ %i/%i }==={ %s }==={ %s }===' % (i, stopsearch-startsearch, search, tocurl)
     try:
         driver.get(tocurl)
@@ -165,7 +169,7 @@ for search in searches[startsearch:stopsearch]:
         tocpages = [BeautifulSoup(driver.page_source, features="lxml")]
     numofpages = 1
     for link in tocpages[0].find_all('link', attrs = {'rel' : 'last'}):
-        time.sleep(15)
+        time.sleep(25)
         numoftheses = int(re.sub('.*=', '', link['href']))
         numofpages = (numoftheses - 1)/rpp + 1
         for j in range(numofpages-1):
@@ -173,7 +177,7 @@ for search in searches[startsearch:stopsearch]:
             tocurl = 'https://oatd.org/oatd/search?q=(' + search + ') AND ' + date + '&level.facet=doctoral&start=' + str(page*rpp+1)
             print ' =={ %i/%i | %i/%i }==={ %s }===' % (i, stopsearch-startsearch, page+1, numofpages, tocurl)
             try:
-                time.sleep(5)
+                time.sleep(10)
                 driver.get(tocurl)
                 WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'citeFormatName')))
                 tocpages.append(BeautifulSoup(driver.page_source, features="lxml"))
