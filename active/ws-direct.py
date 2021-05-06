@@ -149,6 +149,8 @@ for i in range(len(recs)):
             for div2 in div.find_all('div', attrs = {'class' : 'bottom-info'}):
                 div2.replace_with('')
                 for a in div.find_all('a'):
+                    if a.has_attr('href') and re.search('http', a['href']):
+                        continue
                     at = a.text.strip()
                 if re.search(r'(?i)COLLABORATION', at):
                     at = re.sub(r'(?i)FOR THE ', '', at)
