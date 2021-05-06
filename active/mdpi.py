@@ -61,6 +61,9 @@ elif jnl == 'axioms':
     numberofpages = 6
 elif jnl == 'applsci':
     numberofpages = 100
+elif jnl == 'information':
+    numberofpages = 7
+    
 chunksize = 50
 
 rpp = 10
