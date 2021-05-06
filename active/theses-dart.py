@@ -502,8 +502,11 @@ for rec in recs:
                     if recc.search(tdt):
                         rec['license'] = {'url' : recc.sub(r'\1', tdt)}
     #author's affiliation
-    if 'university' in rec.keys():
-        rec['autaff'][0].append(rec['university'])
+    if 'university' in rec.keys():        
+        if 'autaff' in rec.keys():
+            rec['autaff'][0].append(rec['university'])
+        else:
+            rec['autaff'] = [[ 'Mustermann, Max', rec['university'] ]]
     #discard 'additional' language
     if english and 'language' in rec.keys():
         del rec['language']
