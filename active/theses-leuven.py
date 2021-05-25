@@ -27,7 +27,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Leuven U.'
 pages = 7 
-jnlfilename = 'THESES-LEUVEN-%sY' % (stampoftoday)
+jnlfilename = 'THESES-LEUVEN-%s' % (stampoftoday)
 
 recs = []
 
