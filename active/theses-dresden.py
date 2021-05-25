@@ -55,7 +55,7 @@ for thesestype in ['doctoral_thesis', 'habilitation_thesis']:
     for div in basepage.find_all('div', attrs = {'class' : 'search-results'}):
         for span in div.find_all('span'):
             spant = span.text.strip()
-            print spant
+            #print spant
             expnr = int(re.sub('\D', '', spant))
             pages = expnr / 20 + 1
 
@@ -70,7 +70,7 @@ for thesestype in ['doctoral_thesis', 'habilitation_thesis']:
                     rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : [], 'note' : []}
                     rec['link'] = 'https://tud.qucosa.de' + a['href']
                     prerecs.append(rec)
-                    print '  ', a.text.strip()
+                    #print '  ', a.text.strip()
         time.sleep(1)
 
 i = 0
