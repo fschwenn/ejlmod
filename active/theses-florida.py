@@ -22,7 +22,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'Florida U.'
 
 rpp = 20
-pages = 15
+pages = 15+440
 boring = ['aerodynamics', 'birds', 'disease', 'religion', 'archaeology', 'hormones',
           'biocollections', 'dental', 'aircraft', 'rhetoric', 'potato', 'paleontology',
           'aegypti', 'aerosol', 'agarose', 'andes', 'anthropocene', 'antimicrobial',
@@ -107,7 +107,7 @@ jnlfilename = 'THESES-FloridaU-%sB' % (stampoftoday)
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
 for page in range(pages):
-    tocurl = 'https://ufdc.ufl.edu/ufir/contains/brief/' + str(page+1 + 100+300) + '/?t=%22theses%22&f=GE&o=11'
+    tocurl = 'https://ufdc.ufl.edu/ufir/contains/brief/' + str(page+1) + '/?t=%22theses%22&f=GE&o=11'
     print '---{ %i/%i }---{ %s }---' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
@@ -118,7 +118,7 @@ for page in range(pages):
             rec['restricted'] = True
         for span in section.find_all('span', attrs = {'class' : 'briefResultsTitle'}):
             for a in span.find_all('a'):
-                rec['artlink'] =  a['href']
+                rec['link'] =  a['href']
                 rec['tit'] = a.text.strip()
                 rec['doi'] = '20.2000/FloridaU/' + re.sub('.*edu\/', '', a['href'])
         for dl in section.find_all('dl'):
@@ -157,17 +157,17 @@ recs = []
 for rec in prerecs:
     i += 1
     keepit = True
-    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink']+ '/citation')
+    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link']+ '/citation')
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']+ '/citation'), features="lxml")
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']+ '/citation'), features="lxml")
         time.sleep(5)
     except:
         try:
-            print "retry %s in 180 seconds" % (rec['artlink'])
+            print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']+ '/citation'), features="lxml")
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']+ '/citation'), features="lxml")
         except:
-            print "no access to %s" % (rec['artlink'])
+            print "no access to %s" % (rec['link'])
             continue
     for dl in  artpage.find_all('dl'):
         for child in dl.children:
