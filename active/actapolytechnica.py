@@ -36,7 +36,7 @@ for div in page.find_all('ul', attrs = {'class' : 'issues_archive'}):
         iss = re.sub('.*No\.? (\d+).*', r'\1', at)
         yr = re.sub('.*\((\d+)\).*', r'\1', at)
         nr = re.sub('.*\/', '', a['href'])
-        jnlfilename = 'actapoly%s.%s_%s' % (vol, iss, nr)
+        jnlfilename = re.sub(' ', '_', 'actapoly%s.%s_%s' % (vol, iss, nr))
         #check whether file already exists
         goahead = True
         for ordner in ['/', '/zu_punkten/', '/zu_punkten/enriched/', '/backup/', '/onhold/']:
