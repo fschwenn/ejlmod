@@ -21,7 +21,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_spec
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
-publisher = 'U. Giessen (main)'
+publisher = 'Ruhr U., Bochum (main)'
 jnlfilename = 'THESES-BOCHUM-%s' % (stampoftoday)
 
 rpp = 100
