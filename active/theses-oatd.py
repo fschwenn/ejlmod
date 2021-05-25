@@ -84,9 +84,9 @@ dedicatedharvester = ['alberta', 'arizona-diss', 'asu', 'barcelona', 'baylor', '
 dedicatedaffiliations = ['Imperial College London', 'University of Edinburgh',
                          'University College London (University of London)',
                          "King's College London (University of London)", 'University of Manchester']
-dedicatedsuboptimalharvester = ['eth', 'fsu', 'cornell', 'karlsruhe-diss', 'stanford', 'texas', 'thueringen']
-nodedicatedharvester = ['aberdeen', 'ankara', 'arkansas', 'bremen', 'brazil', 'bu', 'cardiff',  'clemson', 'colo-mines','colostate',
-                        'darmstadt', 'delaware', 'duquesne', 'ethos', 'fiu', 'florida', 'gatech', 'georgia-state', 
+dedicatedsuboptimalharvester = ['eth', 'fsu', 'cornell', 'karlsruhe-diss', 'stanford', 'texas', 'thueringen', 'thueringen-diss']
+nodedicatedharvester = ['aberdeen', 'alabama', 'ankara', 'arkansas', 'bremen', 'brazil', 'bu', 'cardiff',  'clemson', 'colo-mines','colostate',
+                        'darmstadt', 'darmstadt2', 'delaware', 'duquesne', 'ethos', 'fiu', 'florida', 'gatech', 'georgia-state', 
                         'groningen', 'guelph', 'hokkaido', 'iowa', 'jairo', 'jamescook', 'lehigh', 'liberty', 'lsu-diss', 'macquarie-phd',
                         'maynooth', 'montana', 'msstate', 'mtu', 'ncsu', 'odu', 'oviedo', 'potsdam-diss', 'regina', 'rice', 'rit', 'siu-diss',
                         'south-carolina', 'star-france', 'stellenbosch', 'st-andrews', 'syracuse-diss', 'temple', 'uconn',
