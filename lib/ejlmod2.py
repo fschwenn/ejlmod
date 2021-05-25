@@ -500,24 +500,29 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('exp'):
             xmlstring += marcxml('693',[('e',rec['exp'])])
         if 'pdf' in rec.keys():
-            xmlstring += marcxml('8564',[('u',rec['pdf']), ('y','Fulltext')])
-            if not re.search('^http', rec['pdf']):
+            if re.search('^http', rec['pdf']):
+                xmlstring += marcxml('8564',[('u',rec['pdf']), ('y','Fulltext')])
+            else:
                 xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['pdf']))])
         if 'FFT' in rec.keys():
-            xmlstring += marcxml('FFT',[('a',rec['FFT']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
-            if not re.search('^http', rec['FFT']) and not re.search('^\/afs\/cern', rec['FFT']):
+            if re.search('^http', rec['FFT']) or re.search('^\/afs\/cern', rec['FFT']):
+                xmlstring += marcxml('FFT',[('a',rec['FFT']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
+            else:
                 xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['FFT']))])
         elif 'fft' in rec.keys():
-            xmlstring += marcxml('FFT',[('a',rec['fft']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
-            if not re.search('^http', rec['fft']) and not re.search('^\/afs\/cern', rec['fft']):
+            if re.search('^http', rec['fft']) or re.search('^\/afs\/cern', rec['fft']):
+                xmlstring += marcxml('FFT',[('a',rec['fft']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
+            else:
                 xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['fft']))])
         elif 'hidden' in rec.keys():
-            xmlstring += marcxml('FFT',[('a',rec['hidden']), ('d','Fulltext'), ('o', 'HIDDEN')])
-            if not re.search('^http', rec['hidden']) and not re.search('^\/afs\/cern', rec['hidden']):
+            if re.search('^http', rec['hidden']) or re.search('^\/afs\/cern', rec['hidden']):
+                xmlstring += marcxml('FFT',[('a',rec['hidden']), ('d','Fulltext'), ('o', 'HIDDEN')])
+            else:
                 xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['hidden']))])
         if 'link' in rec.keys():
-            xmlstring += marcxml('8564',[('u', rec['link'])])
-            if not re.search('^http', rec['link']):
+            if re.search('^http', rec['link']):
+                xmlstring += marcxml('8564',[('u', rec['link'])])
+            else:
                 xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['link']))])
         if 'license' in rec.keys() and not 'licence' in rec.keys():
             rec['licence'] = rec['license']
