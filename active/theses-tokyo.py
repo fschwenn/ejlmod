@@ -15,43 +15,60 @@ import datetime
 import time
 import json
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
+bookkeepingfile = "/afs/desy.de/group/library/publisherdata/tokyou.txt"
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
+startdate = '%4d-%02d-%02d' % (now.year-1, now.month, now.day)
+
 
 publisher = 'Tokyo U. '
 
 jnlfilename = 'THESES-TOKYO_U-%s' % (stampoftoday)
 
-rpp = 100
-pages = 3
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
-recs = []
-for page in range(pages):
-    tocurl = 'https://repository.dl.itc.u-tokyo.ac.jp/index.php?action=pages_view_main&active_action=repository_view_main_item_snippet&index_id=280&pn=' + str(page+1) + '&count=' + str(rpp) + '&order=16&lang=english&page_id=41&block_id=85'
-    print '==={ %s/%s }==={ %s }===' % (page+1, pages, tocurl)
-    req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
-    for div in tocpage.body.find_all('div', attrs = {'class' : 'item_title'}):
-        rec = {'tc' : 'T', 'jnl' : 'BOOK'}
-        for a in div.find_all('a'):
-            at = a.text.strip()
-            if re.search('[a-zA-Z]+ [a-zA-Z]+', at):
-                rec['artlink'] = a['href'] + '&lang=english'
-                rec['tit'] = at
-                recs.append(rec)
-            else:
-                print '  skip completely Japanese title'
-    time.sleep(5)
+#bookkeeping
+done = []
+inf = open(bookkeepingfile, 'r')
+for line in inf.readlines():
+    done.append(line.strip())
+inf.close()
+
+tocurl = 'https://repository.dl.itc.u-tokyo.ac.jp/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=' + startdate
+prerecs = []
+notcomplete = True
+cls = 0
+i = 0
+while notcomplete:
+    i += 1
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+    for identifier in tocpage.find_all('identifier'):
+        rec = {'tc' : 'T', 'jnl' : 'BOOK', 'identifier' : identifier.text.strip(), 'note' : []}
+        rec['artlink'] = 'https://repository.dl.itc.u-tokyo.ac.jp/records/' + re.sub('.*:0*', '', rec['identifier'])
+        if not rec['identifier'] in done:
+            prerecs.append(rec)
+    notcomplete = False
+    for rt in tocpage.find_all('resumptiontoken'):
+        tocurl = 'https://repository.dl.itc.u-tokyo.ac.jp/oai?verb=ListIdentifiers&resumptionToken=' + rt.text.strip()
+        cls = int(rt['completelistsize'])
+        notcomplete = True
+    if prerecs:
+        print prerecs[-1]['identifier']
+    print '[%i] %i/%i/%i' % (i, len(prerecs), 100*i, cls)
+    time.sleep(2)
+    if len(prerecs) > 10000:
+        break
+
 
 i = 0
-for rec in recs:
+recs = []
+newlydone = []
+for rec in prerecs:
     i += 1
-    print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
+    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
@@ -63,45 +80,99 @@ for rec in recs:
         except:
             print "no access to %s" % (rec['artlink'])
             continue
-    #FFT
-    for meta in artpage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
-        rec['FFT'] = meta['content']
-    for table in artpage.body.find_all('table', attrs = {'class' : 'full'}):
-        for tr in table.find_all('tr'):
-            for th in tr.find_all('th'):
-                tht = re.sub('[\n\t\r]', '', th.text.strip())
-                for td in tr.find_all('td'):
-                    tdt = re.sub('[\n\t\r]', '', td.text.strip()).strip()
-                    #DOI
-                    if re.search('DOI', tht):
-                        rec['doi'] = re.sub('.*?(10.15083.*)', r'\1', tdt)
-                        rec['doi'] = re.sub('info.doi\/', '', rec['doi'])
-                    #author
-                    elif re.search('reator', tht):
-                        if  re.search('[a-zA-Z]+', tdt):
-                            author = re.sub('(.*) (.*)', r'\1, \2', tdt)
-                            rec['autaff'] = [[ author, publisher ]]
-                    #date
-                    elif re.search('Date', tht):
-                        rec['date'] = tdt
-    #DOI?
-    if not 'doi' in rec.keys():
-        rec['doi'] = '20.2000/TOKYO/' + re.sub('.*item_id=(\d+).*', r'\1', rec['artlink'])
-        rec['link'] = rec['artlink']
-    print '   ', rec.keys()
+    try:
+        artpage.body.find_all('ol', attrs = {'class' : 'breadcrumb'})
+        newlydone.append(rec['identifier'])
+    except:
+        continue
+    #check relevance    
+    keepit = True
+    ols = artpage.body.find_all('ol', attrs = {'class' : 'breadcrumb'})
+    lis = ols[0].find_all('a')
+    #faculty
+    fac = re.sub('\D', '', lis[0].text.strip())
+    if fac in ['110', '111', '112', '113', '114',
+               '116', '117', '118', '119', '120',
+               '122', '123', '124', '131', '132', '133', '134', '135', '136',
+               '138', '139', '140', '156', '166', '181', '182', '190', '191', '192', '200', '300']:
+        print ' skip fac=%s' % (fac)
+        keepit = False
+    else:
+        rec['note'].append('fac='+fac)
+    if keepit:
+        #department
+        dep = re.sub('\D', '', lis[1].text.strip())
+        if dep in ['06', '09', '11', '14', '32', '46']:
+            print 'skip dep=%s' % (dep)
+            keepit = False
+        else:
+            rec['note'].append('dep='+dep)
+        #documeny type
+        if len(ols) > 1:
+            lis = ols[1].find_all('a')
+            if len(lis) > 2:
+                deg = re.sub('\D', '', lis[2].text.strip())
+                if deg != '021':
+                    print ' skip deg=%s' % (deg)
+                    keepit = False
+            else:
+                keepit = False
+    #find JSON
+    if keepit:
+        for pre in artpage.body.find_all('pre', attrs = {'class' : 'hide'}):
+            metadata = json.loads(pre.text)
+            print ' keys:', metadata.keys()
+            #title
+            rec['tit'] = metadata['item_title']
+            if not re.search('[a-zA-Z]', rec['tit']):
+                print ' skip theses with Japanes title'
+                keepit = False
+            #date
+            rec['date'] = metadata['publish_date']
+            if 'item_7_biblio_info_7' in metadata.keys():
+                rec['date'] = metadata['item_7_biblio_info_7']['attribute_value_mlt'][0]['bibliographicIssueDates']['bibliographicIssueDate']
+            #DOI
+            if re.search('doi.org', metadata['permalink_uri']):
+                rec['doi'] = re.sub('.*org\/', '', metadata['permalink_uri'])
+            elif re.search('handle.net', metadata['permalink_uri']):
+                rec['hdl'] = re.sub('.*handle.net\/', '', metadata['permalink_uri'])
+            else:
+                rec['doi'] = '20.2000/TokyoU/' + re.sub('\W', '', metadata['permalink_uri'])
+            #author
+            if 'item_7_full_name_3' in metadata.keys():
+                rec['autaff'] = [[ metadata['item_7_full_name_3']['attribute_value_mlt'][0]['names'][0]['name'], publisher ]]
+            else:
+                for a in artpage.body.find_all('a', attrs = {'class' : 'creator-name'}):
+                    rec['autaff'] = [[ a.text.strip(), publisher ]]
+            #language
+            if 'item_language' in metadata.keys():
+                lang = metadata['item_language']['attribute_value_mlt'][0]['subitem_language']
+                if lang == 'jpn':
+                    rec['language'] = 'Japanese'
+            #abstract
+            if 'item_4_description_5' in metadata.keys():
+                rec['abs'] = metadata['item_4_description_5']['attribute_value_mlt'][0]['subitem_description']
+    if keepit:
+        recs.append(rec)
+        print rec
 
-    if i % 100 == 0:
-        jnlfilename = 'THESES-TOKYO_U-%s_%03i' % (stampoftoday, i/100)
-    
-        #closing of files and printing
-        xmlf = os.path.join(xmldir, jnlfilename+'.xml')
-        xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-        ejlmod2.writeXML(recs[i-100:i], xmlfile, publisher)
-        xmlfile.close()
-        #retrival
-        retfiles_text = open(retfiles_path, "r").read()
-        line = jnlfilename+'.xml'+ "\n"
-        if not line in retfiles_text:
-            retfiles = open(retfiles_path,"a")
-            retfiles.write(line)
-            retfiles.close()
+jnlfilename = 'THESES-TOKYO_U-%sB' % (stampoftoday)
+
+#closing of files and printing
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writeXML(recs, xmlfile, publisher)
+xmlfile.close()
+#retrival
+retfiles_text = open(retfiles_path, "r").read()
+line = jnlfilename+'.xml'+ "\n"
+if not line in retfiles_text:
+    retfiles = open(retfiles_path,"a")
+    retfiles.write(line)
+    retfiles.close()
+
+#bookkeeping
+ouf = open(bookkeepingfile, 'a')
+for identifier in newlydone:
+    ouf.write('%s\n' % (identifier))
+ouf.close()
