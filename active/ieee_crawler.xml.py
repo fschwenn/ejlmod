@@ -152,6 +152,7 @@ def addreferences(refsdict, articlelink):
             reffile.write(ref.encode('utf-8')+'\n')
     reffile.close()
     print '  found %i references' % (len(arefs))
+    time.sleep(1)
     
 
 
@@ -343,9 +344,9 @@ def ieee(number):
             rec['tc'] = 'C'
         #references
         if hasreferencesection:
-                print '  try to get references'
                 refilename = '/tmp/ieee.%s.refs' % re.sub('\D', '', articlelink)
                 if not os.path.isfile(refilename):
+                    print '  try to get references'
                     action_process = Process(target=addreferences, args=(refsdict, articlelink))
                     action_process.start()
                     #action_process.join(timeout=5)
