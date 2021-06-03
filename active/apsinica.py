@@ -53,7 +53,8 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'main-right'}):
                         rec['note'].append(section)
                     rec['artlink'] = a['href']
                     rec['tit'] = a.text.strip()
-                    recs.append(rec)
+                    if not a['href'] in ['http://wulixb.iphy.ac.cn:80/en/article/doi/10.7498/aps.70.20201347']:
+                        recs.append(rec)
 time.sleep(3)
 
 i = 0
