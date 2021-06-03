@@ -188,6 +188,18 @@ for artlink in artlinks:
     for span in articlepage.body.find_all('span', attrs = {'class' : 'references'}):
         for dd in span.find_all('dd'):
             rec['refs'].append([('x', dd.text)])
+    if not rec['refs']:
+        for ul in articlepage.body.find_all('ul', attrs = {'class' : 'journalsReferenceList'}):
+            for a in ul.find_all('a'):
+                if a.has_attr('href') and re.search('doi.org', a['href']):
+                    rdoi = re.sub('.*doi.org\/', '', a['href'])
+                    rdoi = re.sub('%28', '(', rdoi)
+                    rdoi = re.sub('%29', ')', rdoi)
+                    rdoi = re.sub('%2F', '/', rdoi)
+                    rdoi = re.sub('%3A', ':', rdoi)
+                    a.replace_with(' '+rdoi+' ')
+            for li in ul.find_all('li'):
+                rec['refs'].append([('x', li.text)])
     print rec
     recs.append(rec)
 
