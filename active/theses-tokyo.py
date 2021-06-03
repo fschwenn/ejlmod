@@ -20,7 +20,8 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_specia
 bookkeepingfile = "/afs/desy.de/group/library/publisherdata/tokyou.txt"
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-startdate = '%4d-%02d-%02d' % (now.year-1, now.month, now.day)
+startdate = now + datetime.timedelta(days=-190*2)
+stampofstartdate = '%4d-%02d-%02d' % (startdate.year, startdate.month, startdate.day)
 
 
 publisher = 'Tokyo U. '
@@ -37,13 +38,14 @@ for line in inf.readlines():
     done.append(line.strip())
 inf.close()
 
-tocurl = 'https://repository.dl.itc.u-tokyo.ac.jp/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=' + startdate
+tocurl = 'https://repository.dl.itc.u-tokyo.ac.jp/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=' + stampofstartdate
 prerecs = []
 notcomplete = True
 cls = 0
 i = 0
 while notcomplete:
     i += 1
+    print tocurl
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
     for identifier in tocpage.find_all('identifier'):
         rec = {'tc' : 'T', 'jnl' : 'BOOK', 'identifier' : identifier.text.strip(), 'note' : []}
@@ -58,9 +60,9 @@ while notcomplete:
     if prerecs:
         print prerecs[-1]['identifier']
     print '[%i] %i/%i/%i' % (i, len(prerecs), 100*i, cls)
+    if 100*i >= cls:
+        notcomplete = False
     time.sleep(2)
-    if len(prerecs) > 10000:
-        break
 
 
 i = 0
