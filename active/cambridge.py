@@ -75,6 +75,8 @@ elif jid == 'SIC':
     jnlname = 'Sci.Context'
 elif jid == 'JMJ':
     jnlname = 'J.Inst.Math.Jussieu'
+elif jid == 'MAM':
+    jnlname = 'Microscopy Microanal.'
 #Now at Global Science Press
 #elif jid == 'CPH':
 #    jnlname = 'Commun.Comput.Phys.'
@@ -115,6 +117,7 @@ for i in range(numpages):
     print ' . ', toclink
     if not os.path.isfile('/tmp/%s.%i.toc' % (jnlfilename, i)):
         os.system('wget -O /tmp/%s.%i.toc "%s"' % (jnlfilename, i, toclink))
+        time.sleep(3)
     tocf = open('/tmp/%s.%i.toc' % (jnlfilename, i), 'r')
     toc = BeautifulSoup(''.join(tocf.readlines()))
     tocf.close()
@@ -141,6 +144,7 @@ for i in range(numpages):
                                               '10.1017/S0022377818000430',
                                               '10.1112/S0025579318000232',
                                               '10.1112/S0025579318000244',
+                                              '10.1017/S1431927620001191',
                                               '10.1112/S0025579318000256']:
                                 continue
                             if not note in ['Front Cover (OFC, IFC) and matter', 
@@ -159,6 +163,7 @@ for i in range(numpages):
 
 
 #2nd run to get details for individual articles
+reref = re.compile('^reference\-\d')
 hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
        'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
@@ -169,10 +174,10 @@ i = 0
 for rec in recs:    
     i += 1 
     req = urllib2.Request(rec['artlink'], headers=hdr)
-    print rec['artlink']
+    print '\n', rec['artlink']
     try:
         artpage = BeautifulSoup(urllib2.urlopen(req))
-        time.sleep(10)
+        time.sleep(8)
     except:
         if 'artlink2' in rec.keys():
             print 'wait 3 minutes befor trying %s instead of %s' % (rec['artlink2'], rec['artlink'])
@@ -263,6 +268,22 @@ for rec in recs:
         if not rec['refs']:
             for div2 in div.find_all('div', attrs = {'class' : 'ref'}):
                 rec['refs'].append([('x', div2.text.strip())])
+    if not rec['refs']:
+        refdivs = []
+        for div in artpage.body.find_all('div'):
+            if div.has_attr('id') and reref.search(div['id']):
+                refdivs.append(div)
+        for div in refdivs:
+            reference = ''
+            refnum = re.sub('\D', '', div['id'])
+            for a in div.find_all('a'):
+                if a.text == 'CrossRef':
+                    refdoi = re.sub('.*doi.org.', '', a['href'])
+                    reference += ', DOI: ' + refdoi
+                    a.decompose()
+                elif a.text in ['Google Scholar', 'Pubmed']:
+                    a.decompose()
+            rec['refs'].append([('x', '[%s] %s%s' % (refnum, re.sub('\. *$', '', div.text.strip()), reference))])
     #licence
     for div in artpage.body.find_all('div', attrs = {'class' : 'description'}):
         for div2 in div.find_all('div', attrs = {'class' : 'margin-top'}):
@@ -271,7 +292,7 @@ for rec in recs:
                 rec['licence'] = {'url' : re.sub('.*(http.*?creativecommons.*?0).*', r'\1', div2text)}
                 for meta in artpage.head.find_all('meta', attrs = {'name' : 'citation_pdf_url'}):
                     rec['FFT'] = meta['content']
-    #print rec
+    print [(k, len(rec[k])) for k in rec.keys()]
         
 
 
