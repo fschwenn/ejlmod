@@ -72,7 +72,7 @@ for journal in crossref.body.find_all('journal'):
             rec['FFT'] = 'http://www.actaphys.uj.edu.pl/fulltext?series=Reg&vol=%s&page=%s' % (rec['vol'], rec['p1'])
             rec['vol'] = 'B' + rec['vol']
         elif jtit == 'Acta Physica Polonica B Proceedings Supplement':
-            rec['jnl'] = 'Acta Phys.Polon.Supp'
+            rec['jnl'] = 'Acta Phys.Polon.Supp.'
             rec['tc'] = 'C'
         else:
             rec['jnl'] = jtit
