@@ -33,7 +33,7 @@ for journal in crossref.body.find_all('journal'):
     #metadata of this issue/ volume
     for journal_metadata in journal.find_all('journal_metadata'):
         for full_title in journal_metadata.find_all('full_title'):
-            jtit = full_title.text
+            jtit = full_title.text                
     (jvol, jiss, jdate, m, d, y) = (False, False, False, False, False, False)
     for journal_issue in journal.find_all('journal_issue'):
         for issue in journal_issue.find_all('issue'):
@@ -56,21 +56,29 @@ for journal in crossref.body.find_all('journal'):
     for journal_article in journal.find_all('journal_article'):
         rec = {'tc' : 'P', 'refs' : []}
         #pbn
+        for first_page in journal_article.find_all('first_page'):
+            rec['p1'] = first_page.text
+        for last_page in journal_article.find_all('last_page'):
+            rec['p2'] = last_page.text
         if jvol: rec['vol'] = jvol
         if jiss: rec['iss'] = jiss
         if jdate: rec['date'] = jdate
         if jtit == 'Acta Physica Polonica A':
             rec['jnl'] = 'Acta Phys.Polon.'
             rec['vol'] = 'A' + rec['vol']
+        elif jtit == 'Acta Physica Polonica B':
+            rec['jnl'] = 'Acta Phys.Polon.'
+            rec['licence'] = {'statement' : 'CC-BY-4.0'}
+            rec['FFT'] = 'http://www.actaphys.uj.edu.pl/fulltext?series=Reg&vol=%s&page=%s' % (rec['vol'], rec['p1'])
+            rec['vol'] = 'B' + rec['vol']
+        elif jtit == 'Acta Physica Polonica B Proceedings Supplement':
+            rec['jnl'] = 'Acta Phys.Polon.Supp'
+            rec['tc'] = 'C'
         else:
             rec['jnl'] = jtit
         for publication_date in journal_article.find_all('publication_date', attr = {'media_type' : 'print'}):
             for year in publication_date.find_all('year'):
                 rec['year'] = year.text
-        for first_page in journal_article.find_all('first_page'):
-            rec['p1'] = first_page.text
-        for last_page in journal_article.find_all('last_page'):
-            rec['p2'] = last_page.text
         #DOI
         for doi_data in journal_article.find_all('doi_data'):
             for doi in doi_data.find_all('doi'):
@@ -114,7 +122,7 @@ for journal in crossref.body.find_all('journal'):
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 
 
