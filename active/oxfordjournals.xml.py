@@ -371,9 +371,10 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
                 elif 'citation_author_institution' == meta['name']:
                     if len(rec['autaff']) > 0:
                         rec['autaff'][-1].append(re.sub('^\d*', '', meta['content']))                        
-                elif meta['name'] == 'citation_pdf_url' and (jnl == 'ptep'):
-                    rec['FFT'] = meta['content']
-                    rec['p1'] = re.sub('.*\/20\d\d\/\d+\/(.*?)\/.*', r'\1', rec['FFT'])
+                elif meta['name'] == 'citation_pdf_url':
+                    rec['citation_pdf_url'] = meta['content']
+                    if jnl == 'ptep':
+                        rec['p1'] = re.sub('.*\/20\d\d\/\d+\/(.*?)\/.*', r'\1', rec['citation_pdf_url'])
         for abstract in page.find_all('section', attrs = {'class' : 'abstract'}):
             try:
                 fsunwrap(abstract)
@@ -398,10 +399,16 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
         if (jnl == 'pasj'): 
             for wwco in page.find_all('div', attrs = {'class' : 'ww-citation-primary'}):
                 rec['p1'] = re.sub('.*: (.*?)\.?$', r'\1', wwco.text)
+                if re.search('Publications of the Astronomi.*Page', rec['p1']):
+                    rec['p1'] = re.sub(',.*', '', re.sub('.*Pages? ', '', rec['p1']))
+        elif (jnl == 'nsr'):
+            rec['p1'] = re.sub('.*\/', '', rec['doi'])
         #licence
         for a in page.find_all('a'):
             if a.has_attr('href') and re.search('creativecommons', a['href']):
                 rec['licence'] = {'url' : a['href']}
+                if 'citation_pdf_url' in rec.keys():
+                    rec['FFT'] = rec['citation_pdf_url']
         #PASJ keywords
         for a in page.find_all('a', attrs = {'class' : 'kwd-part kwd-main'}):
             rec['keyw'].append(a.text)
@@ -431,7 +438,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 
 #retrival
