@@ -19,7 +19,8 @@ import datetime
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
-
+maxtries = 7
+basewait = 60
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
 
@@ -47,7 +48,7 @@ elif (jnl == 'easps'):
     tc = 'C'
 elif (jnl == 'aanda'):
     jnlname = 'Astron.Astrophys.'
-    urltrunk = 'http://www.aanda.org/index.php?option=com_toc&url=/articles/aa/abs/'
+    urltrunk = 'https://www.aanda.org/articles/aa/abs/'
     tc = 'P'
 elif (jnl == 'aandas'):
     jnlname = 'Astron.Astrophys.Suppl.Ser.'
@@ -58,22 +59,21 @@ elif (jnl == '4open'):
     urltrunk = 'https://www.4open-sciences.org/articles/fopen/abs/'
     tc = 'P'
 
-
 if (jnl == '4open'):
     jnlfilename = "%s%s.%s_%s" % (jnl, year, issue, stampoftoday)
     toclink = "%s%s/%02i/contents/contents.html" % (urltrunk, year, int(issue))
 else:
     jnlfilename = "%s%s.%s" % (jnl, year, issue)
-    toclink = "%s%s/%s/contents/contents.html" % (urltrunk, year, issue)
+    toclink = "%s%s/%02i/contents/contents.html" % (urltrunk, year, int(issue))
 
 print "get table of content..."
 
 try:
-    tocpage = BeautifulSoup(urllib2.urlopen(toclink))
+    tocpage = BeautifulSoup(urllib2.urlopen(toclink), features="lxml")
 except:
-    print "wait 5 minutes, retry %s" % (toclink)
-    time.sleep(300)
-    tocpage = BeautifulSoup(urllib2.urlopen(toclink))
+    print "wait 2 minutes, retry %s" % (toclink)
+    time.sleep(120)
+    tocpage = BeautifulSoup(urllib2.urlopen(toclink), features="lxml")
 
 
 recs = []
@@ -90,12 +90,17 @@ for a in articleas:
     artlink = re.sub('(.*\.org)\/.*', r'\1', toclink) + a['href']
     #check article page
     time.sleep(10)
-    try:
-        artpage = BeautifulSoup(urllib2.urlopen(artlink))
-    except:
-        print "wait 5 minutes, retry %s" % (artlink)
-        time.sleep(300)
-        artpage = BeautifulSoup(urllib2.urlopen(artlink))
+    tries = 0
+    while tries < maxtries:
+        try:
+            artpage = BeautifulSoup(urllib2.urlopen(artlink), features="lxml")
+            tries = 2*maxtries
+        except:
+            tries += 1            
+            print "    wait %3i seconds, retry %s (%i)" % (tries*basewait, artlink, tries)
+            time.sleep(tries*basewait)
+    if tries == maxtries:
+        sys.exit(0)
     autaff = False
     #check metatags
     for meta in artpage.head.find_all('meta'):
@@ -197,7 +202,7 @@ for a in articleas:
         try:
             refpage = BeautifulSoup(urllib2.urlopen(reflink))
         except:
-            print '%s not found' % (reflink)
+            print '    %s not found' % (reflink)
             break
         list = refpage.body.find_all('ol', attrs = {'class' : 'references'})
         if not list:
@@ -220,21 +225,22 @@ for a in articleas:
                 rec['refs'].append([('x', reference)])
     if rec['autaff']:
         recs.append(rec)
+        print '    ', rec.keys()
     else:
         print 'no authors ?!'
 
 
   
 #write xml
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf,mode='wb'), 'utf8')
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
