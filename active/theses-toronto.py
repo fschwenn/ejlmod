@@ -119,7 +119,7 @@ jnlfilename = 'THESES-TORONTO-%s' % (stampoftoday)
 #closing of files and printing
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(deprecs[dep], xmlfile, publisher)
+ejlmod2.writenewXML(deprecs[dep], xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
@@ -136,7 +136,7 @@ if not line in retfiles_text:
 #        #closing of files and printing
 #        xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 #        xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-#        ejlmod2.writeXML(deprecs[dep], xmlfile, publisher)
+#        ejlmod2.writenewXML(deprecs[dep], xmlfile, publisher, jnlfilename)
 #        xmlfile.close()
 #        #retrival
 #        retfiles_text = open(retfiles_path,"r").read()
