@@ -31,8 +31,9 @@ jnlfilename = '%s%s.%s' % (jnl, vol, issue)
 jnlname = 'Armenian J.Phys.'
 issn = "1829-1171"
 
+
 urltrunk = 'http://www.flib.sci.am/eng/journal/Phys'
-#urltrunk = 'http://ajp.asj-oa.am'
+urltrunk = 'https://www.flib.sci.am/journal/arm/Phys'
 tocurl = '%s/PV%sIss%s.html' % (urltrunk, vol, issue)
 
 #bad certificate
@@ -69,33 +70,33 @@ for rec in recs:
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #author
-            if meta['name'] == 'eprints.creators_name':
+            if meta['name'] in ['eprints.creators_name', 'DC.creator'] :
                 rec['auts'].append(meta['content'])
             #title
-            elif meta['name'] == 'eprints.title':
+            elif meta['name'] in ['eprints.title', 'DC.title']:
                 rec['tit'] = meta['content']
             #date
-            elif meta['name'] == 'DC.date':
+            elif meta['name'] in ['DC.date', 'citation_online_date']:
                 rec['date'] = meta['content']
             #abstract
-            elif meta['name'] == 'eprints.abstract':
+            elif meta['name'] in ['eprints.abstract', 'DC.description']:
                 rec['abs'] = meta['content']
             #pages
-            elif meta['name'] == 'eprints.pagerange':
+            elif meta['name'] in ['eprints.pagerange', 'DC.coverage']:
                 rec['p1'] = re.sub('\-.*', '', meta['content'])
                 rec['p2'] = re.sub('.*\-', '', meta['content'])
             #subject
             elif meta['name'] == 'DC.subject':
                 rec['note'].append(meta['content'])
             #PDF
-            elif meta['name'] == 'eprints.document_url':
+            elif meta['name'] == ['eprints.document_url', 'citation_pdf_url']:
                 if 'license' in rec.keys():
                     rec['FFT'] = meta['content']
     print ' ', rec.keys()                 
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = open(xmlf,'w')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 
 #retrival
