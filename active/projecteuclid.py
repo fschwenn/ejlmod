@@ -25,163 +25,171 @@ ejldir = '/afs/desy.de/user/l/library/dok/ejl'
 
 volumestodo = 5
 journals = {#'aaa'   : ('Abstr.Appl.Anal. ', 'Hindawi'),
-            'aihp'  : ('Ann.Inst.H.Poincare Probab.Statist.', 'Institut Henri Poincare'),
-            'ajm'   : ('Asian J.Math.', 'International Press'),
-            'aop'   : ('Annals Probab.', 'The Institute of Mathematical Statistics'),            
+            'aihp'  : ('Ann.Inst.H.Poincare Probab.Statist.', 'Institut Henri Poincare',
+                       'annales-de-linstitut-henri-poincare-probabilites-et-statistiques'),
+            #'ajm'   : ('Asian J.Math.', 'International Press', 'asian-journal-of-mathematics'),
+            'aop'   : ('Annals Probab.', 'The Institute of Mathematical Statistics', 'annals-of-probability'),            
             #'atmp'  : ('Adv.Theor.Math.Phys.', 'International Press'),
-            'ba'    : ('Bayesian Anal.', 'International Society for Bayesian Analysis'),
-            'bjps'  : ('Braz.J.Probab.Statist.', 'Brazilian Statistical Association'),
+            'ba'    : ('Bayesian Anal.', 'International Society for Bayesian Analysis', 'bayesian-analysis'),
+            'bjps'  : ('Braz.J.Probab.Statist.', 'Brazilian Statistical Association', 'brazilian-journal-of-probability-and-statistics'),
             #'cdm'   : ('Curr.Dev.Math.', 'International Press'),
-            'dmj'   : ('Duke Math.J.', 'Duke University Press'),
-            'hokmj' : ('Hokkaido Math.J.', 'Hokkaido University, Department of Mathematics'),
-            #'jam'   : ('J.Appl.Math.', 'Hindawi'),
-            'jdg'   : ('J.Diff.Geom.', 'Lehigh University'),
-            'jgsp' : ('J.Geom.Symmetry Phys.', 'Bulgarian Academy of Sciences'),
-            'jmsj'  : ('J.Math.Soc.Jap.', 'Mathematical Society of Japan'),
-            'jpm'   : ('J.Phys.Math.', 'OMICS International'),
+            'dmj'   : ('Duke Math.J.', 'Duke University Press', 'duke-mathematical-journal'),
+            'hokmj' : ('Hokkaido Math.J.', 'Hokkaido University, Department of Mathematics', 'hokkaido-mathematical-journal'),
+            #'jam'   : ('J.Appl.Math.', 'Hindawi', 'journal-of-applied-mathematics'),
+            'jdg'   : ('J.Diff.Geom.', 'Lehigh University', 'journal-of-differential-geometry'),
+            'jgsp' : ('J.Geom.Symmetry Phys.', 'Bulgarian Academy of Sciences', 'journal-of-geometry-and-symmetry-in-physics'),
+            'jmsj'  : ('J.Math.Soc.Jap.', 'Mathematical Society of Japan', 'journal-of-the-mathematical-society-of-japan'),
+            #'jpm'   : ('J.Phys.Math.', 'OMICS International', 'journal-of-physical-mathematics'),
             #'maa'   : ('Methods Appl.Anal.', 'International Press'),
-            'ps'    : ('Probab.Surv.', 'The Institute of Mathematical Statistics and the Bernoulli Society'),
-            'tjm'   : ('Tokyo J.Math.', 'Publication Committee for the Tokyo Journal of Mathematics'),
-            'facm'  : ('Funct.Approx.Comment.Math.', 'Adam Mickiewicz University, Faculty of Mathematics and Computer Science'),
-            'pgiq'  : ('Proc.Geom.Int.Quant.', 'Institute of Biophysics and Biomedical Engineering, Bulgarian Academy of Sciences')}
+            'ps'    : ('Probab.Surv.', 'The Institute of Mathematical Statistics and the Bernoulli Society',
+                       'probability-surveys'),
+            'tjm'   : ('Tokyo J.Math.', 'Publication Committee for the Tokyo Journal of Mathematics',
+                       'tokyo-journal-of-mathematics'),
+            'facm'  : ('Funct.Approx.Comment.Math.', 'Adam Mickiewicz University, Faculty of Mathematics and Computer Science',
+                       'functiones-et-approximatio-commentarii-mathematici'),
+            'pgiq'  : ('Proc.Geom.Int.Quant.', 'Institute of Biophysics and Biomedical Engineering, Bulgarian Academy of Sciences',
+                       'geometry-integrability-and-quantization')}
 
 #journals = {'jgsp' : ('J.Geom.Symmetry Phys.', 'Bulgarian Academy of Sciences')}
 
+jnl = sys.argv[1]
+vol = sys.argv[2]
+iss = sys.argv[3]
 
 
-j = 0
-for jnl in journals.keys():
-    j += 1
-#for jnl in temp.keys():
 
-    print jnl
-#    print todo
-    jnlname = journals[jnl][0]
-    publisher = journals[jnl][1]
-    #all issues page
-    print jnlname
-    url = 'http://projecteuclid.org/all/euclid.%s' % (jnl)
-    page = BeautifulSoup(urllib2.urlopen(url))
-    todo = []
-    uls = page.body.find_all('ul', attrs = {'class' : 'contents-simple'})
-    if not uls:
-        uls = page.body.find_all('ul', attrs = {'class' : 'volumeContents'})
-    for ul in uls:
-        for a in ul.find_all('a'):
-            if a.has_attr('href'):
-                link = 'http://projecteuclid.org' + a['href']
-                text = a.text.strip()
-                if len(todo) < volumestodo:
-                    todo.append(link)
-                    print ' ',re.sub('\n? +', ' ', text)
-                else:
-                    break
-    #todo = temp[jnl]
-    #individual volumes
-    i = 0 
-    for link in todo:
-        i += 1
-        print '---{ %s (%i/%i) }---{ %i/%i }---{ %s }---' % (jnl, j, len(journals.keys()), i, len(todo), link)
-        jnlfilename = re.sub('.*euclid.(.*?)\/(.*)', r'projecteuclid_\1.\2', link)
-        #check whether file already exists
-        goahead = True
-        for ordner in ['/', '/zu_punkten/', '/zu_punkten/enriched/', 
-                       '/backup/', '/backup/%i/' % (lastyear), 
-                       '/backup/%i/' % (llastyear), '/onhold/']:
-            if os.path.isfile(ejldir + ordner + jnlfilename + '.doki'):
-                print '    Datei %s exisitiert bereit in %s' % (jnlfilename, ordner)
-                goahead = False
-        if not goahead:
-            continue
-        print '   ', jnlfilename
-        tocpage = BeautifulSoup(urllib2.urlopen(link))
-        #volume metadata
-        for div in tocpage.body.find_all('div', attrs = {'class' : 'publication'}):
-            for h3 in div.find_all('h3'):
-                note = re.sub('[\n\t]', ' ', h3.text)
-                note = re.sub('  +', ' ', note.strip())
-                break
-        for p in tocpage.body.find_all('p', attrs = {'class' : 'date'}):
-            date = p.text
-        #make list of article links
-        articles = []
-        for span in tocpage.body.find_all('span', attrs = {'class' : 'title'}):
-            for a in span.find_all('a'):
-                articles.append(a['href'])
-        #print articles
-        recs = []
-        for article in articles:
-            #rec = {'jnl' : jnlname, 'link' : 'http://projecteuclid.org'+article, 'auts' : [], 'tc' : 'P'}
-            rec = {'jnl' : jnlname, 'auts' : [], 'tc' : 'P'}
-            if jnl == 'pgiq':
-                rec['tc'] = 'C'
-                if link == 'http://projecteuclid.org/euclid.pgiq/1545361482':
-                    rec['cnum'] = 'C18-06-02'
-                elif link == 'http://projecteuclid.org/euclid.pgiq/1513998413':
-                    rec['cnum'] = 'C17-06-02'
-                elif link == 'http://projecteuclid.org/euclid.pgiq/1484362813':
-                    rec['cnum'] = 'C16-06-03.1'
-                elif link == 'http://projecteuclid.org/euclid.pgiq/1450194149':
-                    rec['cnum'] = 'C15-06-05.1'
-                elif link == 'http://projecteuclid.org/euclid.pgiq/1436815733':
-                    rec['cnum'] = 'C14-06-06'
-            rec['note'] = [ note ]
+def tryeucllidnumber(rec):
+    if 'doi' in rec.keys():
+        if re.search('^10.(4310|1214|14492|2969|3836|7169)\/[a-z]+\/\d+', rec['doi']):
+            euclid = re.sub('^10.\d+\/([a-z]+)\/(\d+)', r'euclid.\1/\2', rec['doi'])
             try:
-                articlepage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org' + article))
+                euclidpage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org/' + euclid), features="lxml")
             except:
-                print "retry '%s' in 180 seconds" % ('http://projecteuclid.org' + article)
-                time.sleep(180)
-                articlepage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org' + article))
-            #pages
-            for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_date'}):
+                print '?', euclidpage
+                return
+            for meta in euclidpage.head.find_all('meta', attrs = {'name' : 'citation_doi'}):
+                if meta['content'] == rec['doi']:
+                    rec['MARC'] = [ ('035', [('9', 'EUCLID'), ('a', euclid)]) ]
+                    print '   ->', euclid
+            
+    return 
+
+recs = []
+if jnl in journals.keys():
+    publisher = journals[jnl][1]
+    jnlname = journals[jnl][0]
+    jnlfilename = 'projecteuclid_%s%s.%s' % (jnl, vol, iss)
+    tocurl = 'https://projecteuclid.org/journals/%s/volume-%s/issue-%s' % (journals[jnl][2], vol, iss)
+    #tocurl = 'https://projecteuclid.org/proceedings/geometry-integrability-and-quantization/Proceedings-of-the-Twenty-Second-International-Conference-on-Geometry-Integrability/toc/10.7546/giq-22-2021' #C20-06-08.6
+    print '={ %s }={ %s }=' % (jnlname, tocurl)
+    page = BeautifulSoup(urllib2.urlopen(tocurl), features="lxml")
+    for div in page.body.find_all('div', attrs = {'class' : 'TOCLineItemRow1'}):
+        for div2 in div.find_all('div', attrs = {'class' : 'row'}):
+            for a in div2.find_all('a'):
+                for span in a.find_all('span', attrs = {'class' : 'TOCLineItemText1'}):
+                    rec = {'jnl' : jnlname, 'auts' : [], 'tc' : 'P', 'vol' : vol, 'note' : []}
+                    #rec['cnum'] = 'C20-06-08.6'
+                    if iss != 'none':
+                        rec['issue'] = iss
+                    rec['artlink'] = 'https://projecteuclid.org' + a['href']
+                    rec['tit'] = span.text.strip()
+                    if not rec['tit'] in ['Editorial Board', 'Table of Contents',
+                                          'Front Matter', 'Back Matter', 'Preface']:
+                        recs.append(rec)
+
+i = 0
+for rec in recs:
+    i += 1
+    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
+    try:
+        articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink']), features="lxml")
+    except:
+        print "retry '%s' in 180 seconds" % (rec['artlink'])
+        time.sleep(180)
+        articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink']), features="lxml")
+    for meta in articlepage.head.find_all('meta'):
+        if meta.has_attr('name'):
+            #date
+            if meta['name'] == 'dc.Date':
                 rec['date'] = meta['content']
-            for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_year'}):
+            #year
+            elif meta['name'] == 'citation_year':
                 rec['year'] = meta['content']
-            for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_volume'}):
-                rec['vol'] = meta['content']
-            for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_issue'}):
-                rec['issue'] = meta['content']
-            for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_firstpage'}):
+            #DOI
+            elif meta['name'] == 'citation_doi':
+                if re.search('^10\.\d+\/', meta['content']):
+                    rec['doi'] = meta['content']
+                elif re.search('^[a-z]+\/\d+$', meta['content']):
+                    rec['MARC'] = [ ('035', [('9', 'EUCLID'), ('a', 'euclid.' + meta['content'])]) ]
+                    rec['doi'] = '20.2000/ProjectEuclid/' + meta['content']
+            #pages
+            elif meta['name'] == 'citation_firstpage':
                 rec['p1'] = meta['content']
-            for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_lastpage'}):
+            elif meta['name'] == 'citation_lastpage':
                 rec['p2'] = meta['content']
-            for meta in articlepage.head.find_all('meta', attrs = {'name' : 'citation_author'}):
+            #authors
+            elif meta['name'] == 'citation_author':
                 rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', meta['content']))
-            #doi
-            rec['doi'] = '20.2000' + article
-            for div in articlepage.body.find_all('div', attrs = {'id' : 'info'}):
-                for p in div.find_all('p'):
-                    ptext = p.text.strip()
-                    if re.search('Digital Object Identifier.*10\.....\/', ptext):
-                        rec['doi'] = re.sub('.*doi: *(10\..*)', r'\1', ptext)
-            if rec['doi'][0] == '2':
-                rec['link'] = 'http://projecteuclid.org' + article
+            #abs
+            elif meta['name'] == 'citation_abstract':
+                rec['abs'] = meta['content']
             #title
-            for section in articlepage.body.find_all('section', attrs = {'class' : 'publication-content'}):
-                rec['tit'] = section.find('h3').text
-            #abstract 
-            for div in articlepage.body.find_all('div', attrs = {'class' : 'abstract-text'}):
-                rec['abs'] = re.sub('[\t\n]', '', div.text)
-            #references
-            for ul in articlepage.body.find_all('ul', attrs = {'class' : 'references'}):
-                rec['refs'] = []
-                for li in ul.find_all('li'):
-                    rec['refs'].append([('x', li.text)])
-            print '        ', rec['doi']
-            year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
-            if year >= now.year - 1:
-                recs.append(rec)
-        #write xml
-        if recs:
-            xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-            xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-            ejlmod2.writeXML(recs,xmlfile,publisher)
-            xmlfile.close()
-            #retrival
-            retfiles_text = open(retfiles_path,"r").read()
-            line = jnlfilename+'.xml'+ "\n"
-            if not line in retfiles_text: 
-                retfiles = open(retfiles_path,"a")
-                retfiles.write(line)
-                retfiles.close()
+            elif meta['name'] == 'citation_title':
+                rec['tit'] = meta['content']
+            #keywords
+            elif meta['name'] == 'citation_keywords':
+                rec['keyw'] = re.split('; ', meta['content'])
+            #fulltext
+            elif meta['name'] == 'citation_pdf_url':
+                rec['citation_pdf_url'] = meta['content']
+            #language
+            elif meta['name'] == 'dc.Language':
+                if meta['content'] != 'en':
+                    if meta['content'] == 'fr':
+                        rec['language'] = 'French'
+                    else:
+                        rec['note'].append('lang=%s' % (meta['content']))
+    #license
+    for a in articlepage.body.find_all('a'):
+       if a.has_attr('href') and re.search('creativecommons.org', a['href']):
+           rec['license'] = {'url' : a['href']}
+    if 'citation_pdf_url' in rec.keys():
+        if 'license' in rec.keys():
+            rec['FFT'] = rec['citation_pdf_url']
+        else:
+            rec['hidden'] = rec['citation_pdf_url']
+    #references
+    refurl = rec['artlink'] + '?tab=ArticleLinkReference'
+    try:
+        refpage = BeautifulSoup(urllib2.urlopen(refurl), features="lxml")
+    except:
+        print "retry '%s' in 18 seconds" % (refurl)
+        time.sleep(18)
+        try:
+            refpage = BeautifulSoup(urllib2.urlopen(refurl), features="lxml")
+        except:
+            refpage = articlepage
+    for ul in refpage.body.find_all('ul', attrs = {'class' : 'ref-list'}):
+        rec['refs'] = []
+        for li in ul.find_all('li', attrs = {'class' : 'ref-label'}):
+            for li2 in li.find_all('li', attrs = {'class' : 'googleScholar'}):
+                li2.decompose()
+            rec['refs'].append([('x', re.sub('[\n\t\r]', ' ', li.text.strip()))])
+    print ' ', rec.keys()
+    tryeucllidnumber(rec)
+    #print rec
+            
+#write xml
+if recs:
+    xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
+    xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+    ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+    xmlfile.close()
+    #retrival
+    retfiles_text = open(retfiles_path,"r").read()
+    line = jnlfilename+'.xml'+ "\n"
+    if not line in retfiles_text: 
+        retfiles = open(retfiles_path,"a")
+        retfiles.write(line)
+        retfiles.close()
 
