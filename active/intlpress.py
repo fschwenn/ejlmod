@@ -15,8 +15,6 @@ import urlparse
 import codecs
 from bs4 import BeautifulSoup
 
-
-
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 
@@ -69,6 +67,7 @@ elif (jnl == 'cms'):
     issn = '1539-6746'
     year = str(int(vol)+2002)
     url = "http://www.intlpress.com/%s/%s/issue%s-%s" % (jnl.upper(),year,vol,isu)
+    url = "http://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/00%s/000%s/index.php" % (jnl,vol,isu)
 elif (jnl == 'jsg'):
     jnlname = 'J.Sympl.Geom.'
     issn = '1527-5256'
@@ -147,7 +146,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'list_item'}):
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 #xmlfile  = open(xmlf,'w')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 
 #retrival
