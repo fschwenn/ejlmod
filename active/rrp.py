@@ -70,7 +70,7 @@ for table in tocpage.body.find_all('table', attrs = {'dwcopytype' : 'CopyTableRo
                     done.append(rec['p1'])
 
 xmlfile  = codecs.EncodedFile(open(xmlf,mode='wb'),"utf8")
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, xmlf[:-4])
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()

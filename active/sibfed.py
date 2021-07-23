@@ -146,7 +146,7 @@ for rec in prerecs:
 #write xml
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"

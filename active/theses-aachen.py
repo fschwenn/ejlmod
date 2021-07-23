@@ -94,7 +94,7 @@ jnlfilename = 'THESES-AACHEN_%s' % (stampoftoday)
 #closing of files and printing
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs.values(),xmlfile,publisher)
+ejlmod2.writenewXML(recs.values(),xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()

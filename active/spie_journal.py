@@ -179,7 +179,7 @@ if __name__ == '__main__':
     outfile = 'spie_%s%s.%s.xml' % (jnl, vol, iss)
     #dokf = codecs.EncodedFile(open(os.path.join(xmldir,outfile),mode='wb'),"utf8")
     dokf = open(os.path.join(xmldir,outfile),'w')
-    ejlmod2.writeXML(recs,dokf,publisher)
+    ejlmod2.writenewXML(recs,dokf,publisher, outfile[:-4])
     dokf.close()
     #retrival
     retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"

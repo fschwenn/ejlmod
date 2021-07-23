@@ -407,7 +407,7 @@ for rec in prerecs:
                 #closing of files and printing
                 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
                 xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-                ejlmod2.writeXML(crecs, xmlfile, publisher)
+                ejlmod2.writenewXML(crecs, xmlfile, publisher, jnlfilename)
                 xmlfile.close()
                 #retrival
                 retfiles_text = open(retfiles_path,"r").read()

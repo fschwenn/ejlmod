@@ -101,7 +101,7 @@ for inst in recs.keys():
     #closing of files and printing
     xmlf = os.path.join(xmldir, jnlfilename+'.xml')
     xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-    ejlmod2.writeXML(recs[inst], xmlfile,publisher)
+    ejlmod2.writenewXML(recs[inst], xmlfile,publisher, jnlfilename)
     xmlfile.close()
     #retrival
     retfiles_text = open(retfiles_path, "r").read()
