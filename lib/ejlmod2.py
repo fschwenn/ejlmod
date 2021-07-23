@@ -11,6 +11,8 @@ import unidecode
 from collclean_lib import coll_cleanforthe
 from collclean_lib import coll_clean710
 from collclean_lib import coll_split
+from inspire_utils.date import normalize_date
+
 try:
     # needed to remove the print-commands from /usr/lib/python2.6/site-packages/refextract/references/engine.py
     from refextract import  extract_references_from_string
@@ -44,6 +46,10 @@ mappings = {'doi' : 'a',
 #find additional reportnumbers
 repreprints = re.compile('.*Preprint:? ([A-Z0-9\-\/, ]+).*')
 repreprint = re.compile('^[A-Z0-9\-\/ ]+$')
+
+#valid arXiv numbers
+rearxivold = re.compile('^[a-z\-]+\/\d{7}$')
+rearxivnew = re.compile('^ar[xX]iv:\d{4}\.\d{4,5}')
 
 #auxiliary function to strip lines
 def tgstrip(x): return x.strip()
@@ -253,24 +259,23 @@ def marcxml(marc,liste):
         return ''
 
 #translates '27 February 2013' to '2013-02-27'
-def datetodate(date):
-    months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
-    months2 = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-    parts = re.split(' +', date.strip())
-    if len(parts) == 3:
-        try:
-            return '%4i-%02i-%02i' % (int(parts[2]), months.index(parts[1].upper())+1, int(parts[0]))
-        except:
-            return '%4i-%02i-%02i' % (int(parts[2]), months2.index(parts[1].upper())+1, int(parts[0]))
-    elif len(parts) == 2:
-        try:
-            return '%4i-%02i' % (int(parts[1]), months.index(parts[0].upper())+1)
-        except:
-            try:
-                return '%4i-%02i' % (int(parts[1]), months2.index(parts[0].upper())+1)
-            except:
-                return '%4i' % (int(parts[1]))
-
+#def datetodate(date):
+#    months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
+#    months2 = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+#    parts = re.split(' +', date.strip())
+#    if len(parts) == 3:
+#        try:
+#            return '%4i-%02i-%02i' % (int(parts[2]), months.index(parts[1].upper())+1, int(parts[0]))
+#        except:
+#            return '%4i-%02i-%02i' % (int(parts[2]), months2.index(parts[1].upper())+1, int(parts[0]))
+#    elif len(parts) == 2:
+#        try:
+#            return '%4i-%02i' % (int(parts[1]), months.index(parts[0].upper())+1)
+#        except:
+#            try:
+#                return '%4i-%02i' % (int(parts[1]), months2.index(parts[0].upper())+1)
+#            except:
+#                return '%4i' % (int(parts[1]))
 
 def writeXML(recs,dokfile,publisher):
     dokfile.write('<collection>\n')
@@ -296,7 +301,7 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('MARC'):
             for marc in rec['MARC']:
                 xmlstring += marcxml(marc[0], marc[1])
-        #
+        #TITLE
         if rec.has_key('tit'):
             xmlstring += marcxml('245',[('a',kapitalisiere(rec['tit'])), ('9',publisher)])
         if rec.has_key('otits'):
@@ -304,19 +309,38 @@ def writeXML(recs,dokfile,publisher):
                 xmlstring += marcxml('246', [('a',kapitalisiere(otit)), ('9',publisher)])
         if rec.has_key('transtit'):
             xmlstring += marcxml('242',[('a',kapitalisiere(rec['transtit'])), ('9',publisher)])
+        #LANGUAGE
         if rec.has_key('language'):
             #print rec
             xmlstring += marcxml('041', [('a', rec['language'])])
-            xmlstring += marcxml('599', [('a', 'Text in %s' % (rec['language']))])
+            xmlstring += marcxml('595', [('a', 'Text in %s' % (rec['language']))])
+        #ABSTRACT
         if rec.has_key('abs'):
             if len(rec['abs']) > 5:
                 try:
                     xmlstring += marcxml('520',[('a',rec['abs']), ('9',publisher)])
                 except:
-                    #xmlstring += marcxml('599', [('a', 'could not write abstract!')])
+                    #xmlstring += marcxml('595', [('a', 'could not write abstract!')])
                     xmlstring += marcxml('520', [('a', unidecode.unidecode(rec['abs'])), ('9', publisher)])
             else:
                 print 'abstract "%s" too short' % (rec['abs'])
+        #DATE
+        if 'date' in rec.keys():
+            try:
+                recdate = normalize_date(rec['date'])
+            except:
+                recdate = False
+                print ' !! invalid date "%s"' % (rec['date'])
+                del(rec['date'])
+        if not 'date' in rec.keys() and 'year' in rec.keys():
+            rec['date'] = rec['year']
+            recdate = rec['year']
+        if 'date' in rec.keys():
+            if 'B' in rec['tc']:
+                xmlstring += marcxml('260',[('c', recdate), ('t', 'published'), ('b', publisher)])
+            else:
+                xmlstring += marcxml('260',[('c', recdate), ('t', 'published')])
+        #KEYWORDS
         if rec.has_key('keyw'):
             for kw in rec['keyw']:
                 #xmlstring += marcxml('6531',[('a',kw), ('9','publisher')])
@@ -330,6 +354,7 @@ def writeXML(recs,dokfile,publisher):
             for kw in rec['authorkeyw']:
                 if kw:
                     xmlstring += marcxml('6531',[('a',kw), ('9','author')])
+        #PUBNOTE
         if rec.has_key('jnl'):
             liste = [('p',rec['jnl'])]
             if rec.has_key('year'):
@@ -400,20 +425,25 @@ def writeXML(recs,dokfile,publisher):
             if rec.has_key('issue2'): liste.append(('n',rec['issue2']))
             if rec.has_key('cnum'): liste.append(('w',rec['cnum']))
             xmlstring += marcxml('773',liste)
+        #BOOK SERIES
         if rec.has_key('bookseries'):
             xmlstring += marcxml('490', rec['bookseries'])
+        #ISBN
         if rec.has_key('isbns'):
             for isbn in rec['isbns']:
                 xmlstring += marcxml('020', isbn)
         elif rec.has_key('isbn'):
             xmlstring += marcxml('020',[('a', re.sub('\-', '', rec['isbn']))])
+        #DOI
         if rec.has_key('doi'):
             xmlstring += marcxml('0247',[('a',rec['doi']), ('2','DOI'), ('9',publisher)])
             #special euclid:
             if re.search('^20.2000\/euclid\.', rec['doi']):
                 xmlstring += marcxml('035', [('9', 'EUCLID'), ('a', rec['doi'][8:])])
+        #HDL
         if rec.has_key('hdl'):
             xmlstring += marcxml('0247',[('a',rec['hdl']), ('2','HDL'), ('9',publisher)])
+        #URN
         if rec.has_key('urn'):
             xmlstring += marcxml('0247',[('a',rec['urn']), ('2','URN'), ('9',publisher)])
         elif not 'doi' in rec.keys() and not 'hdl' in rec.keys():
@@ -426,6 +456,7 @@ def writeXML(recs,dokfile,publisher):
                         if tupel[0] == 'a':
                             pseudodoi += '_' + tupel[1]
                 xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
+        #NUMBER OF PAGES
         if rec.has_key('pages'):
             if rec['pages']:
                 if type(rec['pages']) == type('999'):
@@ -434,39 +465,20 @@ def writeXML(recs,dokfile,publisher):
                     xmlstring += marcxml('300',[('a',rec['pages'])])
                 elif type(rec['pages']) == type(999):
                     xmlstring += marcxml('300',[('a',str(rec['pages']))])
-        if rec.has_key('date'):
-            if re.search('[a-zA-Z] ', rec['date']):
-                rec['date'] = datetodate(rec['date'])
-            recdate = re.sub('\/', '-', rec['date'])
-            if re.search('\d\d\-\d\d\-\d\d\d\d', recdate):
-                parts = re.split('\-', recdate)
-                recdate = '%s-%s-%s' % (parts[2], parts[1], parts[0])
-            parts = re.split('\-', recdate)
-            if len(parts) > 1:
-                if len(parts[1]) == 1:
-                    parts[1] = '0' + parts[1]
-                if len(parts) > 2 and len(parts[2]) == 1:
-                    parts[2] = '0' + parts[2]
-                recdate = '-'.join(parts)
-            if 'B' in rec['tc']:
-                xmlstring += marcxml('260',[('c', recdate), ('t', 'published'), ('b', publisher)])
-            else:
-                xmlstring += marcxml('260',[('c', recdate), ('t', 'published')])
-        elif rec.has_key('year'):
-            if 'B' in rec['tc']:
-                xmlstring += marcxml('260',[('c',rec['year']), ('t', 'published'), ('b', publisher)])
-            else:
-                xmlstring += marcxml('260',[('c',rec['year']), ('t', 'published')])
+        #TYPE CODE
         if rec.has_key('tc'):
             for tc in rec['tc']:
                 if tc != '':
                     xmlstring += marcxml('980',[('a',inspiretc[tc])])
+        #FIELD CODE
         if rec.has_key('fc'):
             for fc in rec['fc']:
                 xmlstring += marcxml('65017',[('a',inspirefc[fc]),('2','INSPIRE')])
+        #PACS
         if rec.has_key('pacs'):
             for pacs in rec['pacs']:
                 xmlstring += marcxml('084',[('a',pacs), ('2','PACS')])
+        #COLLABRATION
         if rec.has_key('col'):
             if type(rec['col']) != type([]):
                 rec['col'] = [rec['col']]
@@ -485,11 +497,15 @@ def writeXML(recs,dokfile,publisher):
                 xmlstring += marcxml('710',[('g',col)])
                 if not rec.has_key('exp') and colexpdict.has_key(col):
                     xmlstring += marcxml('693',[('e',colexpdict[col])])
+        #arXiv NUMBER
         if rec.has_key('arxiv'):
             if re.search('^[0-9]',rec['arxiv']):
                 rec['arxiv'] = 'arXiv:'+rec['arxiv']
-            xmlstring += marcxml('037',[('a',rec['arxiv']),('9','arXiv')])
-            xmlstring += marcxml('980',[('a','arXiv')])
+            if rearxivnew.search(rec['arxiv']) or rearxivold.search(rec['arxiv']):
+                xmlstring += marcxml('037',[('a',rec['arxiv']),('9','arXiv')])
+            else:
+                xmlstring += marcxml('037',[('a',rec['arxiv'])])
+        #REPORT NUMBER
         if rec.has_key('rn'):
             for rn in rec['rn']:
                 #check for OSTI
@@ -497,33 +513,38 @@ def writeXML(recs,dokfile,publisher):
                     xmlstring += marcxml('035', [('9', 'OSTI'), ('a', rn[5:])])
                 else:
                     xmlstring += marcxml('037', [('a', rn)])
+        #EXPERIMENT
         if rec.has_key('exp'):
             xmlstring += marcxml('693',[('e',rec['exp'])])
+        #PDF LINK
         if 'pdf' in rec.keys():
             if re.search('^http', rec['pdf']):
                 xmlstring += marcxml('8564',[('u',rec['pdf']), ('y','Fulltext')])
             else:
-                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['pdf']))])
+                xmlstring += marcxml('595', [('a', 'invalid link "%s"' % (rec['pdf']))])
+        #FULLTEXT
         if 'FFT' in rec.keys():
             if re.search('^http', rec['FFT']) or re.search('^\/afs\/cern', rec['FFT']):
                 xmlstring += marcxml('FFT',[('a',rec['FFT']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
             else:
-                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['FFT']))])
+                xmlstring += marcxml('595', [('a', 'invalid link "%s"' % (rec['FFT']))])
         elif 'fft' in rec.keys():
             if re.search('^http', rec['fft']) or re.search('^\/afs\/cern', rec['fft']):
                 xmlstring += marcxml('FFT',[('a',rec['fft']), ('d','Fulltext'), ('t','INSPIRE-PUBLIC')])
             else:
-                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['fft']))])
+                xmlstring += marcxml('595', [('a', 'invalid link "%s"' % (rec['fft']))])
         elif 'hidden' in rec.keys():
             if re.search('^http', rec['hidden']) or re.search('^\/afs\/cern', rec['hidden']):
                 xmlstring += marcxml('FFT',[('a',rec['hidden']), ('d','Fulltext'), ('o', 'HIDDEN')])
             else:
-                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['hidden']))])
+                xmlstring += marcxml('595', [('a', 'invalid link "%s"' % (rec['hidden']))])
+        #LINK
         if 'link' in rec.keys():
             if re.search('^http', rec['link']):
                 xmlstring += marcxml('8564',[('u', rec['link'])])
             else:
-                xmlstring += marcxml('599', [('a', 'invalid link "%s"' % (rec['link']))])
+                xmlstring += marcxml('595', [('a', 'invalid link "%s"' % (rec['link']))])
+        #LICENSE
         if 'license' in rec.keys() and not 'licence' in rec.keys():
             rec['licence'] = rec['license']
         if rec.has_key('licence'):
@@ -550,13 +571,14 @@ def writeXML(recs,dokfile,publisher):
                 xmlstring += marcxml('540', entry)
             except:
                 xmlstring += marcxml(marc, [(tup[0], unidecode.unidecode(tup[1])) for tup in entry])
+        #SUPERVISOR
         if rec.has_key('supervisor'):
             marc = '701'
             for autaff in rec['supervisor']:
                 autlist = [('a',shapeaut(autaff[0]))]
                 for aff in autaff[1:]:
                     if re.search('ORCID', aff):
-                        autlist.append(('j', aff))
+                        autlist.append(('j', re.sub(' ', '', aff)))
                     elif re.search('EMAIL', aff):
                         if re.search('@', aff):
                             autlist.append(('m', re.sub('EMAIL:', '', aff)))
@@ -567,6 +589,7 @@ def writeXML(recs,dokfile,publisher):
                 except:
                     autlist2 = [(tup[0], unidecode.unidecode(tup[1])) for tup in autlist]
                     xmlstring += marcxml(marc, autlist2)
+        #AUTHORS
         if rec.has_key('autaff'):
             marc = '100'
             for autaff in rec['autaff']:
@@ -591,7 +614,7 @@ def writeXML(recs,dokfile,publisher):
                     autlist = [('a',shapeaut(autaff[0]))]
                 for aff in autaff[1:]:
                     if re.search('ORCID', aff):
-                        autlist.append(('j', aff))
+                        autlist.append(('j', re.sub(' ', '', aff)))
                     elif re.search('EMAIL', aff):
                         if re.search('@', aff):
                             autlist.append(('m', re.sub('EMAIL:', '', aff)))
@@ -660,7 +683,7 @@ def writeXML(recs,dokfile,publisher):
                             aut.append(('q', re.sub('.*, CHINESENAME: ', '', author)))
                             author = re.sub(' *, CHINESENAME.*', '', author)
                         if re.search('ORCID', author):
-                            aut.append(('j', re.sub('\.$', '', re.sub('.*, ',  '', author))))
+                            aut.append(('j', re.sub(' ', '', re.sub('\.$', '', re.sub('.*, ',  '', author)))))
                             author = re.sub(' *, ORCID.*', '', author)
                         if re.search('EMAIL', author):
                             if re.search('@', author):
@@ -687,6 +710,7 @@ def writeXML(recs,dokfile,publisher):
             for aut in longauts:
                 xmlstring += marcxml(marc,aut)
                 marc = '700'
+        #REFERENCES
         if rec.has_key('refs'):
             print 'extracting %i refs for record %i of %i' % (len(rec['refs']),i,len(recs))
             for ref in rec['refs']:
@@ -746,23 +770,24 @@ def writeXML(recs,dokfile,publisher):
                                 xmlstring += marcxml('999C5', entryaslist + additionalreportnumbers)
                         except:
                             print 'real UTF8 Problem in Referenzen'
-                            xmlstring += marcxml('599', [('a', 'real UTF8 Problem in Referenzen')])
+                            xmlstring += marcxml('595', [('a', 'real UTF8 Problem in Referenzen')])
                 else:
                     xmlstring += marcxml('999C5',ref)
         xmlstring += marcxml('980',[('a','HEP')])
+        #COMMENTS
         #temporary informations used for selection process
         if rec.has_key('comments'):
             for comment in rec['comments']:
-                xmlstring += marcxml('599',[('a',comment)])
+                xmlstring += marcxml('595',[('a',comment)])
         if rec.has_key('note'):
             for comment in rec['note']:
                 try: 
-                    xmlstring += marcxml('599', [('a', comment)])
+                    xmlstring += marcxml('595', [('a', comment)])
                 except:
-                    xmlstring += marcxml('599', [('a', unidecode.unidecode(comment))])
+                    xmlstring += marcxml('595', [('a', unidecode.unidecode(comment))])
         if rec.has_key('typ'):
-            xmlstring += marcxml('599',[('a',rec['typ'])])
-        #Add 502 for Theses
+            xmlstring += marcxml('595',[('a',rec['typ'])])
+        #THESIS PUBNOTE
         if 'T' in rec['tc'] and not re.search('"502"', xmlstring):
             thesispbn = [('b', 'PhD')]
             if 'autaff' in rec.keys() and len(rec['autaff'][0]) > 1:
@@ -771,7 +796,7 @@ def writeXML(recs,dokfile,publisher):
                         thesispbn.append(('c', aff))
             elif 'aff' in rec.keys() and rec['aff']:
                 thesispbn.append(('c', rec['aff'][0]))
-            if 'date' in rec.keys() and re.search('[12]\d\d\d', rec['date']):
+            if 'date' in rec.keys():
                 thesispbn.append(('d', re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])))
             xmlstring += marcxml('502', thesispbn)
         xmlstring += '</record>\n'
@@ -804,3 +829,12 @@ def shapeaut(author):
     author = re.sub('([A-Z])$',r'\1.', author)
     return author
 
+
+def writenewXML(recs, dokfile, publisher, dokifilename):
+    for rec in recs:
+        if 'note' in rec.keys():
+            rec['note'].append('DOKIFILE:'+dokifilename)
+        else:
+            rec['note'] = ['DOKIFILE:'+dokifilename]
+    writeXML(recs, dokfile, publisher)
+    return
