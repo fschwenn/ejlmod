@@ -43,6 +43,7 @@ jnlfilename = 'THESES-IZMIR-%s' % (stampoftoday)
 prerecs = []
 for page in range(pages):
     tocurl = 'https://openaccess.iyte.edu.tr/xmlui/handle/11147/60/discover?filtertype=type&filter_relational_operator=equals&filter=doctoralThesis&sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp) + '&page=' + str(page+1)
+    tocurl = 'https://openaccess.iyte.edu.tr/browse?type=type&sort_by=2&order=DESC&rpp=' + str(rpp) + '&etal=-1&value=doctoralThesis&offset=' + str(rpp*page)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     try:
         req = urllib2.Request(tocurl, headers=hdr)
@@ -53,7 +54,7 @@ for page in range(pages):
         req = urllib2.Request(tocurl, headers=hdr)
         tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     time.sleep(3)
-    for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
+    for div in tocpage.body.find_all('td', attrs = {'headers' : 't2'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : [], 'supervisor'  : []}
         for a in div.find_all('a'):
             rec['artlink'] = 'https://openaccess.iyte.edu.tr' + a['href'] + '?show=full'
@@ -105,7 +106,7 @@ for rec in prerecs:
             #language
             elif meta['name'] == 'citation_language':
                 if meta['content'] != 'eng':
-                    rec['language'] = mta['content']
+                    rec['language'] = meta['content']
             #pages
             elif meta['name'] == 'DCTERMS.extent':
                 if re.search('\d\d', meta['content']):
@@ -131,7 +132,7 @@ for rec in prerecs:
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
 xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-ejlmod2.writeXML(recs, xmlfile, publisher)
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path, "r").read()
