@@ -634,7 +634,8 @@ def convertarticle(journalnumber, filename, contlevel):
                     afftext += country.text.strip()
                 #GRID
                 for grid in aff.find_all('institution-id', attrs = {'institution-id-type' : 'GRID'}):
-                    afftext += ', GRID:%s' % (grid.text.strip())
+                    gridnumber = re.sub('.*grid', 'grid', re.sub('[\n\t\r]', '', grid.text.strip()))
+                    afftext += ', GRID:%s' % (gridnumber)
                 rec['aff'].append('%s= %s' % (aff['id'], afftext))
         #check for editor
         authortype = 'author'
@@ -1031,7 +1032,7 @@ for dirlev1 in os.listdir(sprdir):
             #write xml
             xmlf = os.path.join(xmldir, jnlfilename+'.xml')
             xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-            ejlmod2.writeXML(recs, xmlfile, publisher)
+            ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
             xmlfile.close()
             #retrival
             retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -1054,7 +1055,7 @@ for dirlev1 in os.listdir(sprdir):
                     #write xml
                     xmlf = os.path.join(xmldir, jnlfilename+'.xml')
                     xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-                    ejlmod2.writeXML(recs, xmlfile, publisher)
+                    ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
                     xmlfile.close()
                     #retrival
                     retfiles_text = open(retfiles_path, "r").read()
