@@ -47,7 +47,7 @@ for tr in tocpage.body.find_all('tr'):
                    'auts' : [],
                    'licence' : {'statement' : 'CC-BY-NC-ND-2.5'},
                    'tc' : typecode, 'tit' : a.text.strip()}
-            rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+            rec['doi'] = '20.2000/Niscair/' + re.sub('.*handle\/', '', a['href'])
             rec['artlink'] = 'http://nopr.niscair.res.in' + a['href']
             for td in tr.find_all('td', attrs = {'headers' : 't4'}):
                 pages = re.split(' *\- *', td.text.strip())
@@ -96,7 +96,7 @@ for rec in recs:
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
