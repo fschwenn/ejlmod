@@ -257,7 +257,7 @@ def get_references(rl):
                         el.decompose()
                     elif re.search('inspirehep.net', link):
                         el.decompose()
-                    elif re.search('arxiv.org', link):
+                    elif re.search('arxiv.org', link) and not re.search('submit', link):
                         arxiv = re.sub(' ', '', el.text.strip())
                         arxiv = re.sub('^\[', '', arxiv)
                         arxiv = re.sub('(\d)\]$', r'\1', arxiv)
@@ -406,7 +406,7 @@ for ordner in os.listdir(os.path.join(feeddir, 'tmp')):
                     #closing of files and printing
                     xmlf = os.path.join(xmldir,jnlfilename+'.xml')
                     xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-                    ejlmod2.writeXML(recs, xmlfile, publisher)
+                    ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
                     xmlfile.close()
                     #retrival
                     retfiles_text = open(retfiles_path, "r").read()
