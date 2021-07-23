@@ -55,7 +55,7 @@ def readbackup(jnl):
 #compare the journal's web page with already processed files
 def comparewebwithbackup(tocheck):
     todo = []
-    for (jnl, link, command, date) in tocheck:
+    for (jnl, link, command, date, lastissue) in tocheck:
         print jnl, link
         done = readbackup(re.sub('[ \.]', '', jnl).lower())
         driver.get(link)
@@ -73,9 +73,9 @@ def comparewebwithbackup(tocheck):
             print ' done:', oldisns, 'todo:', newisns
             #new ones found and sure there is no gap
             if newisns and len(newisns) >= 2:
-                minisn = min([int(isn[0]) for isn in newisns])
+                maxisn = max([int(isn[0]) for isn in newisns])
                 for isn in newisns:
-                    if int(isn[0]) != minisn:
+                    if int(isn[0]) != maxisn:
                         todo.append(isn)
                         print ' added ', isn
             #nothing new found
@@ -103,10 +103,10 @@ def harvest(todo):
         for line in lines:
             if re.search(jnl, line):
                 if isn >= 0:
-                    ouf.write(re.sub('(.*);.*', r'\1;', line.strip()))
-                    ouf.write(stampoftoday+'\n')
+                    ouf.write(re.sub('(.*);202.*', r'\1;', line.strip()))
+                    ouf.write('%s;%s\n' % (stampoftoday, isn))
                 else:
-                    ouf.write(line.strip() + ' CHECK MANUALLY\n')
+                    ouf.write(re.sub('(.*;202.\-..\-..)(.*)', r'\1 CHECK MANUALLY\2', line.strip()))
             else:
                 ouf.write(line)
         ouf.close()
