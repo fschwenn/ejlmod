@@ -133,6 +133,8 @@ for adoi in page.body.find_all('a'):
             #keywords
             elif meta['name'] == 'keywords':
                 rec['keyw'] = re.split(', ', meta['content'])
+                if re.search(',.*,.*,.*,', meta['content']) and len(rec['keyw']) == 1:
+                    rec['keyw'] = re.split(',', meta['content'])
     #article type
     for div in apage.body.find_all('div', attrs = {'class' : 'toc-heading'}):
         for h3 in div.find_all('h3'):
@@ -161,7 +163,7 @@ for adoi in page.body.find_all('a'):
         try:
             [rec['p1'], rec['p2']] = re.split('\-', pages)
         except:
-            rec['p1'] = pages
+            rec['p1'] = re.sub('Article: ', '', pages)
 
     #references
     for ul in apage.body.find_all('ul', attrs = {'class' : 'references numeric-ordered-list'}):
@@ -207,7 +209,7 @@ for adoi in page.body.find_all('a'):
 
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(open(xmlf,mode='wb'),"utf8")
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
