@@ -22,8 +22,6 @@ publisher = 'Frontiers'
 typecode = 'P'
 jnlfilename = 'frontiers.' + timestamp
 
-
-
 urls = sys.argv[1:]
 recs = []
 i = 0
@@ -66,9 +64,12 @@ for artlink in urls:
             #keywords
             elif meta['name'] == 'citation_keywords':
                 rec['keyw'] = re.split(' *; *', meta['content'])
-            #absract
+            #abstract
             elif meta['name'] == 'citation_abstract':
                 rec['abs'] = meta['content']
+            #FFT
+            elif meta['name'] == 'citation_pdf_url':
+                rec['FFT'] = meta['content']
             #date
             elif meta['name'] == 'citation_online_date':
                 rec['date'] = meta['content']
@@ -89,9 +90,15 @@ for artlink in urls:
             elif meta['name'] == 'citation_author_email':
                 if meta['content']:
                     email = meta['content']
-                    autaff.append('EMAIL:%s' % (email))    
+                    autaff.append('EMAIL:%s' % (email))
     if autaff:
         rec['autaff'].append(autaff)
+    #license
+    for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
+        rec['license'] = {'url' : a['href']}
+    #FFT
+    if not 'FFT' in rec.keys():
+        rec['FFT'] = 'https://www.frontiersin.org/articles/%s/pdf' % (rec['doi'])
     #section
     for a in artpage.body.find_all('a', attrs = {'data-test-id' : 'section-link'}):
         rec['note'] = [ a.text.strip() ]
@@ -102,19 +109,15 @@ for artlink in urls:
         rec['refs'].append([('x', div.text.strip())])
     recs.append(rec)
 
-
-
-                                       
 #closing of files and printing
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
+if not line in retfiles_text:
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
- 
