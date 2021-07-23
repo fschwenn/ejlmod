@@ -236,6 +236,12 @@ for rec in recs:
     #CNUM
     if len(sys.argv) > 4:
         rec['cnum'] = sys.argv[4]
+    #article-ID
+    if not 'p1' in rec.keys():
+        for dl in artpage.body.find_all('dl', attrs = {'class' : 'article-details'}):
+            for div in dl.find_all('div', attrs = {'class' : 'content__journal'}):
+                for span in div.find_all('span'):
+                    rec['p1'] = re.sub('^ *,? *', '', span.text.strip())
     #articleID
     if not rec.has_key('p1'):
         for ul in artpage.body.find_all('ul', attrs = {'class' : 'title-volume-issue'}):
@@ -299,7 +305,7 @@ for rec in recs:
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
