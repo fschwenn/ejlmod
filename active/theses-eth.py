@@ -93,8 +93,8 @@ for rec in prerecs:
                 if meta['content'] == 'por':
                     rec['language'] = 'portuguese'
             #FFT
-            elif meta['name'] == 'citation_pdf_url':
-                rec['hidden'] = meta['content']
+            #elif meta['name'] == 'citation_pdf_url':
+            #    rec['hidden'] = meta['content']
             #abstract
             elif meta['name'] == 'DCTERMS.abstract':
                 rec['abs'] = meta['content']
@@ -106,7 +106,9 @@ for rec in prerecs:
         for div in artpage.body.find_all('div', attrs = {'class' : 'file-link'}):
             for a in div.find_all('a'):
                 if re.search('Fulltext', a.text):
-                    rec['FFT'] = 'https://www.research-collection.ethz.ch' + a['href']
+                    #ETH is just too restrictive against robots (even 5 minutes delays do not work)
+                    #rec['FFT'] = 'https://www.research-collection.ethz.ch' + a['href']
+                    rec['link'] = 'https://www.research-collection.ethz.ch' + a['href']
     recs.append(rec)
 
 
@@ -117,7 +119,7 @@ for rec in prerecs:
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
