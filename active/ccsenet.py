@@ -84,7 +84,7 @@ for li in tocpage.body.find_all('li', attrs = {'class' : 'h5'}):
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
 #xmlfile = open(xmlf, 'w')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs ,xmlfile, publisher)
+ejlmod2.writenewXML(recs ,xmlfile, publisher, jnlfilename)
 xmlfile.close()
 
 #retrival

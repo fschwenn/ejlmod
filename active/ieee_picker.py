@@ -20,7 +20,6 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-
 publisher = 'IEEE'
 
 jnlfilename = 'ieee_picker-%s' % (stampoftoday)
@@ -178,7 +177,7 @@ for doi in dois:
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()

@@ -30,7 +30,10 @@ jnlfilename = 'eptcs' + confid
 url = 'http://eptcs.web.cse.unsw.edu.au/content.cgi?' + confid
 print url
 
+
 tocpage = BeautifulSoup(urllib2.urlopen(url))
+
+
 
 artlinks = []
 for a in tocpage.body.find_all('a'):
@@ -92,7 +95,7 @@ for artlink in artlinks:
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 
 #retrival
