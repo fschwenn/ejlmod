@@ -80,7 +80,7 @@ for table in tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'}):
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 #xmlfile  = open(xmlf,'w')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 
 #retrival
