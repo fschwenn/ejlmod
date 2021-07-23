@@ -39,6 +39,7 @@ tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp
 tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=100&etal=0&scope=&group_by=none&page=3&sort_by=dc.date.issued_dt&order=asc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis')
 
 prerecs = []
+dois = []
 for tocurl in tocurls:
     try:
         print tocurl
@@ -56,7 +57,9 @@ for tocurl in tocurls:
                 rec['tit'] = a.text.strip()
                 rec['link'] = 'https://www.repository.cam.ac.uk' + a['href']
                 rec['doi'] = '20.2000/OXFORD/' + re.sub('\W', '', a['href'])
-                prerecs.append(rec)
+                if not rec['doi'] in dois:
+                    prerecs.append(rec)
+                    dois.append(rec['doi'])
 
 i = 0
 recs = []
@@ -125,7 +128,7 @@ for rec in prerecs:
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
