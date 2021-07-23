@@ -85,6 +85,8 @@ def requestarticles(timespan):
         stampofstopdate = '%4d%02d%02d' % (stopdate.year, stopdate.month, stopdate.day)
         print '==={ %i/%i }==={ %s->%s }===' % (i+1, numoftimespans, stampofstartdate, stampofstopdate)
         tocurl = 'https://bib-pubdb1.desy.de/search?ln=en&cc=VDB&p=005%3A' + stampofstartdate + '-%3E' + stampofstopdate + '+0247_a%3A10.3204*+and+not+9131_1%3AG%3A(DE-HGF)POF3-620++not+980%3Auser&f=&action_search=Search&c=VDB&c=&sf=&so=d&rm=&rg=' + str(rpp) + '&sc=0&of=xm&jrec=1'
+        #only theses
+        tocurl = 'https://bib-pubdb1.desy.de/search?ln=en&cc=VDB&p=005%3A' + stampofstartdate + '-%3E' + stampofstopdate + '+0247_a%3A10.3204*+and+980__a%3Aphd+and+not+9131_1%3AG%3A(DE-HGF)POF3-620++not+980%3Auser&f=&action_search=Search&c=VDB&c=&sf=&so=d&rm=&rg=' + str(rpp) + '&sc=0&of=xm&jrec=1'
         print '  ={ %s }===' % (tocurl)
         pages.append(BeautifulSoup(urllib2.urlopen(tocurl), features="lxml"))
         try:
@@ -462,12 +464,12 @@ if __name__ == '__main__':
                 records[tc + str(i)] = records[tc][i:i+chunksize]
             del records[tc]                                    
     for tc in records.keys():
-        #if not tc[0] in ['T', 'C', 'K']:
-        #    continue
+        if not tc[0] in ['T']:
+            continue
         #write xml-file
         xmlf    = os.path.join(xmldir, '%s.%s.xml' % (jnlfilename, tc))
         xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')    
-        ejlmod2.writeXML(records[tc], xmlfile, publisher)
+        ejlmod2.writenewXML(records[tc], xmlfile, publisher, xmlf[:-4])
         xmlfile.close()   
         #retrival
         retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
