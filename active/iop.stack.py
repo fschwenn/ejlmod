@@ -948,6 +948,8 @@ stampoftoday = '%4d-%02d-%02d-%02d-%02d' % (now.year, now.month, now.day, now.ho
 
 #get data from IOP stacks
 #os.system('wget --no-check-certificate -O %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
+
+
 os.system('curl -o %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
 
 
@@ -971,7 +973,6 @@ for datei in os.listdir(ftpdir):
     elif re.search('xml$', datei):
         bookfeeds.append(datei)
     
-
 
 print '%i packages to do: %s' % (len(todo), ', '.join(todo))
 if not todo and not bookfeeds:
@@ -1219,7 +1220,7 @@ def convertarticle(issn, vol, isu, artid):
         for datei in os.listdir(os.path.join(iopdirtmp, issn, vol, isu, artid)):
             if re.search('\.pdf$', datei):
                 pdfsrc = os.path.join(iopdirtmp, issn, vol, isu, artid, datei)
-                pdfdst = os.path.join(pdfdir, re.sub('[\/\(\)]', '_', rec['doi']) + '.pdf')
+                pdfdst = os.path.join(pdfdir, re.sub('\/.*', '', rec['doi']), re.sub('[\/\(\)]', '_', rec['doi']) + '.pdf')
                 if os.path.isfile(pdfdst):
                     print '   fulltext found but no need to copy'
                 else:
@@ -1276,7 +1277,7 @@ for issn in os.listdir(iopdirtmp):
                     if not issn in jnlskip.keys():
                         xmlf = os.path.join(xmldir,iopf+'.xml')
                         xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-                        ejlmod2.writeXML(recs ,xmlfile,'IOP')
+                        ejlmod2.writenewXML(recs ,xmlfile, 'IOP', iopf)
                         xmlfile.close()
                   
                         #retrival
@@ -1429,7 +1430,7 @@ for bookfeed in bookfeeds:
     if recs:
         xmlf = os.path.join(xmldir,iopf+'.xml')
         xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-        ejlmod2.writeXML(recs ,xmlfile,'IOP')
+        ejlmod2.writenewXML(recs, xmlfile, 'IOP', iopf)
         xmlfile.close()
         retfiles_text = open(retfiles_path,"r").read()
         line = iopf+'.xml'+ "\n"
