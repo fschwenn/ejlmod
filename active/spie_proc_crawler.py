@@ -16,6 +16,7 @@ import time
 
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 #xmldir = '/afs/desy.de/user/s/schwenn/inspire/ejl'
 
 
@@ -187,10 +188,9 @@ if __name__ == '__main__':
         outfile = 'spie%s.xml' % (volume)
     #dokf = codecs.EncodedFile(open(os.path.join(xmldir,outfile),mode='wb'),"utf8")
     dokf = open(os.path.join(xmldir,outfile),'w')
-    ejlmod2.writeXML(recs,dokf,publisher)
+    ejlmod2.writenewXML(recs,dokf,publisher, dokf[:-4])
     dokf.close()
     #retrival
-    retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
     retfiles_text = open(retfiles_path,"r").read()
     line = outfile+ "\n"
     if not line in retfiles_text:
