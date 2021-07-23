@@ -22,7 +22,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'Florida U.'
 
 rpp = 20
-pages = 15+440
+pages = 50
 boring = ['aerodynamics', 'birds', 'disease', 'religion', 'archaeology', 'hormones',
           'biocollections', 'dental', 'aircraft', 'rhetoric', 'potato', 'paleontology',
           'aegypti', 'aerosol', 'agarose', 'andes', 'anthropocene', 'antimicrobial',
@@ -203,7 +203,7 @@ for rec in prerecs:
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
 xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-ejlmod2.writeXML(recs, xmlfile, publisher)
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path, "r").read()
