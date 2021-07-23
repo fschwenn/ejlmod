@@ -25,7 +25,7 @@ ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 
-articlesperpage = 50
+articlesperpage = 100
 
 driver = webdriver.PhantomJS()
 driver.implicitly_wait(60)
@@ -188,7 +188,8 @@ def ieee(number):
         print 'getting TOC from %s%s%s' % (urltrunc, toclink, pagecommand)        
         try:
             driver.get(urltrunc + toclink + pagecommand)
-            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
+            #WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'icon-pdf')))
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'result-item-title')))
         except:
             print ' wait a minute'
             time.sleep(60)
@@ -197,6 +198,7 @@ def ieee(number):
         #click to accept cookies
         if i == 1:
             try:
+                time.sleep(1)
                 driver.find_element_by_css_selector('.cc-btn.cc-dismiss').click()
             except:
                 print "\033[0;91mCould not click .cc-btn.cc-dismiss\033[0m"
@@ -228,15 +230,15 @@ def ieee(number):
             print '   %i article links of %i so far (+ %i not proper articles)' % (len(allarticlelinks), numberofarticles, notproperarticles)
             if len(allarticlelinks) + notproperarticles >= numberofarticles:
                 gotallarticles = True
-            elif len(resultitems) < 50:
+            elif len(resultitems) < articlesperpage:
                 gotallarticles = True                
         else:
             break
         time.sleep(10)
     
     print 'found %i article links' % (len(allarticlelinks))
-    if not allarticlelinks:
-        print page
+#    if not allarticlelinks:
+#        print page
     recs = []
     i = 0
     for articlelink in allarticlelinks:
@@ -408,7 +410,7 @@ if __name__ == '__main__':
 
     (recs,outfile) = ieee(number)
     dokf = codecs.EncodedFile(codecs.open(os.path.join(xmldir, outfile), mode='wb'), 'utf8')
-    ejlmod2.writeXML(recs, dokf, publisher)
+    ejlmod2.writenewXML(recs, dokf, publisher, outfile[:-4])
     dokf.close()
 
 #os.system('rm /tmp/ieee_%s*' % (number))
