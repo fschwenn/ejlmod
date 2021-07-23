@@ -14,8 +14,8 @@ from bs4 import BeautifulSoup
 import datetime
 import time 
 
-xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 tmpdir = '/tmp'
 
 now = datetime.datetime.now()
@@ -59,7 +59,7 @@ for record in records:
     print '---[ %i/%i ]---[ %i ]---' % (i, len(records), len(recs))
     rec = {'jnl' : 'BOOK', 'tc' : 'T', 'keyw' : [], 'supervisor' : []}
     isnew = False
-    #DOI
+    #DOI/URN
     for df in record.find_all('datafield', attrs = {'tag' : '024'}):
         for sf in df.find_all('subfield', attrs = {'code' : '2'}):
             doityp = sf.text.strip()
@@ -150,7 +150,7 @@ for record in records:
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
