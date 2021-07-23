@@ -69,7 +69,7 @@ chunksize = 50
 rpp = 10
 startyear = now.year-1
 if jnl == 'proceedings':
-    starturl = 'http://www.mdpi.com/2504-3900/%s/%s' % (vol, iss)
+    #starturl = 'http://www.mdpi.com/2504-3900/%s/%s' % (vol, iss)
     #starturl = 'https://www.mdpi.com/journal/universe/special_issues/quantum_fields'
     jnlfilename = 'mdpi_proc%s.%s_%s' % (vol, iss, cnum)
     done = []
@@ -94,6 +94,7 @@ hdr = {'User-Agent' : 'Mozilla/5.0'}
 artlinks = []
 if jnl == 'proceedings':
     #starturl = 'https://www.mdpi.com/journal/symmetry/special_issues/mttd2019_symmetry'
+    starturl = 'https://www.mdpi.com/journal/information/special_issues/machine_learning_accelerator_technology'
     #done = []  
     print starturl
     req = urllib2.Request(starturl, headers=hdr)
@@ -271,7 +272,7 @@ for artlink in artlinks:
                 xmlfilename = '%s-fin_of_%i.xml' % (jnlfilename, numberofchunks)
             xmlf = os.path.join(xmldir, xmlfilename)
             xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-            ejlmod2.writeXML(recs, xmlfile, publisher)
+            ejlmod2.writenewXML(recs, xmlfile, publisher, xmlfilename[:-4])
             xmlfile.close()
             #retrival
             retfiles_text = open(retfiles_path, "r").read()
