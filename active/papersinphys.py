@@ -34,6 +34,7 @@ elif jnl == 'cip':
     publisher = 'Publishing House for Science and Technology, Vietnam Academy of Science and Technology'
     jnlname = 'Commun.in Phys.'
     urltrunk = 'http://vjs.ac.vn/index.php/cip/issue/view/%s/showToc' % (vol)
+    urltrunk = 'http://vjs.ac.vn/index.php/cip/issue/view/%s' % (vol)
 elif jnl == 'eureka':
     publisher = 'Scientific Route OU'
     jnlname = 'Eureka'
@@ -48,20 +49,20 @@ jnlfilename = '%s%s_%s' % (jnl, vol, stampoftoday)
     
 print urltrunk
 try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk), features="lxml")
     time.sleep(3)
 except:
     print "retry %s in 180 seconds" % (urltrunk)
     time.sleep(180)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk), features="lxml")
 
 recs = []
-if jnl == 'pip':
+if jnl in ['pip', 'cip']:
     tables = tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summary'})
-elif jnl == 'cip':
-    tables = tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'})
 elif jnl == 'eureka':
     tables = tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'})
+
+print '%i potential articles found' % (len(tables))
 
 for table in tables:
     rec = {'jnl' : jnlname, 'tc' : typecode, 'vol' : vol, 'keyw' : [], 'autaff' : [], 'refs' : []}
@@ -84,6 +85,11 @@ for table in tables:
             rec['tit'] = div.text.strip()
             for a in div.find_all('a'):
                 rec['artlink'] = a['href']
+    if not rec.has_key('tit'):
+        for h3 in table.find_all('h3', attrs = {'class' : 'title'}):
+            for a in h3.find_all('a'):
+                rec['artlink'] = a['href']
+                rec['tit'] = a.text.strip()
     recs.append(rec)
 
 
@@ -113,12 +119,18 @@ for rec in recs:
             elif meta['name'] == 'citation_author_institution':
                 rec['autaff'][-1].append(meta['content'])
             #volume and issue
-            if meta['name'] == 'citation_issue':
+            elif meta['name'] == 'citation_issue':
                 if jnl in ['cip', 'eureka']:
                     rec['issue'] = meta['content']
-            if meta['name'] == 'citation_volume':
+            elif meta['name'] == 'citation_volume':
                 if jnl == 'cip':
                     rec['vol'] = meta['content']
+            #abstract
+            elif meta['name'] == 'og:description':
+                rec['abs'] = meta['content']
+            #references
+            elif meta['name'] == 'citation_reference':
+                rec['refs'].append([('x', meta['content'])])
     #year as volume
     if jnl == 'eureka':
         rec['vol'] = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
@@ -151,7 +163,7 @@ for rec in recs:
     for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
         rec['licence'] = {'url' : a['href']}
     #references
-    if jnl == 'pip':
+    if jnl in ['pip']:
         reflink = False
         #reflink = re.sub('(.*)\/(.*)', r'https://www.papersinphysics.org/papersinphysics/article/download/\2/ref\2?inline=1', rec['artlink'])
         for a in artpage.body.find_all('a', attrs = {'class' : 'obj_galley_link file'}):
@@ -171,17 +183,17 @@ for rec in recs:
                 rec['refs'].append([('x', ref)])
         else:
             print '   no references!'    
-    elif jnl in ['cip', 'eureka']:
+    elif jnl in ['eureka']:
         for div in artpage.body.find_all('div', attrs = {'id' : 'articleCitations'}):
             for p in div.find_all('p'):
                 rec['refs'].append([('x', p.text.strip())])
-    print [(k, len(k)) for k in rec.keys()]
+    print [(k, len(rec[k])) for k in rec.keys()]
 
                                        
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path,"r").read()
