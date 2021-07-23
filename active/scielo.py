@@ -14,7 +14,7 @@ import urllib2
 import urlparse
 import time
 from bs4 import BeautifulSoup
-
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 tmpdir = '/tmp'
@@ -42,9 +42,17 @@ else:
     print 'Dont know journal %s!' % (jnl)
     sys.exit(0)
 
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+hdr = {'User-Agent' : 'Magic Browser'}
+
+
 tocurl = '%s/scielo.php?script=sci_issuetoc&pid=%s%s%04i&lng=en&nrm=iso' % (trunc, issn, year, int(issue))
-print "get table of content of %s%s.%s via %s..." %(jnlname, year, issue, tocurl)
-tocpage = BeautifulSoup(urllib2.urlopen(tocurl))
+print "get table of content of %s%s.%s via %s ..." %(jnlname, year, issue, tocurl)
+req = urllib2.Request(tocurl, headers=hdr)
+tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
 
 note = ''
 recs = []
@@ -52,14 +60,32 @@ recs = []
 
 
 alldois = []
-for table in tocpage.body.find_all('table'):
-    for td in table.find_all('td'):
+for ul in tocpage.body.find_all('ul', attrs = {'class' : 'articles'}):
+    for li in ul.find_all('li'):
         arturl = False
         absurl = False
         rec = {'jnl' : jnlname, 'year' : year, 'issue' : issue, 'tc' : typecode,
-               'autaff' : [], 'refs' : []}
-        for b in td.find_all('B'):
-            rec['tit'] = b.text
+               'autaff' : [], 'refs' : [], 'note' : []}
+        for h2 in td.find_all('h2'):
+            #title and document type
+            for span in h2.find_all('span'):
+                rec['note'].append(span.text)
+                span.decompose()
+            rec['tit'] = h2.text
+            for li2 in li.find_all'li'):
+                #PDF
+                if re.search('PDF', li.text):
+                    for a in li2.find_all('a'):
+                        rec['FFT'] = 'https://www.scielo.br' + a['href']
+                        if a['title'] == 'Portuguese':
+                            rec['language'] = 'Portuguese'
+                #
+
+
+
+                WORK IN PROGRESS
+
+                
         for a in td.find_all('a'):
             if a.has_attr('href'):
                 if re.search('^pdf', a.text):
@@ -165,7 +191,7 @@ for table in tocpage.body.find_all('table'):
 
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writeXML(recs,xmlfile,publisher)
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 
 #retrival
