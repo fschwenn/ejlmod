@@ -25,8 +25,8 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Victoria U., Wellington'
-rpp = 50
-numofpages = 2
+rpp = 20
+numofpages = 5
 jnlfilename = 'THESES-VICTORIA-%s' % (stampoftoday)
 
 
@@ -36,8 +36,8 @@ ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
 hdr = {'User-Agent' : 'Magic Browser'}
+recs = []
 for i in range(numofpages):
-    recs = []
     tocurl = 'https://researcharchive.vuw.ac.nz/handle/10063/32/browse?rpp=%i&sort_by=2&type=dateissued&offset=%i&etal=-1&order=DESC' % (rpp, i*rpp)
     print '---{ %i/%i }---{ %s }------' % (i+1, numofpages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
@@ -54,7 +54,7 @@ for i in range(numofpages):
 j = 0
 for rec in recs:
     j += 1
-    print '---{ %i/%i }---{ %i/%i }---{ %s }------' % (i+1, numofpages, j, len(recs), rec['artlink'])
+    print '---{ %i/%i }---{ %s }------' % (j, len(recs), rec['artlink'])
     req = urllib2.Request(rec['artlink'])
     artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
     time.sleep(5)
@@ -65,6 +65,8 @@ for rec in recs:
         if meta.has_attr('name'):
             #date
             if meta['name'] == 'DC.date':
+                rec['date'] = meta['content'][:10]
+            if meta['name'] == 'citation_date':
                 rec['date'] = meta['content'][:10]
             #abstract
             elif meta['name'] == 'DCTERMS.abstract':
@@ -78,17 +80,17 @@ for rec in recs:
             #URN
     print '  ', rec.keys()
                 
-    #closing of files and printing
-    xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-    xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-    ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
-    xmlfile.close()
-    #retrival
-    retfiles_text = open(retfiles_path,"r").read()
-    line = jnlfilename+'.xml'+ "\n"
-    if not line in retfiles_text: 
-        retfiles = open(retfiles_path,"a")
-        retfiles.write(line)
-        retfiles.close()
+#closing of files and printing
+xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
+xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+xmlfile.close()
+#retrival
+retfiles_text = open(retfiles_path,"r").read()
+line = jnlfilename+'.xml'+ "\n"
+if not line in retfiles_text: 
+    retfiles = open(retfiles_path,"a")
+    retfiles.write(line)
+    retfiles.close()
 
 
