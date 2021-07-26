@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #!/usr/bin/python
-#program to harvest AIP-journals
+#program to harvest Andromeda-journals
 # FS 2015-02-11
 
 import sys
