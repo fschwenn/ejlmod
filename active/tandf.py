@@ -15,12 +15,15 @@ import urlparse
 from bs4 import BeautifulSoup
 import time
 
-
+import datetime
 
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 tmpdir = '/tmp'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
+
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 def tfstrip(x): return x.strip()
 
@@ -58,7 +61,10 @@ elif (jnl == 'gitr20'):
 elif (jnl == 'glma20'):
     jnlname = 'Linear Multilinear Alg.'
 
-jnlfilename = "%s.%s.%s" % (jnl, vol, issue)
+if jnl in ['tapx20']:
+    jnlfilename = "%s.%s.%s.%s" % (jnl, vol, issue, stampoftoday)
+else:
+    jnlfilename = "%s.%s.%s" % (jnl, vol, issue)
 
 
 print 'get table of content from http://www.tandfonline.com/toc/%s/%s/%s' % (jnl, vol, issue)
