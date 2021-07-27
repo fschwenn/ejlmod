@@ -25,7 +25,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Colombia, U. Natl.'
 
-jnlfilename = 'THESES-ColumbiaUNatl-%s' % (stampoftoday)
+jnlfilename = 'THESES-ColombiaUNatl-%s' % (stampoftoday)
 recs = []
 hdr = {'User-Agent' : 'Magic Browser'}
 
@@ -67,7 +67,8 @@ for rec in recs:
                 rec['autaff'] = [[ meta['content'], publisher ]]
             #supervisor
             #elif meta['name'] == 'DC.contributor':
-            #    rec['supervisor'] = [[ meta['content'] ]]
+            #    if re.search('(ad|super)visor',  meta['content']):
+            #        rec['supervisor'].append([ re.sub(' \(.*', '', meta['content']) ])
             #title
             elif meta['name'] == 'DC.title':
                 rec['tit'] = meta['content']
@@ -83,7 +84,7 @@ for rec in recs:
             elif meta['name'] == 'DCTERMS.abstract':
                 rec['abs'] = meta['content']
             #date
-            elif meta['name'] == 'DCTERMS.created':
+            elif meta['name'] == 'DCTERMS.issued':
                 rec['date'] = meta['content'][:8]
             #fulltext
             elif meta['name'] == 'citation_pdf_url':
