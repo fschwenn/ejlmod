@@ -35,6 +35,7 @@ jnlfilename = 'dg' + serial + stampoftoday
 if serial == 'GSTMP':
     jnl = "De Gruyter Stud.Math.Phys."
     tocurl = 'https://www.degruyter.com/view/serial/GSTMP-B?contents=toc-59654'
+    tocurl = 'https://www.degruyter.com/serial/GSTMP-B/html#volumes'
 
 print tocurl
 
@@ -52,7 +53,8 @@ tocpage = BeautifulSoup(driver.page_source)
 recs = []
 i = 0
 #divs = tocpage.body.find_all('div', attrs = {'class' : 'cover-image'})
-divs = tocpage.body.find_all('h4', attrs = {'class' : 'resultTitle'})
+#divs = tocpage.body.find_all('h4', attrs = {'class' : 'resultTitle'})
+divs = tocpage.body.find_all('div', attrs = {'class' : 'resultTitle'})
 for div in divs:
     for a in div.find_all('a'):
         i += 1
@@ -131,10 +133,13 @@ for div in divs:
                             rec['auts'].append(strong.text.strip())
         if not rec['auts']:
             for div in volpage.find_all('div', attrs = {'class' : 'productInfo'}):
-                for h3 in div.find_all('h3'):
-                    if re.search('Author', h3.text):
+                for h2 in div.find_all('h2'):
+                    if re.search('Author', h2.text):
                         for strong in div.find_all('strong'):
                             rec['auts'].append(strong.text.strip())
+                        if not rec['auts']:
+                            h2.decompose()
+                            rec['auts'].append(re.sub(',*', '', div.text.strip()))
         if 'date' in rec.keys():
             print '  ', rec.keys()
             recs.append(rec)
