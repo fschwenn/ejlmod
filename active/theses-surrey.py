@@ -293,6 +293,7 @@ undepartments = ['Department of Mechanical Engineering Sciences',
 recs = []
 for year in [now.year-1, now.year]:
     tocurl = 'http://epubs.surrey.ac.uk/cgi/exportview/type/thesis/%i/JSON/thesis_%i.js' % (year, year)
+    print tocurl
     tocjson = requests.get(tocurl).json()
     time.sleep(3)
     for recjson in tocjson:
