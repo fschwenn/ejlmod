@@ -158,7 +158,10 @@ for rec in prerecs:
                 #supervisor
                 elif dtt == 'Supervisor / co-supervisor and their department(s)':
                     for a in dd.find_all('a'):
-                        rec['supervisor'].append([re.sub(' \(.*', '', a.text.strip())])
+                        sv = re.sub(' \(.*', '', a.text.strip())
+                        if re.search(',.*,', sv):
+                            sv = re.sub(' *,.*', '', sv)
+                        rec['supervisor'].append([sv])
     #handle fulltext depending on license
     if 'pdf_url' in rec.keys():
         if 'license' in rec.keys():
