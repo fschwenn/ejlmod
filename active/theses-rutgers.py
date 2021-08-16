@@ -89,6 +89,11 @@ for rec in recs:
             elif span.text == 'Graduate Program':
                 for span2 in div.find_all('span', attrs = {'class' : 'resultFull__result-text'}):
                     rec['note'] = [ span2.text.strip() ]
+            #date fallback
+            elif span.text == 'Other Date' and not 'date' in rec.keys():
+                for span2 in div.find_all('span', attrs = {'class' : 'resultFull__result-text'}):
+                    rec['date'] = re.sub('.*?([12]\d\d\d).*', r'\1', span2.text.strip())
+    
 
 
 recsdict = {}
