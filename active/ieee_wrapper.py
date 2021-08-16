@@ -40,6 +40,7 @@ def gothroughjlist():
         if re.search('ieee.*isnumber', line):
             tocheck.append(tuple(re.split(' *; *', line.strip())))
     inf.close()
+    print ' tocheck:', tocheck
     return tocheck
 
 #check backup directories for specific journal
@@ -106,7 +107,7 @@ def harvest(todo):
                     ouf.write(re.sub('(.*);202.*', r'\1;', line.strip()))
                     ouf.write('%s;%s\n' % (stampoftoday, isn))
                 else:
-                    ouf.write(re.sub('(.*;202.\-..\-..)(.*)', r'\1 CHECK MANUALLY\2', line.strip()))
+                    ouf.write(re.sub('(.*;202.\-..\-..)(.*)', r'\1 CHECK MANUALLY\2\n', line.strip()))
             else:
                 ouf.write(line)
         ouf.close()
