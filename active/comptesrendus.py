@@ -30,12 +30,18 @@ iss = sys.argv[3]
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-jnlfilename = 'cr%s%s.%s_%s' % (jnl, vol, iss, stampoftoday)
+if iss:
+    jnlfilename = 'cr%s%s.%s_%s' % (jnl, vol, iss, stampoftoday)
+else:
+    jnlfilename = 'cr%s%s_%s' % (jnl, vol, stampoftoday)
 
 #journals have quite different number of articles per month
 if jnl == 'mathematique':
     year = str(1662 + int(vol))
-    tocurl = 'https://comptes-rendus.academie-sciences.fr/mathematique/issues/CRMATH_%s__%s_%s/' % (year, vol, iss)
+    if iss:
+        tocurl = 'https://comptes-rendus.academie-sciences.fr/mathematique/issues/CRMATH_%s__%s_%s/' % (year, vol, iss)
+    else:
+        tocurl = 'https://comptes-rendus.academie-sciences.fr/mathematique/volume/CRMATH_%s__%s' % (year, vol)
     jnlname = 'Compt.Rend.Math.'
 elif jnl == 'physique':
     year = str(1999 + int(vol))
