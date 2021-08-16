@@ -126,7 +126,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
 
 
 for i in range(len(recs)):
-    print '---{ %i/%i}---{ %s }---' % (i, len(recs), recs[i]['artlink'])
+    print '---{ %i/%i }---{ %s }---' % (i, len(recs), recs[i]['artlink'])
     if not os.path.isfile("/tmp/%s.%i" % (jnlfilename, i)):
         os.system("wget -T 300 -t 3 -q -O /tmp/%s.%i %s" % (jnlfilename, i, recs[i]['artlink']))
         time.sleep(3)
