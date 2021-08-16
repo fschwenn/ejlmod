@@ -91,7 +91,7 @@ def get_records(url):
         page = pages[tocurl]
         newlinks = []
         newlinks += page.body.findAll('p', attrs={'class': 'title'})
-        newlinks += page.body.findAll('h3', attrs={'class': 'title'})
+        newlinks += page.body.findAll('h3', attrs={'class': ['title', 'c-card__title']})
         links += newlinks
         print('a) %i potential links in %s' % (len(newlinks), tocurl))
     if not links:
@@ -121,7 +121,10 @@ def get_records(url):
             rec['tc'] = 'P'
         rec['tit'] = link.text.strip()
         for a in link.find_all('a'):
-            rec['artlink'] = urltrunc + a['href']
+            if re.search('https?:', a['href']):
+                rec['artlink'] = a['href']
+            else:
+                rec['artlink'] = urltrunc + a['href']
             if not rec['artlink'] in artlinks:
                 recs.append(rec)
                 artlinks.append(rec['artlink'])
@@ -151,8 +154,9 @@ for rec in recs:
                 rec['autaff'][-1].append(meta['content'])
             elif meta['name'] == 'citation_author_email':
                 rec['autaff'][-1].append('EMAIL:' + meta['content'])
-            elif meta['name'] == 'description':
-                rec['abs'] = meta['content']
+            elif meta['name'] in ['description', 'dc.description']:
+                if not 'abs' in rec.keys() or len(meta['content']) > len(rec['abs']):
+                    rec['abs'] = meta['content']
             elif meta['name'] == 'citation_cover_date':
                 rec['date'] = meta['content']
     if not 'date' in rec.keys():
@@ -164,16 +168,18 @@ for rec in recs:
                 rec['date'] = re.sub('.*?([12]\d\d\d).*', r'\1', span.text.strip())
     #Abstract
     for section in artpage.body.find_all('section', attrs = {'class' : 'Abstract'}):
-        rec['abs'] = ''
+        abstract = ''
         for p in section.find_all('p'):
-            rec['abs'] += p.text.strip() + ' '
+            absract += p.text.strip() + ' '
+        if not 'abs' in rec.keys() or len(abstract) > len(rec['abs']):
+            rec['abs'] = abstract
     #Keywords
     for div in artpage.body.find_all('div', attrs = {'class' : 'KeywordGroup'}):
         rec['keyw'] = []
         for span in div.find_all('span', attrs = {'class' : 'Keyword'}):
             rec['keyw'].append(span.text.strip())
     #References
-    for ol in artpage.body.find_all('ol', attrs = {'class' : 'BibliographyWrapper'}):
+    for ol in artpage.body.find_all('ol', attrs = {'class' : ['BibliographyWrapper', 'c-article-references']}):
         rec['refs'] = []
         for li in ol.find_all('li'):
             for a in li.find_all('a'):
@@ -232,9 +238,11 @@ for rec in recs:
                     aff = re.sub('  +', ' ', aff).strip()
                     rec['aff'].append(re.sub('^(\d.*?) (.*)', r'Aff\1= \2', aff))
         #Abstract
-        for div in artpage.body.find_all('div', attrs = {'class' : 'section__content'}):
-            for p in div.find_all('p'):
-                rec['abs'] = p.text.strip()
+        if not 'abs' in rec.keys():
+            for div in artpage.body.find_all('div', attrs = {'class' : 'section__content'}):
+                for p in div.find_all('p'):
+                    rec['abs'] = p.text.strip()
+        print '   ', rec.keys()
                 
                         
                     
@@ -242,9 +250,9 @@ for rec in recs:
 
   
 #write xml
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
