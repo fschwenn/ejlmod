@@ -186,9 +186,9 @@ if __name__ == '__main__':
         outfile = 'spie%s_%s.xml' % (volume, cnum)
     else:
         outfile = 'spie%s.xml' % (volume)
-    #dokf = codecs.EncodedFile(open(os.path.join(xmldir,outfile),mode='wb'),"utf8")
-    dokf = open(os.path.join(xmldir,outfile),'w')
-    ejlmod2.writenewXML(recs,dokf,publisher, dokf[:-4])
+    dokf = codecs.EncodedFile(open(os.path.join(xmldir,outfile),mode='wb'),"utf8")
+    #dokf = open(os.path.join(xmldir,outfile),'w')
+    ejlmod2.writenewXML(recs,dokf,publisher, outfile[:-4])
     dokf.close()
     #retrival
     retfiles_text = open(retfiles_path,"r").read()
