@@ -201,7 +201,10 @@ jc['43673'] = ['aappsbul', 'AAPPS Bull.', '', '', '']
 
 
 #known conferences
-confdict = {'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30'}
+confdict = {'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30',
+            'Advances on the Few-Body Problem in Physics – Selected and Refereed papers from the 8th Asia-Pacific Conference' : 'C21-03-01.3',
+            '0361_248' : 'C19-10-14.3',
+            '0361_250' : 'C19-06-10'}
 
 #work around for bad JHEP references from Springer:
 #get them from SISSA instead
@@ -422,8 +425,6 @@ def get_references(rl):
             refs.append(reference)
     return refs
 
-confdict = {'0361' : {'248' : 'C19-10-14.3',
-                      '250' : 'C19-06-10'}}
 ###convert individual JATS file to record
 def convertarticle(journalnumber, filename, contlevel):
     rec = {'jnl' : jc[journalnumber][1], 'tc' : jc[journalnumber][4],
@@ -492,8 +493,6 @@ def convertarticle(journalnumber, filename, contlevel):
                 #check whether article in fact is part of proceedings
                 elif re.search('Proceedings of ', subjt) and 'P' in rec['tc']:
                     rec['tc'] = 'C'
-                    if subjt in confdict.keys():
-                        rec['cnum'] = confdict[subjt]
         #title # xml:lang="en" ?
         for tg in meta.find_all('title-group'): 
             for at in tg.find_all(['article-title', 'title']):
@@ -695,9 +694,14 @@ def convertarticle(journalnumber, filename, contlevel):
             (comment, rec['refs']) = combinerefs(springerrefs, sissarefs)
             rec['note'].append(comment)
     #known conferences
-    if journalnumber in confdict.keys():
-        if 'vol' in rec.keys() and rec['vol'] in confdict[journalnumber].keys():
-            rec['cnum'] = confdict[journalnumber][rec['vol']]
+    if 'vol' in rec.keys():
+        isvolkey = '%s_%s' % (journalnumber, rec['vol'])
+        if isvolkey in  confdict.keys():
+            rec['cnum'] = journalnumber[isvolkey]
+        rec['tc'] = 'C'
+    if subjt in confdict.keys():
+        rec['cnum'] = confdict[subjt]
+        rec['tc'] = 'C'
     return rec
 
 #combine Springer and SISSA references
