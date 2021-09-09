@@ -336,10 +336,14 @@ def writeXML(recs,dokfile,publisher):
             rec['date'] = rec['year']
             recdate = rec['year']
         if 'date' in rec.keys():
-            if 'B' in rec['tc']:
-                xmlstring += marcxml('260',[('c', recdate), ('t', 'published'), ('b', publisher)])
-            else:
-                xmlstring += marcxml('260',[('c', recdate), ('t', 'published')])
+            try:
+                if 'B' in rec['tc']:
+                    xmlstring += marcxml('260', [('c', recdate), ('t', 'published'), ('b', publisher)])
+                else:
+                    xmlstring += marcxml('260', [('c', recdate), ('t', 'published')])
+            except:
+                print '{DATE}', rec
+                xmlstring += marcxml('599', [('a', 'date missing?!')])
         #KEYWORDS
         if rec.has_key('keyw'):
             for kw in rec['keyw']:
