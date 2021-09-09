@@ -86,7 +86,7 @@ for rec in recs:
             elif meta['name'] == 'eprints.document_url':
                 rec['hidden'] = meta['content']
     rec['autaff'][-1].append(publisher)
-    for tr in artpage.body.find_all('tr'):
+    for tr in artpage.find_all('tr'):
         for th in tr.find_all('th'):
             tht = th.text.strip()
         for td in tr.find_all('td'):
