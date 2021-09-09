@@ -29,8 +29,26 @@ typecode = 'T'
 
 jnlfilename = 'THESES-MIT-%s' % (stampoftoday)
 
-tocurl = 'https://dspace.mit.edu/handle/1721.1/7695/discover?sort_by=dc.date.issued_dt&order=desc&rpp=200'
+#tocurl = 'https://dspace.mit.edu/handle/1721.1/7695/discover?sort_by=dc.date.issued_dt&order=desc&rpp=200'
+tocurl = 'https://dspace.mit.edu/handle/1721.1/7582/discover?sort_by=dc.date.issued_dt&order=desc&rpp=200'
 
+#these keywords are in fact the departments/institute/PhD prorgams
+boringkeywords = ['Joint Program in Biological Oceanography.',
+                  'Joint Program in Marine Geology and Geophysics.',
+                  'Joint Program in Physical Oceanography.',
+                  'Sloan School of Management. Master of Finance Program.',
+                  'Civil and Environmental Engineering.', 'Economics.',
+                  'Harvard--MIT Program in Health Sciences and Technology.',
+                  'Operations Research Center.', 'Biological Engineering.',
+                  'Joint Program in Oceanography/Applied Ocean Science and Engineering.',
+                  'Sloan School of Management.', 'Chemical Engineering.',
+                  'Institute for Data, Systems, and Society.',
+                  'Materials Science and Engineering.', 'Technology and Policy Program.',
+                  'Center for Real Estate. Program in Real Estate Development.',
+                  'Chemistry.', 'Program in Media Arts and Sciences',
+                  'Aeronautics and Astronautics.', 'Biology.', 'Mechanical Engineering.',
+                  'Earth, Atmospheric, and Planetary Sciences.',
+                  'Woods Hole Oceanographic Institution.',]
 
 print tocurl
 
@@ -58,7 +76,8 @@ recs = []
 i = 0
 for rec in prerecs:
     i += 1
-    print '---{ %i/%i}---{ %s}------' % (i, len(prerecs), rec['artlink'])
+    keepit = True
+    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
@@ -87,6 +106,8 @@ for rec in prerecs:
             elif meta['name'] == 'DC.subject':
                 for keyw in re.split(' *; *', meta['content']):
                     rec['keyw'].append(keyw)
+                    if keyw in boringkeywords:
+                        keepit = False
             #language
             elif meta['name'] == 'DC.language':
                 if meta['content'] == 'por':
@@ -105,8 +126,8 @@ for rec in prerecs:
             elif meta['name'] == 'DC.rights':
                 if re.search('creativecommons.org', meta['content']):
                     rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
-                    
-    recs.append(rec)
+    if keepit:
+        recs.append(rec)
 
 
 
