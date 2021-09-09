@@ -44,7 +44,7 @@ elif (jnl == 'ces'):
     typecode = "P"
 
 urltrunk = 'http://www.m-hikari.com/%s/%s%s/%s%s-%s' % (jnl,jnl,year,jnl,isu,year)
-
+print urltrunk
 
 
 
