@@ -698,7 +698,7 @@ def convertarticle(journalnumber, filename, contlevel):
         isvolkey = '%s_%s' % (journalnumber, rec['vol'])
         if isvolkey in  confdict.keys():
             rec['cnum'] = journalnumber[isvolkey]
-        rec['tc'] = 'C'
+            rec['tc'] = 'C'
     if subjt in confdict.keys():
         rec['cnum'] = confdict[subjt]
         rec['tc'] = 'C'
