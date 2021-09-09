@@ -77,7 +77,7 @@ dedicatedharvester = ['alberta', 'arizona-diss', 'asu', 'barcelona', 'baylor', '
                       'colorado', 'columbia-diss', 'dortmund-diss', 'durham', 'freiburg-diss', 'glasgow',
                       'goettingen', 'harvard', 'heid-diss', 'houston', 'humboldt-diss', 'ksu',
                       'ku', 'liverpool', 'lmu-germany', 'lund', 'manchester', 'mcgill', 'melbourne',
-                      'mississippi', 'montstate', 'narcis', 'neu', 'ohiolink', 'oregon', 'princeton', 
+                      'mississippi', 'montstate', 'narcis', 'neu', 'ncsu', 'ohiolink', 'oregon', 'princeton', 
                       'qucosa-diss', 'regensburg-diss', 'rochester', 'rutgers', 'giessen-diss', 'tamu', 'toronto-diss',
                       'ttu', 'ubc', 'uky-diss', 'umich', 'valencia', 'vcu', 'vt', 'washington', 'wayne',
                       'whiterose', 'wm-mary', 'wurz-diss']
@@ -88,7 +88,7 @@ dedicatedsuboptimalharvester = ['eth', 'fsu', 'cornell', 'karlsruhe-diss', 'stan
 nodedicatedharvester = ['aberdeen', 'alabama', 'ankara', 'arkansas', 'bremen', 'brazil', 'bu', 'cardiff',  'clemson', 'colo-mines','colostate',
                         'darmstadt', 'darmstadt2', 'delaware', 'duquesne', 'ethos', 'fiu', 'florida', 'gatech', 'georgia-state', 
                         'groningen', 'guelph', 'hokkaido', 'iowa', 'jairo', 'jamescook', 'lehigh', 'liberty', 'lsu-diss', 'macquarie-phd',
-                        'maynooth', 'montana', 'msstate', 'mtu', 'ncsu', 'odu', 'oviedo', 'potsdam-diss', 'regina', 'rice', 'rit', 'siu-diss',
+                        'maynooth', 'montana', 'msstate', 'mtu', 'odu', 'oviedo', 'potsdam-diss', 'regina', 'rice', 'rit', 'siu-diss',
                         'south-carolina', 'star-france', 'stellenbosch', 'st-andrews', 'syracuse-diss', 'temple', 'uconn',
                         'udel', 'uiuc', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'vandy', 'virginia', 'vrije',
                         'wustl', 'wvu', 'york']
