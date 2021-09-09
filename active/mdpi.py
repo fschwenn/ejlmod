@@ -24,7 +24,7 @@ def tfstrip(x): return x.strip()
 
 publisher = 'MDPI'
 jnl = sys.argv[1]
-if jnl == 'proceedings':
+if jnl in ['proceedings', 'psf']:
     vol = sys.argv[2]
     iss = sys.argv[3]
     cnum = sys.argv[4]
@@ -63,7 +63,12 @@ elif jnl == 'applsci':
     numberofpages = 100
 elif jnl == 'information':
     numberofpages = 7
-    
+
+
+
+conferences = {'Selected Papers from the 1st International Electronic Conference on Universe (ECU 2021)' : 'C21-02-22',
+               'Selected Papers from the 17th Russian Gravitational Conference —International Conference on Gravitation, Cosmology and Astrophysics (RUSGRAV-17)' : 'C20-06-28'}
+
 chunksize = 50
 
 rpp = 10
@@ -72,6 +77,10 @@ if jnl == 'proceedings':
     #starturl = 'http://www.mdpi.com/2504-3900/%s/%s' % (vol, iss)
     #starturl = 'https://www.mdpi.com/journal/universe/special_issues/quantum_fields'
     jnlfilename = 'mdpi_proc%s.%s_%s' % (vol, iss, cnum)
+    done = []
+elif jnl == 'psf':
+    starturl = 'http://www.mdpi.com/2673-9984/%s/%s' % (vol, iss)
+    jnlfilename = 'mdpi_psf%s.%s_%s' % (vol, iss, cnum)
     done = []
 else:
     starturl = 'http://www.mdpi.com/search?journal=%s&year_from=%i&year_to=2150&page_count=%i&sort=pubdate&view=default' % (jnl, startyear, rpp)
@@ -135,6 +144,10 @@ for artlink in artlinks:
         rec['jnl'] = 'MDPI Proc.'
         rec['tc'] = 'C'
         rec['cnum'] = cnum
+    elif jnl == 'psf':
+        rec['jnl'] = 'Phys.Sci.Forum'
+        rec['tc'] = 'C'
+        rec['cnum'] = cnum
     elif jnl == 'condensedmatter':
         rec['jnl'] = 'Condens.Mat.'
     elif jnl == 'physics':
@@ -195,6 +208,9 @@ for artlink in artlinks:
             if re.search('Special Issue', div.text):
                 for a2 in div.find_all('a'):
                     rec['note'].append([ a2.text ])
+                    if a2.text in conferences.keys():
+                        rec['tc'] = 'C'
+                        rec['cnum'] = conferences[a2.text]
         ##authors and affiliations
         for div in page.body.find_all('div', attrs = {'class' : 'art-authors'}):
     #        for div in diva.find_all('div', attrs = {'class' : 'author'}):
