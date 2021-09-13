@@ -96,7 +96,7 @@ boringdegrees = ['Master+of+Science', 'masters', 'Doctor+of+Education', 'Doctor+
 recs = []
 redeg = re.compile('rft.degree=')
 for page in range(pages):
-    tocurl = 'https://open.bu.edu/handle/2144/8520/discover?rpp='+str(rpp)+'&etal=0&group_by=none&page=' + str(page+1 + 86) + '&sort_by=dc.date.issued_dt&order=desc'
+    tocurl = 'https://open.bu.edu/handle/2144/8520/discover?rpp='+str(rpp)+'&etal=0&group_by=none&page=' + str(page+1) + '&sort_by=dc.date.issued_dt&order=desc'
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
