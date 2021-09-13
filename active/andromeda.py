@@ -12,10 +12,14 @@ import urlparse
 import codecs
 from bs4 import BeautifulSoup
 import time
+import datetime
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 tmpdir = '/tmp'
+
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 def tfstrip(x): return x.strip()
 regexpref = re.compile('[\n\r\t]')
@@ -29,6 +33,10 @@ issuenumber = sys.argv[2]
 if jnl == 'lhep':
     jnlname = 'LHEP'
     tocurl = 'http://journals.andromedapublisher.com/index.php/LHEP/issue/view/' + issuenumber
+elif jnl == 'acp':    
+    jnlname = 'BOOK'
+    tocurl = ' http://main.andromedapublisher.com/ACP/' + issuenumber
+    typecode = 'C'
 
 print tocurl
 try:
@@ -74,22 +82,28 @@ for rec in recs:
                 rec['vol'] = meta['content'] 
             elif meta['name'] == 'citation_issue':
                 rec['issue'] = meta['content'] 
-            elif meta['name'] == 'citation_firstpage':
-                rec['p1'] = meta['content'] 
-            elif meta['name'] == 'citation_lastpage':
-                rec['p2'] = meta['content'] 
+            #elif meta['name'] == 'citation_firstpage':
+            #    rec['p1'] = meta['content'] 
+            #elif meta['name'] == 'citation_lastpage':
+            #    rec['p2'] = meta['content'] 
             #DOI
             elif meta['name'] == 'citation_doi':
                 rec['doi'] = meta['content']
             #keywords
             elif meta['name'] == 'citation_keywords':
-                rec['keyw'].append(meta['content'])
+                if re.search(', .*, ', meta['content']):
+                    rec['keyw'] += re.split(', ', meta['content'])
+                else:
+                    rec['keyw'].append(meta['content'])
             #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['FFT'] = meta['content']
             #abstract
             elif meta['name'] == 'DC.Description':
                 rec['abs'] = meta['content']
+    #year as volume for LHEP
+    if not 'vol' in rec.keys() and jnl in ['lhep']:
+        rec['vol'] = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
     #licence
     for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
         rec['license'] = {'url' : a['href']}
@@ -99,12 +113,64 @@ for rec in recs:
         for div2 in div.find_all('div'):
             for br in div2.find_all('br'):
                 br.replace_with('_TRENNER_')
-            for ref in re.split('_TRENNER_', div2.text):
+            div2t = re.sub('\. *\[(\d+)\] ', r'._TRENNER_[\1] ', div2.text)
+            for ref in re.split('_TRENNER_', div2t):
                 rec['refs'].append([('x', ref)])
     print rec
 
-jnlfilename = '%s%s.%s' % (jnl, rec['vol'], rec['issue'])
+if recs:
+    if 'issue' in rec.keys():
+        jnlfilename = '%s%s.%s_%s' % (jnl, rec['vol'], rec['issue'], stampoftoday)
+    else:
+        jnlfilename = '%s%s_%s' % (jnl, rec['vol'], stampoftoday)
+elif jnl in ['acp']:
+    recs = []
+    jnlfilename = '%s%s_%s' % (jnl, issuenumber, stampoftoday)
+    for div in tocpage.find_all('div', attrs = {'class' : 'col-md-8'}):
+        for div2 in div.find_all('div', attrs = {'class' : 'container'}):
+            rec = {'jnl': jnlname, 'tc' : typecode, 'auts' : [], 'aff' : []}
+            #year
+            rec['year'] = sys.argv[3]
+            #cnum
+            if len(sys.argv) > 4:
+                rec['cnum'] = sys.argv[4]
+            #title
+            for h2 in div2.find_all('h2', attrs = {'class' : 'text-primary'}):
+                rec['tit'] = h2.text.strip()
+            #abstract
+            for div3 in div2.find_all('div', attrs = {'class' : 'collapse'}):
+                for p in div3.find_all('p'):
+                    rec['abs'] = p.text.strip()
+                div3.decompose()
+            #authors
+            for h2 in div2.find_all('h2', attrs = {'class' : 'text-secondary'}):
+                for sup in h2.find_all('sup'):
+                    aff = sup.text
+                    sup.replace_with(', =Aff%s, ' % (aff))
+                for aut in re.split(' *, *', re.sub('[\n\t\r]', ' ', h2.text.strip())):
+                    if re.search('\w', aut):
+                        rec['auts'].append(aut)
+            #affiliations
+            for p in div2.find_all('p'):
+                for sup in p.find_all('sup'):
+                    aff = sup.text
+                    sup.replace_with(' XXX Aff%s= ' % (aff))
+                rec['aff'] = re.split(' +XXX +', re.sub('[\n\t\r]', ' ', p.text))[1:]
+            #fulltext
+            for a in div2.find_all('a'):
+                if a.has_attr('href') and re.search('\.pdf', a['href']):
+                    rec['FFT'] = 'http://main.andromedapublisher.com' + a['href'].strip()
+                    rec['link'] = 'http://main.andromedapublisher.com' + a['href'].strip()
+                    rec['doi'] = '20.2000/Andromeda/' + re.sub('\W', '', a['href'].strip()[10:])
+            if rec['auts']:
+                print rec.keys()
+                recs.append(rec)
+                    
+                    
                 
+            
+                                     
+
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
 xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
