@@ -16,17 +16,18 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-rpp = 3
-pages = 60
+rpp = 60
+pages = 3
 
 publisher = 'Oviedo U.'
 
 jnlfilename = 'THESES-OVIEDO-%s' % (stampoftoday)
 boring = [u'Biología Molecular y Celular, Departamento de',
+          u'Universidad de León, Departamento de Tecnología Minera, Topografía y Estructuras',
           u'Ciencias de la Salud, Departamento de',
           u'Administración de Empresas, Departamento de',
           u'Biología de Organismos y Sistemas, Departamento de',
@@ -71,8 +72,6 @@ boring = [u'Biología Molecular y Celular, Departamento de',
           u'Sociología, Departamento de']
 
 prerecs = []
-
-realpages = pages
 for page in range(pages):
         tocurl = 'https://digibuo.uniovi.es/dspace/handle/10651/5573/discover?rpp=' + str(rpp) + '&page=' + str(page+1) + '&sort_by=dc.date.issued_dt&order=desc'
         print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
@@ -116,7 +115,7 @@ for rec in prerecs:
             elif meta['name'] == 'DC.subject':
                 rec['keyw'] += re.split('; ', meta['content'])
             elif meta['name'] == 'DC.contributor':
-                if meta.has_attr('xml:lang'):
+                if meta.has_attr('xml:lang') or re.search(',.*,', meta['content']) or re.search('(Departamento|Instituto)', meta['content']):
                     department = meta['content']
                     if department in boring:
                         keepit = False
