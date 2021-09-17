@@ -49,6 +49,8 @@ for dep in departments:
                 rec['link'] = 'https://dash.harvard.edu' + a['href']
                 #rec['doi'] = '20.2000/HARVARD/' + re.sub('\/handle\/', '', a['href'])
                 rec['tit'] = a.text.strip()
+                if dep == 'Mathematics':
+                    rec['fc'] = 'm'
                 recs.append(rec)
             
 jnlfilename = 'THESES-HARVARD-%s' % (stampoftoday)
