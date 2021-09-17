@@ -45,6 +45,8 @@ for (affurl, aff, affname) in departments:
                 for a in h4.find_all('a'):
                     rec['artlink'] = urltrunc + a['href']
                     rec['tit'] = a.text.strip()
+            if affname == 'MATHEMATICS':
+                rec['fc'] = 'm'
             for dd in li.find_all('dd'):
                 ddt = dd.text.strip()
                 if re.search('^[12]\d\d\d', ddt):
