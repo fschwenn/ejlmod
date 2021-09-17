@@ -40,6 +40,8 @@ for department in ['Physics', 'Mathematics']:
         for a in div.find_all('a'):
             rec['artlink'] = 'https://dukespace.lib.duke.edu' + a['href'] #+ '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+            if department == 'Mathematics':
+                rec['fc'] = 'm'
             recs.append(rec)
     time.sleep(30)
 
