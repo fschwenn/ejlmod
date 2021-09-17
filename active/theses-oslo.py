@@ -42,6 +42,10 @@ for (depnr, dep) in [(14, 'Phys'), (11, 'Astro'), (6, 'Math')]:
                 rec['link'] = 'https://www.duo.uio.no' + a['href']
                 rec['hdl'] = re.sub('\/handle\/', '', a['href'])
                 rec['tit'] = a.text.strip()
+                if dep == 'Astro':
+                    rec['fc'] = 'a'
+                elif dep == 'Math':
+                    rec['fc'] = 'm'
                 recs.append(rec)
             
 j = 0
