@@ -39,6 +39,10 @@ for (dep, depnr) in [('Astronomy', '772'), ('Physics', '2136'), ('Mathematics', 
             for a in td.find_all('a'):
                 rec['artlink'] = 'https://scholarspace.manoa.hawaii.edu' + a['href'] #+ '?show=full'
                 rec['hdl'] = re.sub('.*handle\/', '',  a['href'])
+                if dep == 'Astronomy':
+                    rec['fc'] = 'a'
+                elif dep == 'Mathematics':
+                    rec['fc'] = 'm'
                 recs.append(rec)
     time.sleep(7)
 
