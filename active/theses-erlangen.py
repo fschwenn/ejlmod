@@ -41,6 +41,8 @@ for dep in ['Department+Physik', 'Naturwissenschaftliche+Fakult%C3%A4t', 'Depart
                 rec = {'tc' : 'T', 'jnl' : 'BOOK'}
                 rec['link'] = 'https://opus4.kobv.de' + a['href']
                 rec['tit'] = a.text.strip()
+                if dep == 'Department+Mathematik':
+                    rec['fc'] = 'm'
                 if rec['link'] in links:
                     print '  already in list'
                 else:
