@@ -39,6 +39,8 @@ for (aff, depid) in departments:
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'depaff' : aff, 'supervisor' : [], 'note' : []}
             rec['artlink'] = 'https://repository.library.northeastern.edu' + a['href']
             rec['tit'] = a.text.strip()
+            if depid == '200':
+                rec['fc'] = 'm'
             recs.append(rec)
 
 j = 0
