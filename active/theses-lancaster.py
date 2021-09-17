@@ -39,14 +39,13 @@ recs = []
 for section in ['Physics&organisations=5227', 'Mathematics+and+Statistics&organisations=5198']:
     for page in range(pages):
         tocurl = 'http://www.research.lancs.ac.uk/portal/en/publications/search.html?publicationYearsFrom=' + str(startyear) + '&publicationstatus=published&advanced=true&documents=%20&pageSize=' + str(rpp) + '&language=%20&publicationYearsTo=' + str(stopyear) + '&type=%2Fdk%2Fatira%2Fpure%2Fresearchoutput%2Fresearchoutputtypes%2Fthesis%2Fdoc&uri=&search=&organisationName=' + section + '&publicationcategory=&peerreview=&page=' + str(page)
-
-
-        
         print '==={ %s }==={ %i/%i }==={ %s }===' % (re.sub('\&.*', '', section), page+1, pages, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
         tocpage = BeautifulSoup(urllib2.urlopen(req))
         for li in tocpage.body.find_all('li', attrs = {'class' : 'portal_list_item'}):
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'autaff' : [], 'supervisor' : [], 'note' : []}
+            if section == 'Mathematics+and+Statistics&organisations=5198':
+                rec['fc'] = 'm'
             for h2 in li.find_all('h2'):
                 for a in h2.find_all('a'):
                     rec['artlink'] = a['href']
