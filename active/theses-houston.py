@@ -43,6 +43,8 @@ for department in ['Physics%2C+Department+of', 'Physics', 'Mathematics%2C+Depart
             for a in div.find_all('a'):
                 rec['artlink'] = 'https://uh-ir.tdl.org' + a['href'] + '?show=full'
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                if department == 'Mathematics%2C+Department+of':
+                    rec['fc'] = 'm'
                 recs.append(rec)
     print '  %i/%i' % (len(recs), len(divs))
     time.sleep(30)
