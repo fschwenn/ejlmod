@@ -46,6 +46,8 @@ for ddc in ['530+Physik', '510+Mathematik', '539+Moderne+Physik']:
     time.sleep(3)
     for div in tocpage.body.find_all('div', attrs = {'class' : 'ds-artifact-item'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+        if ddc == '510+Mathematik':
+            rec['fc'] = 'm'
         rec['note'] = [ ddc ]
         for a in div.find_all('a'):
             rec['artlink'] = 'https://edoc.hu-berlin.de' + a['href'] + '?show=full'
