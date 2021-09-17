@@ -46,12 +46,16 @@ mappings = {'doi' : 'a',
 #find additional reportnumbers
 repreprints = re.compile('.*Preprint:? ([A-Z0-9\-\/, ]+).*')
 repreprint = re.compile('^[A-Z0-9\-\/ ]+$')
+#split keywords
+rekeywsplit1 =  re.compile(', .*, ')
+rekeywsplit2 =  re.compile('; .*; ')
 
 #valid arXiv numbers
 rearxivold = re.compile('^[a-z\-]+\/\d{7}$')
 rearxivnew = re.compile('^ar[xX]iv:\d{4}\.\d{4,5}')
 
-#automatically suggest a fieldcode based on journalname
+#list of lists to automatically suggest fieldcodes based on journalname
+#(can also handle mutiple FCs like 'ai' or so)
 fcjournalliste = [('b', ['IEEE Trans.Appl.Supercond.', 'Supercond.Sci.Technol.']),
                   ('m', ['Abstr.Appl.Anal.', 'Acta Appl.Math.', 'Adv.Appl.Clifford Algebras', 'Adv.Math.', 'Adv.Math.Phys.', 'Afr.Math.', 'Alg.Anal.', 'Algebr.Geom.Topol.', 'Alg.Groups Geom.', 'Alg.Logika', 'Anal.Math.Phys.', 'Anal.Part.Diff.Eq.', 'Annals Probab.', 'Ann.Inst.H.Poincare Probab.Statist.', 'Ann.Math.Sci.Appl.', 'Ann.PDE', 'Arab.J.Math.', 'Asian J.Math.', 'Axioms', 'Bayesian Anal.', 'Braz.J.Probab.Statist.', 'Bull.Am.Math.Soc.', 'Bull.Austral.Math.Soc.', 'Cahiers Topo.Geom.Diff.', 'Calc.Var.Part.Differ.Equ', 'Can.J.Math.', 'Commun.Anal.Geom.', 'Commun.Math.Phys.', 'Commun.Math.Sci.', 'Commun.Pure Appl.Math.', 'Compos.Math.', 'Compt.Rend.Math.', 'Conform.Geom.Dyn.', 'Contemp.Math.', 'Duke Math.J.', 'Eur.J.Combinatorics', 'Exper.Math.', 'Forum Math.Pi', 'Forum Math.Sigma', 'Fractals', 'Geom.Topol.', 'Geom.Topol.Monographs', 'Glasgow Math.J.', 'Hokkaido Math.J.', 'Int.Math.Res.Not.', 'Invent.Math.', 'Inverse Prob.', 'J.Alg.Geom.', 'J.Am.Math.Soc.', 'J.Appl.Math.', 'J.Appl.Math.Mech.', 'J.Austral.Math.Soc.', 'J.Diff.Geom.', 'J.Geom.Anal.', 'J.Geom.Symmetry Phys.', 'J.Inst.Math.Jussieu', 'J.Integrab.Syst.', 'J.Korean Math.Soc.', 'J.Math.Phys.', 'J.Math.Res.', 'J.Math.Sci.', 'J.Math.Soc.Jap.', 'J.Part.Diff.Eq.', 'Lect.Notes Math.', 'Lett.Math.Phys.', 'Manuscr.Math.', 'Math.Comput.', 'Mathematics', 'Math.Methods Appl.Sci.', 'Math.Nachr.', 'Math.Notes', 'Math.Phys.Anal.Geom.', 'Math.Phys.Stud.', 'Math.Proc.Cambridge Phil.Soc.', 'Math.Res.Lett.', 'Mat.Sbornik', 'Mat.Zametki', 'Moscow Math.J.', 'Pacific J.Math.', 'p Adic Ultra.Anal.Appl.', 'Proc.Am.Math.Soc.', 'Proc.Am.Math.Soc.Ser.B', 'Proc.Geom.Int.Quant.', 'Prog.Math.Phys.', 'Rept.Math.Phys.', 'Russ.J.Math.Phys.', 'Russ.Math.Surveys', 'Springer Proc.Math.Stat.', 'Tokyo J.Math.', 'Trans.Am.Math.Soc.', 'Trans.Am.Math.Soc.Ser.B', 'Trans.Moscow Math.Soc.', 'Turk.J.Math.', 'Ukr.Math.J.']),
                   ('q', ['ACM Trans.Quant.Comput.', 'ACS Photonics', 'Adv.Cond.Mat.Phys.', 'Ann.Rev.Condensed Matter Phys.', 'Atoms', 'Condensed Matter Phys.', 'Condens.Mat.', 'J.Chem.Phys.', 'J.Chem.Theor.Comput.', 'J.Mod.Opt.', 'J.Molec.Struc.', 'J.Noncryst.Solids', 'J.Opt.', 'J.Opt.Soc.Am. A', 'J.Opt.Soc.Am. B', 'J.Phys.Chem.Solids', 'J.Phys.Condens.Matter', 'Mater.Chem.Phys.', 'Nano Lett.', 'Nanotechnol.', 'Nature Photon.', 'Solid State Commun.', 'Sov.Phys.Solid State']),
@@ -59,6 +63,7 @@ fcjournalliste = [('b', ['IEEE Trans.Appl.Supercond.', 'Supercond.Sci.Technol.']
                   ('g', ['Class.Quant.Grav.', 'Gen.Rel.Grav.', 'Living Rev.Rel.']),
                   ('c', ['Comput.Softw.Big Sci.', 'J.Grid Comput.', 'J.Open Source Softw.', 'SoftwareX']),
                   ('i', ['IEEE Instrum.Measur.Mag.', 'IEEE Sensors J.', 'IEEE Trans.Circuits Theor.', 'IEEE Trans.Instrum.Measur.', 'Instruments', 'Instrum.Exp.Tech.', 'JINST', 'Meas.Tech.', 'Measur.Sci.Tech.', 'Metrologia', 'Microscopy Microanal.', 'Rad.Det.Tech.Meth.', 'Rev.Sci.Instrum.', 'Sensors'])]
+#rearrange the lists into a dictionary
 jnltofc = {}
 for (fc, jnllist) in fcjournalliste:
     for jnl in jnllist:
@@ -360,6 +365,17 @@ def writeXML(recs,dokfile,publisher):
                 xmlstring += marcxml('599', [('a', 'date missing?!')])
         #KEYWORDS
         if rec.has_key('keyw'):
+            if len(rec['keyw']) == 1:
+                if rekeywsplit1.search(rec['keyw'][0]):
+                    keywords = re.split(', ', rec['keyw'][0])
+                    xmlstring += marcxml('595', [('a', 'Keywords split: "%s"' % (rec['keyw'][0]))])
+                elif rekeywsplit2.search(rec['keyw'][0]):
+                    keywords = re.split('; ', rec['keyw'][0])
+                    xmlstring += marcxml('595', [('a', 'Keywords split: "%s"' % (rec['keyw'][0]))])
+                else:
+                    keywords = rec['keyw']
+            else:
+                keywords = rec['keyw']
             for kw in rec['keyw']:
                 #xmlstring += marcxml('6531',[('a',kw), ('9','publisher')])
                 if kw.strip(): 
@@ -495,7 +511,7 @@ def writeXML(recs,dokfile,publisher):
         elif rec['jnl'] in jnltofc.keys():
             for fc in jnltofc[rec['jnl']]:
                 xmlstring += marcxml('65017',[('a',inspirefc[fc]),('2','INSPIRE')])
-                print 'FC:', rec['jnl'], fc
+                print '  FC:', rec['jnl'], fc
         #PACS
         if rec.has_key('pacs'):
             for pacs in rec['pacs']:
