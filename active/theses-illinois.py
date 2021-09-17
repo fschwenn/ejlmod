@@ -54,6 +54,10 @@ for (dep, aff) in departments:
             for div in divs:
                 rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'abs' : '',
                        'supervisor' : []}
+                if dep == 'Astronomy':
+                    rec['fc'] = 'a'
+                elif dep == 'Mathematics':
+                    rec['fc'] = 'm'
                 for a in div.find_all('a'):
                     rec['artlink'] = 'https://www.ideals.illinois.edu' + a['href'] #+ '?show=full'
                     rec['hdl'] = re.sub('.*handle\/', '', a['href'])
