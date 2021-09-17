@@ -40,6 +40,8 @@ for dep in deps:
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : [], 'keyw' : [], 'supervisor' : []}
             rec['link'] = 'https://academiccommons.columbia.edu' + a['href']
             rec['note'].append(re.sub('\W', ' ', dep))
+            if dep == 'Mathematics':
+                rec['fc'] = 'm'
             recs.append(rec)
 
 #check individual thesis pages
