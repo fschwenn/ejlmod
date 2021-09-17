@@ -36,6 +36,8 @@ for discipline in ['Physics', 'Mathematics']:
         divs = tocpage.body.find_all('div', attrs = {'class' : 'views-row'})
         for div in divs:
             rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+            if discipline == 'Mathematics':
+                rec['fc'] = 'm'
             for div2 in div.find_all('div', attrs = {'class' : 'views-field-title'}):
                 for a in div2.find_all('a'):
                     rec['link'] = 'https://curve.carleton.ca' + a['href']
