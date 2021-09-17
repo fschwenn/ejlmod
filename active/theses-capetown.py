@@ -41,6 +41,10 @@ for dep in ['Department+of+Physics', 'Department+of+Mathematics+and+Applied+Math
         for a in div.find_all('a'):
             rec['artlink'] = 'https://open.uct.ac.za' + a['href'] #+ '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+            if dep == 'Department+of+Astronomy':
+                rec['fc'] = 'a'
+            elif dep in ['Department+of+Mathematics+and+Applied+Mathematics', 'Department+of+Maths+and+Applied+Maths']:
+                rec['fc'] = 'm'
             recs.append(rec)
 
 i = 0
