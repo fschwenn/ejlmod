@@ -53,6 +53,12 @@ for (department, aff, dnr) in departments:
                     rec['doi'] = '20.2000/LUND/' + re.sub('.*\/', '', a['href'])
                     rec['tit'] = a.text.strip()
                     rec['aff'] = aff
+            if department in ['Atomic Physics', 'Solid State']:
+                rec['fc'] = 'q'
+            elif department in ['Mathematical Physics', 'Mathematics']:
+                rec['fc'] = 'm'
+            elif department =='Lund Observatory':
+                rec['fc'] = 'a'
             recs.append(rec)
         time.sleep(3)
 
