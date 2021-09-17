@@ -201,8 +201,8 @@ jc['43673'] = ['aappsbul', 'AAPPS Bull.', '', '', '']
 
 
 #known conferences
-confdict = {'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30',
-            'Advances on the Few-Body Problem in Physics – Selected and Refereed papers from the 8th Asia-Pacific Conference' : 'C21-03-01.3',
+confdict = {u'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30',
+            u'Advances on the Few-Body Problem in Physics – Selected and Refereed papers from the 8th Asia-Pacific Conference' : 'C21-03-01.3',
             '0361_248' : 'C19-10-14.3',
             '0361_250' : 'C19-06-10'}
 
@@ -576,7 +576,8 @@ def convertarticle(journalnumber, filename, contlevel):
                         rec['license'] = {'url' : licence['xlink:href']}
         #conference (<conf-name>, <conf-date>, <conf-loc>)
         for conf in meta.find_all('conference'):
-            rec['note'].append(conf.text.strip())
+            confnote = conf.text.strip()
+            rec['note'].append(confnote)
         #PACS
         for kwg in meta.find_all('kwd-group'):
             for title in kwg.find_all('title'):
@@ -697,11 +698,14 @@ def convertarticle(journalnumber, filename, contlevel):
     if 'vol' in rec.keys():
         isvolkey = '%s_%s' % (journalnumber, rec['vol'])
         if isvolkey in  confdict.keys():
-            rec['cnum'] = journalnumber[isvolkey]
+            rec['cnum'] = confdict[isvolkey]
             rec['tc'] = 'C'
-    if subjt in confdict.keys():
-        rec['cnum'] = confdict[subjt]
-        rec['tc'] = 'C'
+            rec['note'].append('added cnum:%s' % (rec['cnum']))
+    for note in rec['note']:
+        if note in confdict.keys():
+            rec['cnum'] = confdict[note]
+            rec['tc'] = 'C'
+            rec['note'].append('added cnum:%s' % (rec['cnum']))
     return rec
 
 #combine Springer and SISSA references
