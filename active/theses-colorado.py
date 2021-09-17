@@ -43,6 +43,8 @@ for (affurl, aff, affname, pages) in departments:
                     rec['link'] = urltrunc + a['href']
                     rec['doi'] = '20.2000/ColoradoU/' + re.sub('.*\/', '', a['href'])
                     rec['tit'] = a.text.strip()
+            if affurl == 'Mathematics':
+                rec['fc'] = 'm'
             if not rec['doi'] in ['20.2000/ColoradoU/6m311p316', '20.2000/ColoradoU/5138jd902']:                
                 recs.append(rec)
     time.sleep(10)
