@@ -47,6 +47,8 @@ for fac in ['510+Mathematik', '530+Physik']:
         for tr in tocpage.body.find_all('tr'):
             for td in tr.find_all('td', attrs = {'headers' : 't1'}):
                 rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : []}
+                if fac == '510+Mathematik':
+                    rec['fc'] = 'm'
                 for a in td.find_all('a'):
                     rec['artlink'] = 'https://ediss.sub.uni-hamburg.de' + a['href']
                     recs.append(rec)
