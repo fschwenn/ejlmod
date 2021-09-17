@@ -136,6 +136,11 @@ for (hdl, uni, dep) in departments[kw]:
         #pick individual links            
         for tr in tocpage.body.find_all('tr'):
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : [], 'keyw' : [], 'note' : []}
+            #fc
+            if kw == 'Astro':
+                rec['fc'] = 'a'
+            elif kw == 'Math':
+                rec['fc'] = 'm'
             #affiliation
             rec['aff'] = ['%s, %s, India' % (uni, dep)]
             for td in tr.find_all('td', attrs = {'headers' : 't1'}):
