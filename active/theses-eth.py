@@ -41,10 +41,12 @@ for dep in ['02000', '02010', '02150']:
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
         if dep == '02000':
             rec['note'] = ['Dep. Mathematik']
+            rec['fc'] = 'm'
         elif dep == '02010':
             rec['note'] = ['Dep. Physik']
         elif dep == '02150':
             rec['note'] = ['Dep. Informatik']
+            rec['fc'] = 'c'
         for a in div.find_all('a'):
             rec['artlink'] = 'https://www.research-collection.ethz.ch' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('.*handle\/(.*\d).*', r'\1', a['href'])
