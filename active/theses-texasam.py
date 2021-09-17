@@ -40,6 +40,8 @@ for department in ['Physics', 'Physics+and+Astronomy', 'Mathematics']:
     divs = tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'})
     for div in divs:
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+        if department == 'Mathematics':
+            rec['fc'] = 'm'
         for span in div.find_all('span', title=re.compile('rft.degree=Doctor')):
             for a in div.find_all('a'):
                 rec['artlink'] = 'https://oaktrust.library.tamu.edu' + a['href'] #+ '?show=full'
