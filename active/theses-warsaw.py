@@ -44,6 +44,8 @@ for (depnr, aff, subject) in deps:
             rec['link'] = 'https://depotuw.ceon.pl' + a['href'] + '?show=full'
             rec['doi'] = '20.2000/Warsaw/' + re.sub('\/handle\/', '', a['href'])
             rec['tit'] = a.text.strip()
+            if depnr = '29':
+                rec['fc'] = 'm'
             recs.append(rec)
 
     i = 0
