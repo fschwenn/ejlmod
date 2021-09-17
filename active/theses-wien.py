@@ -35,6 +35,8 @@ for (publisher, fac, facnum) in [('Vienna U., Dept. Math. ', 'math', '56'), ('Vi
     time.sleep(5)
     for p in tocpage.body.find_all('p'):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : [], 'supervisor' : []}
+        if fac == 'math':
+            rec['fc'] = 'm'
         for aut in p.find_all('span', attrs = {'class' : 'person_name'}):
             rec['autaff'] = [[ aut.text.strip(), publisher ]]
             for a in p.find_all('a'):
