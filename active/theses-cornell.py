@@ -53,6 +53,14 @@ for filter in ['Physics', 'Quantum+physics', 'Theoretical+physics', 'physics', '
                     for a in div.find_all('a'):
                         rec['artlink'] = 'https://ecommons.cornell.edu' + a['href'] #+ '?show=full'
                         rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                        if filter in ['Mathematics', 'Applied+mathematics']:
+                            rec['fc'] = 'm'
+                        elif filter in ['Astronomy', 'Astrophysics']:
+                            rec['fc'] = 'a'
+                        elif filter in ['String+Theory']:
+                            rec['fc'] = 't'
+                        elif filter in ['CMS']:
+                            rec['fc'] = 'e'
                         if rec['hdl'] in allhdls:
                             print 'skip double appearance of', rec['hdl']
                         else:
