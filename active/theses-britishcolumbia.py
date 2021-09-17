@@ -54,6 +54,8 @@ for dep in deps:
                 rec['doi'] = '20.2000/BritishColumbia/' + re.sub('.*items\/', '', a['href'])
                 if 'UBCO' in dep:
                     rec['note'].append('Okanagan Campus')
+                if dep == 'Mathematics,%20Department%20of&campus=UBCV':
+                    rec['fc'] = 'm'
                 if not rec['doi'] in dois:
                     recs.append(rec)
                     dois.append(rec['doi'])
