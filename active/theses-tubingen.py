@@ -41,6 +41,8 @@ for fac in ['Physik', 'Sonstige+-+Mathematik+und+Physik', 'Mathematik']:
     tocpage = BeautifulSoup(urllib2.urlopen(req))
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+        if fac == 'Mathematik':
+            rec['fc'] = 'm'
         for a in div.find_all('a'):
             rec['artlink'] = 'https://publikationen.uni-tuebingen.de' + a['href'] #+ '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
