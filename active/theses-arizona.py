@@ -41,6 +41,10 @@ for department in ['Physics', 'Mathematics', 'Astrophysics']:
         for a in div.find_all('a'):
             rec['artlink'] = 'https://repository.asu.edu' + a['href'] #+ '?show=full'
             rec['tit'] = a.text.strip()
+            if department == 'Mathematics':
+                rec['fc'] = 'm'
+            elif department == 'Astrophysics':
+                rec['fc'] = 'a'
             prerecs.append(rec)
     time.sleep(30)
 
