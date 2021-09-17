@@ -52,6 +52,10 @@ for section in sections:
                     #it's not a registered handle
                     #rec['hdl'] = re.sub('.*handle\/', '', a['href'])
                     rec['doi'] = '20.2000/PRINCETON/' + re.sub('.*handle\/', '', a['href'])
+                    if section == 'Astrophysics':
+                        rec['fc'] = 'a'
+                    elif section == 'Mathematics':
+                        rec['fc'] = 'm'
                     recs.append(rec)
     i = 0
     for rec in recs:
