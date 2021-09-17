@@ -45,6 +45,10 @@ for (depnr, department) in [('46', 'Physics'), ('48', 'Mathematics'), ('49', 'Ap
                     if int(rec['year']) < now.year - 2*10:
                         new = False
                         print '  skip',  rec['year']
+            if depnr in ['46', '48']:
+                rec['fc'] = 'm'
+            elif depnr == '43':
+                rec['fc'] = 'c'
             if new:
                 for a in div.find_all('a'):
                     if re.search('handle', a['href']):
