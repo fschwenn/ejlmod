@@ -30,7 +30,7 @@ publisher = 'TCD, Dublin'
 
 boringschools = ['Biochemistry & Immunology', 'Business', 'Chemistry',
                  'Computer Science & Statistics', 'Creative Arts', 'Dental Sciences',
-                 'Ecumenics</subfield>', 'Education', 'Engineering', 'English',
+                 'Ecumenics', 'Education', 'Engineering', 'English',
                  'Histories & Humanities', 'Lang, Lit', 'Law',
                  'Linguistic Speech & Comm Sci', 'Medicine', 'Natural Sciences',
                  'Nursing & Midwifery', 'Pharmacy & Pharma', 'Psychology',
@@ -105,6 +105,7 @@ for year in years:
         if 'school' in rec.keys():
             if rec['school'] == 'Mathematics':
                 rec['autaff'][-1].append('Trinity Coll., Dublin')
+                rec['fc'] = 'm'
             elif rec['school'] in boringschools:
                 print '   skip School of %s' % (rec['school'])
                 keepit = False
