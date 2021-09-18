@@ -156,7 +156,7 @@ for rec in prerecs:
         if meta['content'] in divisionsdict.keys():
             if meta['content'] in ['inst_50095', 'inst_50135', 'klips-14725', 'klips-14795']:
                 rec['fc'] = 'm'
-            elif in ['klips-14751']:
+            elif meta['content'] in ['klips-14751']:
                 rec['fc'] = 'c'            
             rec['autaff'][-1].append(divisionsdict[ meta['content'] ])
         else:
