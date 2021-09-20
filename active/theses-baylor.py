@@ -29,7 +29,7 @@ typecode = 'T'
 
 jnlfilename = 'THESES-BAYLOR-%s' % (stampoftoday)
 rpp = 50
-pages = 3
+pages = 2
 
 
 hdr = {'User-Agent' : 'Magic Browser'}
