@@ -73,25 +73,25 @@ multwords = [['AdS', 'CFT'], ['quantum', 'field', 'theory'],
              ['Quantum', 'Cosmology'], ['quantum', 'electrodynamics'],
              ['quantum', 'gravity'], ['string', 'theory'],
              ['wakefield', 'acceleration']]
-dedicatedharvester = ['alberta', 'arizona-diss', 'asu', 'barcelona', 'baylor', 'bielefeld', 'brown', 'caltech', 'cambridge',
+dedicatedharvester = ['alabama', 'alberta', 'arizona-diss', 'asu', 'barcelona', 'baylor', 'bielefeld', 'brown', 'caltech', 'cambridge',
                       'colorado', 'columbia-diss', 'dortmund-diss', 'durham', 'freiburg-diss', 'glasgow',
                       'goettingen', 'harvard', 'heid-diss', 'houston', 'humboldt-diss', 'ksu',
-                      'ku', 'liverpool', 'lmu-germany', 'lund', 'manchester', 'mcgill', 'melbourne',
-                      'mississippi', 'montstate', 'narcis', 'neu', 'ncsu', 'ohiolink', 'oregon', 'princeton', 
-                      'qucosa-diss', 'regensburg-diss', 'rochester', 'rutgers', 'giessen-diss', 'tamu', 'toronto-diss',
+                      'ku', 'liverpool', 'lmu-germany', 'lsu-diss', 'lund', 'manchester', 'mcgill', 'melbourne',
+                      'mississippi', 'montstate', 'narcis', 'neu', 'ncsu', 'ohiolink', 'oregon', 'oviedo', 'princeton', 
+                      'qucosa-diss', 'regensburg-diss', 'rochester', 'rutgers', 'giessen-diss', 'syracuse-diss', 'tamu', 'toronto-diss',
                       'ttu', 'ubc', 'uky-diss', 'umich', 'valencia', 'vcu', 'vt', 'washington', 'wayne',
-                      'whiterose', 'wm-mary', 'wurz-diss']
+                      'whiterose', 'wm-mary', 'wurz-diss', 'york']
 dedicatedaffiliations = ['Imperial College London', 'University of Edinburgh',
                          'University College London (University of London)',
                          "King's College London (University of London)", 'University of Manchester']
 dedicatedsuboptimalharvester = ['eth', 'fsu', 'cornell', 'karlsruhe-diss', 'stanford', 'texas', 'thueringen', 'thueringen-diss']
-nodedicatedharvester = ['aberdeen', 'alabama', 'ankara', 'arkansas', 'bremen', 'brazil', 'bu', 'cardiff',  'clemson', 'colo-mines','colostate',
+nodedicatedharvester = ['aberdeen', 'ankara', 'arkansas', 'bremen', 'brazil', 'bu', 'cardiff',  'clemson', 'colo-mines','colostate',
                         'darmstadt', 'darmstadt2', 'delaware', 'duquesne', 'ethos', 'fiu', 'florida', 'gatech', 'georgia-state', 
-                        'groningen', 'guelph', 'hokkaido', 'iowa', 'jairo', 'jamescook', 'lehigh', 'liberty', 'lsu-diss', 'macquarie-phd',
-                        'maynooth', 'montana', 'msstate', 'mtu', 'odu', 'oviedo', 'potsdam-diss', 'regina', 'rice', 'rit', 'siu-diss',
-                        'south-carolina', 'star-france', 'stellenbosch', 'st-andrews', 'syracuse-diss', 'temple', 'uconn',
+                        'groningen', 'guelph', 'hokkaido', 'iowa', 'jairo', 'jamescook', 'lehigh', 'liberty', 'macquarie-phd',
+                        'maynooth', 'montana', 'msstate', 'mtu', 'odu', 'potsdam-diss', 'regina', 'rice', 'rit', 'siu-diss',
+                        'south-carolina', 'star-france', 'stellenbosch', 'st-andrews', 'temple', 'uconn',
                         'udel', 'uiuc', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'vandy', 'virginia', 'vrije',
-                        'wustl', 'wvu', 'york']
+                        'wustl', 'wvu']
 dontcheckforpdf = ['ethos']
 
 wordsperquery = 10
