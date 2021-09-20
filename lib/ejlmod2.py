@@ -53,6 +53,8 @@ rekeywsplit2 =  re.compile('; .*; ')
 #valid arXiv numbers
 rearxivold = re.compile('^[a-z\-]+\/\d{7}$')
 rearxivnew = re.compile('^ar[xX]iv:\d{4}\.\d{4,5}')
+#valid ORCID
+reorcid = re.compile('^ORCID:\d{4}\-\d{4}\-\d{4}\-\d{3}[0-9X]$')
 
 #list of lists to automatically suggest fieldcodes based on journalname
 #(can also handle mutiple FCs like 'ai' or so)
@@ -616,7 +618,10 @@ def writeXML(recs,dokfile,publisher):
                 autlist = [('a',shapeaut(autaff[0]))]
                 for aff in autaff[1:]:
                     if re.search('ORCID', aff):
-                        autlist.append(('j', re.sub(' ', '', aff)))
+                        if reorcid.search(aff):
+                            autlist.append(('j', aff))
+                        else:
+                            print ' "%s" is not a valid ORCID' % (aff)                        
                     elif re.search('EMAIL', aff):
                         if re.search('@', aff):
                             autlist.append(('m', re.sub('EMAIL:', '', aff)))
@@ -652,7 +657,10 @@ def writeXML(recs,dokfile,publisher):
                     autlist = [('a',shapeaut(autaff[0]))]
                 for aff in autaff[1:]:
                     if re.search('ORCID', aff):
-                        autlist.append(('j', re.sub(' ', '', aff)))
+                        if reorcid.search(aff):
+                            autlist.append(('j', aff))
+                        else:
+                            print ' "%s" is not a valid ORCID' % (aff)    
                     elif re.search('EMAIL', aff):
                         if re.search('@', aff):
                             autlist.append(('m', re.sub('EMAIL:', '', aff)))
@@ -721,7 +729,11 @@ def writeXML(recs,dokfile,publisher):
                             aut.append(('q', re.sub('.*, CHINESENAME: ', '', author)))
                             author = re.sub(' *, CHINESENAME.*', '', author)
                         if re.search('ORCID', author):
-                            aut.append(('j', re.sub(' ', '', re.sub('\.$', '', re.sub('.*, ',  '', author)))))
+                            orcid = re.sub(' ', '', re.sub('\.$', '', re.sub('.*, ',  '', author)))
+                            if reorcid.search(orcid):
+                                aut.append(('j', orcid))
+                            else:
+                                print ' "%s" is not a valid ORCID' % (orcid)    
                             author = re.sub(' *, ORCID.*', '', author)
                         if re.search('EMAIL', author):
                             if re.search('@', author):
