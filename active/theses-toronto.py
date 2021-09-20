@@ -50,7 +50,7 @@ boringdeps = ['Adult Education and Counselling Psychology', 'Aerospace Science a
               'Sociology and Equity Studies in Education', 'Speech-Language Pathology']
 
 rpp = 50
-pages = 10 
+pages = 10
 
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
@@ -144,6 +144,8 @@ for rec in prerecs:
                             keepit = False
         #if i % 10 == 0:
         #    print ', '.join(['%s (%s)' % (dep, len(deprecs[dep])) for dep in deprecs.keys()])
+    if not 'tit' in rec.keys():
+        keepit = False
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
