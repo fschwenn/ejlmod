@@ -90,6 +90,8 @@ for rec in recs:
                 supervisor = re.sub(' *\[.*', '', meta['content'])
                 rec['supervisor'] = [[ supervisor ]]
                 rec['supervisor'][-1].append('Cape Town U.')
+    if rec['hdl'] == '11427/32379':
+        rec['date'] = '2020'
 
 
 
