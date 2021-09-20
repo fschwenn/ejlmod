@@ -26,7 +26,7 @@ publisher = 'Osaka U. '
 jnlfilename = 'THESES-OSAKA_U-%s' % (stampoftoday)
 
 rpp = 200
-pages = 2
+pages = 1
 hdr = {'User-Agent' : 'Magic Browser'}
 
 #first get links of year pages
