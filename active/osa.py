@@ -62,6 +62,10 @@ except:
 done = ['https://www.osapublishing.org/josab/abstract.cfm?uri=josab-36-7-E112']
 (level0note, level1note) = (False, False)
 recs = []
+year = False
+for h2 in tocpage.find_all('h2', attrs = {'class' : 'heading-block-header'}):
+    if re.search(' 20\d\d', h2.text):
+        year = re.sub('.* (20\d\d).*', r'\1', re.sub('[\n\t\r]', '', h2.text.strip()))
 divs = tocpage.body.find_all('div', attrs = {'class' : 'osap-accordion'})
 if not divs:
     divs = tocpage.find_all('body')
@@ -80,12 +84,25 @@ for div in divs:
                 rec['note'].append(level0note)
             if level1note:
                 rec['note'].append(level1note)
+            if year:
+                rec['year'] = year
             for a in p.find_all('a'):
                 rec['tit'] = p.text.strip()
                 rec['artlink'] = 'https://www.osapublishing.org' + a['href']
             if not rec['artlink'] in done:                
                 recs.append(rec)
                 done.append(rec['artlink'])
+        #pages
+        for p in div2.find_all('p', attrs = {'style' : 'color: #999'}):
+            pt = re.sub('[\n\t\r]', '', p.text.strip()) 
+            if re.search('\), \d+\-\d+', pt):
+                rec['p1'] = re.sub('.*\), (\d+)\-.*', r'\1', pt)
+                rec['p2'] = re.sub('.*\), \d+\-(\d+).*', r'\1', pt)
+        #authors
+        for p in div2.find_all('p', attrs = {'class' : 'article-authors'}):
+            rec['auts'] = []
+            for aut in re.split('(,| and) ', p.text.strip()):
+                rec['auts'].append(re.sub('^and ', '', aut))
 
 i = 0
 for rec in recs:
@@ -93,13 +110,13 @@ for rec in recs:
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-        time.sleep(3)
+        time.sleep(5)
     except:
         print "retry %s in 180 seconds" % (artlink)
         time.sleep(180)
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     print '   read meta tags'
-    for meta in artpage.head.find_all('meta'):
+    for meta in artpage.find_all('meta'):
         if meta.has_attr('name'):
             if meta['name'] == 'dc.description':
                 rec['abs'] = meta['content']
@@ -107,7 +124,7 @@ for rec in recs:
                 rec['doi'] = meta['content']
             elif meta['name'] == 'dc.subject':
                 rec['keyw'].append(meta['content'])
-            elif meta['name'] == 'citation_author':
+            elif meta['name'] == 'citation_author':                
                 rec['autaff'].append([ meta['content'] ])
             elif meta['name'] == 'citation_author_institution':
                 rec['autaff'][-1].append(meta['content'])
@@ -130,7 +147,7 @@ for rec in recs:
                     rec['FFT'] = meta['content']
     #references
     j = 0
-    for ol in artpage.body.find_all('ol', attrs = {'id' : 'referenceById'}):
+    for ol in artpage.find_all('ol', attrs = {'id' : 'referenceById'}):
         lis = ol.find_all('li')
         print '   read %i references' % (len(lis))
         for li in lis:
@@ -144,10 +161,9 @@ for rec in recs:
             ref = re.sub('[\n\t]', ' ', li.text.strip())
             ref = '[%i] %s' % (j, re.sub('\. *, DOI', ', DOI', ref))
             rec['refs'].append([('x', ref)])
-            
-
-
-
+    if not rec['autaff']:
+        del rec['autaff']
+    print '  ', rec.keys()
 
 
 
