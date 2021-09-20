@@ -30,29 +30,48 @@ hdr = {'User-Agent' : 'Magic Browser'}
 ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.firefox.options import Options
 
 if jnl == 'science':
     jnlname = 'Science'
-elif jnl == 'advances':
+elif jnl == 'sciadv':
     jnlname = 'Sci.Adv.'
+
+#driver
+opts = Options()
+opts.add_argument("--headless")
+caps = webdriver.DesiredCapabilities().FIREFOX
+caps["marionette"] = True
+driver  = webdriver.Firefox(options=opts, capabilities=caps)
+#webdriver.PhantomJS()
+driver.implicitly_wait(30)
 
 def getissuenumbers(jnl, year):
     issues = []
     tocurl = 'https://%s.sciencemag.org/content/by/year/%s' % (jnl, year)
-    tocreq = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(tocreq, context=ctx), features="lxml")
-    for div in tocpage.find_all('div', attrs = {'class' : 'archive-issue-list'}):
-        for a in div.find_all('a', attrs = {'class' : 'highwire-cite-linked-title'}):
-            vol = re.sub('.*tent\/(\d+).*', r'\1', a['href'])
+    tocurl = 'https://www.science.org/loi/%s/group/y%s' % (jnl, year)
+    print tocurl
+    driver.get(tocurl)
+    tocpage = BeautifulSoup(driver.page_source, features="lxml")
+    #tocreq = urllib2.Request(tocurl, headers=hdr)
+    #tocpage = BeautifulSoup(urllib2.urlopen(tocreq, context=ctx), features="lxml")
+    for a in tocpage.find_all('a', attrs = {'class' : 'd-flex'}):
+            vol = re.sub('.*[a-z]\/(\d+).*', r'\1', a['href'])
             issue = re.sub('.*\/(\d+).*', r'\1', a['href'])
-            issues.append((vol, issue))
+            if re.search('^\d+$', vol) and  re.search('^\d+$', issue):
+                issues.append((vol, issue))
+    issues.sort()
     print 'available', issues
     return issues
 
 def getdone():
     if jnl == 'science':
         reg = re.compile('science(\d+)\.(\d+)')
-    elif jnl == 'advances':
+    elif jnl == 'sciadv':
         reg = re.compile('sciadv(\d+)\.(\d+)')
     ejldir = '/afs/desy.de/user/l/library/dok/ejl'
     issues = []
@@ -62,26 +81,32 @@ def getdone():
                 regs = reg.search(datei)
                 vol = regs.group(1)
                 issue = regs.group(2)
-                issues.append((vol, issue))
+                if not (vol, issue) in issues:
+                    issues.append((vol, issue))
+    issues.sort()
     print 'done', issues
     return issues
 
 def harvestissue(jnl, vol, issue):
-    tocurl = 'https://%s.sciencemag.org/content/%s/%s' % (jnl, vol, issue)
-    print "get table of content of %s %s.%s via %s ..." % (jnlname, vol, issue, tocurl)
-    tocreq = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(tocreq, context=ctx), features="lxml")
-    for meta in tocpage.find_all('meta'):
-        if meta.has_attr('name') and meta.has_attr('content'):
-            if meta['name'] == 'citation_publication_date':
-                year = re.sub('.*([12]\d\d\d).*', r'\1', meta['content'])
+    tocurl = 'https://www.science.org/toc/%s/%s/%s' % (jnl, vol, issue)
+    print "   get table of content of %s %s.%s via %s ..." % (jnlname, vol, issue, tocurl)
+    driver.get(tocurl)
+    tocpage = BeautifulSoup(driver.page_source, features="lxml")
     recs = []
-    for li in tocpage.find_all('li', attrs = {'class' : ['issue-toc-section-review', 'issue-toc-section-research-articles', 'issue-toc-section-reports']}):
-        for article in li.find_all('article'):
-            for h3 in article.find_all('h3'):
+    for sct in tocpage.find_all('section', attrs = {'class' : 'toc__section'}):
+        for h4 in sct.find_all('h4'):
+            scttit = h4.text.strip()
+        if scttit in ['Editorial', 'In Brief', 'In Depth', 'Feature', 'Working Life',
+                      'Books et al.', 'Policy Forum', 'Perspectives', 'Association Affiars',
+                      'In Other Journals', 'In Science Journals', 'Neuroscience',
+                      'Social and Interdisciplinary Sciences', 'Biomedicine and Life Sciences']:
+            print '      skip', scttit
+        else:
+            for h3 in sct.find_all('h3'):
                 for a in h3.find_all('a'):
-                    rec = {'tc' : 'P', 'jnl' : jnlname, 'vol' : vol, 'issue' : issue, 'year' : year, 'autaff' : []}
-                    rec['artlink'] = 'https://%s.sciencemag.org%s' % (jnl, a['href'])
+                    rec = {'tc' : 'P', 'jnl' : jnlname, 'vol' : vol, 'issue' : issue,
+                           'year' : year, 'autaff' : [], 'note' : [scttit], 'refs' : []}
+                    rec['artlink'] = 'https://www.science.org%s' % (a['href'])
                     recs.append(rec)
     #check article pages
     i = 0
@@ -90,53 +115,68 @@ def harvestissue(jnl, vol, issue):
         print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
         try:
             time.sleep(40)
-            pagreq = urllib2.Request(rec['artlink'], headers=hdr)
-            page = BeautifulSoup(urllib2.urlopen(pagreq), features="lxml")
+            driver.get(rec['artlink'])
+            page = BeautifulSoup(driver.page_source, features="lxml")
         except:
             print "retry in 180 seconds"
             time.sleep(180)
             pagreq = urllib2.Request(rec['artlink'], headers=hdr)
             page = BeautifulSoup(urllib2.urlopen(pagreq), features="lxml")
+        #DOI
+        rec['doi'] = re.sub('.*?(10\.\d+\/)', r'\1', rec['artlink'])
         for meta in page.find_all('meta'):
             if meta.has_attr('name') and meta.has_attr('content'):
-                #pages
-                if meta['name'] == 'citation_firstpage':
-                    rec['p1'] = meta['content']
-                elif meta['name'] == 'citation_lastpage':
-                    rec['p2'] = meta['content']
-                #DOI
-                elif meta['name'] == 'citation_doi':
-                    rec['doi'] = meta['content']
                 #title
-                elif meta['name'] == 'citation_title':
+                if meta['name'] == 'dc.Title':
                     rec['tit'] = meta['content']
                 #date
-                elif meta['name'] == 'citation_publication_date':
+                elif meta['name'] == 'dc.Date':
                     rec['date'] = meta['content']
-                #authors
-                elif 'citation_author' == meta['name']:
-                    rec['autaff'].append([meta['content']])
-                elif 'citation_author_institution' == meta['name']:
-                    rec['autaff'][-1].append(meta['content'])
-                elif meta['name'] == 'citation_author_orcid':
-                    orcid = re.sub('.*/', 'ORCID:', meta['content'])
-                    rec['autaff'][-1].append(orcid)
-                #abstract
-                elif meta['name'] == 'citation_abstract':
-                    if not meta.has_attr('scheme'):
-                        rec['abs'] = meta['content']
+                #pages
+                if meta['name'] == 'dc.Identifier':
+                    if meta.has_attr('scheme'):
+                        if meta['scheme'] == 'publisher-id':
+                            rec['p1'] = meta['content']
+                        elif meta['scheme'] == 'doi':
+                            rec['doi'] = meta['content']
+        #authors and affiliations
+        for div in page.find_all('div', attrs = {'property' : 'author'}):
+            for span in div.find_all('span', attrs = {'property' : 'familyName'}):
+                name = span.text.strip()
+            for span in div.find_all('span', attrs = {'property' : 'givenName'}):
+                name += ', ' + span.text.strip()
+            rec['autaff'].append([name])
+            for a in div.find_all('a', attrs = {'class' : 'orcid-id'}):
+                rec['autaff'][-1].append(re.sub('.*\/', 'ORCID:', a['href']))
+            for div2 in div.find_all('div', attrs = {'property' : 'organization'}):
+                rec['autaff'][-1].append(div2.text.strip())
+        #abstract
+        for section in page.find_all('section', attrs = {'id' : 'abstract'}):
+            for h2 in section.find_all('h2'):
+                h2.decompose()
+            rec['abs'] = section.text.strip()
         #strange page
         if not 'p1' in rec.keys():
             rec['p1'] = re.sub('.*\.', '', rec['doi'])
         #references
-        for div in page.find_all('div', attrs = {'class' : 'ref-list'}):
-            rec['refs'] = []
-            for li in div.find_all('li'):
-                for a in li.find_all('a', attrs = {'class' : 'rev-xref-ref'}):
+        divs = page.find_all('div', attrs = {'class' : 'labeled'})
+        if not len(divs):
+             divs = page.find_all('div', attrs = {'role' : 'doc-biblioentry'})
+        for div in divs:
+            for d2 in div.find_all('div', attrs = {'class' : 'label'}):
+                d2t = d2.text
+                d2.replace_with('[%s] ' % d2t)
+            for a in div.find_all('a'):
+                at = a.text.strip()
+                ah = a['href']
+                if at == 'Crossref':
+                    a.replace_with(re.sub('.*doi.org\/', ', DOI: ', ah))
+                else:
                     a.decompose()
-                    for a in li.find_all('a'):
-                        a.decompose()
-                    rec['refs'].append([('x', li.text.strip())])
+            rec['refs'].append([('x', div.text.strip())])
+        #for k in rec.keys():
+        #    print '  ', k, '::', rec[k]
+        print '  (%s)' % (', '.join(['%s:%s' % (k, len(rec[k])) for k in rec.keys()]))
     return recs
 
 
