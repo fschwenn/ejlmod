@@ -110,7 +110,7 @@ for (affurl, aff, affname) in departments:
             rec['hidden'] = rec['pdf_url']
         #DOI
         if not 'link' in rec.keys():
-            rec['link'] = a['artlink']
+            rec['link'] = rec['artlink']
             rec['doi'] = '30.3000/McGill/' + re.sub('.*\/(.+)', r'\1', rec['link'])
             
         print '  ', rec.keys()
