@@ -31,6 +31,8 @@ urltrunc = 'https://escholarship.mcgill.ca'
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
+artlinks = []
+
 for (affurl, aff, affname) in departments:
     recs = []
     jnlfilename = 'THESES-MCGILL-%s-%s' % (stampoftoday, affname)
@@ -45,15 +47,17 @@ for (affurl, aff, affname) in departments:
                 for a in h4.find_all('a'):
                     rec['artlink'] = urltrunc + a['href']
                     rec['tit'] = a.text.strip()
-            if affname == 'MATHEMATICS':
-                rec['fc'] = 'm'
-            for dd in li.find_all('dd'):
-                ddt = dd.text.strip()
-                if re.search('^[12]\d\d\d', ddt):
-                    rec['date'] = ddt
-                    rec['year'] = re.sub('.*(\d\d\d\d).*', r'\1', ddt)
-                    if int(rec['year']) > now.year - 15:
-                        recs.append(rec)
+            if not rec['artlink'] in artlinks:
+                artlinks.append(artlinks)
+                if affname == 'MATHEMATICS':
+                    rec['fc'] = 'm'
+                    for dd in li.find_all('dd'):
+                        ddt = dd.text.strip()
+                        if re.search('^[12]\d\d\d', ddt):
+                            rec['date'] = ddt
+                            rec['year'] = re.sub('.*(\d\d\d\d).*', r'\1', ddt)
+                            if int(rec['year']) > now.year - 15:
+                                recs.append(rec)
         print '   %i theses so far' % (len(recs))
         time.sleep(5)
 
