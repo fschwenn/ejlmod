@@ -18,99 +18,102 @@ nr = sys.argv[1]
 vol = sys.argv[2]
 year = sys.argv[3]
 
-htmlentity = re.compile(r'&#x.*?;')
-def lam(x):                                                
-    x  = x.group()
-    return unichr(int(x[3:-1], 16))
-def validxml(string):
-    if type(string) == type(()):
-        return tuple([validxml(part) for part in string])
-    elif type(string) == type([]):
-        return [validxml(part) for part in string]
-    else:
-        #print '--->',string
-        string = htmlentity.sub(lam, string)
-        string = re.sub('&','&amp;',string)
-        string = re.sub('>','&gt;',string)
-        string = re.sub('<','&lt;',string)
-        string = re.sub('"','&quot;',string)
-        string = re.sub('\'','&apos;',string)
-        return re.sub('  +', ' ', string)
+xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+ppdfpath = '/afs/desy.de/group/library/publisherdata/pdf'
 
-
-xmldir = os.path.join('/afs/desy.de/group/library/preprints/incoming', vol)
-
-if not os.path.isdir(xmldir):
-    os.system('mkdir %s' % (xmldir))
+publisher = 'SISSA'
+jnlfilename = 'pos_%s' % (vol)
 
 tocurl = 'https://pos.sissa.it/%s/' % (nr)
-tocpage = BeautifulSoup(urllib2.urlopen(tocurl))
+tocpage = BeautifulSoup(urllib2.urlopen(tocurl), features="lxml")
 
 note = False
+recs = []
 for tr in tocpage.body.find_all('tr'):
-    print tr.text
+    #print tr.text
     if tr.has_attr('class'):
         note = tr.text.strip()
         print '===[ %s ]===' % (note)
     arturl = False
-    rec = {'540  ' : [[('a', 'CC-BY-NC-ND-4.0')]],
-           '980  ' : [[('a', 'ConferencePaper')], [('a', 'HEP')]]}
+    rec = {'vol' : vol, 'tc' : 'C', 'year' : year, 'jnl' : 'PoS', 'auts' : [], 'col' : []}
+    if note: rec['note'] = [note]
+    #cnum
     if len(sys.argv) > 4:
         rec['cnum'] = sys.argv[4]
+    #title
     for span in tr.find_all('span', attrs = {'class' : 'contrib_title'}):
-        rec['245  '] = [[('a', span.text.strip())]]
+        rec['tit'] = span.text.strip()
+    #articleID
     for span in tr.find_all('span', attrs = {'class' : 'contrib_code'}):
         for a in span.find_all('a'):
             arturl = 'https://pos.sissa.it' + a['href']
-            rec['8564 '] = [[('u', arturl + 'pdf')]]
-            rec['FFT  '] = [[('a', arturl + 'pdf'),
-                            ('t', 'PoS'),
-                            ('d', 'Fulltext')]]
-            #if note: rec['599  '] = [[('a', note)]]
-            if note: rec['595  '] = [[('a', note)]]
-            print arturl
-            p1 = re.sub('.*\/(\d+).*', r'\1',  a['href'])
-            rec['773  '] = [[('c', p1), ('y', year), ('v', vol), ('p', 'PoS')]]
+            rec['p1'] = re.sub('.*\/(\d+).*', r'\1',  a['href'])
     if not arturl:
         continue
-    artpage = BeautifulSoup(urllib2.urlopen(arturl))
-    auts = '100  '
+    print arturl
+    artpage = BeautifulSoup(urllib2.urlopen(arturl), features="lxml")
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
+            #authors
             if meta['name'] == 'citation_author':
                 if re.search('behalf of', meta['content']):
                     col = re.sub('.*behalf of ', '', meta['content'])
                     col = re.sub('^the ', '', col)
                     col = re.sub(' [Cc]ollaboration,?$', '', col)
-                    rec['710  '] = [[('g', col)]]
-                elif auts in rec.keys():
-                    rec[auts].append([('a', meta['content'])])
+                    rec['col'].append(col)
                 else:
-                    rec[auts] = [[('a', meta['content'])]]
-                    auts = '700  '
+                    mc = re.sub(',$', '', meta['content'])
+                    if mc in ['IceCube-Gen2', 'FACT', 'Dampe', 'Fermi Large Area Telescope', 'KM3NeT',
+                              'The CTA-LST Project', 'Hess', 'Telescope Array', 'Veritas', 'Fermi-LAT',
+                              'H.E.S.S.', 'KASCADE Grande', 'LAGO', 'Hawc', 'MAGIC', 'Pierre Auger',
+                              'IceCube']:
+                        rec['col'].append(mc)
+                    else:
+                        rec['auts'].append(mc)
+            #FFT
+            elif meta['name'] == 'citation_pdf_url':
+                rec['FFT'] = meta['content']
+            #date
             elif meta['name'] == 'citation_publication_date':
-                rec['260  '] = [[('c', meta['content'])]]
+                rec['date'] = meta['content']
+            #DOI
             elif meta['name'] == 'citation_doi':
-                rec['0247 '] = [[('a', meta['content']), ('2', 'DOI')]]
+                rec['doi'] = meta['content']
+            #abstract
             elif meta['name'] == 'citation_abstract':
-                rec['520  '] = [[('a', meta['content'])]]
-    if not '0247 ' in rec.keys():
-        rec['0247 '] = [[('a', '10.22323/1.%s.%04i' % (nr, int(p1))), ('2', 'DOI')]]
-    ouf = codecs.EncodedFile(codecs.open('%s/%s.xml' % (xmldir, p1), mode='wb'), 'utf8')
-    ouf.write('<collection>\n')
-    ouf.write(' <record>\n')
-    print rec.keys()
-    for marc in rec.keys():
-        #print marc
-        for entry in rec[marc]:
-            #print entry
-            ouf.write('  <datafield tag="%s" ind1="%s" ind2="%s">\n' % (marc[:3], marc[3], marc[4]))
-            for subentry in entry:
-                try:
-                    ouf.write('   <subfield code="%s">%s</subfield>\n' % (subentry[0], validxml(subentry[1])))
-                except:
-                    ouf.write('   <subfield code="%s">%s</subfield>\n' % (subentry[0], validxml(unicode(subentry[1].encode('ascii', 'ignore'), 'utf-8'))))
-            ouf.write('  </datafield>\n')
-    ouf.write(' </record>\n')
-    ouf.write('</collection>\n')
-    ouf.close()
+                rec['abs'] = meta['content']
+    #construct DOI if neccessasry
+    if not 'doi' in rec.keys():
+        rec['doi'] = '10.22323/1.%s.%04i' % (nr, int(rec['p1']))
+    #get PDF
+    if 'FFT' in rec.keys():
+        doi1 = re.sub('[\(\)\/]', '_', rec['doi'])
+        doifilename = '%s/10.22323/%s.pdf' % (ppdfpath, doi1)
+        if not os.path.isfile(doifilename):
+            os.system('wget -q -O %s "%s"' % (doifilename, rec['FFT']))
+            time.sleep(10)
+        #count pages
+        anzahlseiten = os.popen('pdftk %s dump_data output | grep -i NumberO' % (doifilename)).read().strip()
+        anzahlseiten = re.sub('.*NumberOfPages. (\d*).*',r'\1',anzahlseiten)
+        rec['pages'] = anzahlseiten
+        #license
+        for div in artpage.find_all('div', attrs = {'class' : 'license'}):
+            for a in div.find_all('a'):
+                if a.has_attr('href') and re.search('creativecommons.org', a['href']):
+                    rec['license'] = {'url' : a['href']}
+        recs.append(rec) 
+        print '  ', rec['doi'], rec.keys()
+
+#closing of files and printing
+xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
+xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+xmlfile.close()
+#retrival
+retfiles_text = open(retfiles_path,"r").read()
+line = jnlfilename+'.xml'+ "\n"
+if not line in retfiles_text: 
+    retfiles = open(retfiles_path,"a")
+    retfiles.write(line)
+    retfiles.close()
