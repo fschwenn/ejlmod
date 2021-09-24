@@ -37,9 +37,9 @@ req = urllib2.Request(tocurl, headers=hdr)
 tocpage = BeautifulSoup(urllib2.urlopen(req))
 
 recs = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'post-folded__nav'}):
+for div in tocpage.find_all('div', attrs = {'class' : 'post-folded__nav'}):
     for h3 in div.find_all('h3'):
-        for span in h3.find_all('span'):
+        for span in h3.find_all('button'):
             year = span.text.strip()
             print '---{ %s }---' % (year)
     if year in years:
