@@ -31,7 +31,7 @@ jnlfilename = 'THESES-ZURICH-%s' % (stampoftoday)
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
 for page in range(pages):
-    tocurl = 'https://www.zora.uzh.ch/cgi/search/archive/advanced?exp=0%7C1%7C-date%2Fcreators_name%2Feditors_name%2Ftitle%7Carchive%7C-%7Csubjects%3Asubjects%3AANY%3AEQ%3A10172+10123+10192%7Ctype%3Atype%3AANY%3AEQ%3Adissertation+habilitation%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow&_action_search=1&order=-date%2Fcreators_name%2Feditors_name%2Ftitle&screen=Search&cache=7376471&search_offset=' + str((page+40)*rpp)
+    tocurl = 'https://www.zora.uzh.ch/cgi/search/archive/advanced?exp=0%7C1%7C-date%2Fcreators_name%2Feditors_name%2Ftitle%7Carchive%7C-%7Csubjects%3Asubjects%3AANY%3AEQ%3A10172+10123+10192%7Ctype%3Atype%3AANY%3AEQ%3Adissertation+habilitation%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow&_action_search=1&order=-date%2Fcreators_name%2Feditors_name%2Ftitle&screen=Search&cache=7376471&search_offset=' + str(page*rpp)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
