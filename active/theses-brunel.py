@@ -35,7 +35,7 @@ prerecs = []
 #for dep in ['8623', '8629']:
 for dep in ['8623']:
     for j in range(pages):
-        tocurl = 'https://bura.brunel.ac.uk/handle/2438/' + dep +'/browse?rpp=' + str(rpp) + '&sort_by=2&type=dateissued&offset=' + str((j+2)*rpp) + '&etal=-1&order=DESC'
+        tocurl = 'https://bura.brunel.ac.uk/handle/2438/' + dep +'/browse?rpp=' + str(rpp) + '&sort_by=2&type=dateissued&offset=' + str(j*rpp) + '&etal=-1&order=DESC'
         print '===[ %s ]===[ %i/%i ]===[ %s ]===' % (dep, j+1, pages, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
         tocpage = BeautifulSoup(urllib2.urlopen(req))
