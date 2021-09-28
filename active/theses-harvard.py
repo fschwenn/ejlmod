@@ -29,7 +29,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Harvard U. (main)'
 rpp = 50
-numofpages = 2
+numofpages = 1
 departments = ['Mathematics', 'Physics']
 
 driver = webdriver.PhantomJS()
