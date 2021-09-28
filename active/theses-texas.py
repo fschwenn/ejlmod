@@ -25,7 +25,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Texas U.'
 
-rpp = 200
+rpp = 100
 
 hdr = {'User-Agent' : 'Magic Browser'}
 for department in ['Physics', 'Mathematics']:
