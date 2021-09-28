@@ -737,7 +737,7 @@ def writeXML(recs,dokfile,publisher):
                             aut.append(('q', re.sub('.*, CHINESENAME: ', '', author)))
                             author = re.sub(' *, CHINESENAME.*', '', author)
                         if re.search('ORCID', author):
-                            orcid = re.sub(' ', '', re.sub('\.$', '', re.sub('.*, ',  '', author)))
+                            orcid = re.sub(' ', '', re.sub('\.$', '', re.sub('.*, ORCID',  'ORCID', author)))
                             if reorcid.search(orcid):
                                 aut.append(('j', orcid))
                             else:
