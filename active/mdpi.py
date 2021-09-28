@@ -54,13 +54,13 @@ elif jnl == 'condensedmatter': #139
 elif jnl == 'atoms': #173
     numberofpages = 3
 elif jnl == 'mathematics':
-    numberofpages = 35
+    numberofpages = 45
 elif jnl == 'quantumrep':
     numberofpages = 4
 elif jnl == 'axioms':
     numberofpages = 6
 elif jnl == 'applsci':
-    numberofpages = 100
+    numberofpages = 110
 elif jnl == 'information':
     numberofpages = 7
 
@@ -116,12 +116,19 @@ else:
     for j in range(numberofpages):
         print '==={ %i/%i }==={ %s&page_no=%i }===' % (j+1, numberofpages, starturl, j+1)
         req = urllib2.Request('%s&page_no=%i' % (starturl, j+1), headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
+        tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
         divs = tocpage.body.find_all('div', attrs = {'class' : 'article-content'})
         for div in divs:
+            doi = False
+            for a in div.find_all('a'):
+                if a.has_attr('href') and re.search('doi.org', a['href']):
+                    doi = re.sub('.*doi.org\/', '', a['href'])
             for a in div.find_all('a', attrs = {'class' : 'title-link'}):
                 if not ('http://www.mdpi.com' + a['href'], a.text) in artlinks:
-                    artlinks.append(('http://www.mdpi.com' + a['href'], a.text))
+                    if doi and doi in done:
+                        print '  %s in done' % (doi)
+                    else:
+                        artlinks.append(('http://www.mdpi.com' + a['href'], a.text))
         print '  %i article links so far ' % (len(artlinks))
         time.sleep(3)
 
@@ -163,12 +170,12 @@ for artlink in artlinks:
     try:
         time.sleep(1)
         artreq = urllib2.Request(artlink[0], headers=hdr)
-        page = BeautifulSoup(urllib2.urlopen(artreq))
+        page = BeautifulSoup(urllib2.urlopen(artreq), features="lxml")
     except:
         print '   ... wait 15 minutes'
         time.sleep(900)
         artreq = urllib2.Request(artlink[0], headers=hdr)
-        page = BeautifulSoup(urllib2.urlopen(artreq))
+        page = BeautifulSoup(urllib2.urlopen(artreq), features="lxml")
     ##Review?1
     for meta in page.head.find_all('meta', attrs = {'name' : 'dc.type'}):
         if meta['content'] == 'Review': rec['tc'] = 'R'
