@@ -28,7 +28,7 @@ publisher = 'Texas A-M'
 typecode = 'T'
 
 
-rpp = 200
+rpp = 100
 
 hdr = {'User-Agent' : 'Magic Browser'}
 for department in ['Physics', 'Physics+and+Astronomy', 'Mathematics']:
