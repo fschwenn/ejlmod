@@ -22,7 +22,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'Florida U.'
 
 rpp = 20
-pages = 50
+pages = 20
 boring = ['aerodynamics', 'birds', 'disease', 'religion', 'archaeology', 'hormones',
           'biocollections', 'dental', 'aircraft', 'rhetoric', 'potato', 'paleontology',
           'aegypti', 'aerosol', 'agarose', 'andes', 'anthropocene', 'antimicrobial',
