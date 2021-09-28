@@ -31,7 +31,7 @@ pages = 1
 
 for (subject, aff) in [('Fizika', 'Zagreb U., Phys. Dept.'), ('Matematika',  'U. Zagreb (main)')]:
     for page in range(pages):
-        tocurl = 'https://repozitorij.pmf.unizg.hr/en/islandora/search?page=' + str(page+4) + '&display=default&f%5B0%5D=RELS_EXT_hasModel_uri_s%3A%22info%3Afedora/ir%3AdisertationCModel%22&f%5B1%5D=facet_field_pth%3APRIRODNE%5C%20ZNANOSTI%23' + subject + '%2A&islandora_solr_search_navigation=0&sort=dabar_sort_date_s%20desc'
+        tocurl = 'https://repozitorij.pmf.unizg.hr/en/islandora/search?page=' + str(page) + '&display=default&f%5B0%5D=RELS_EXT_hasModel_uri_s%3A%22info%3Afedora/ir%3AdisertationCModel%22&f%5B1%5D=facet_field_pth%3APRIRODNE%5C%20ZNANOSTI%23' + subject + '%2A&islandora_solr_search_navigation=0&sort=dabar_sort_date_s%20desc'
         print '==={ %s }==={ %i/%i }==={ %s }===' % (subject, page+1, pages, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
         tocpage = BeautifulSoup(urllib2.urlopen(req))
