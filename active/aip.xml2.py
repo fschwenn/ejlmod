@@ -224,9 +224,10 @@ def getarticle(href, sec, subsec, p1):
                 sup.replace_with('')
             author = re.sub(' and *$', '', span.text.strip())
             author = re.sub(',', '', author)
+            author = re.sub('[\n\r\t]', '', author)
             #author = re.sub('([A-Z]\.) ([A-Z]\.) ', r'\1\2 ', author)
             #author = re.sub('([A-Z]\.) ([A-Z]\.) ', r'\1\2 ', author)
-            #author = re.sub('(.*) (.*)', r'\2, \1', author)
+            #author = re.sub('(.*) (.*)', r'\2, \1', author)            
             for a in span.find_all('a'):
                 if a.has_attr('href') and re.search('orcid.org', a['href']):
                     author += re.sub('http.*orcid.org.', ', ORCID:', a['href'])
