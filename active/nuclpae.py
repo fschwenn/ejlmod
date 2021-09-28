@@ -133,8 +133,8 @@ for rec in recs:
             if child.has_attr('href') and not 'doi' in rec.keys():
                 if redoi.search(child['href']):
                     rec['doi'] = redoi.sub(r'\1', child['href'])
-        #elif child.name == 'b' and re.search('References', child.text):
-        #    refstart = True
+        elif child.name == 'b' and re.search('References', child.text):
+            refstart = True
         elif refstart and child.name == 'p':
             for a in child.find_all('a'):
                 if a.has_attr('href') and redoi.search(a['href']):
