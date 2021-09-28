@@ -26,7 +26,6 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'British Columbia U.'
-hdr = {'User-Agent' : 'Magic Browser'}
 
 pages = 1+9
 deps = ['Mathematics,%20Department%20of&campus=UBCV',
