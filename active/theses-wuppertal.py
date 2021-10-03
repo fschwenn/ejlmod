@@ -32,7 +32,7 @@ prerecs = []
 jnlfilename = 'THESES-WUPPERTAL-%s' % (stampoftoday)
 tocfilname = '/tmp/%s.toc' % (jnlfilename)
 
-tocurl = 'http://elpub.bib.uni-wuppertal.de/servlets/MCRSearchServlet?mask=browse/ddc.xml&query=(ddc%20=%20%225%22)%20AND%20(status%20=%20%22published%22)%20AND%20(datevalidfrom%20<=%20%2221.2.2020%22)%20AND%20(datevalidto%20>=%20%2221.2.2020%22)&maxResults=0&datecreation.sortField.1=descending'
+tocurl = 'http://elpub.bib.uni-wuppertal.de/servlets/MCRSearchServlet?mask=browse/ddc.xml&query=(ddc%20=%20%225%22)%20AND%20(status%20=%20%22published%22)&maxResults=0&datecreation.sortField.1=descending'
 print tocurl
 if not os.path.isfile(tocfilname):
     os.system('wget -T 300 -t 3 -q -O %s "%s"' % (tocfilname, tocurl))
@@ -54,8 +54,12 @@ for ol in tocpage.find_all('ol', attrs = {'class' : 'results'}):
                 rec['MARC'][0][1].append(('b', 'PhD'))
             elif div.text.strip() == 'Habilitation':
                 rec['MARC'][0][1].append(('b', 'Habilitation'))
-        if rec['docnr'] > docthresh:
-            prerecs.append(rec)
+        for div in li.find_all('div', attrs = {'class' : 'date'}):
+            #this is the year of last update of files (which can not be befor date of thesis)
+            year = re.sub('.*([12]\d\d\d).*', r'\1', div.text.strip())            
+            if int(year) >= now.year - years:
+                if rec['docnr'] > docthresh:
+                    prerecs.append(rec)
 
 i = 0
 for rec in prerecs:
@@ -64,7 +68,7 @@ for rec in prerecs:
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
-        time.sleep(10)
+        time.sleep(10-8)
     except:
         try:
             print 'retry %s in 180 seconds' % (rec['link'])
@@ -114,6 +118,16 @@ for rec in prerecs:
                 datum = False
             if re.search('Datum der Promotion', div2t):
                 datum = True
+            elif re.search('Datum der Habilitation', div2t):
+                datum = True
+    if not 'date' in rec.keys():
+        for div in artpage.body.find_all('div', attrs = {'class' : 'container_12'}):
+            for div2 in div.find_all('div'):
+                div2t = div2.text.strip()
+                if re.search('20[12]\d', div2t):
+                    rec['year'] = re.sub('.*(2\d\d\d).*', r'\1', div2t)
+                    rec['MARC'][0][1].append(('d', rec['year']))                    
+    #make 502entry by "hand" for habilitations
     rec['autaff'][-1].append(publisher)
     if 'year' in rec.keys() and int(rec['year']) < now.year - years:
         print '  skip', rec['year']
