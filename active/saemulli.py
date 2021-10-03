@@ -9,7 +9,7 @@ import re
 import sys
 import unicodedata
 import string
-import codecs 
+import codecs
 import urllib2
 import urlparse
 import time
@@ -45,7 +45,7 @@ recc = re.compile('http.*creativecommons.org')
 repacs = re.compile('PACS numbers:? *')
 
 for h4 in tocpage.body.find_all('h4'):
-    rec = {'jnl' : jnlname, 'tc' : tc, 'issue' : issue, 'note' : [], 
+    rec = {'jnl' : jnlname, 'tc' : tc, 'issue' : issue, 'note' : [],
            'auts' : [], 'aff' : [], 'keyw' : [], 'vol' : vol}
     for a in h4.find_all('a'):
         artlink = '%s/%s' % (urltrunk, a['href'])
@@ -75,6 +75,8 @@ for h4 in tocpage.body.find_all('h4'):
             if a.has_attr('href'):
                 if recc.search(a['href']):
                     rec['licence'] = {'url' : a['href']}
+                    if 'fulltext' in rec.keys():
+                        rec['FFT'] = rec['fulltext']
         #abstract
         for dd in artpage.body.find_all('div', attrs = {'class' : 'go_section'}):
             rec['abs'] = re.sub('Keywords:.*', '', dd.text.strip())
@@ -93,7 +95,6 @@ for h4 in tocpage.body.find_all('h4'):
                 else:
                     rec['auts'].append(re.sub('(.*) (.*)', r'\2, \1', author))
             ps[0].decompose()
-            print 'XXX auts', rec['auts']
         #affiliations
         for diva in artpage.body.find_all('div', attrs = {'class' : 'inner_content'}):
             for h2 in diva.find_all('h2'):
@@ -106,25 +107,22 @@ for h4 in tocpage.body.find_all('h4'):
             divat = re.sub('Abstract *Go to Abstract.*', '', divat)
             print divat
             divat = re.sub('Received.*', '', divat)
-            
             for aff in re.split(';;;', divat):
                 if len(aff) > 6:
                     rec['aff'].append(aff.strip())
-            print 'XXXaff', rec['aff']
         recs.append(rec)
         print rec['doi'], rec.keys()
-    
-    
+
 #write xml
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
+if not line in retfiles_text:
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
