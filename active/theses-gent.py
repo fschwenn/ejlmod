@@ -10,14 +10,15 @@ import urllib2
 import urlparse
 from bs4 import BeautifulSoup
 import re
-import ejlmod2
 import codecs
 import datetime
 import time
 import json
+import ejlmod2
+import lxml
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
@@ -93,7 +94,6 @@ def getperson(perslink):
         person.append(address)
     persdict[perslink] = person
     print '  . ', person
-    return
    
 recs = []
 for span in tocpage.body.find_all('span', attrs = {'class' : 'title'}):
@@ -139,10 +139,9 @@ for rec in recs:
     #other metadata
     for dl in artpage.body.find_all('dl'):
         for child in dl.children:
-            try:
-                child.name
-            except:
+            if child.name is None:
                 continue
+
             if child.name == 'dd':
                 dd = child.text.strip()
                 #pages
@@ -158,11 +157,19 @@ for rec in recs:
                         rec['language'] = dd
                 #author
                 elif re.search('Author', dt):
-                    for a in child.find_all('a'):
-                        perslink = 'https://biblio.ugent.be' + a['href']
-                        if not perslink in persdict.keys():
-                            getperson(perslink)
-                        rec['autaff'] = [ persdict[perslink] ]
+		    if child.find_all('a') == []:
+			author = child.text.split('\n')
+                    	if author[0] == u'':
+                       	    author = author[1]
+                    	else:
+                            author = author[0]
+			rec['autaff'] = [[author]]
+		    else:
+                    	for a in child.find_all('a'):
+                            perslink = 'https://biblio.ugent.be' + a['href']
+                            if not perslink in persdict.keys():
+                                getperson(perslink)
+                            rec['autaff'] = [ persdict[perslink] ]
                 #supervisor
                 elif re.search('Promoter', dt):
                     for a in child.find_all('a'):
