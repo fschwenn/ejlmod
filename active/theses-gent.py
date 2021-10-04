@@ -10,14 +10,14 @@ import urllib2
 import urlparse
 from bs4 import BeautifulSoup
 import re
-import ejlmod2
 import codecs
 import datetime
 import time
 import json
+import ejlmod2
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
@@ -35,7 +35,7 @@ hdr = {'User-Agent' : 'Magic Browser'}
 tocurl = 'https://biblio.ugent.be/publication?limit=' + str(rpp) + '&subject=Physics+and+Astronomy&type=dissertation'
 print tocurl
 req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
+tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
 recs = []
 persdict = {}
 
@@ -43,22 +43,24 @@ persdict = {}
 def getperson(perslink):
     print ' .  ', perslink
     try:
-        perspage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(perslink))
+        perspage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(perslink), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['artlink'])
             time.sleep(180)
-            perspage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(perslink))
+            perspage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(perslink), features="lxml")
         except:
             print "no access to %s" % (rec['artlink'])
             persdict[perslink] = []
             return 
     #name
     for h1 in perspage.find_all('h1', attrs = {'itemprop' : 'name'}):
-        name = re.sub('^prof. ', '', h1.text.strip())
-        name = re.sub('^dr. ', '', name)
-        name = re.sub('^ir. ', '', name)
+        name = re.sub('^em\. ', '', h1.text.strip())
+        name = re.sub('^prof\. ', '', name)
+        name = re.sub('^ereprof\. ', '', name)
+        name = re.sub('^dr\. ', '', name)
+        name = re.sub('^ir\. ', '', name)
         if re.search(' [vV]an ', name):
             person = [re.sub('(.*) [vV]an (.*)', r'van \2, \1', name)]
         else:
@@ -93,7 +95,6 @@ def getperson(perslink):
         person.append(address)
     persdict[perslink] = person
     print '  . ', person
-    return
    
 recs = []
 for span in tocpage.body.find_all('span', attrs = {'class' : 'title'}):
@@ -107,13 +108,13 @@ for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['artlink'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         except:
             print "no access to %s" % (rec['artlink'])
             continue    
@@ -139,10 +140,9 @@ for rec in recs:
     #other metadata
     for dl in artpage.body.find_all('dl'):
         for child in dl.children:
-            try:
-                child.name
-            except:
+            if child.name is None:
                 continue
+
             if child.name == 'dd':
                 dd = child.text.strip()
                 #pages
@@ -158,11 +158,21 @@ for rec in recs:
                         rec['language'] = dd
                 #author
                 elif re.search('Author', dt):
-                    for a in child.find_all('a'):
-                        perslink = 'https://biblio.ugent.be' + a['href']
-                        if not perslink in persdict.keys():
-                            getperson(perslink)
-                        rec['autaff'] = [ persdict[perslink] ]
+		    if child.find_all('a') == []:
+			author = child.text.split('\n')
+                    	if author[0] == u'':
+                       	    author = author[1]
+                    	else:
+                            author = author[0]
+			rec['autaff'] = [[author, publisher]]
+		    else:
+                    	for a in child.find_all('a'):
+                            perslink = 'https://biblio.ugent.be' + a['href']
+                            if not perslink in persdict.keys():
+                                getperson(perslink)
+                            rec['autaff'] = [ persdict[perslink] ]
+                            if len(rec['autaff'][0]) == 1 or (len(rec['autaff'][0]) == 2 and re.search('ORCID', rec['autaff'][0][1])):
+                                rec['autaff'][0].append(publisher)
                 #supervisor
                 elif re.search('Promoter', dt):
                     for a in child.find_all('a'):
