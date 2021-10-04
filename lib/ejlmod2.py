@@ -634,7 +634,7 @@ def writeXML(recs,dokfile,publisher):
                         if re.search('@', aff):
                             autlist.append(('m', re.sub('EMAIL:', '', aff)))
                     else:
-                        autlist.append(('u', aff))
+                        autlist.append(('v', aff))
                 try:
                     xmlstring += marcxml(marc, autlist)
                 except:
