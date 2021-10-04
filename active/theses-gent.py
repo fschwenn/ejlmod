@@ -14,9 +14,11 @@ import codecs
 import datetime
 import time
 import json
+import ejlmod2
+import lxml
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
@@ -155,14 +157,14 @@ for rec in recs:
                         rec['language'] = dd
                 #author
                 elif re.search('Author', dt):
-		            if child.find_all('a') == []:
-			            author = child.text.split('\n')
-                  	    if author[0] == u'':
-                            author = author[1]
+		    if child.find_all('a') == []:
+			author = child.text.split('\n')
+                    	if author[0] == u'':
+                       	    author = author[1]
                     	else:
                             author = author[0]
-			            rec['autaff'] = [[author]]
-		            else:
+			rec['autaff'] = [[author]]
+		    else:
                     	for a in child.find_all('a'):
                             perslink = 'https://biblio.ugent.be' + a['href']
                             if not perslink in persdict.keys():
