@@ -18,7 +18,7 @@ import datetime
 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 urltrunc = 'https://www.degruyter.com'
 publisher = 'De Gruyter'
 
@@ -47,9 +47,11 @@ elif journal == 'ijnsns':
     jnl = 'Int.J.Nonlin.Sci.Numer.Simul.'
 elif journal == 'kern':
     jnl = 'Kerntech.'
+elif journal == 'crll':
+    jnl = 'J.Reine Angew.Math.'
 
 #get list of volumes
-if journal in ['kern', 'ract', 'phys', 'astro']:
+if journal in ['kern', 'ract', 'phys', 'astro', 'crll']:
     tocurl = 'https://www.degruyter.com/journal/key/%s/%s/%s/html' % (journal.upper(), vol, iss)
 else:
     tocurl = "%s/view/j/%s.%s.%s.issue-%s/issue-files/%s.%s.%s.issue-%s.xml" % (urltrunc, journal, year, vol, iss, journal, year, vol, iss)        
