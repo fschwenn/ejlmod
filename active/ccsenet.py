@@ -38,16 +38,24 @@ archiveslink = 'http://www.ccsenet.org/journal/index.php/%s/issue/archives' % (j
 
 
 print '[archive] %s' % (archiveslink)
-arcpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(archiveslink))
+arcpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(archiveslink), features="lxml")
+toclink = False
+otherlinks = []
 for li in arcpage.body.find_all('li'):
     for a in li.find_all('a'):
         at = a.text.strip()
         if re.search('Vol. %s, No. %s$' % (vol, isu), at):
             toclink = a['href']
+        elif re.search('Vol. \d', at):
+            otherlinks.append(at)
 
+if not toclink:
+    print 'TOC link for this issue not found'
+    print 'found only:', otherlinks
+    sys.exit(0)
 
 print '[TOC] %s' % (toclink)
-tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
+tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink), features="lxml")
 recs = []
 for li in tocpage.body.find_all('li', attrs = {'class' : 'h5'}):
     for a in li.find_all('a'):
@@ -55,7 +63,7 @@ for li in tocpage.body.find_all('li', attrs = {'class' : 'h5'}):
         print '[ART] %s' % (artlink)
         rec = {'vol' : vol, 'issue' : isu, 'jnl' : jnlname, 'tc' : tc,
                'auts' : []}
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink), features="lxml")
         for meta in artpage.head.find_all('meta'):
             if meta.has_attr('name'):
                 if meta['name'] == 'DC.Date.issued':
