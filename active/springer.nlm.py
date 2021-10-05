@@ -45,6 +45,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '00023': ['ahp', 'Annales Henri Poincare', '', '', 'P'],
       '00031': ['trgr', 'Transform.Groups', '', '', 'P'],
       '00159': ['aar', 'Astron.Astrophys.Rev.', '', '', 'P'],
+      '00205': ['arma', 'Arch.Ration.Mech.Anal.', '', '', 'P'],
       '00220': ['cmp', 'Commun.Math.Phys.', '', '', 'P'],
       '00339': ['apa', 'Appl.Phys.', 'A', '', 'P'], #HAL
       '00340': ['apb', 'Appl.Phys.', 'B', '', 'P'], #HAL
@@ -119,6 +120,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '40010': ['pnisia', 'Proc.Nat.Inst.Sci.India (Pt.A Phys.Sci.)', '', '', 'P'],
       '40042': ['jkps', 'J.Korean Phys.Soc.', '', '', 'P'],
       '40065': ['arjoma', 'Arab.J.Math.', '', '', 'P'],
+      '40306': ['avietnamm', 'Acta Math.Vietnamica', '', '', 'P'],
       '40485': ['epjti', 'EPJ Tech.Instrum.', '', '', 'P'],
       '40509': ['qsmf', 'Quant.Stud.Math.Found.', '', '', 'P'],
       '40623': ['eaplsc', 'Earth Planets Space', '', '', 'P'],
@@ -924,10 +926,11 @@ def convertbook(journalnumber, dirname):
                     chapters.append(os.path.join(chpdirfullpath, filename))
         elif re.search('^PRT', chpdir):
             for chp2dir in os.listdir(chpdirfullpath):
-                chp2dirfullpath = os.path.join(chpdirfullpath, chp2dir)
-                for filename in os.listdir(chp2dirfullpath):
-                    if re.search('Meta$', filename):
-                        chapters.append(os.path.join(chp2dirfullpath, filename))
+                if re.search('^CHP', chp2dir):
+                    chp2dirfullpath = os.path.join(chpdirfullpath, chp2dir)
+                    for filename in os.listdir(chp2dirfullpath):
+                        if re.search('Meta$', filename):
+                            chapters.append(os.path.join(chp2dirfullpath, filename))
     #get Hauptaufnahme
     if front:
         ha = convertarticle(journalnumber, front, 'book')
