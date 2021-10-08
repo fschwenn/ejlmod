@@ -70,7 +70,7 @@ for year in [now.year-1, now.year]:
                 elif meta['name'] == 'DC.title':
                     rec['tit'] = meta['content']
                 #date
-                elif meta['name'] == 'DC.date':
+                elif meta['name'] == 'eprints.date':
                     rec['date'] = meta['content']
                 #keywords
                 elif meta['name'] == 'eprints.keywords':
@@ -80,6 +80,8 @@ for year in [now.year-1, now.year]:
                 elif meta['name'] == 'DC.identifier':
                     if re.search('10.6092', meta['content']):
                         rec['doi'] = re.sub('.*?(10.6092\/.*)\..*', r'\1', meta['content'])
+                    elif re.search('urn.nbn.it.unibo', meta['content']):
+                        rec['urn'] = meta['content']
                 #language
                 elif meta['name'] == 'DC.language':
                     if meta['content'] == 'ita':
@@ -96,7 +98,10 @@ for year in [now.year-1, now.year]:
                 if a.has_attr('href') and re.search('creativecommons.org', a['href']):
                     rec['licence'] = {'url' : a['href']}
         if not 'doi' in rec.keys():
-            rec['doi'] = '20.2000/UNIBO/' + re.sub('.*it\/', '', rec['artlink'])
+            rec['link'] = rec['artlink']
+            if not 'urn' in rec.keys():
+                rec['doi'] = '20.2000/UNIBO/' + re.sub('.*it\/', '', rec['artlink'])
+        print '     ', rec.keys()
 
     #closing of files and printing
     xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
