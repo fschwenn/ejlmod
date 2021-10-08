@@ -85,7 +85,7 @@ for rec in recs:
                 rec['abs'] = meta['content']
             #date
             elif meta['name'] == 'DCTERMS.issued':
-                rec['date'] = meta['content'][:8]
+                rec['date'] = meta['content']
             #fulltext
             elif meta['name'] == 'citation_pdf_url':
                 rec['fulltextlink'] = meta['content']
