@@ -57,10 +57,10 @@ hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
 jnlfilename = 'THESES-LouisianaStateU-%s' % (stampoftoday)
 for i in range(numofpages):
-    #if i == 0:
-    #    tocurl = 'https://digitalcommons.lsu.edu/gradschool_dissertations/index.html'
-    #else:
-    tocurl = 'https://digitalcommons.lsu.edu/gradschool_dissertations/index.%i.html' % (i+1)
+    if i == 0:
+        tocurl = 'https://digitalcommons.lsu.edu/gradschool_dissertations/index.html'
+    else:
+        tocurl = 'https://digitalcommons.lsu.edu/gradschool_dissertations/index.%i.html' % (i+1)
     print '==={ %i/%i }==={ %s }===' % (i+1, numofpages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
