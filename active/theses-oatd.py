@@ -112,7 +112,6 @@ rpp = 30
 chunksize = 50
 publisher = 'oatd.org'
 comment = Comment('Kommentar')
-
 #check already harvested
 ejldirs = ['/afs/desy.de/user/l/library/dok/ejl/onhold',
            '/afs/desy.de/user/l/library/dok/ejl',
@@ -255,6 +254,9 @@ for rec in prerecs:
             if meta['name'] == 'citation_author':
                 if meta['content']:
                     rec['autaff'] = [[ meta['content'] ]]
+            #title
+            elif meta['name'] == 'citation_author_orcid':
+                rec['autaff'][-1].append('ORCID:' + meta['content'])
             #title
             elif meta['name'] == 'citation_title':
                 rec['tit'] = meta['content']
