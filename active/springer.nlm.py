@@ -638,7 +638,7 @@ def convertarticle(journalnumber, filename, contlevel):
                 for grid in aff.find_all('institution-id', attrs = {'institution-id-type' : 'GRID'}):
                     gridnumber = re.sub('.*grid', 'grid', re.sub('[\n\t\r]', '', grid.text.strip()))
                     afftext += ', GRID:%s' % (gridnumber)
-                rec['aff'].append('%s= %s' % (aff['id'], afftext))
+                rec['aff'].append('%s= %s' % (aff['id'], re.sub('[\n\t\r]', ' ', afftext)))
         #check for editor
         authortype = 'author'
         if contlevel == 'book':
