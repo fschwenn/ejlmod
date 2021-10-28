@@ -137,7 +137,7 @@ for rec in recs:
     if not 'hdl' in rec.keys():
         rec['doi'] = '20.2000/Didktorika/' + re.sub('\D', '', rec['artlink'])
         rec['link'] = rec['artlink']
-    print rec.keys()
+    print '  ', rec.keys()
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
