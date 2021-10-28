@@ -170,7 +170,7 @@ for rec in recs:
     for section in artpage.body.find_all('section', attrs = {'class' : 'Abstract'}):
         abstract = ''
         for p in section.find_all('p'):
-            absract += p.text.strip() + ' '
+            abstract += p.text.strip() + ' '
         if not 'abs' in rec.keys() or len(abstract) > len(rec['abs']):
             rec['abs'] = abstract
     #Keywords
