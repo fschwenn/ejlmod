@@ -107,6 +107,24 @@ for artlink in urls:
         for a in div.find_all('a'):
             a.replace_with('')
         rec['refs'].append([('x', div.text.strip())])
+    ### meta tags not well formatted or filled
+    #date
+    for div in artpage.body.find_all('div', attrs = {'class' : 'article-header-container'}):
+        if not 'date' in rec.keys() or rec['date'] == '0001/01/01':            
+            for div2 in div.find_all('div', attrs = {'class' : 'header-bar-three'}):
+                div2t = re.sub('[\n\r\t]', ' ', div2.text.strip())
+                if re.search(' [12]\d\d\d', div2t):
+                    rec['date'] = re.sub('.*, (.*?[12]\d\d\d).*', r'\1', div2t)
+    #pubnote
+    for div in artpage.body.find_all('div', attrs = {'class' : 'AbstractSummary'}):
+        for p in div.find_all('p'):
+            for span in p.find_all('span'):
+                if re.search('Citation:', span.text):
+                    pt = p.text.strip()
+                    if re.search('Front.* (\d+:\d+)\. doi', pt):
+                        rec['vol'] = re.sub('.*Front.* (\d+):\d+\. doi.*', r'\1', pt)
+                        rec['p1'] = re.sub('.*Front.* \d+:(\d+)\. doi.*', r'\1', pt)        
+    print '   ', rec.keys()
     recs.append(rec)
 
 #closing of files and printing
