@@ -2,7 +2,6 @@
 #harvest theses from Michigan
 #FS: 2019-10-28
 
-
 import getopt
 import sys
 import os
@@ -36,7 +35,7 @@ for i in range(numofpages):
     tocurl = 'https://deepblue.lib.umich.edu/handle/2027.42/39366/browse?order=DESC&rpp=' + str(rpp) + 'sort_by=3&etal=-1&offset=' + str(i*rpp) + '&type=dateissued'
     print '---{ %i/%i }---{ %s }------' % (i+1, numofpages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     time.sleep(10)
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-title'}):
         for a in div.find_all('a'):
@@ -54,14 +53,14 @@ for rec in allrecs:
     print '---{ %i/%i }---{ %s }------' % (j, len(allrecs), rec['artlink'])
     try:
         req = urllib2.Request(rec['artlink'])
-        artpage = BeautifulSoup(urllib2.urlopen(req))
+        artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
         time.sleep(30)
     except:
         print 'wait 10 minutes'
         time.sleep(600)
         try:
             req = urllib2.Request(rec['artlink'])
-            artpage = BeautifulSoup(urllib2.urlopen(req))
+            artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
             time.sleep(30)
         except:
             continue
@@ -84,7 +83,7 @@ for rec in allrecs:
     for tr in artpage.body.find_all('tr', attrs = {'class' : 'ds-table-row'}):
         for td in tr.find_all('td', attrs = {'class' : 'label-cell'}):
             label = td.text.strip()
-        for td in tr.find_all('td', attrs = {'class' : 'data-cell'}):
+        for td in tr.find_all('td', attrs = {'class' : ['data-cell', 'word-break']}):
             if label in tabelle.keys():
                 tabelle[label].append(td.text.strip())
             else:
@@ -109,10 +108,14 @@ for rec in allrecs:
             print '  skip "%s"' % (tabelle['dc.description.thesisdegreename'][0])
     print '   ', len(recsbysubject.keys()), [len(recsbysubject[s]) for s in recsbysubject.keys()]
 
+    print rec
+    print tabelle.keys()
+
 for subject in recsbysubject.keys():
     if subject in ['Arts', 'Health Sciences', 'Humanities', 'Government Information and Law',
                    'Engineering', 'Business and Economics', 'Social Sciences', 'Education',
-                   'Business', 'Government  Politics and Law']:
+                   'School for Environment and Sustainability', 'Manufacturing Engineering',
+                   'Business', 'Government  Politics and Law', 'Physical Therapy']:
         print 'skip', subject
     else:
         recs = recsbysubject[subject]
