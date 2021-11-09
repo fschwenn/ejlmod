@@ -60,7 +60,7 @@ elif jnl == 'quantumrep':
 elif jnl == 'axioms':
     numberofpages = 6
 elif jnl == 'applsci':
-    numberofpages = 110
+    numberofpages = 130
 elif jnl == 'information':
     numberofpages = 7
 
