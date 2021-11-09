@@ -6,18 +6,19 @@ import sys
 import getopt
 import codecs
 import urllib
-from invenio.bibrecord import *
-from invenio.search_engine import perform_request_search
-from invenio.search_engine import get_record
-#from invenio.bibcheck_task import AmendableRecord
-from invenio.bibrecord  import record_add_field
+from simple_record import *
 from clean_fulltext import clean_fulltext_jacow, clean_fulltext_moriond, clean_linebreaks, get_reference_section
 
-##from correct_utf8 import check_record
+# ==================================================
+# Download Metadata feeds 
+# http://jacow.org/[ACRONYM]/html/inspire-[ACRONYM].xml
+# 
+# e.g.
+# http://jacow.org/IPAC2017/html/inspire-IPAC2017.xml
+#
+# Then call /home/library/.virtualenvs/inspire/bin/python jacow.py -c <cnum> -i <conf>
 
-## http://invenio-software.org/code-browser/invenio.bibrecord-module.html
-
-tmppath = '/tmp/jacow/'
+tmppath = '/afs/desy.de/group/library/publisherdata/tmp/'
 publisherdatapath = '/afs/desy.de/group/library/publisherdata/jacow/'
 ejl = '/afs/desy.de/user/l/library/inspire/ejl/'
 #ejl = '/afs/desy.de/user/s/sachs/inspire/jacow/'
@@ -45,6 +46,7 @@ def get_references(url, clean='jacow'):
     if os.path.isfile('%s/%s_clean.txt' % (tmppath, filename[:-4])):
         controlfile = codecs.EncodedFile(codecs.open('%s/%s_clean.txt' % (tmppath, filename[:-4])),'utf8')
         fulltext = controlfile.read()
+        fulltext = fulltext.decode("utf-8")
         controlfile.close()      
     else:
         if not os.path.isfile('%s/%s.txt' % (tmppath, filename[:-4])):
@@ -54,6 +56,7 @@ def get_references(url, clean='jacow'):
     
         infile = codecs.EncodedFile(codecs.open('%s/%s.txt' % (tmppath, filename[:-4])),'utf8')
         fulltext = infile.readlines()
+        fulltext = [line.decode("utf-8") for line in fulltext]
         if clean == 'jacow':
             fulltext = clean_fulltext_jacow(fulltext, verbose=1)
         elif clean == 'moriond':
@@ -87,7 +90,7 @@ def get_references(url, clean='jacow'):
                 reflog_file.close()
 
         controlfile = codecs.EncodedFile(codecs.open('%s/%s_clean.txt' % (tmppath, filename[:-4]), mode='wb'),'utf8')
-        controlfile.write(fulltext)
+        controlfile.write(fulltext.encode("utf-8"))
         controlfile.close()      
     
     refs = extract_references_from_string(fulltext, is_only_references=False, override_kbs_files={'journals': '/opt/invenio/etc/docextract/journal-titles-inspire.kb'}, reference_format="{title},{volume},{page}")
@@ -166,10 +169,11 @@ def convertToInspire(argv):
     
     infile = codecs.EncodedFile(codecs.open(confpath,'r'),'utf8')
     xmlrecords = infile.read()
+    xmlrecords = xmlrecords.decode("utf-8")
     for html, utf in TRANSLATE.items():
-        xmlrecords = xmlrecords.replace(html, utf)
-    xmlrecords = xmlrecords.replace('&','&amp;')
-    records = create_records(xmlrecords,verbose=1)
+        xmlrecords = re.sub(html, utf, xmlrecords)
+    xmlrecords = re.sub('&','&amp;', xmlrecords)
+    records = create_records(xmlrecords)
     infile.close()
       
     outfile = codecs.EncodedFile(codecs.open(ejl+'jacow.'+conf+'.xml',mode='wb'),'utf8')
@@ -182,30 +186,13 @@ def convertToInspire(argv):
  
     nrec = 0
     info = {}
-    for recordtuple in records:
-        if recordtuple[1] == '0':
-            print recordtuple[2]
-            print 'error in record'
-            continue
-        
-        record = recordtuple[0]
-        if not record:
-            print 'no record'
-            print recordtuple
-            continue
-        
-##        record = AmendableRecord(record)
-##        # try to fix UTF8 problems
-##        message = check_record(record, ['100__a', '700__a'])
-##        if message:
-##            print message
-            
+    for record in records:
         nrec +=1
         
-        if record_get_field_value(record, '245', ' ', ' ', 'a').startswith('Proceedings'):
-            proceedings = True
-        else:
-            proceedings = False
+        proceedings = False
+        for value in record_get_field_values(record, '245', ' ', ' ', 'a'):
+            if value.startswith('Proceedings'):
+                proceedings = True
         
         # clean 980
         m980 = record_delete_fields(record, '980')
@@ -254,6 +241,8 @@ def convertToInspire(argv):
                 if len(doi_parts) == 3:
                     url = "http://jacow.org/%s/papers/%s.pdf" % (doi_parts[1], doi_parts[2]) 
         
+        print '%s -- %s ' % (nrec, url)
+
         if url:
             if url[-4:].lower() == '.pdf':
                 if nrec < 10:
@@ -286,7 +275,7 @@ def convertToInspire(argv):
         else:
             print 'No URL found!'
             print record
-
+            
 # delete link if DOI
         if record.has_key('024'):
             record_delete_fields(record, '856')
@@ -297,7 +286,7 @@ def convertToInspire(argv):
             for j in range(0, len(m)):
                 for i in range(0, len(m[j][0])):
                     if m[j][0][i][0] == 'a':
-                        m[j][0][i] = ('a',m[j][0][i][1].replace('-',''))
+                        m[j][0][i] = ('a',re.sub('-','',m[j][0][i][1]))
             record_add_fields(record, '020', m)
 
 #       correct licence
@@ -344,9 +333,11 @@ def convertToInspire(argv):
                     m773[j][0].append(('w', cnum))
                 if year and not m773y:
                     m773[j][0].append(('y', year))
+                m773[j][0].append(('p', 'JACoW'))
+                m773[j][0].append(('v', conf_acronym)
             record_add_fields(record, '773', m773)
         else:
-            m773 = [('w',cnum),('c',year)]
+            m773 = [('p','JaCoW'),('q',conf_acronym),('v',conf_acronym),('w',cnum),('c',year)]
             record_add_field(record,'773',' ',' ','', m773)
 
         # add pseudo DOIconf_acronym if there is none
@@ -434,15 +425,18 @@ def convertToInspire(argv):
                         empty_fields.append(i)
                     if m[j][0][i][0] == 'a':
                         if m[j][0][i][1].count('"'):
-                            m[j][0][i] = ('a',m[j][0][i][1].replace('"',''))
+                            m[j][0][i] = ('a',re.sub('"','',m[j][0][i][1]))
                         if m[j][0][i][1] == 'Schaa, Volker RW':
+                            m[j][0][i] = ('a','Schaa, Volker R.W.')
+                        if m[j][0][i][1] == 'Schaa, Volker R. W.':
                             m[j][0][i] = ('a','Schaa, Volker R.W.')
                 empty_fields.reverse()
                 for i in empty_fields:
                     m[j][0].pop(i)
             record_add_fields(record, marc, m)
         
-        outfile.write(record_xml_output(record))
+        
+        outfile.write(record_xml_output(record).encode("utf-8"))
         
         # basic check for dublets
         titles = record_get_field_values(record,'245',' ',' ','a')
@@ -466,6 +460,6 @@ def convertToInspire(argv):
     outfile.close()
 
 
-    print 'To remove fulltexts:   rm /tmp/jacow/*'
+    print 'To remove fulltexts:   rm %s*' % tmppath
 if __name__ == "__main__":
     convertToInspire(sys.argv[1:])
