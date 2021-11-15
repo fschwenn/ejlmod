@@ -22,7 +22,7 @@ from bs4 import BeautifulSoup
 chunksize = 80
 rpp = 25
 #to avoid "too many results" split the timespan of the search
-maxtimespan = 5 
+maxtimespan = 5 * 999
 
 confdict = {'12th International Conference on Elastic and Diffractive Scattering Forward Physics and QCD' : 'C07-05-21.2',
             '12th International Conference on Elastic and Diffractive Scattering: Forward Physics and QCD' : 'C07-05-21.2',
@@ -86,7 +86,7 @@ def requestarticles(timespan):
         print '==={ %i/%i }==={ %s->%s }===' % (i+1, numoftimespans, stampofstartdate, stampofstopdate)
         tocurl = 'https://bib-pubdb1.desy.de/search?ln=en&cc=VDB&p=005%3A' + stampofstartdate + '-%3E' + stampofstopdate + '+0247_a%3A10.3204*+and+not+9131_1%3AG%3A(DE-HGF)POF3-620++not+980%3Auser&f=&action_search=Search&c=VDB&c=&sf=&so=d&rm=&rg=' + str(rpp) + '&sc=0&of=xm&jrec=1'
         #only theses
-        tocurl = 'https://bib-pubdb1.desy.de/search?ln=en&cc=VDB&p=005%3A' + stampofstartdate + '-%3E' + stampofstopdate + '+0247_a%3A10.3204*+and+980__a%3Aphd+and+not+9131_1%3AG%3A(DE-HGF)POF3-620++not+980%3Auser&f=&action_search=Search&c=VDB&c=&sf=&so=d&rm=&rg=' + str(rpp) + '&sc=0&of=xm&jrec=1'
+        tocurl = 'https://bib-pubdb1.desy.de/search?ln=en&cc=VDB&p=0247_a%3A10.3204*+and+260__c%3A202*+and+980__a%3Aphd+and+not+9131_1%3AG%3A(DE-HGF)POF3-620++not+980%3Auser&f=&action_search=Search&c=VDB&c=&sf=&so=d&rm=&rg=' + str(rpp) + '&sc=0&of=xm&jrec=1'
         print '  ={ %s }===' % (tocurl)
         pages.append(BeautifulSoup(urllib2.urlopen(tocurl), features="lxml"))
         try:
@@ -97,6 +97,8 @@ def requestarticles(timespan):
                 time.sleep(2)
                 print '---{ %i/%i }---' % (pagenum+2, numofpages)
                 tocurl = 'https://bib-pubdb1.desy.de/search?ln=en&cc=VDB&p=005%3A' + stampofstartdate + '-%3E2050+0247_a%3A10.3204*+and+not+9131_1%3AG%3A(DE-HGF)POF3-620++not+980%3Auser&f=&action_search=Search&c=VDB&c=&sf=&so=d&rm=&rg=' + str(rpp) + '&sc=0&of=xm&jrec=' + str((pagenum+1)*rpp+1)
+                #only theses
+                tocurl = 'https://bib-pubdb1.desy.de/search?ln=en&cc=VDB&p=0247_a%3A10.3204*+and+260__c%3A202*+and+980__a%3Aphd+and+not+9131_1%3AG%3A(DE-HGF)POF3-620++not+980%3Auser&f=&action_search=Search&c=VDB&c=&sf=&so=d&rm=&rg=' + str(rpp) + '&sc=0&of=xm&jrec=' + str((pagenum+1)*rpp+1)
                 pages.append(BeautifulSoup(urllib2.urlopen(tocurl), features="lxml"))
         except:
             print '  no records found'
@@ -281,7 +283,7 @@ def translatearticles(pubdbrecords):
             if oa and pdf:
                 if (not rec.has_key('FFT')) and (not re.search('title', link)) and rec['tc'] in ['C', 'T', 'K']:
                     try:
-                        oafilename = re.sub('.*\/', '', link)
+                        oafilename = re.sub('.*\/', '', link) + '?subformat=pdfa'
                         urllib.urlretrieve(link, '/afs/desy.de/group/library/www/html/pdf/'+oafilename)
                         rec['FFT'] = 'http://www-library.desy.de/pdf/'+oafilename
                     except:
@@ -464,7 +466,7 @@ if __name__ == '__main__':
                 records[tc + str(i)] = records[tc][i:i+chunksize]
             del records[tc]                                    
     for tc in records.keys():
-        if not tc[0] in ['T']:
+        if not tc or not tc[0] in ['T']:
             continue
         #write xml-file
         xmlf    = os.path.join(xmldir, '%s.%s.xml' % (jnlfilename, tc))
