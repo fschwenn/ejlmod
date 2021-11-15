@@ -237,23 +237,25 @@ for div in tocpage.find_all('div', attrs = {'class' : 'resultTitle'}):
                         rec['p1'] = re.sub('.*[pP]ages (\d+).*', r'\1', pages)
                         rec['p2'] = re.sub('.*[pP]ages \d+\D(\d+).*', r'\1', pages)
             #authors
-            if not rec['autaff'] and not rec['aff']:
-                print '   DEL AUTS'
-                del rec['auts']
-                for span in artpage.find_all('span', attrs = {'class' : 'contrib'}):
-                    (affs, email) = ([], '')
-                    for a in span.find_all('a', attrs = {'class' : 'contrib-corresp'}):
-                        email = re.sub('mailto.(.*?)\?.*', r'\1', a['href'])
-                    for li in span.find_all('li'):
-                        if not re.search('(De Gruyter Online|Other articles by this author|Email)', li.text):
-                            aff = re.sub('Corresponding author', '', li.text.strip())
-                            if aff:
-                                affs.append(aff)
-                        li.replace_with('')
-                    if email:
-                        rec['autaff'].append([span.text.strip(), ' and '.join(affs), 'EMAIL:'+email])
-                    else:
-                        rec['autaff'].append([span.text.strip(), ' and '.join(affs)])
+            if not rec['autaff']:
+                if not 'aff' in rec.keys() or not arec['aff']:
+                    if 'auts' in rec.keys():
+                        print '   DEL AUTS'
+                        del rec['auts']
+                    for span in artpage.find_all('span', attrs = {'class' : 'contrib'}):
+                        (affs, email) = ([], '')
+                        for a in span.find_all('a', attrs = {'class' : 'contrib-corresp'}):
+                            email = re.sub('mailto.(.*?)\?.*', r'\1', a['href'])
+                        for li in span.find_all('li'):
+                            if not re.search('(De Gruyter Online|Other articles by this author|Email)', li.text):
+                                aff = re.sub('Corresponding author', '', li.text.strip())
+                                if aff:
+                                    affs.append(aff)
+                            li.replace_with('')
+                        if email:
+                            rec['autaff'].append([span.text.strip(), ' and '.join(affs), 'EMAIL:'+email])
+                        else:
+                            rec['autaff'].append([span.text.strip(), ' and '.join(affs)])
             recs.append(rec)
             print '  ', rec.keys()
    
