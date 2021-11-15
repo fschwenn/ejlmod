@@ -14,6 +14,10 @@ import urllib2
 import urlparse
 import time
 from bs4 import BeautifulSoup
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special/'
@@ -279,9 +283,17 @@ ptepcollcode = {'A0' : 'General physics', 'A00' : 'Classical mechanics', 'A01' :
 urltrunk = "https://academic.oup.com/%s/issue/%s/%s" % (jnl, vol, issue)
 
 print "get table of content of %s%s.%s via %s ..." %(jnlname, vol, issue, urltrunk)
-tocreq = urllib2.Request(urltrunk, headers={'User-Agent' : "Magic Browser"})
-tocpage = BeautifulSoup(urllib2.urlopen(tocreq))
-
+driver = webdriver.PhantomJS()
+driver.get(urltrunk)
+#hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
+#       'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+#       'Accept-Charset': 'ISO-8859-1,utf-8;q=0.7,*;q=0.3',
+#       'Accept-Encoding': 'none',
+#       'Accept-Language': 'en-US,en;q=0.8',
+#       'Connection': 'keep-alive'}
+#tocreq = urllib2.Request(urltrunk, headers=hdr)
+#tocpage = BeautifulSoup(urllib2.urlopen(tocreq), features="lxml")
+tocpage = BeautifulSoup(driver.page_source, features="lxml")
 
 
 
@@ -305,6 +317,7 @@ note = ''
 recnr = 1
 recs = []
 
+
 for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'}):
     articles = []
     for section in div.find_all('section'):
@@ -323,13 +336,15 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
         print '---{ %i/%i }---{ %s }---' % (i, len(articles), artlink)
         try:
             time.sleep(27)
-            pagreq = urllib2.Request(artlink, headers={'User-Agent' : "Magic Browser"})
-            page = BeautifulSoup(urllib2.urlopen(pagreq))
+            #pagreq = urllib2.Request(artlink, headers={'User-Agent' : "Magic Browser"})
+            #page = BeautifulSoup(urllib2.urlopen(pagreq), features="lxml")
+            driver.get(artlink)
+            page = BeautifulSoup(driver.page_source, features="lxml")
         except:
             print "retry in 180 seconds"
             time.sleep(180)
             pagreq = urllib2.Request(artlink, headers={'User-Agent' : "Magic Browser"})
-            page = BeautifulSoup(urllib2.urlopen(pagreq))
+            page = BeautifulSoup(urllib2.urlopen(pagreq), features="lxml")
         rec = {'issue' : issue, 'vol' : vol, 'jnl' : jnlname, 'note' : [], 'tc' : typecode,
                'refs' : [], 'autaff' : [], 'keyw' : []}
         #not completely loaded?
