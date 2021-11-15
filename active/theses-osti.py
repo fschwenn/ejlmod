@@ -44,14 +44,22 @@ prerecs = []
 for page in range(pages):
     tocurl = 'https://www.osti.gov/search/sort:publication_date%20desc/publish-date-start:01/01/' + str(startyear) + '/publish-date-end:31/12/2050/product-type:Thesis/Dissertation/page:' + str(page+1)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
-    req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
-    time.sleep(3)
+    try:
+        req = urllib2.Request(tocurl, headers=hdr)
+        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
+        time.sleep(10)
+    except:
+        print '    try again in 180s'
+        time.sleep(180)
+        req = urllib2.Request(tocurl, headers=hdr)
+        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
+        time.sleep(10)
     for h2 in tocpage.body.find_all('h2', attrs = {'class' : 'title'}):
         for a in h2.find_all('a'):
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : [], 'rn' : [], 'keyw' : []}
             rec['artlink'] = 'https://www.osti.gov' + a['href']
             prerecs.append(rec)
+    print '   ', len(prerecs)
             
 i = 0
 recs = []
@@ -109,7 +117,8 @@ for rec in prerecs:
     #affiliation
     for ol in artpage.find_all('ol', attrs = {'class' : 'affiliation_list'}):
         for li in ol.find_all('li'):
-            rec['autaff'][-1].append(li.text.strip())
+            if 'autaff' in rec.keys():
+                rec['autaff'][-1].append(li.text.strip())
     for script in artpage.body.find_all('script', attrs = {'type' : 'application/ld+json'}):
         if script.contents:
             scriptt = re.sub('[\n\t]', '', script.contents[0].strip())
