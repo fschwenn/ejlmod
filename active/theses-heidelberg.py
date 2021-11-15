@@ -82,7 +82,10 @@ for rec in prerecs:
                     rec['language'] = 'german'
             #FFT
             elif meta['name'] == 'eprints.document_url':
-                rec['FFT'] = meta['content']
+                if re.search('http', meta['content']):
+                    rec['FFT'] = meta['content']
+                else:
+                    rec['FFT'] = 'https://archiv.ub.uni-heidelberg.de' + meta['content']
             #DOI
             elif meta['name'] == 'DC.identifier':
                 if re.search('^DOI', meta['content']):
