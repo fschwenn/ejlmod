@@ -69,6 +69,7 @@ for dl in tocpage.body.find_all('dl'):
                 #fulltext
                 elif meta['name'] == 'citation_pdf_url':
                     rec['pdf'] = meta['content']
+                    rec['hidden'] = meta['content']
                 #keywords
                 elif meta['name'] == 'citation_keywords':
                     rec['keyw'] = re.split('; ', meta['content'])
