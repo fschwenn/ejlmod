@@ -134,6 +134,8 @@ for rec in prerecs:
         for meta in artpage.head.find_all('meta', attrs = {'name' : 'DCTERMS.dateAccepted'}):
             rec['date'] = meta['content']
             rec['note'].append('date from DCTERMS.dateAccepted')
+    if not 'autaff' in rec.keys():
+        rec['autaff'] = [[ 'Doe, John' ]]
     rec['autaff'][-1].append(publisher)
     for tr in artpage.find_all('tr'):
         for td in tr.find_all('td', attrs = {'class' : 'metadataFieldLabel'}):
