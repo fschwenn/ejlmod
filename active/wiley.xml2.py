@@ -136,7 +136,7 @@ alldois = []
 for div in tocpage.find_all('div', attrs = {'class' : 'issue-item'}):
     for h2 in div.find_all('h2'):
         tit = h2.text.strip()
-    if tit == 'Contents' or re.search('^Issue Information:', tit) or re.search('^Cover Picture:', tit):
+    if tit == 'Contents' or re.search('^Issue Information', tit) or re.search('^Cover Picture', tit) or re.search('^Masthead', tit):
         continue
     rec = {'tit' : tit, 'year' : year, 'jnl' : jnlname, 'autaff' : [],
            'note' : [], 'vol' : vol, 'issue' : issue, 'keyw' : []}
