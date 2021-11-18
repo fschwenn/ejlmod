@@ -82,7 +82,7 @@ for rec in prerecs:
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #author
-            if meta['name'] == 'citation_authors':
+            if meta['name'] in ['citation_authors', 'citation_author']:
                 author = meta['content']
                 if re.search('ORCID:', author):
                     rec['autaff'] = [[re.sub(' .ORCID.*', '', author)]]
