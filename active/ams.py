@@ -200,7 +200,7 @@ for artlink in artlinks:
                     a.replace_with(' '+rdoi+' ')
             for li in ul.find_all('li'):
                 rec['refs'].append([('x', li.text)])
-    print rec
+    print '   ', rec.keys()
     recs.append(rec)
 
 
