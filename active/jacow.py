@@ -334,7 +334,7 @@ def convertToInspire(argv):
                 if year and not m773y:
                     m773[j][0].append(('y', year))
                 m773[j][0].append(('p', 'JACoW'))
-                m773[j][0].append(('v', conf_acronym)
+                m773[j][0].append(('v', conf_acronym))
             record_add_fields(record, '773', m773)
         else:
             m773 = [('p','JaCoW'),('q',conf_acronym),('v',conf_acronym),('w',cnum),('c',year)]
