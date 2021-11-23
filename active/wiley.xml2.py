@@ -134,6 +134,10 @@ if 1 > 0:
 recs = []
 alldois = []
 for div in tocpage.find_all('div', attrs = {'class' : 'issue-item'}):
+    for h3 in div.find_all('h3'):
+        tit = h2.text.strip()
+        if tit == 'Contents' or re.search('^Issue Information', tit) or re.search('^Cover Picture', tit) or re.search('^Masthead', tit):
+            continue
     for h2 in div.find_all('h2'):
         tit = h2.text.strip()
     if tit == 'Contents' or re.search('^Issue Information', tit) or re.search('^Cover Picture', tit) or re.search('^Masthead', tit):
