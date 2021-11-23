@@ -66,8 +66,8 @@ elif jnl == 'information':
 
 
 
-conferences = {'Selected Papers from the 1st International Electronic Conference on Universe (ECU 2021)' : 'C21-02-22',
-               'Selected Papers from the 17th Russian Gravitational Conference —International Conference on Gravitation, Cosmology and Astrophysics (RUSGRAV-17)' : 'C20-06-28'}
+conferences = {u'Selected Papers from the 1st International Electronic Conference on Universe (ECU 2021)' : 'C21-02-22',
+               u'Selected Papers from the 17th Russian Gravitational Conference —International Conference on Gravitation, Cosmology and Astrophysics (RUSGRAV-17)' : 'C20-06-28'}
 
 chunksize = 50
 
@@ -134,7 +134,7 @@ else:
 
 #done = []
 
-
+maxnumberofchunks = (10*numberofpages-1) / chunksize + 1 
 numberofchunks = (len(artlinks)-1) / chunksize + 1 
 
 i=0
@@ -290,9 +290,9 @@ for artlink in artlinks:
         #write xml
         if recs:
             if i % chunksize == 0:
-                xmlfilename = '%s-%02i_of_%i.xml' % (jnlfilename, i/chunksize, numberofchunks)
+                xmlfilename = '%s-%02i_of_%i_of_%i.xml' % (jnlfilename, i/chunksize, numberofchunks, maxnumberofchunks)
             else:
-                xmlfilename = '%s-fin_of_%i.xml' % (jnlfilename, numberofchunks)
+                xmlfilename = '%s-fin_of_%i_of_%i.xml' % (jnlfilename, numberofchunks, maxnumberofchunks)
             xmlf = os.path.join(xmldir, xmlfilename)
             xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
             ejlmod2.writenewXML(recs, xmlfile, publisher, xmlfilename[:-4])
