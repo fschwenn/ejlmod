@@ -97,7 +97,8 @@ def harvestissue(jnl, vol, issue):
         for h4 in sct.find_all('h4'):
             scttit = h4.text.strip()
         if scttit in ['Editorial', 'In Brief', 'In Depth', 'Feature', 'Working Life',
-                      'Books et al.', 'Policy Forum', 'Perspectives', 'Association Affiars',
+                      'Books et al.', 'Policy Forum', 'Perspectives', 'Association Affairs',
+                      'Products & Materials',
                       'In Other Journals', 'In Science Journals', 'Neuroscience', 'News', 
                       'Social and Interdisciplinary Sciences', 'Biomedicine and Life Sciences']:
             print '      skip', scttit
