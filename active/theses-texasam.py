@@ -45,8 +45,11 @@ for department in ['Physics', 'Physics+and+Astronomy', 'Mathematics']:
         for span in div.find_all('span', title=re.compile('rft.degree=Doctor')):
             for a in div.find_all('a'):
                 rec['artlink'] = 'https://oaktrust.library.tamu.edu' + a['href'] #+ '?show=full'
-                rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                recs.append(rec)
+                if re.search('handle\/', a['href']):
+                    rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                    recs.append(rec)
+                else:
+                    print '  skip ', rec['artlink']
     print '  %i/%i' % (len(recs), len(divs))
     time.sleep(30)
 
