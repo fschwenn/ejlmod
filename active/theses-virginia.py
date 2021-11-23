@@ -20,7 +20,7 @@ from selenium.webdriver.firefox.options import Options
 import requests
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -31,7 +31,7 @@ deps = [('Physics+-+Graduate+School+of+Arts+and+Sciences', ''),
         ('Mathematics+-+Graduate+School+of+Arts+and+Sciences', 'm'),
         ('Astronomy', 'a'),
         ('Department+of+Astronomy', '')]
-startday = '%4d-01-01' % (now.year-16)
+startday = '%4d-01-01' % (now.year-2)
 endday = '%4d-12-31' % (now.year)
 rpp = 20
 boringdegrees = ['BA (Bachelor of Arts)', 'MA (Master of Arts)',
