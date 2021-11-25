@@ -28,7 +28,7 @@ hdr = {'User-Agent' : 'Magic Browser'}
 
 rpp = 50
 pages = 15
-years = 20
+years = 3
 boringdisciplines = ['Mechanical+Engineering', 'Biomedical+Engineering', 'Education',
                      'Systems+Engineering', 'Sargent+College+of+Health+and+Rehabilitation+Sciences',
                      'Microbiology', 'Molecular+and+Translational+Medicine', 'Neuroscience', 'Pharmacology',
