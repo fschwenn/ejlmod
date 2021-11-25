@@ -205,6 +205,7 @@ jc['43673'] = ['aappsbul', 'AAPPS Bull.', '', '', '']
 #known conferences
 confdict = {u'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30',
             u'Advances on the Few-Body Problem in Physics – Selected and Refereed papers from the 8th Asia-Pacific Conference' : 'C21-03-01.3',
+            u'Proceedings of the International Conference on Hyperfine Interactions (HYPERFINE 2021), 5-10 September 2021, Brasov, Romania' : 'C21-09-05.2',
             '0361_248' : 'C19-10-14.3',
             '0361_250' : 'C19-06-10'}
 
