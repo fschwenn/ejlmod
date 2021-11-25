@@ -22,15 +22,15 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 publisher = 'Oxford University Press'
 urltrunc = 'https://global.oup.com/academic/category/science-and-mathematics'
 
-serieses = ['physics/astronomy-and-cosmology',
-            'physics/astrophysics',
+serieses = ['physics/astronomy-and-astrophysics',
+            'physics/atomic-molecular-and-optical-physics',
             'physics/condensed-matter-physics',
             'physics/mathematical-and-statistical-physics',
             'physics/nuclear-physics',
             'physics/particles-and-fields',
             'physics/quantum-physics',
-            'physics/relativity',
-            'physics/space-and-time',
+            'physics/relativity-and-gravitation',
+            'mathematics/mathematical-analysis',
             'mathematics/numerical-and-computational-mathematics']
 
 
