@@ -122,6 +122,10 @@ for rec in recs:
             #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['pdf_url'] = meta['content']
+            #DOI
+            elif meta['name'] == 'DC.identifier':
+                if re.search('^10\.\d+\/',  meta['content']):
+                    rec['doi'] = meta['content']
     #authors
     if 'auten' in rec.keys():
         if 'autel' in rec.keys():
@@ -134,7 +138,7 @@ for rec in recs:
     if not 'abs' in rec.keys() and 'absel' in rec.keys():
         rec['abs'] = rec['absel']
     #pseudodoi
-    if not 'hdl' in rec.keys():
+    if not 'hdl' in rec.keys() and not 'doi' in rec.keys():
         rec['doi'] = '20.2000/Didktorika/' + re.sub('\D', '', rec['artlink'])
         rec['link'] = rec['artlink']
     print '  ', rec.keys()
