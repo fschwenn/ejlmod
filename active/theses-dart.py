@@ -64,10 +64,12 @@ singlewords = ["ABJM", "antibaryon", "antifermion", "antifield", "antihydrogen",
                "tachyon", "technicolor", "TeV", "Tevatron", "topcolor", "TPC", "TQFT", "Ward-Takahashi",
                "Wess-Zumino", "Wheeler-DeWitt", "WIMP", "Wino", "wormhole", "XENON1T",
                "Yang-Mills", "Yang-Mills-Higgs", "Zino"]
+singlewords += ['qubit', 'QIS', 'NISQ']
 multwords = [['AdS', 'CFT'], ['quantum', 'field', 'theory'], ['PANDA', 'FAIR'], ['quantum', 'chromodynamics'],
              ['Quantum', 'Cosmology'], ['quantum', 'electrodynamics'], ['gravitational', 'radiation'],
              ['gravitational', 'waves'], ['quantum', 'gravity'], ['string', 'theory'],
              ['wakefield', 'acceleration']]
+multwords += [['quantum', 'computing']]
 
 #hyphens do not work as expected
 realsinglewords = []
