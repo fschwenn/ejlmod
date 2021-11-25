@@ -68,18 +68,20 @@ singlewords = ["2HDM", "ABJM", "antibaryon", "antifermion", "antifield",
                "TPC", "TQFT", "Ward-Takahashi", "Wess-Zumino", "Wess-Zumino-Witten",
                "Wheeler-DeWitt", "Wick-Cutkosky", "WIMP", "Wino", "wormhole", "XENON1T",
                "Yang-Mills", "Yang-Mills-Higgs", "Zino"]
+singlewords += ['qubit', 'QIS', 'NISQ']
 multwords = [['AdS', 'CFT'], ['quantum', 'field', 'theory'],
              ['PANDA', 'FAIR'], ['quantum', 'chromodynamics'],
              ['Quantum', 'Cosmology'], ['quantum', 'electrodynamics'],
              ['quantum', 'gravity'], ['string', 'theory'],
              ['wakefield', 'acceleration']]
+multwords += [['quantum', 'computing']]
 dedicatedharvester = ['alabama', 'alberta', 'arizona-diss', 'asu', 'barcelona', 'baylor', 'bielefeld', 'brown', 'caltech', 'cambridge',
                       'colorado', 'columbia-diss', 'dortmund-diss', 'durham', 'freiburg-diss', 'glasgow',
                       'goettingen', 'harvard', 'heid-diss', 'houston', 'humboldt-diss', 'ksu',
                       'ku', 'liverpool', 'lmu-germany', 'lsu-diss', 'lund', 'manchester', 'mcgill', 'melbourne',
                       'mississippi', 'montstate', 'narcis', 'neu', 'ncsu', 'ohiolink', 'oregon', 'oviedo', 'princeton', 
                       'qucosa-diss', 'regensburg-diss', 'rochester', 'rutgers', 'giessen-diss', 'syracuse-diss', 'tamu', 'toronto-diss',
-                      'ttu', 'ubc', 'uky-diss', 'umich', 'valencia', 'vcu', 'vt', 'washington', 'wayne',
+                      'ttu', 'ubc', 'uky-diss', 'umich', 'valencia', 'vandy', 'vcu', 'vt', 'washington', 'wayne',
                       'whiterose', 'wm-mary', 'wurz-diss', 'york']
 dedicatedaffiliations = ['Imperial College London', 'University of Edinburgh',
                          'University College London (University of London)',
@@ -90,7 +92,7 @@ nodedicatedharvester = ['aberdeen', 'ankara', 'arkansas', 'bremen', 'brazil', 'b
                         'groningen', 'guelph', 'hokkaido', 'iowa', 'jairo', 'jamescook', 'lehigh', 'liberty', 'macquarie-phd',
                         'maynooth', 'montana', 'msstate', 'mtu', 'odu', 'potsdam-diss', 'regina', 'rice', 'rit', 'siu-diss',
                         'south-carolina', 'star-france', 'stellenbosch', 'st-andrews', 'temple', 'uconn',
-                        'udel', 'uiuc', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'vandy', 'virginia', 'vrije',
+                        'udel', 'uiuc', 'ulm-diss', 'unm', 'unsw', 'utk-diss', 'urecht', 'uwm', 'virginia', 'vrije',
                         'wustl', 'wvu']
 dontcheckforpdf = ['ethos']
 
