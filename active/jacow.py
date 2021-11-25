@@ -130,6 +130,23 @@ def get_references(url, clean='jacow'):
 #                print 'no mapping for', key
         references.append(entryaslist)
     return references
+
+def addDOI_thisConference(ref, base_doi, re_thisConf):
+    re_artid = re.compile(r'paper ([A-Z][A-Z0-9]{5,8})')
+    no_doi = True
+    rawref = ''
+    for code, value in ref:
+        if code == 'a':
+            no_doi = False
+        if code == 'x':
+            rawref = value
+    if no_doi and rawref:
+        found_artid = re_artid.search(rawref)
+        in_thisConf = "this conference" in rawref.lower() or re_thisConf.search(rawref)
+        if found_artid and in_thisConf:
+            ref.append(('a', 'doi:%s-%s' % (base_doi, found_artid.group(1))))    
+        
+    return ref
     
 def convertToInspire(argv):
     re_non_char = re.compile(r"[^\w',. -]", re.UNICODE)
@@ -165,7 +182,9 @@ def convertToInspire(argv):
         if not os.path.isfile(confpath):
             print conf, 'xml does not exist'
             sys.exit(2)
-        
+    
+    re_thisConf = re.compile(r'(?i)%s[^a-zA-Z]*%s' % (re.sub('\d.*','',conf), conf[-2:]))
+    base_doi = ''
     
     infile = codecs.EncodedFile(codecs.open(confpath,'r'),'utf8')
     xmlrecords = infile.read()
@@ -228,18 +247,25 @@ def convertToInspire(argv):
                 print 'wrong MARC field 8564 - use anyhow'
                 record_delete_fields(record, '8564')
         
+        # get DOI
+        jacow_doi = []
+        dois = record_get_field_values(record, '024', '7', ' ', 'a')
+        for doi in dois:
+            if doi.startswith('10.18429'):
+                doi_parts = doi[9:].split('-')
+                if len(doi_parts) == 3 and doi_parts[0].lower() == 'jacow':
+                    jacow_doi = doi_parts
+                    base_doi = '10.18429/%s-%s' % (doi_parts[0], doi_parts[1])
+                    break
+       
         # check the first URLs
-        
         url = ''
         if len(urls) > 0:
             url = urls[0]
         else:    
             # construct url from DOI
-            dois = record_get_field_values(record, '024', '7', ' ', 'a')
-            if len(dois) > 0:
-                doi_parts = dois[0][9:].lower().split('-')
-                if len(doi_parts) == 3:
-                    url = "http://jacow.org/%s/papers/%s.pdf" % (doi_parts[1], doi_parts[2]) 
+            if jacow_doi:
+                url = "http://jacow.org/%s/papers/%s.pdf" % (jacow_doi[1].lower(), jacow_doi[2].lower()) 
         
         print '%s -- %s ' % (nrec, url)
 
@@ -266,6 +292,7 @@ def convertToInspire(argv):
                         #add references
                         references = get_references(url)
                         for ref in references:
+                            ref = addDOI_thisConference(ref, base_doi, re_thisConf)
                             record_add_field(record, '999', ind1='C', ind2='5', subfields=ref)
                 else:
                     record_add_field(record,'856','4',' ','',[('u', urls[0]),('y', 'JACOW')])            
@@ -351,55 +378,6 @@ def convertToInspire(argv):
                 nodoi = 'jacow.%s.%s' % (conf_acronym, article_id)
             record_add_field(record,'024','7',' ','',[('a',nodoi),('2','NODOI')])
         
-#        m980__a = record_get_field_values(record, '980', ' ', ' ', 'a')
-#        record_delete_fields(record, '980')            
-#        doctyp = 'PROCEEDINGS'
-#        for t in m980__a:
-#            if t == 'Conference' or t == 'ConferencePaper':
-#                doctyp = 'ConferencePaper'
-#        record_add_field(record,'980',' ',' ','',[('a',doctyp)])
-#        record_add_field(record,'980',' ',' ','',[('a','HEP')])
-# 
-   
-##        #get authors and write them into the authors file
-##        authors = record_get_field_instances(record, '100')
-##        authors += record_get_field_instances(record, '700')
-##        
-##        for i in range(0, len(authors)):
-##            name=''; aff=''; rawaff=''; email=''; aid=''
-##            for line in authors[i][0]:
-##                if line[0] == 'a':
-##                    name = line[1]
-##                if line[0] == 'u':
-##                    rawaff = line[1] 
-##                if line[0] == 'v':
-##                    aff = line[1]
-##                if line[0] == 'm':
-##                    email = line[1]
-##                if line[0] == 'j':
-##                    aid = line[1]
-##            
-##
-##            if email or aid:
-##                afile = authorsfile
-##            else:
-##                badcounter += 1
-##                if badcounter < 10:
-##                    print 'Author informations not complete!  Writing them to '+conf+'_incomplete_authors.txt.'
-##                elif badcounter == 10:
-##                    print 'More authors fail'
-##                afile = incompleteAuthorsfile
-##            if name:
-##                afile.write('NAME='+name+';\n')
-##            if aff:
-##                afile.write('AFFILIATION='+aff+';\n')
-##            if rawaff:
-##                afile.write('ADDRESS='+rawaff+';\n')
-##            if email:
-##                afile.write('EMAIL='+email+';\n')
-##            if aid:
-##                afile.write('ID='+aid+';\n')
-##            afile.write(';\n')
 
         # delete wrong aff and move adress to v
         for marc in ['100','700']:
