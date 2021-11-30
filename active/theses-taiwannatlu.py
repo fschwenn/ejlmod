@@ -20,7 +20,8 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_spec
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
-publisher = 'Taiwan, Natl. Taiwan U.' jnlfilename = 'THESES-TaiwanNatlU-%s' % (stampoftoday)
+publisher = 'Taiwan, Natl. Taiwan U.'
+jnlfilename = 'THESES-TaiwanNatlU-%s' % (stampoftoday)
 
 rpp = 20
 pages = 5
