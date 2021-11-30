@@ -320,9 +320,11 @@ filestodo = []
 ftp = FTP("ftp.wspc.com.sg")
 ftp.login("inspire", "Ins!539Ws%")
 files = ftp.nlst()  #list of the zip.files
+numofskipped = 0
 for filename in files:
     if filename in done:
-        print 'skip "%s"' % (filename)
+        #print 'skip "%s"' % (filename)
+        numofskipped += 1
     else:
         print 'download "%s"' % (filename)
         f2 = open(filename,"wb")
@@ -331,7 +333,7 @@ for filename in files:
         if re.search('.zip$', filename):
             filestodo.append(filename)
 
-print 'found %i new WSP zip-files to digest' % (len(filestodo))
+print 'skipped %i zip-files, found %i new WSP zip-files to digest' % (numofskipped, len(filestodo))
 
 
 #unzip new files
