@@ -371,11 +371,11 @@ def convertToInspire(argv):
         if not record.has_key('024'):
             if proceedings:
                 if conf_acronym:
-                    nodoi = 'jacow.%s.proc' % (conf_acronym)
+                    nodoi = '20.2000/jacow.%s.proc' % (conf_acronym)
                 else:
-                    nodoi = 'jacow.%s.proc' % (cnum)
+                    nodoi = '20.2000/jacow.%s.proc' % (cnum)
             else:
-                nodoi = 'jacow.%s.%s' % (conf_acronym, article_id)
+                nodoi = '20.2000/jacow.%s.%s' % (conf_acronym, article_id)
             record_add_field(record,'024','7',' ','',[('a',nodoi),('2','NODOI')])
         
 
