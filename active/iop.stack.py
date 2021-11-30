@@ -949,8 +949,8 @@ stampoftoday = '%4d-%02d-%02d-%02d-%02d' % (now.year, now.month, now.day, now.ho
 #get data from IOP stacks
 #os.system('wget --no-check-certificate -O %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
 
-
-os.system('curl -o %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
+#stacks has stopped -> now sftp
+#os.system('curl -o %s/%s.tar.gz https://J9774:gIe^F83S@stacks.iop.org/Member/lload.tar.gz' % (iopdirraw, stampoftoday))
 
 
 
