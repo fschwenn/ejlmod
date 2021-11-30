@@ -26,7 +26,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'Carleton U. (main)'
 
 hdr = {'User-Agent' : 'Magic Browser'}
-for discipline in ['Physics', 'Mathematics']:
+for discipline in ['Physics', 'Mathematics', 'FLAG']:
     recs = []
     for year in [str(now.year), str(now.year-1)]:
         tocurl = 'https://curve.carleton.ca/167299e9-53e6-48d7-a28d-8af2f87719ec?f%5B0%5D=thesis_degree_level%3ADoctoral&f%5B1%5D=dcterms_date%3A' + year + '&f%5B2%5D=thesis_degree_discipline%3A' + discipline
@@ -83,13 +83,16 @@ for discipline in ['Physics', 'Mathematics']:
         for a in artpage.find_all('a'):
             if a.has_attr('href') and re.search('creativecommons.org', a['href']):
                 rec['license'] = {'url' : a['href']}
-                if 'pdf_url' in rec.keys():
-                    rec['FFT'] = rec['pdf_url']
-        print '  ', rec.keys()
+        if 'pdf_url' in rec.keys():
+            if 'license' in rec.keys():
+                rec['FFT'] = rec['pdf_url']
+            else:
+                rec['hidden'] = rec['pdf_url']
         #doi
         for a in artpage.find_all('a'):
             if a.has_attr('href') and re.search('doi.org\/10\.22215', a['href']):
                 rec['doi'] = re.sub('.*doi.org\/', '', a['href'])
+        print '  ', rec.keys()
     jnlfilename = 'THESES-CARLETON-%s_%s' % (stampoftoday, re.sub('\W', '', discipline))
 
 
