@@ -13,6 +13,7 @@ import codecs
 from bs4 import BeautifulSoup
 import time
 import datetime
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
@@ -24,10 +25,17 @@ publisher = 'Chinese Academy of Sciences'
 year = sys.argv[1]
 issue = sys.argv[2]
 jnlfilename = 'actaphyssin%s.%s' % (year, issue)
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+hdr = {'User-Agent' : 'Magic Browser'}
 
 urltrunk = 'http://wulixb.iphy.ac.cn/en/custom/%s/%s' % (year, issue)
 try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk), features="lxml")
+    print urltrunk
+    req = urllib2.Request(urltrunk, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
     time.sleep(3)
 except:
     print "retry %s in 180 seconds" % (urltrunk)
@@ -51,7 +59,10 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'main-right'}):
                            'note' : [], 'issue' : issue, 'refs' : []}
                     if section:
                         rec['note'].append(section)
-                    rec['artlink'] = a['href']
+                    if re.search('^http:', a['href']):
+                        rec['artlink'] = a['href']
+                    else:
+                        rec['artlink'] = 'http:' + a['href']
                     rec['tit'] = a.text.strip()
                     if not a['href'] in ['http://wulixb.iphy.ac.cn:80/en/article/doi/10.7498/aps.70.20201347']:
                         recs.append(rec)
@@ -62,7 +73,8 @@ for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
+        req = urllib2.Request(rec['artlink'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
         time.sleep(13)
     except:
         print "retry %s in 180 seconds" % (rec['artlink'])
