@@ -27,7 +27,7 @@ universities = {'milanbicocca' : ('Milan Bicocca U.', 'https://boa.unimib.it', '
                 'turinpoly' : ('Turin Polytechnic', 'https://iris.polito.it', '/handle/11583/2614423', 10),
                 'milan' : ('Milan U.', 'https://air.unimi.it', '/handle/2434/146884', 20),
                 'udine' : ('Udine U.', 'https://air.uniud.it', '/handle/11390/1123314', 7),
-                'genoa' : ('Genoa U.', 'https://iris.unige.it', '/handle/11567/928192', 20),
+                'genoa' : ('Genoa U.', 'https://iris.unige.it', '/handle/11567/928192', 15),
                 'ferrara' : ('Ferrara U.', 'https://iris.unife.it', '/handle/11392/2380873', 7),
                 'trieste' : ('Trieste U', 'https://arts.units.it', '/handle/11368/2907477', 10),
                 'siena' : ('Siena U.', 'https://usiena-air.unisi.it', '/handle/11365/973085', 5),
