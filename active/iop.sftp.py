@@ -165,7 +165,7 @@ for datei in srv.listdir():
     else:
         todo.append(datei)
         print 'downloading %s ...' % (datei)
-        #XXX#srv.get(datei, os.path.join(iopdirraw, datei))
+        srv.get(datei, os.path.join(iopdirraw, datei))
 
 print '%i packages to do: %s' % (len(todo), ', '.join(todo))
 if not todo:
@@ -176,7 +176,7 @@ if not os.path.isdir(iopdirtmp):
 #extract the feeds:
 for datei in todo:
     print 'extracting %s' % (os.path.join(iopdirraw, datei))
-    #XXX#os.system('cd %s && unzip -q -d %s -o %s' % (iopdirraw, iopdirtmp, datei))
+    os.system('cd %s && unzip -q -d %s -o %s' % (iopdirraw, iopdirtmp, datei))
 
 #create base name
 iopftrunc = stampoftoday
@@ -695,11 +695,7 @@ for issn in os.listdir(iopdirtmp):
     
 #if everything went fine, move the files to done
 for datei in todo:
-#    os.system('mv %s/%s %s/%s' % (iopdirraw, datei, iopdirdone, datei))
-    print '? mv %s/%s %s/%s' % (iopdirraw, datei, iopdirdone, datei)
-for bookfeed in bookfeeds:
-#    os.system('mv %s/%s %s/%s' % (iopdirraw, bookfeed, iopdirdone, bookfeed))
-    print '? mv %s/%s %s/%s' % (iopdirraw, bookfeed, iopdirdone, bookfeed)
+    os.system('mv %s/%s %s/%s' % (iopdirraw, datei, iopdirdone, datei))
 #shutil.rmtree(iopdirtmp)
 print 'done :-)'
     
