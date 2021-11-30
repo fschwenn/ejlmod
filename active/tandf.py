@@ -72,7 +72,7 @@ print 'get table of content from http://www.tandfonline.com/toc/%s/%s/%s' % (jnl
 if not os.path.isfile('/tmp/tandf_%s' % (jnlfilename)):
     os.system("wget -T 300 -t 3 -q -O /tmp/tandf_%s http://www.tandfonline.com/toc/%s/%s/%s" % (jnlfilename, jnl, vol, issue))
 inf = open('/tmp/tandf_%s' % (jnlfilename), 'r')
-page = BeautifulSoup(''.join(inf.readlines()))
+page = BeautifulSoup(''.join(inf.readlines()), features="lxml")
 inf.close()
 
               
@@ -119,7 +119,7 @@ for adoi in page.body.find_all('a'):
         time.sleep(10)        
     #inf = open(artfilname)
     inf = codecs.EncodedFile(open(artfilname, mode='rb'), "utf8")
-    apage = BeautifulSoup(''.join(inf.readlines()))
+    apage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
     inf.close()
     #cnum
     if len(sys.argv) > 4:
@@ -152,17 +152,28 @@ for adoi in page.body.find_all('a'):
         if re.search('Volume \d.* \d\d\d\d', h2.text):
             rec['year'] = re.sub('.* (\d\d\d\d).*', r'\1', re.sub('\n', ' ', h2.text.strip()))
     #pdf
-    #authors
+    #authorstructure
     for span in apage.body.find_all('div', attrs = {'class' : 'hlFld-ContribAuthor'}):
-        for a in span.find_all('a', attrs = {'class' : 'entryAuthor'}):
-            aff = ''
-            for span2 in a.find_all('span', attrs = {'class' : 'overlay'}):
-                aff = re.sub(' *, *', ' - ', span2.text.strip())
-                span2.replace_with('')
-            autaff = [ re.sub('(.*) (.*)', r'\2, \1', a.text.strip()) ]
-            if aff:
-                autaff.append(aff)
-            rec['autaff'].append(autaff)                
+        for div in span.find_all('div', attrs = {'class' : 'entryAuthor'}):
+            #author's name
+            for a in div.find_all('a', attrs = {'class' : 'author'}):
+                rec['autaff'].append([ re.sub('(.*) (.*)', r'\2, \1', a.text.strip()) ])
+            #ORCID
+            for a in div.find_all('a', attrs = {'class' : 'orcid-author'}):
+                rec['autaff'][-1].append(re.sub('.*org\/', 'ORCID:', a['href']))
+            for affspan in div.find_all('span', attrs = {'class' : 'overlay'}):
+                #EMAIL
+                for a in affspan.find_all('a'):
+                    if a.has_attr('href') and re.search('@[a-z]', a['href']):
+                        rec['autaff'][-1].append(re.sub('.*mailto:', 'EMAIL:', a['href']))
+                    a.decompose()
+                #correspondance/funding note 
+                for corr in div.find_all('span', attrs = {'class' : 'corr-sec'}):
+                    corr.decompose()
+                for fund in div.find_all('a', attrs = {'class' : 'author-extra-info'}):
+                    fund.decompose()
+                #AFFILLIATION
+                rec['autaff'][-1].append(affspan.text.strip())
     #pages
     for span in apage.body.find_all('span', attrs = {'class' : 'contentItemPageRange'}):
         pages = re.sub('[Pp]ages? *', '', span.text).strip()
