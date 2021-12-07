@@ -27,7 +27,7 @@ publisher = 'PANDA'
 
 typecode = 'T'
 
-jnlfilename = 'THESIS-PANDA-%s' % (stampoftoday)
+jnlfilename = 'THESES-PANDA-%s' % (stampoftoday)
 
 tocurl = 'https://panda.gsi.de/panda-publications/thesis-th'
 
