@@ -490,6 +490,7 @@ def convertarticle(journalnumber, filename, contlevel):
                 elif subjt in ['Editorial', 'News Q&A', 'Correspondence', 'News And Views', 'Career Q&A',
                                'Career News', 'Outlook', 'Technology Feature', 'Book Review', 'Obituary', 'News',
                                'Books And Arts', 'World View', 'Seven Days', 'Career Column', 'Career Brief',
+                               'research-highlight', 'Research Highlight', 
                                'Futures', 'Where I Work', 'Books & Arts', 'Expert Recommendation', 'Measure for Measure',
                                'News Round-up', 'News & Views']:
                     return {}
