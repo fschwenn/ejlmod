@@ -14,7 +14,7 @@ import datetime
 import time
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -97,7 +97,8 @@ for rec in recs:
         if meta.has_attr('name'):
             #date
             if meta['name'] == 'DC.date':
-                rec['date'] = meta['content']
+                if not re.search('embargo', meta['content']):
+                    rec['date'] = meta['content']
             #title
             elif meta['name'] == 'DC.title':
                 rec['tit'] = meta['content']
