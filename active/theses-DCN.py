@@ -27,7 +27,7 @@ publisher = 'Digital Commons Network'
 
 typecode = 'T'
 
-jnlfilename = 'THESIS-DCN-%s' % (stampoftoday)
+jnlfilename = 'THESES-DCN-%s' % (stampoftoday)
 
 tocurl = 'http://network.bepress.com/explore/physical-sciences-and-mathematics/physics/elementary-particles-and-fields-and-string-theory/?facet=publication_type%3A%22Theses%2FDissertations%22&facet=publication_facet%3A%22Doctoral+Dissertations%22'
 
