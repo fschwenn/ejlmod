@@ -55,7 +55,7 @@ tocpage = BeautifulSoup(''.join(inf.readlines()))
 inf.close()
 
 (note1, note2) = (False, False)
-recs = []
+prerecs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : ['card', 'issue-items-container']}):
     for child in div.children:
         try:
@@ -91,7 +91,7 @@ for div in tocpage.body.find_all('div', attrs = {'class' : ['card', 'issue-items
                             if note2:
                                 rec['note'].append(note2)
                             print '    a)', rec['doi']
-                            recs.append(rec)
+                            prerecs.append(rec)
                 elif child2.name == 'a':
                     if child2.has_attr('class') and ('issue-item__title' in child2['class'] or 'issue-item__title visitable' in child2['class']):
                         rec = {'jnl' : jnlname, 'vol' : vol, 'issue' : issue, 'year' : '%i' % (int(vol)+1895),
@@ -106,15 +106,16 @@ for div in tocpage.body.find_all('div', attrs = {'class' : ['card', 'issue-items
                             if note2:
                                 rec['note'].append(note2)
                             print '    b)', rec['doi']
-                            recs.append(rec)
+                            prerecs.append(rec)
 
 
 
 
 i = 0
-for rec in recs:
+recs = []
+for rec in prerecs:
     i += 1
-    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
+    print '---{ %i/%i }---{ %s }---' % (i, len(prerecs), rec['artlink'])
     #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     artfilename = '/tmp/%s.%s' % (jnlfilename, re.sub('\W', '', rec['artlink'][8:]))
     if not os.path.isfile(artfilename):
@@ -192,7 +193,11 @@ for rec in recs:
             #print '         ', ref
             rec['refs'].append([('x', ref)])
         print '        %i references found (%i with DOI)' % (len(rec['refs']), refswithdoi)
-    print '    ', rec.keys()
+    if not rec['autaff'] and rec['tit'] in ['Issue Information']:
+        pass
+    else:
+        print '    ', rec.keys()
+        recs.append(rec)
 
 
 
