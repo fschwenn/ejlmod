@@ -19,7 +19,7 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'U. Wisconsin, Madison (main)'
-jnlfilename = 'THESES-WISCONSINMADISON-%sMATHEMATICS' % (stampoftoday)
+jnlfilename = 'THESES-WISCONSINMADISON-%s' % (stampoftoday)
 departments = [(5, 'Physics', '', 'Wisconsin U., Madison'),
                (3, 'Mathematics', 'm', 'Wisconsin U., Madison, Math. Dept.')]
 
