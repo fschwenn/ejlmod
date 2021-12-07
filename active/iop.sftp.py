@@ -641,13 +641,12 @@ def convertarticle(issn, vol, isu, artid):
                        print '     fulltext found but not copied!'
                        print pdfsrc
                        print pdfdst
-
-
-
-
-    #CONFERENCES
-    #datecover?
-    return rec
+    #non-articles
+    if not rec['auts'] and rec['tit'] in ['Preface', 'Peer review declaration', 'Statement of Peer Review',
+                                          'Peer Review Declaration', 'Committee', 'Preface']:
+        print '   skip non-article'
+    else:
+        return rec
 
         
 #scan extracted directories
@@ -696,6 +695,6 @@ for issn in os.listdir(iopdirtmp):
 #if everything went fine, move the files to done
 for datei in todo:
     os.system('mv %s/%s %s/%s' % (iopdirraw, datei, iopdirdone, datei))
-#shutil.rmtree(iopdirtmp)
+shutil.rmtree(iopdirtmp)
 print 'done :-)'
     
