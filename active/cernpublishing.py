@@ -65,7 +65,8 @@ recs = []
 for table in tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summary'}):
     rec = {'jnl' : jnl, 'tc' : tc, 'keyw' : [], 'autaff' : []}
 #    for div in table.find_all('div', attrs = {'class' : 'tocTitle'}):
-    for div in table.find_all('div', attrs = {'class' : 'title'}):
+    divs = table.find_all(attrs = {'class' : 'title'})
+    for div in divs:
         rec['tit'] = re.sub('[\n\t]', '', div.text.strip())
         for a in div.find_all('a'):
             rec['artlink'] = a['href']
@@ -75,7 +76,7 @@ for table in tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summar
 i = 0
 for rec in recs:
     i += 1
-    print '---{ %i/ %i }---{ %s }---' % (i, len(recs), rec['artlink'])
+    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         time.sleep(3)
