@@ -34,6 +34,7 @@ else:
     years = [str(now.year)]
 
 tocurl = 'http://archiv.ub.uni-heidelberg.de/volltextserver/view/type/doctoralThesis.html'
+badlinks = ['http://archiv.ub.uni-heidelberg.de/volltextserver/28894/']
 print tocurl
 hdr = {'User-Agent' : 'Magic Browser'}
 req = urllib2.Request(tocurl, headers=hdr)
@@ -53,8 +54,9 @@ for p in ps:
         if re.search('\(\d\d\d\d\)', pt):
             rec['date'] = re.sub('.*\((\d\d\d\d)\).*', r'\1', pt)
             if rec['date'] in years:
-                prerecs.append(rec)
-    print '%i/%i %s %i' % (i, len(ps), rec['date'], len(prerecs))
+                if not rec['artlink'] in badlinks:
+                    prerecs.append(rec)
+    #print '%i/%i %s %i' % (i, len(ps), rec['date'], len(prerecs))
 
 i = 0
 recs = []
@@ -123,7 +125,7 @@ for rec in prerecs:
             sv = re.sub('Dr\. *', '', sv)
             sv = re.sub('h\.c\. *', '', sv)
             rec['supervisor'].append([sv])
-    print rec
+    print '   ', rec.keys()
 
 
 
