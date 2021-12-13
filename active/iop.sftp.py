@@ -643,6 +643,7 @@ def convertarticle(issn, vol, isu, artid):
                        print pdfdst
     #non-articles
     if not rec['auts'] and rec['tit'] in ['Preface', 'Peer review declaration', 'Statement of Peer Review',
+                                          'Peer Review Statement',
                                           'Peer Review Declaration', 'Committee', 'Preface']:
         print '   skip non-article'
     else:
