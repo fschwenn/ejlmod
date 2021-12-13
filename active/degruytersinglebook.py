@@ -28,13 +28,16 @@ jnlfilename = 'dg' + re.sub('.*\/', '', toclink)
 jnl = "BOOK"
 
 #get list of volumes
-os.system("wget -T 300 -t 3 -q -O /tmp/dg%s %s" % (jnlfilename, toclink))
+if not os.path.isfile('/tmp/dg%s' % (jnlfilename)):
+    os.system("wget -T 300 -t 3 -q -O /tmp/dg%s %s" % (jnlfilename, toclink))
+    time.sleep(5)
 inf = open('/tmp/dg%s' % (jnlfilename), 'r')
 tocpage = BeautifulSoup(''.join(inf.readlines()))
 inf.close()
 
 #Hauptaufnahme
 rec = {'jnl' : jnl, 'auts' : [], 'tc' : 'B'}
+date = False
 for h1 in tocpage.find_all('h1', attrs = {'id' : 'mainTitle'}):
     rec['tit'] = h1.text
 for div in tocpage.find_all('div', attrs = {'class' : 'HG'}):
@@ -51,12 +54,25 @@ for dd in tocpage.find_all('dd', attrs = {'id' : 'isbn'}):
 recs = [rec]
 
 #Chapters
-for div in tocpage.find_all('div', attrs = {'class' : 'article-meta'}):
-    rec = {'jnl' : jnl, 'auts' : [], 'tc' : 'S', 'date' : date, 'auts' : []}
+divs = tocpage.find_all('div', attrs = {'class' : 'article-meta'})
+if not divs:
+    divs = tocpage.find_all('tr', attrs = {'class' : 'bookTocEntryRow'})
+i = 0 
+for div in divs:
+    i += 1
+    print '---'
+    rec = {'jnl' : jnl, 'auts' : [], 'tc' : 'S', 'auts' : []}
+    if date:
+        rec['date'] = date
     for a in div.find_all('a'):
-        rec['artlink'] = 'https://www.degruyter.com' + a['href']
-    os.system("wget -T 300 -t 3 -q -O /tmp/dg%s%i %s" % (jnlfilename, len(recs), rec['artlink']))
-    inf = open('/tmp/dg%s%i' % (jnlfilename, len(recs)), 'r')
+        if a.has_attr('href') and not re.search('pdf$', a['href']):
+            rec['artlink'] = 'https://www.degruyter.com' + a['href']
+            print rec['artlink']
+    artfilename = '/tmp/dg%s___%05i' % (jnlfilename, i)
+    if not os.path.isfile(artfilename):
+        os.system("wget -T 300 -t 3 -q -O %s %s" % (artfilename, rec['artlink']))
+        time.sleep(5)
+    inf = open(artfilename, 'r')
     artpage = BeautifulSoup(''.join(inf.readlines()))
     inf.close()
     #title
@@ -81,8 +97,33 @@ for div in tocpage.find_all('div', attrs = {'class' : 'article-meta'}):
         ptext = p.text.strip()
         if re.search('hapter', ptext):
             rec['doi'] = re.sub('.*?(10\..*)', r'\1', ptext)
+    ###look for meta tags
+    for meta in artpage.find_all('meta'):
+        if meta.has_attr('name'):
+            #pages
+            if meta['name'] == 'citation_firstpage':
+                rec['p1'] = meta['content']
+            elif meta['name'] == 'citation_lastpage':
+                rec['p2'] = meta['content']
+            #ISBN
+            elif meta['name'] == 'citation_isbn':
+                rec['motherisbn'] = meta['content']
+            #author
+            elif meta['name'] == 'citation_author':
+                rec['auts'].append(meta['content'])
+            #title
+            elif meta['name'] == 'citation_title':
+                rec['tit'] = meta['content']
+        elif meta.has_attr('property'):
+            #DOI
+            if meta['property'] == 'og:url':
+                if re.search('10.1515', meta['content']):
+                    rec['doi'] = re.sub('.*(10\/1515\/.*)', r'\1', meta['content'])
+                    rec['doi'] = re.sub('\/hml', '', rec['doi'])
+            
     if rec['auts']:
         recs.append(rec)
+    print '  ', rec
     
     
 
