@@ -7,6 +7,7 @@ import datetime
 import platform
 import unicodedata
 import unidecode
+import codecs
 
 from collclean_lib import coll_cleanforthe
 from collclean_lib import coll_clean710
@@ -20,6 +21,10 @@ except:
     #for running on PubDB
     print 'could not import extract_references_from_string'
 
+#QIS bibclassify
+qisbibclassifycommand = "python /afs/desy.de/user/l/library/proc/bibclassify/bibclassify_cli.py  -k /afs/desy.de/user/l/library/akw/QIS_TEST.rdf -n 10"
+absdir = '/afs/desy.de/group/library/publisherdata/abs'
+tmpdir = '/afs/desy.de/user/l/library/tmp'
 
 
 #from collclean import clean710
@@ -284,25 +289,14 @@ def marcxml(marc,liste):
     else:
         return ''
 
-#translates '27 February 2013' to '2013-02-27'
-#def datetodate(date):
-#    months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
-#    months2 = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
-#    parts = re.split(' +', date.strip())
-#    if len(parts) == 3:
-#        try:
-#            return '%4i-%02i-%02i' % (int(parts[2]), months.index(parts[1].upper())+1, int(parts[0]))
-#        except:
-#            return '%4i-%02i-%02i' % (int(parts[2]), months2.index(parts[1].upper())+1, int(parts[0]))
-#    elif len(parts) == 2:
-#        try:
-#            return '%4i-%02i' % (int(parts[1]), months.index(parts[0].upper())+1)
-#        except:
-#            try:
-#                return '%4i-%02i' % (int(parts[1]), months2.index(parts[0].upper())+1)
-#            except:
-#                return '%4i' % (int(parts[1]))
 
+#regular expressions to add field code based on rec['note']
+refcmp = re.compile('Mathematical Phys')
+refcp = re.compile('Phys')
+refcm = re.compile('Math')
+refcc = re.compile('Comp')
+refca = re.compile('Astro')
+refck = re.compile('[qQ]uantum.(Phys|phys|Infor|infor|Comp|comp|Tec|Com|Corr|Theor|Mech|Dynam|Opti|Elec)')
 def writeXML(recs,dokfile,publisher):
     dokfile.write('<collection>\n')
     i = 0
@@ -353,6 +347,7 @@ def writeXML(recs,dokfile,publisher):
         #DATE
         if 'date' in rec.keys():
             try:
+                #recdate = rec['date']
                 recdate = normalize_date(rec['date'])
             except:
                 recdate = False
@@ -518,14 +513,6 @@ def writeXML(recs,dokfile,publisher):
             for tc in rec['tc']:
                 if tc != '':
                     xmlstring += marcxml('980',[('a',inspiretc[tc])])
-        #FIELD CODE
-        if rec.has_key('fc'):
-            for fc in rec['fc']:
-                xmlstring += marcxml('65017',[('a',inspirefc[fc]),('2','INSPIRE')])
-        elif rec['jnl'] in jnltofc.keys():
-            for fc in jnltofc[rec['jnl']]:
-                xmlstring += marcxml('65017',[('a',inspirefc[fc]),('2','INSPIRE')])
-                print '  FC:', rec['jnl'], fc
         #PACS
         if rec.has_key('pacs'):
             for pacs in rec['pacs']:
@@ -843,6 +830,25 @@ def writeXML(recs,dokfile,publisher):
             for comment in rec['comments']:
                 xmlstring += marcxml('595',[('a',comment)])
         if rec.has_key('note'):
+            if not 'fc' in rec.keys():
+                for comment in rec['note']:
+                    if refcmp.search(comment):
+                        rec['fc'] = 'm'
+                        rec['note'].append('added fieldcode by note')
+                    elif refcp.search(comment):
+                        pass # ignore things like 'School of Mathematics and Physics'
+                    elif refcm.search(comment):
+                        rec['fc'] = 'm'
+                        rec['note'].append('added fieldcode by note')
+                    elif refca.search(comment):
+                        rec['fc'] = 'a'
+                        rec['note'].append('added fieldcode by note')
+                    elif refck.search(comment):
+                        rec['fc'] = 'k'
+                        rec['note'].append('added fieldcode by note')
+                    elif refcc.search(comment):
+                        rec['fc'] = 'c'
+                        rec['note'].append('added fieldcode by note')                    
             for comment in rec['note']:
                 try: 
                     xmlstring += marcxml('595', [('a', comment)])
@@ -850,6 +856,15 @@ def writeXML(recs,dokfile,publisher):
                     xmlstring += marcxml('595', [('a', unidecode.unidecode(comment))])
         if rec.has_key('typ'):
             xmlstring += marcxml('595',[('a',rec['typ'])])
+        #FIELD CODE
+        if rec.has_key('fc'):
+            for fc in rec['fc']:
+                xmlstring += marcxml('65017',[('a',inspirefc[fc]),('2','INSPIRE')])
+        elif rec['jnl'] in jnltofc.keys():
+            for fc in jnltofc[rec['jnl']]:
+                xmlstring += marcxml('65017',[('a',inspirefc[fc]),('2','INSPIRE')])
+                print '  FC:', rec['jnl'], fc
+                rec['fc'] = fc
         #THESIS PUBNOTE
         if 'T' in rec['tc'] and not re.search('"502"', xmlstring):
             thesispbn = [('b', 'PhD')]
@@ -900,11 +915,59 @@ def shapeaut(author):
     return author
 
 
+reqis = re.compile('^\d+ *')
 def writenewXML(recs, dokfile, publisher, dokifilename):
     for rec in recs:
+        #add doki file name
         if 'note' in rec.keys():
             rec['note'].append('DOKIFILE:'+dokifilename)
         else:
             rec['note'] = ['DOKIFILE:'+dokifilename]
+        #QIS keywords
+        doi1 = False 
+        if 'doi' in rec.keys():
+            doi1 = re.sub('[\(\)\/]', '_', rec['doi'])
+        elif 'hdl' in rec.keys():
+            doi1 = re.sub('[\(\)\/]', '_', rec['hdl'])
+        elif 'urn' in rec.keys():
+            doi1 = re.sub('[\(\)\/]', '_', rec['urn'])
+        print '>>', doi1
+        if doi1:
+            absfilename = os.path.join(absdir, doi1)
+            bibfilename = os.path.join(tmpdir, doi1+'.qis.bib')
+            if not os.path.isfile(absfilename):                
+                absfile = codecs.EncodedFile(codecs.open(absfilename, mode='wb'), 'utf8')
+                try:
+                    if 'tit' in rec.keys():
+                        absfile.write(rec['tit'] + '\n\n')
+                    if 'abs' in rec.keys():
+                        absfile.write(rec['abs'] + '\n\n')
+                    if 'keyw' in rec.keys():
+                        for kw in rec['keyw']:
+                            absfile.write(kw + '\n')
+                except:
+                    print '   could not write abstract to file'
+                absfile.close()
+            if not os.path.isfile(bibfilename):
+                print ' >bibclassify %s' % (doi1)
+                os.system('%s %s > %s' % (qisbibclassifycommand, absfilename, bibfilename))
+            absbib = open(bibfilename, 'r')
+            lines = absbib.readlines()
+            qiskws = []
+            for line in lines:
+                if reqis.search(line):
+                    qiskws.append('[QIS] ' + line.strip())
+            absbib.close()
+            if qiskws:
+                if not 'note' in rec.keys():
+                    rec['note'] = []
+                rec['note'].append('%i QIS keywords found' % (len(qiskws)))
+                for qiskw in qiskws:
+                    rec['note'].append(qiskw)
+                if 'fc' in rec.keys():
+                    if not 'k' in rec['fc']:
+                        rec['fc'] += 'k'
+                    else:    
+                        rec['fc'] = 'k'
     writeXML(recs, dokfile, publisher)
     return
