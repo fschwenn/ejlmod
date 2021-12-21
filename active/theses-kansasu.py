@@ -27,7 +27,8 @@ rpp = 50
 pages = 4
 
 boringdisciplines = ['Nursing', 'Bioengineering', 'Civil, Environmental & Architectural Engineering',
-                     'Aerospace Engineering', 'Biostatistics', 'Electrical Engineering & Computer Science',
+                     'Aerospace Engineering', 'Biostatistics',
+                     #'Electrical Engineering & Computer Science',
                      'English', 'Mechanical Engineering', 'Molecular Biosciences', 'Music',
                      'Pharmaceutical Chemistry', 'Physical Therapy & Rehabilitation Sciences',
                      'Slavic Languages & Literatures', 'Anthropology', 'Chemical & Petroleum Engineering',

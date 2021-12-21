@@ -16,7 +16,7 @@ import datetime
 import time
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -53,7 +53,8 @@ departmentstoskip = ['Chemistry', 'Archaeology, Classics and Egyptology', 'Archa
                      'Musculoskeletal Biology',  'Music',  'Ocular Oncology',  'Operations and Supply Chain Management',
                      'Pharmacology',  'Politics',  'Psychological Sciences',  'Psychology',  'School of Biological Sciences',
                      'School of Chemistry',  'School of Dentistry',  'School of Education',
-                     'School of Electrical Engineering, Electronics and Computer Science',  'School of Engineering',
+                     #'School of Electrical Engineering, Electronics and Computer Science',
+                     'School of Engineering',
                      'School of Environmental Sciences',  'School of Management',  'School of Psychology',
                      'School of Tropical Medicine',  'Sociology, Social Policy and Criminology',  'Sociology',
                      'Strategy, International Business and Entrepreneurship',  'Surgery and Oncology',  'Tropical medicine',
@@ -84,7 +85,8 @@ departmentstoskip = ['Chemistry', 'Archaeology, Classics and Egyptology', 'Archa
                      'Pharmacology &amp; Therapeutics', 'Sociolinguistics', 'Veterinary Epidemiology',
                      'Veterinary Microbiology', 'Women&apos;s Health', 'School of Architecture',
                      'Institute of infection and Global health', 'School of Medical Education', 'Infection &amp; Immunity',
-                     'Latin American Studies', 'Haematology', 'Obesity Biology', 'Clinical Engineering', 'Computer Sciences',
+                     'Latin American Studies', 'Haematology', 'Obesity Biology', 'Clinical Engineering',
+                     #'Computer Sciences',
                      'Critical Care', 'Department of Clinical and Molecular', 'Department of Eye and Vision Science',
                      'Electrical Engineering &amp; Electronics', 'Electrical Engineering and Electronics', 'Eye &amp; Vision Science',
                      'German', 'Obesity &amp; Endocrinology(Med)', 'Pathophysiology', 'Perinatal &amp; Reproductive Med',

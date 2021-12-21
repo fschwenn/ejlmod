@@ -29,7 +29,8 @@ rpp = 20
 pages = 2
 
 boringdeps = ['Quimica', 'Biological sciences', 'Ciencias biologicas', 'Ciencias da educacao',
-              'Educational sciences', 'Computer and information sciences',
+              'Educational sciences',
+              #'Computer and information sciences',
               'Ciencias da terra e ciencias do ambiente', 'Earth and related Environmental sciences']
 
 def akzenteabstreifen(string):

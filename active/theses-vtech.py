@@ -17,7 +17,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
@@ -32,13 +32,15 @@ rpp = 50
 pages = 4
 
 boringdisciplines = ['Mechanical Engineering', 'Engineering Education', 'Biological Sciences',
-                     'Civil Engineering', 'Computer Science and Applications', 'Electrical Engineering',                     
+                     'Civil Engineering', 'Electrical Engineering',                     
+                     #'Computer Science and Applications', 
                      'Engineering Mechanics', 'Plant Pathology, Physiology and Weed Science',
                      'Accounting and Information Systems', 'Aerospace Engineering',
                      'Agricultural and Extension Education', 'Animal and Poultry Sciences',
                      'Architecture and Design Research', 'Biomedical and Veterinary Sciences',
                      'Biomedical Engineering', 'Chemical Engineering', 'Chemistry',
-                     'Computer Engineering', 'Counselor Education', 'Crop and Soil Environmental Sciences',
+                     #'Computer Engineering',
+                     'Counselor Education', 'Crop and Soil Environmental Sciences',
                      'Curriculum and Instruction', 'Educational Leadership and Policy Studies',
                      'Educational Research and Evaluation', 'Environmental Design and Planning',
                      'Fisheries and Wildlife Science', 'Food Science and Technology',

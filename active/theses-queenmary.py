@@ -16,7 +16,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -29,14 +29,13 @@ numberofrecords = rpp*pages
 publisher = 'Queen Mary, U. of London (main)'
 
 jnlfilename = 'THESES-QUEEN_MARY-%s' % (stampoftoday)
-boring = ['Electronic Engineering and Computer Science', 'Engineering and Materials Science',
+boring = ['Engineering and Materials Science', #'Electronic Engineering and Computer Science', 
           'Biological and Chemical Sciences', 'Law', 'Medicine', 'Electronic Engineering',
-          'School of Electronic Engineering and Computer Science',
+          #'School of Electronic Engineering and Computer Science',
           'Medicine and Dentistry', 'Engineering and Material Science',
           'School of Medicine and Dentistry', 'School of Law',
           'School of Biological and Chemical Sciences',
-          'School of Electronic Engineering and Computer Science',
-          'Cancer', 'Computer Science',
+          'Cancer', #'Computer Science',
           'Electronic engineering and computer science',
           'Dentistry',
           'Barts and the London School of Medicine and Dentistry',

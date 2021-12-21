@@ -16,7 +16,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = '/afs/desy.de/user/l/library/proc/retinspire/retfiles'
+retfiles_path = '/afs/desy.de/user/l/library/proc/retinspire/retfiles'#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -75,7 +75,9 @@ subjectstoskip = ['Biochemistry', 'LGBTQstudies', 'Classicalstudies', 'Microbiol
                   'Earlychildhoodeducation', 'Folklore', 'Creativewriting', 'Physicalgeography', 
                   'Environmentaljustice', 'Kinesiology', 'Modernhistory', 'Mechanics', 
                   'Educationalphilosophy', 'Fashion', 'Sedimentarygeology', 'Endocrinology', 
-                  'Arteducation', 'Computerscience', 'Italianliterature', 'Landscapearchitecture', 
+                  'Arteducation',
+                  #'Computerscience',
+                  'Italianliterature', 'Landscapearchitecture', 
                   'Pathology', 'Criminology', 'Communitycollegeeducation', 
                   'Culturalresourcesmanagement', 'Multimediacommunications', 
                   'Developmentalpsychology', 'Physicaltherapy', 'Museumstudies', 'Plantsciences', 
@@ -128,7 +130,7 @@ subjectstoskip += ['Animalbehavior', 'ChemistryPharmaceutical', 'Neurobiology',
                    'Plastics', 'HealthSciencesPharmacology', 'Obstetricsandgynecology', 'BiologyGenetics',
                    'BiophysicsMedical', 'Histology', 'BiologyAnimalPhysiology', 'Historyofscience',
                    'HealthSciencesEpidemiology', 'Animaldiseases']
-subjectstoskip += ['Areaplanninganddevelopment', 'Businesseducation', 'Computerengineering',
+subjectstoskip += ['Areaplanninganddevelopment', 'Businesseducation', #'Computerengineering',
                    'Fisheriesandaquaticsciences', 'Islamicculture', 'Metaphysics', 'Mineralogy',
                    'Molecularchemistry', 'Nuclearengineering', 'Plantbiology', 'Platetectonics',
                    'PoliticalScience', 'Publicadministration', 'SouthAfricanstudies', 'Statisticalphysics',
@@ -139,7 +141,8 @@ subjectstoskip += ['Areaplanninganddevelopment', 'Businesseducation', 'Computere
                    'Theater', 'Politicalscience', 'Musictheory']
 subjectstoskip += ['AnthropologyArchaeology', 'Architecturalengineering', 'Audiology',
                    'Canadianhistory', 'Caribbeanliterature', 'Cinematography',
-		   'CommerceBusiness', 'Computationalphysics', 'EconomicsCommerceBusiness',
+		   'CommerceBusiness', #'Computationalphysics',
+                   'EconomicsCommerceBusiness',
 		   'EconomicsLabor', 'Environmentalphilosophy', 'Foreignlanguageinstruction',
 		   'Forensicanthropology', 'Geophysicalengineering', 'Giftededucation',
 		   'Instructionaldesign', 'Mining', 'Multimedia', 'Optometry', 'Patentlaw',
@@ -147,7 +150,7 @@ subjectstoskip += ['AnthropologyArchaeology', 'Architecturalengineering', 'Audio
 		   'Rangemanagement', 'Religiouseducation', 'Systemscience',
 		   'Technicalcommunication', 'Textileresearch', 'FrenchCanadianculture']
 
-problematiclinks = ['https://escholarship.org/uc/item/3hv4z0z8', 'https://escholarship.org/uc/item/5gw3v7bf', 'https://escholarship.org/uc/item/69m6205w', 'https://escholarship.org/uc/item/49q2s5km', 'https://escholarship.org/uc/item/4xn23688', 'https://escholarship.org/uc/item/8tj5d61d', 'https://escholarship.org/uc/item/28w4j5xc', 'https://escholarship.org/uc/item/6972h04z']
+problematiclinks = ['https://escholarship.org/uc/item/3hv4z0z8', 'https://escholarship.org/uc/item/5gw3v7bf', 'https://escholarship.org/uc/item/69m6205w', 'https://escholarship.org/uc/item/49q2s5km', 'https://escholarship.org/uc/item/4xn23688', 'https://escholarship.org/uc/item/8tj5d61d', 'https://escholarship.org/uc/item/28w4j5xc', 'https://escholarship.org/uc/item/6972h04z', 'https://escholarship.org/uc/item/8w73232j']
 #problematiclinks = []
 hdr = {'User-Agent' : 'Magic Browser'}
 campi = {'ucla' : 'UCLA, Los Angeles (main)', 'ucd' : 'UC, Davis (main)',
@@ -297,6 +300,14 @@ for rec in recs:
     for s in rec['subjects']:
         subject = re.sub('\W', '', s)
         if not subject in subjectstoskip:
+            if re.search('Math', subject):
+                rec['fc'] = 'm'
+            elif re.search('Comput', subject):
+                rec['fc'] = 'c'
+            elif re.search('Astro', subject):
+                rec['fc'] = 'a'
+            elif re.search('Condensed', subject):
+                rec['fc'] = 'f'
             relevantrecs.append(rec)
             if subject in subjectrecs.keys():
                 subjectrecs[subject].append(rec)

@@ -29,7 +29,8 @@ publisher = 'TCD, Dublin'
 
 
 boringschools = ['Biochemistry & Immunology', 'Business', 'Chemistry',
-                 'Computer Science & Statistics', 'Creative Arts', 'Dental Sciences',
+                 #'Computer Science & Statistics',
+                 'Creative Arts', 'Dental Sciences',
                  'Ecumenics', 'Education', 'Engineering', 'English',
                  'Histories & Humanities', 'Lang, Lit', 'Law',
                  'Linguistic Speech & Comm Sci', 'Medicine', 'Natural Sciences',

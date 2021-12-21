@@ -17,7 +17,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
@@ -45,8 +45,9 @@ uninterestingsubjects = ['Chemistry', 'Biochemistry', 'Organic chemistry',
                          "British and Irish literature", "Business administration", "Cellular biology",
                          "Chemical engineering", "Civil engineering", "Classical Studies",
                          "Climate Change", "Cognitive psychology", "Communication",
-                         "Comparative literature", "Computational chemistry", "Computational physics",
-                         "Computer Engineering", "Computer science", "Conservation biology",
+                         "Comparative literature", "Computational chemistry",
+                         #"Computational physics", "Computer science", 
+                         "Computer Engineering", "Conservation biology",
                          "Counseling Psychology", "Creative writing", "Criminology",
                          "Cultural anthropology", "Curriculum development", "Design",
                          "Developmental biology", "Ecology", "Economics", "Educational administration",

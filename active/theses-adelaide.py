@@ -17,7 +17,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
@@ -28,7 +28,60 @@ publisher = 'Adelaide U.'
 
 pages = 2
 rpp = 100
-uninterestingdepartments = ['School of Animal and Veterinary Sciences', 'Adelaide Law School', 'Adelaide Medical School : Ophthalmology and Visual Sciences', 'Australian School of Petroleum', 'Business School', 'Centre for Global Food &amp; Resources', 'Politics &amp; International Studies', 'School of Architecture and Built Environment', 'School of Biological Sciences : Ecology and Environmental Science', 'School of Chemical Engineering &amp; Advanced Materials', 'School of Chemical Engineering', 'School of Dentistry', 'School of Electrical and Electronic Engineering', 'School of Humanities : Art History', 'School of Humanities : History', 'School of Mechanical Engineering', 'School of Physical Sciences: Chemistry', 'School of Physical Sciences : Earth Sciences', 'School of Psychology', 'School of Public Health', 'School of Social Sciences : Politics &amp; International Studies', 'School of Social Sciences : Sociology, Criminology &amp; Gender Studies', 'The Centre for Global Food and Resources', 'School of Biological Sciences', 'School of Biological Sciences : Ecology and Environmental Sciences', 'School of Humanities : Media', 'Adelaide Medical School', 'Centre for Global Food and Resources', 'Entrepreneurship, Commercialisation and Innovation Centre', 'School of Agriculture, Food and Wine', 'School of Civil, Environmental and Mining Engineering', 'School of Economics', 'School of Physical Sciences : Chemistry', 'School of Computer Science', 'School of Electrical and Electronic', 'Adelaide Business School', 'Adelaide Dental School', 'Adelaide Medical School : Psychiatry', 'Adelaide Nursing School', 'Anthropology &amp; Development Studies', 'Biological Sciences', 'Centre for Traumatic Stress Studies', 'Elder Conservatorium of Music', 'Institute for International Trade', 'Joanna Briggs Institute', 'School of Biological Sciences : Australian Centre for Ancient DNA', 'School of Biological Sciences : Molecular and Biomedical Science', 'School of Chemical Engineering and Advanced Materials', 'School of Education', 'School of History and Politics : Politics', 'School of Humanities : Classics, Archaeology &amp; Ancient History', 'School of Humanities : English &amp; Creative Writing', 'School of Humanities : English and Creative Writing', 'School of Humanities : French Studies', 'School of Humanities : Philosophy', 'School of Medicine', 'School of Nursing', 'School of Population Health : Public Health', 'School of Social Sciences : Anthropology and School of Social Sciences : Anthropology and Development Studies', 'School of Social Sciences: Anthropology and Development Studies', 'School of Social Sciences : Asian Studies', 'School of Social Sciences : Geography, Environment', 'School of Social Sciences : Geography, Environment &amp; Population', 'School of Social Sciences: Geography, Environment &amp; Population', 'School of Social Sciences : Geography, Environment and Population', 'School of Social Sciences: Politics &amp; International Studies', 'School of Social Sciences : Politics and International Studies', 'School of Social Sciences : Sociology, Criminology and Gender Studies', 'School of Social Sciences', 'The Joanna Briggs Institute', 'Anthropology &amp; Development Studies', 'Centre for Global Food &amp; Resources', 'Physical Sciences', 'Politics &amp; International Studies', 'School of Chemical Engineering &amp; Advanced Materials', 'School of Chemical Engineering and Advanced Materials', 'School of Humanities : Classics, Archaeology &amp; Ancient History', 'School of Humanities : English &amp; Creative Writing', 'School of Social Sciences : Anthropology and School of Social Sciences : Anthropology and Development Studies', 'School of Social Sciences : Geography, Environment', ' School of Social Sciences : Geography, Environment &amp; Population', 'School of Social Sciences: Geography, Environment &amp; Population', 'School of Social Sciences : Politics &amp; International Studies', 'School of Social Sciences: Politics &amp; International Studies', 'School of Social Sciences : Sociology, Criminology &amp; Gender Studies', 'The Joanna Briggs Institute']
+uninterestingdepartments = ['School of Animal and Veterinary Sciences', 'Adelaide Law School',
+                            'Adelaide Medical School : Ophthalmology and Visual Sciences',
+                            'Australian School of Petroleum', 'Business School',
+                            'Centre for Global Food &amp; Resources', 'Politics &amp; International Studies',
+                            'School of Architecture and Built Environment',
+                            'School of Biological Sciences : Ecology and Environmental Science',
+                            'School of Chemical Engineering &amp; Advanced Materials', 'School of Chemical Engineering',
+                            'School of Dentistry', 'School of Electrical and Electronic Engineering',
+                            'School of Humanities : Art History', 'School of Humanities : History',
+                            'School of Mechanical Engineering', 'School of Physical Sciences: Chemistry',
+                            'School of Physical Sciences : Earth Sciences', 'School of Psychology',
+                            'School of Public Health', 'School of Social Sciences : Politics &amp; International Studies',
+                            'School of Social Sciences : Sociology, Criminology &amp; Gender Studies',
+                            'The Centre for Global Food and Resources', 'School of Biological Sciences',
+                            'School of Biological Sciences : Ecology and Environmental Sciences',
+                            'School of Humanities : Media', 'Adelaide Medical School', 'Centre for Global Food and Resources',
+                            'Entrepreneurship, Commercialisation and Innovation Centre', 'School of Agriculture, Food and Wine',
+                            'School of Civil, Environmental and Mining Engineering', 'School of Economics',
+                            'School of Physical Sciences : Chemistry',
+                            #'School of Computer Science',
+                            'School of Electrical and Electronic', 'Adelaide Business School', 'Adelaide Dental School',
+                            'Adelaide Medical School : Psychiatry', 'Adelaide Nursing School',
+                            'Anthropology &amp; Development Studies', 'Biological Sciences', 'Centre for Traumatic Stress Studies',
+                            'Elder Conservatorium of Music', 'Institute for International Trade', 'Joanna Briggs Institute',
+                            'School of Biological Sciences : Australian Centre for Ancient DNA',
+                            'School of Biological Sciences : Molecular and Biomedical Science',
+                            'School of Chemical Engineering and Advanced Materials', 'School of Education',
+                            'School of History and Politics : Politics',
+                            'School of Humanities : Classics, Archaeology &amp; Ancient History',
+                            'School of Humanities : English &amp; Creative Writing',
+                            'School of Humanities : English and Creative Writing', 'School of Humanities : French Studies',
+                            'School of Humanities : Philosophy', 'School of Medicine', 'School of Nursing',
+                            'School of Population Health : Public Health',
+                            'School of Social Sciences : Anthropology and School of Social Sciences : Anthropology and Development Studies',
+                            'School of Social Sciences: Anthropology and Development Studies', 'School of Social Sciences : Asian Studies',
+                            'School of Social Sciences : Geography, Environment',
+                            'School of Social Sciences : Geography, Environment &amp; Population',
+                            'School of Social Sciences: Geography, Environment &amp; Population',
+                            'School of Social Sciences : Geography, Environment and Population',
+                            'School of Social Sciences: Politics &amp; International Studies',
+                            'School of Social Sciences : Politics and International Studies',
+                            'School of Social Sciences : Sociology, Criminology and Gender Studies',
+                            'School of Social Sciences', 'The Joanna Briggs Institute', 'Anthropology &amp; Development Studies',
+                            'Centre for Global Food &amp; Resources', 'Physical Sciences', 'Politics &amp; International Studies',
+                            'School of Chemical Engineering &amp; Advanced Materials', 'School of Chemical Engineering and Advanced Materials',
+                            'School of Humanities : Classics, Archaeology &amp; Ancient History',
+                            'School of Humanities : English &amp; Creative Writing',
+                            'School of Social Sciences : Anthropology and School of Social Sciences : Anthropology and Development Studies',
+                            'School of Social Sciences : Geography, Environment',
+                            'School of Social Sciences : Geography, Environment &amp; Population',
+                            'School of Social Sciences: Geography, Environment &amp; Population',
+                            'School of Social Sciences : Politics &amp; International Studies',
+                            'School of Social Sciences: Politics &amp; International Studies',
+                            'School of Social Sciences : Sociology, Criminology &amp; Gender Studies', 'The Joanna Briggs Institute']
 
 jnlfilename = 'THESES-ADELAIDE-%s' % (stampoftoday)
 

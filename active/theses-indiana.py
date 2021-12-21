@@ -16,7 +16,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -39,13 +39,13 @@ boringdepartments = ['Anthropology/University Graduate School', 'Department of A
                      'Department of Psychological Brain Sciences/University Graduate School',
                      'Department of Spanish Portuguese', 'Department of Speech Hearing Sciences',
                      'History Philosophy of Science Medicine/University Graduate School',
-                     'Informatics Computing Engineering/University Graduate School',
+                     #'Informatics Computing Engineering/University Graduate School',
                      'Jacobs School of Music', 'Kelley School of Business',
                      'Linguistics/University Graduate School',
                      'Media School/University Graduate School',
                      'Musicology/Jacobs School of Music', 'School of Education',
                      'School of Education/University Graduate School',
-                     'School of Informatics Computing Engineering',
+                     #'School of Informatics Computing Engineering',
                      'School of Optometry', 'School of Public Environmental Affairs',
                      'School of Public Health', 'School of Public Health/University Graduate School',
                      'Anthropology', 'Biochemistry', 'Biochemistry Molecular Biology',
@@ -82,7 +82,7 @@ boringdepartments = ['Anthropology/University Graduate School', 'Department of A
                      'Psychological Brain Sciences the Cognitive Science Program',
                      'Psychology', 'Public Affairs', 'Public Health', 'Public Policy',
                      'School of Health Physical Education Recreation',
-                     'School of Informatics Computing', 'School of Informatics Computing Engineering',
+                     #'School of Informatics Computing', 'School of Informatics Computing Engineering',
                      'Sociology', 'Spanish', 'Spanish Portuguese', 'Speech Hearing']
 
 

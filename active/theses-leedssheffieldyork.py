@@ -17,7 +17,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
@@ -53,7 +53,7 @@ boringaffs = ['University of Leeds, Department of Colour and Polymer Chemistry (
               'University of Leeds, School of Chemistry (Leeds), School of Chemical and Process Engineering (Leeds), United Kindgom',
               'University of Leeds, School of Chemistry (Leeds), School of Earth and Environment (Leeds), United Kindgom',
               'University of Leeds, School of Chemistry (Leeds), School of Mechanical Engineering (Leeds), United Kindgom',
-              'University of Leeds, School of Computing (Leeds), School of Chemistry (Leeds), United Kindgom',
+#              'University of Leeds, School of Computing (Leeds), School of Chemistry (Leeds), United Kindgom',
               'University of Leeds, School of Earth and Environment (Leeds), Food Science (Leeds), School of Medicine (Leeds), United Kindgom',
               'University of Leeds, School of Education (Leeds), School of Physics and Astronomy (Leeds), United Kindgom',
               'University of Leeds, School of Electronic & Electrical Engineering (Leeds), School of Physics and Astronomy (Leeds), United Kindgom',
@@ -92,7 +92,7 @@ boringaffs = ['University of Leeds, Department of Colour and Polymer Chemistry (
               'University of Sheffield, Computer Science (Sheffield), Landscape (Sheffield), United Kindgom',
               'University of Sheffield, Computer Science (Sheffield), Psychology (Sheffield), United Kindgom',
               'University of Sheffield, Electronic and Electrical Engineering (Sheffield), Physics and Astronomy (Sheffield), United Kindgom',
-              'University of Sheffield, Faculty of Engineering (Sheffield), Computer Science (Sheffield), United Kindgom',
+#              'University of Sheffield, Faculty of Engineering (Sheffield), Computer Science (Sheffield), United Kindgom',
               'University of Sheffield, Faculty of Science (Sheffield), Animal and Plant Sciences (Sheffield), United Kindgom',
               'University of Sheffield, Faculty of Science (Sheffield), Chemistry (Sheffield), United Kindgom',
               'University of Sheffield, Faculty of Science (Sheffield), Geography (Sheffield), United Kindgom',

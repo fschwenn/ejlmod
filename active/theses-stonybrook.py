@@ -17,7 +17,7 @@ import json
 import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -47,8 +47,8 @@ boringdepartments = ['Department of Molecular and Cellular Biology',
                      'Department of Biochemistry and Structural Biology',
                      'Department of Clinical Psychology',
                      'Department of Comparative Literature',
-                     'Department of Computer Engineering',
-                     'Department of Computer Engineering.',
+                     #'Department of Computer Engineering',
+                     #'Department of Computer Engineering.',
                      'Department of Electrical Engineering.',
                      'Department of English.', 'Department of Chemistry.',
                      'Department of Experimental Psychology.',

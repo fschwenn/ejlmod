@@ -17,7 +17,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -32,7 +32,8 @@ basetocurl = 'https://surface.syr.edu/etd/index.'
 tocextension = 'html'
 
 boringdepartments = ['Biology', 'Mechanical and Aerospace Engineering', 'Chemistry',
-                     'Electrical Engineering and Computer Science', 'Psychology',
+                     #'Electrical Engineering and Computer Science',
+                     'Psychology',
                      'Teaching and Leadership', 'Political Science', 'Design',
                      'Cultural Foundations of Education', 'Reading and Language Arts',
                      'Mass Communications', 'Earth Sciences', 'Anthropology',

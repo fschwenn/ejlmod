@@ -23,9 +23,9 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Florida Intl. U.'
 
-pages = 2 
+pages = 2
 
-jnlfilename = 'THESES-FloridaIntlU-%sB' % (stampoftoday)
+jnlfilename = 'THESES-FloridaIntlU-%s' % (stampoftoday)
 
 basetocurl = 'https://digitalcommons.fiu.edu/etd/index.'
 tocextension = 'html'
@@ -33,7 +33,8 @@ tocextension = 'html'
 boringdepartments = ['English', 'Electrical Engineering', 'International Relations', 'International Studies',
                      'Civil Engineering', 'Adult Education and Human Resource Development', 'Biochemistry',
                      'Biology', 'Biomedical Engineering', 'Biomedical Sciences', 'Business Administration',
-                     'Chemistry', 'Computer Engineering', 'Computer Science', 'Construction Management',
+                     'Chemistry', 'Computer Engineering', 'Construction Management',
+                     #'Computer Science',
                      'Creative Writing', 'Curriculum and Instruction', 'Dietetics and Nutrition',
                      'Earth Systems Science', 'Economics', 'Educational Administration and Supervision',
                      'Electrical and Computer Engineering', 'Engineering Management', 'Environmental Studies',
