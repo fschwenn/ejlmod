@@ -214,7 +214,7 @@ for artlink in artlinks:
         for div in page.body.find_all('div', attrs = {'class' : 'belongsTo'}):
             if re.search('Special Issue', div.text):
                 for a2 in div.find_all('a'):
-                    rec['note'].append([ a2.text ])
+                    rec['note'].append( a2.text )
                     if a2.text in conferences.keys():
                         rec['tc'] = 'C'
                         rec['cnum'] = conferences[a2.text]
