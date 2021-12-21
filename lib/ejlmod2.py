@@ -301,6 +301,7 @@ def writeXML(recs,dokfile,publisher):
     dokfile.write('<collection>\n')
     i = 0
     for rec in recs:
+        recdate = False
         if rec['jnl'] in ['Astron.Astrophys.', 'Mon.Not.Roy.Astron.Soc.', 
                           'Astronom.J.', 'Adv.Astron.', 'Astron.Nachr.']:
             arXivfromADS(rec)
@@ -363,8 +364,11 @@ def writeXML(recs,dokfile,publisher):
                 else:
                     xmlstring += marcxml('260', [('c', recdate), ('t', 'published')])
             except:
-                print '{DATE}', rec
-                xmlstring += marcxml('599', [('a', 'date missing?!')])
+                try:
+                    xmlstring += marcxml('260', [('c', rec['year']), ('t', 'published')])
+                except:
+                    print '{DATE}', recdate,  rec
+                    xmlstring += marcxml('599', [('a', 'date missing?!')])
         #KEYWORDS
         if rec.has_key('keyw'):
             if len(rec['keyw']) == 1:
@@ -674,7 +678,13 @@ def writeXML(recs,dokfile,publisher):
                                 grids.append(grid)
                         else:
                             autlist.append(('v', aff))
-                xmlstring += marcxml(marc, autlist)
+                try:
+                    xmlstring += marcxml(marc, autlist)
+                except:
+                    print rec['link']
+                    print autlist
+                    autlist2 = [(tup[0], unidecode.unidecode(tup[1])) for tup in autlist]
+                    xmlstring += marcxml(marc, autlist2)
                 marc = '700'
         elif rec.has_key('auts'):
             affdict = {}
@@ -857,14 +867,16 @@ def writeXML(recs,dokfile,publisher):
         if rec.has_key('typ'):
             xmlstring += marcxml('595',[('a',rec['typ'])])
         #FIELD CODE
+        if rec['jnl'] in jnltofc.keys():
+            for fc in jnltofc[rec['jnl']]:
+                print '  FC:', rec['jnl'], fc
+                if 'fc' in rec.keys():
+                    rec['fc'] += fc
+                else:
+                    rec['fc'] = fc
         if rec.has_key('fc'):
             for fc in rec['fc']:
                 xmlstring += marcxml('65017',[('a',inspirefc[fc]),('2','INSPIRE')])
-        elif rec['jnl'] in jnltofc.keys():
-            for fc in jnltofc[rec['jnl']]:
-                xmlstring += marcxml('65017',[('a',inspirefc[fc]),('2','INSPIRE')])
-                print '  FC:', rec['jnl'], fc
-                rec['fc'] = fc
         #THESIS PUBNOTE
         if 'T' in rec['tc'] and not re.search('"502"', xmlstring):
             thesispbn = [('b', 'PhD')]
@@ -939,12 +951,21 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
                 absfile = codecs.EncodedFile(codecs.open(absfilename, mode='wb'), 'utf8')
                 try:
                     if 'tit' in rec.keys():
-                        absfile.write(rec['tit'] + '\n\n')
+                        try:
+                            absfile.write(rec['tit'] + '\n\n')
+                        except:
+                            absfile.write(unidecode.unidecode(rec['tit']) + '\n\n')
                     if 'abs' in rec.keys():
-                        absfile.write(rec['abs'] + '\n\n')
+                        try:
+                            absfile.write(rec['abs'] + '\n\n')
+                        except:
+                            absfile.write(unidecode.unidecode(rec['abs']) + '\n\n')
                     if 'keyw' in rec.keys():
                         for kw in rec['keyw']:
-                            absfile.write(kw + '\n')
+                            try:
+                                absfile.write(kw + '\n')
+                            except:
+                                absfile.write(unidecode.unidecode(kw) + '\n')
                 except:
                     print '   could not write abstract to file'
                 absfile.close()
@@ -962,12 +983,13 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
                 if not 'note' in rec.keys():
                     rec['note'] = []
                 rec['note'].append('%i QIS keywords found' % (len(qiskws)))
+                print '   %i QIS keywords found' % (len(qiskws))
                 for qiskw in qiskws:
                     rec['note'].append(qiskw)
                 if 'fc' in rec.keys():
                     if not 'k' in rec['fc']:
                         rec['fc'] += 'k'
-                    else:    
-                        rec['fc'] = 'k'
+                else:    
+                    rec['fc'] = 'k'
     writeXML(recs, dokfile, publisher)
     return
