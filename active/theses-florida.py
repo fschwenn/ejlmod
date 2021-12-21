@@ -12,6 +12,10 @@ import ejlmod2
 import codecs
 import datetime
 import time
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
@@ -21,8 +25,10 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Florida U.'
 
-rpp = 20
+rpp = 24
 pages = 20
+startyear = now.year-1
+stopyear = now.year
 boring = ['aerodynamics', 'birds', 'disease', 'religion', 'archaeology', 'hormones',
           'biocollections', 'dental', 'aircraft', 'rhetoric', 'potato', 'paleontology',
           'aegypti', 'aerosol', 'agarose', 'andes', 'anthropocene', 'antimicrobial',
@@ -60,7 +66,8 @@ boring += ["Accounting", "Advertising", "Aerospace Engineering", "Agricultural a
            "Biomedical Engineering", "Biostatistics", "Botany", "Building Construction", "Geology", 
            "Business Administration", "Chemical Engineering", "Chemistry", "Civil and Coastal Engineering",
            "Civil Engineering", "Classical Studies", "Classics", "Clinical and Health Psychology",
-           "Communication Sciences and Disorders", "Computer and Information Science and Engineering",
+           "Communication Sciences and Disorders",
+           #"Computer and Information Science and Engineering",
            "Counseling and Counselor Education", "Counseling Psychology", "Creative Writing",
            "Criminology, Law, and Society", "Curriculum and Instruction", "Curriculum and Instruction (CCD)",
            "Curriculum and Instruction (CUI)", "Curriculum and Instruction (ISC)", "Dental Sciences",
@@ -73,7 +80,8 @@ boring += ["Accounting", "Advertising", "Aerospace Engineering", "Agricultural a
            "Family, Youth and Community Sciences", "Finance, Insurance and Real Estate", "Genetics (IDP)", 
            "Fisheries and Aquatic Sciences", "Food and Resource Economics", "Food Science", "Geography", 
            "Food Science and Human Nutrition", "Forest Resources and Conservation", "French and Francophone Studies", 
-           "Computer Engineering", "Computer Science", "Construction Management", "Genetics and Genomics", 
+           #"Computer Engineering", "Computer Science",
+           "Construction Management", "Genetics and Genomics", 
            "German", "Health and Human Performance", "Health Education and Behavior", "Health Services Research",
            "Health Services Research, Management, and Policy", "Higher Education Administration",
            "Historic Preservation", "History", "Horticultural Sciences", "Human-Centered Computing",
@@ -101,55 +109,33 @@ boring += ["Accounting", "Advertising", "Aerospace Engineering", "Agricultural a
            "Tourism, Recreation, and Sport Management", "Urban and Regional Planning", "Veterinary Medical Sciences",
            "Veterinary Medicine", "Wildlife Ecology and Conservation", "Women's Studies", "Zoology",
            "Occupational Therapy", "Romance Languages and Literatures"]
+boring += ['Ed.D.', 'M.A.M.C.', 'M.A.', 'M.H.P.', 'M.S.C.M.', 'M.S.', 'M.U.R.P.', 'B.S.'] 
 
-jnlfilename = 'THESES-FloridaU-%sB' % (stampoftoday)
 
-hdr = {'User-Agent' : 'Magic Browser'}
+jnlfilename = 'THESES-FloridaU-%s' % (stampoftoday)
+
 prerecs = []
+driver = webdriver.PhantomJS()
 for page in range(pages):
-    tocurl = 'https://ufdc.ufl.edu/ufir/contains/brief/' + str(page+1) + '/?t=%22theses%22&f=GE&o=11'
-    print '---{ %i/%i }---{ %s }---' % (page+1, pages, tocurl)
-    req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
-    for section in tocpage.body.find_all('section', attrs = {'class' : 'sbkBrv_SingleResult'}):
-        keepit = True
-        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [], 'restricted' : False}
-        for span in section.find_all('span', attrs = {'class' : 'RestrictedItemText'}):
-            rec['restricted'] = True
-        for span in section.find_all('span', attrs = {'class' : 'briefResultsTitle'}):
-            for a in span.find_all('a'):
+    tocurl = 'https://ufdc.ufl.edu/collections/ufetd/results?datehi=' + str(stopyear) + '-31-12&datelo=' + str(startyear) + '-01-01&filter=genre%3Atheses&page=' + str(page+1)
+    print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
+    try:
+        driver.implicitly_wait(60)
+        driver.get(tocurl)
+        WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'boxed-section')))
+        tocpage = BeautifulSoup(driver.page_source, features="lxml")
+        sections = tocpage.find_all('section', attrs = {'class' : 'boxed-section'})
+        for section in sections:
+            for a in section.find_all('a'):
+                rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [], 'restricted' : False}
                 rec['link'] =  a['href']
-                rec['tit'] = a.text.strip()
+                #marc xml works only for some records
+                rec['artlink'] =  re.sub('.*edu\/(..)(..)(..)(..)(..)\/(.*)\/citation', r'https://ufdcimages.uflib.ufl.edu/\1/\2/\3/\4/\5/\6/marc.xml', a['href'])
                 rec['doi'] = '20.2000/FloridaU/' + re.sub('.*edu\/', '', a['href'])
-        for dl in section.find_all('dl'):
-            for child in dl.children:
-                try:
-                    child.name
-                except:
-                    continue
-                if child.name == 'dt':
-                    dtt = child.text.strip()
-                elif child.name == 'dd':
-                    #date
-                    if dtt == 'Publication Date:':
-                        rec['date'] = child.text.strip()
-                    #author
-                    elif dtt == 'Creator:':
-                        rec['autaff'] = [[ child.text.strip() ]]
-                    #pages
-                    elif dtt == 'Format:':
-                        if re.search('\d\d p\.', child.text):
-                            rec['pages'] = re.sub('.*?(\d\d+) p\..*', r'\1', child.text.strip())
-                    #keywords
-                    elif dtt == 'Subjects:':
-                        rec['keyw'] = re.split(' \-\- ', child.text.strip())
-                        for keyw in rec['keyw']:
-                            if keyw in boring:
-                                print '      skip', keyw
-                                keepit = False
-        if keepit:
-            prerecs.append(rec)
-    print '   %i theses so far' % (len(prerecs))
+                prerecs.append(rec)
+    except:
+        print ' could not load "%s"' % (tocurl)
+        break
     time.sleep(10)
 
 i = 0
@@ -157,46 +143,130 @@ recs = []
 for rec in prerecs:
     i += 1
     keepit = True
-    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link']+ '/citation')
-    try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']+ '/citation'), features="lxml")
+    print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
+    #TRY MARC XML
+    artfilename = '/tmp/florida_%s' % (re.sub('\W', '', rec['artlink']))
+    if not os.path.isfile(artfilename):
+        os.system('wget -O %s -q "%s"' % (artfilename, rec['artlink']))
         time.sleep(5)
-    except:
+    inf = open(artfilename, 'r')
+    lines = inf.readlines()
+    inf.close()
+    artpage = BeautifulSoup(''.join(lines), features="lxml")
+    #author
+    for df in artpage.find_all('datafield', attrs = {'tag' : '100'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
+            rec['autaff'] = [[ re.sub('\.$', '', sf.text.strip()) ]]
+    #title
+    for df in artpage.find_all('datafield', attrs = {'tag' : '245'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
+            rec['tit'] = sf.text.strip()
+    #date
+    for df in artpage.find_all('datafield', attrs = {'tag' : '260'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'c'}):
+            rec['date'] = re.sub('\.$', '', sf.text.strip())
+    #keywords
+    for df in artpage.find_all('datafield', attrs = {'tag' : '653'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
+            rec['keyw'].append(sf.text.strip())
+    #pages
+    for df in artpage.find_all('datafield', attrs = {'tag' : '300'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
+            sft = sf.text.strip()
+            if re.search('\d+ pages', sft):
+                rec['pages'] = re.sub('.*?(\d+) pages.*', r'\1', sft)
+            elif  re.search('\d+ p\.\)', sft):
+                rec['pages'] = re.sub('.*?(\d+) p\..*', r'\1', sft)
+    #abstract
+    for df in artpage.find_all('datafield', attrs = {'tag' : '520'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
+            rec['abs'] = sf.text.strip()
+    #department
+    for df in artpage.find_all('datafield', attrs = {'tag' : '690'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
+            dep = re.sub('(.*) thesis,.*', r'\1', sf.text.strip())
+            if dep in boring:
+                keepit = False
+                print '   skip "%s"' % (dep)
+            else:
+                rec['note'].append(dep)
+    #500
+    for df in artpage.find_all('datafield', attrs = {'tag' : '500'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
+            sft = sf.text.strip()
+            #supervisor
+            if re.search('^Advisor:', sft):
+                rec['supervisor'].append([re.sub('.*: *', '', sft)])
+            #department
+            elif re.search('^Major department:', sft):
+                dep = re.sub('Major department: *', '', sft)
+                dep = re.sub('\.$', '', dep).strip()
+                if dep in boring:
+                    keepit = False
+                    print '   skip "%s"' % (dep)
+                else:
+                    rec['note'].append(dep)
+    #degree
+    for df in artpage.find_all('datafield', attrs = {'tag' : '502'}):
+        for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
+            if re.search('Thesis \(', sf.text):
+                degree = re.sub('Thesis\((.*?)\).*', r'\1', sf.text.strip())
+                if degree in boring:
+                    print '  skip "%s"' % (degree)
+                    keepit = False
+                elif degree != 'Ph.D.':
+                    rec['note'].append(degree)
+    #complete
+    dfs = artpage.find_all('datafield')
+    #for df in dfs:
+    #    for sf in df.find_all('subfield'):
+    #        rec['note'].append('[MARC] %s%s : %s' % (df['tag'], sf['code'], sf.text.strip()))
+    #IF MARC XML DOES NOT WORK
+    if not dfs:
+        time.sleep(1)
+        print '     try', rec['link']
         try:
-            print "retry %s in 180 seconds" % (rec['link'])
-            time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']+ '/citation'), features="lxml")
-        except:
-            print "no access to %s" % (rec['link'])
-            continue
-    for dl in  artpage.find_all('dl'):
-        for child in dl.children:
-            try:
-                child.name
-            except:
-                continue
-            if child.name == 'dt':
-                dtt = child.text.strip()
-            elif child.name == 'dd':
-                #absract
-                if dtt == 'Abstract:':
-                    rec['abs'] = re.sub(' *\( *en *\) *$', '', child.text.strip())
-                #disciplines
-                elif dtt == 'Degree Disciplines:':
-                    for a in child.find_all('a'):
-                        disc = a.text.strip()
-                        if disc in boring:
+            driver.get(rec['link'])
+            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'my-3')))
+            artpage = BeautifulSoup(driver.page_source, features="lxml")
+            time.sleep(5)
+            for meta in artpage.head.find_all('meta'):
+                if meta.has_attr('property'):
+                    #title
+                    if meta['property'] == 'title':
+                        rec['tit'] = meta['content']
+            for div in artpage.body.find_all('div', attrs = {'class' : 'my-3'}):
+                for a in div.find_all('a'):
+                    if a.has_attr('href'):
+                        #author
+                        if re.search('filter=creator:', a['href']):
+                            rec['autaff'] = [[ re.sub('.*filter=creator: *', '', a['href']) ]]
+                        #date
+                        elif re.search('publication_date=', a['href']):
+                            rec['date'] = a.text.strip()
+                #pages
+                if re.search('\d+ pages\)', div.text):
+                    rec['pages'] = re.sub('.*?(\d+) pages.*', r'\1', div.text.strip())
+            for div in artpage.body.find_all('div', attrs = {'class' : 'content-css'}):
+                for span in div.find_all('span'):
+                    spant = span.text.strip()
+                    if re.search('Major department: '):
+                        dep = re.sub('Major department: ', '', spant)
+                        dep = re.sub('\.$', '', dep).strip()
+                        if dep in boring:
                             keepit = False
-                            print '  skip', disc
+                            print '   skip "%s"' % (dep)
                         else:
-                            rec['note'].append('discipline: '+disc)
-    if not rec['restricted']:
-        for ul in artpage.body.find_all('ul', attrs = {'class' : 'sf-menu'}):
-            for a in ul.find_all('a'):
-                if a.text.strip() == 'PDF':
-                    rec['hidden'] = a['href']
-    rec['autaff'][-1].append(publisher)
+                            rec['note'].append(dep)
+        except:
+            keepit = False
+            print '    failed'
+    
+    
+
+
     if keepit:
+        rec['autaff'][-1].append(publisher)
         print'  ', rec.keys()
         recs.append(rec)
 
