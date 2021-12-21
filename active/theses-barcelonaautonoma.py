@@ -20,8 +20,8 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_specia
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-rpp = 500
-pages = 1
+rpp = 50
+pages = 10
 
 publisher = 'Barcelona, Autonoma U.'
 hdr = {'User-Agent' : 'Magic Browser'}
@@ -46,7 +46,7 @@ departmentstoskip = ['e%20Biologia%20Cel%C2%B7lular%2C%20de%20Fisiologia%20i%20d
                      'e%20Biologia%20Cel%C2%B7lular%20i%20de%20Fisiologia',
                      'e%20Bioqu%C3%ADmica%20i%20Biologia%20Molecuar',
                      'e%20Ci%C3%A8ncia%20i%20Tecnologia%20Ambientals',
-                     'e%20Ci%C3%A8ncies%20de%20la%20Computaci%C3%B3',
+                     #'e%20Ci%C3%A8ncies%20de%20la%20Computaci%C3%B3',
                      'e%20Comunicaci%C3%B3%20Audiovisual%20i%20de%20Publicitat',
                      'e%20Did%C3%A0ctica%20de%20l%27Expressi%C3%B3%20de%20la%20M%C3%BAsica%2C%20Arts%20Pl%C3%A0stiques%20i%20l%27Educaci%C3%B3%20Corporal',
                      'e%20Did%C3%A0ctica%20i%20Organitzaci%C3%B3%20Educativa',
