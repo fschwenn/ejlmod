@@ -8,6 +8,7 @@ import platform
 import unicodedata
 import unidecode
 import codecs
+import time
 
 from collclean_lib import coll_cleanforthe
 from collclean_lib import coll_clean710
@@ -22,7 +23,7 @@ except:
     print 'could not import extract_references_from_string'
 
 #QIS bibclassify
-qisbibclassifycommand = "python /afs/desy.de/user/l/library/proc/bibclassify/bibclassify_cli.py  -k /afs/desy.de/user/l/library/akw/QIS_TEST.rdf -n 10"
+qisbibclassifycommand = "/usr/bin/python /afs/desy.de/user/l/library/proc/bibclassify/bibclassify_cli.py  -k /afs/desy.de/user/l/library/akw/QIS_TEST.rdf -n 10"
 absdir = '/afs/desy.de/group/library/publisherdata/abs'
 tmpdir = '/afs/desy.de/user/l/library/tmp'
 
@@ -294,7 +295,7 @@ def marcxml(marc,liste):
 refcmp = re.compile('Mathematical Phys')
 refcp = re.compile('Phys')
 refcm = re.compile('Math')
-refcc = re.compile('Comp')
+refcc = re.compile('Comput')
 refca = re.compile('Astro')
 refck = re.compile('[qQ]uantum.(Phys|phys|Infor|infor|Comp|comp|Tec|Com|Corr|Theor|Mech|Dynam|Opti|Elec)')
 def writeXML(recs,dokfile,publisher):
@@ -929,6 +930,8 @@ def shapeaut(author):
 
 reqis = re.compile('^\d+ *')
 def writenewXML(recs, dokfile, publisher, dokifilename):
+    uniqrecs = []
+    doi1s = []
     for rec in recs:
         #add doki file name
         if 'note' in rec.keys():
@@ -943,7 +946,6 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
             doi1 = re.sub('[\(\)\/]', '_', rec['hdl'])
         elif 'urn' in rec.keys():
             doi1 = re.sub('[\(\)\/]', '_', rec['urn'])
-        print '>>', doi1
         if doi1:
             absfilename = os.path.join(absdir, doi1)
             bibfilename = os.path.join(tmpdir, doi1+'.qis.bib')
@@ -969,16 +971,21 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
                 except:
                     print '   could not write abstract to file'
                 absfile.close()
+            time.sleep(.3)
             if not os.path.isfile(bibfilename):
                 print ' >bibclassify %s' % (doi1)
-                os.system('%s %s > %s' % (qisbibclassifycommand, absfilename, bibfilename))
-            absbib = open(bibfilename, 'r')
-            lines = absbib.readlines()
+                try:
+                    os.system('%s %s > %s' % (qisbibclassifycommand, absfilename, bibfilename))
+                except:
+                    print 'FAILURE: %s %s > %s' % (qisbibclassifycommand, absfilename, bibfilename)
             qiskws = []
-            for line in lines:
-                if reqis.search(line):
-                    qiskws.append('[QIS] ' + line.strip())
-            absbib.close()
+            if os.path.isfile(bibfilename):
+                absbib = open(bibfilename, 'r')
+                lines = absbib.readlines()
+                for line in lines:
+                    if reqis.search(line):
+                        qiskws.append('[QIS] ' + line.strip())
+                absbib.close()
             if qiskws:
                 if not 'note' in rec.keys():
                     rec['note'] = []
@@ -991,5 +998,11 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
                         rec['fc'] += 'k'
                 else:    
                     rec['fc'] = 'k'
-    writeXML(recs, dokfile, publisher)
+            if doi1 in doi1s:
+                print '--', doi1
+            else:
+                print '>>', doi1
+                uniqrecs.append(rec)
+                doi1s.append(doi1)
+    writeXML(uniqrecs, dokfile, publisher)
     return
