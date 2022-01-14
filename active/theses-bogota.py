@@ -29,22 +29,26 @@ publisher = 'Andes U., Bogota'
 jnlfilename = 'THESES-BOGOTA-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
-tocurl = 'https://repositorio.uniandes.edu.co/handle/1992/30/browse?type=organization&value=Departamento+de+F%C3%ADsica'
-req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
 recs = []
-for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
-    rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : []}
-    for h4 in div.find_all('h4'):
-        for a in h4.find_all('a'):
-            rec['link'] = 'https://repositorio.uniandes.edu.co' + a['href'] #+ '?show=full'
-            rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-    for span in div.find_all('span', attrs = {'class' : 'date'}):
-        rec['year'] = re.sub('.*?([12]\d\d\d).*', r'\1', span.text.strip())
-        if int(rec['year']) > now.year-5:
-            recs.append(rec)
-        else:
-            print '  skip', rec['year']
+for (fc, dep) in [('', '52401'), ('m', '52426')]:
+    #tocurl = 'https://repositorio.uniandes.edu.co/handle/1992/30/browse?type=organization&value=Departamento+de+F%C3%ADsica'
+    tocurl = 'https://repositorio.uniandes.edu.co/handle/1992/' + dep
+    print tocurl
+    req = urllib2.Request(tocurl, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+    for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : []}
+        if fc: rec['fc'] = fc
+        for h4 in div.find_all('h4'):
+            for a in h4.find_all('a'):
+                rec['link'] = 'https://repositorio.uniandes.edu.co' + a['href'] #+ '?show=full'
+                rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+        for span in div.find_all('span', attrs = {'class' : 'date'}):
+            rec['year'] = re.sub('.*?([12]\d\d\d).*', r'\1', span.text.strip())
+            if int(rec['year']) > now.year-5:
+                recs.append(rec)
+            else:
+                print '  skip', rec['year']
 
 i = 0
 for rec in recs:
@@ -52,14 +56,14 @@ for rec in recs:
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
     try:
         req = urllib2.Request(rec['link'], headers=hdr)
-        artpage = BeautifulSoup(urllib2.urlopen(req))
+        artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
             req = urllib2.Request(rec['link'], headers=hdr)
-            artpage = BeautifulSoup(urllib2.urlopen(req))
+            artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
         except:
             print "no access to %s" % (rec['link'])
             continue    
@@ -91,6 +95,7 @@ for rec in recs:
                 #FFT
                 elif meta['name'] == 'citation_pdf_url':
                     rec['hidden'] = meta['content']
+    print '  ', rec.keys()
 
 
 #closing of files and printing
