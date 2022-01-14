@@ -13,6 +13,10 @@ import ejlmod2
 import codecs
 import datetime
 import time
+from selenium import webdriver
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support import expected_conditions as EC
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
@@ -21,7 +25,9 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Northeastern U. (main)'
-rpp = 10
+rpp = 20
+driver = webdriver.PhantomJS()
+driver.implicitly_wait(30)
 
 departments = [('Northeastern U.', '228'), ('Northeastern U., Math. Dept.', '200')]
 jnlfilename = 'THESES-NEU-%s' % (stampoftoday)
@@ -48,8 +54,9 @@ for rec in recs:
     j += 1
     print '---{ %i/%i }---{ %s }------' % (j, len(recs), rec['artlink'])
     try:
+        driver.get(rec['artlink'])
         req = urllib2.Request(rec['artlink'])
-        artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+        artpage = BeautifulSoup(driver.page_source, features="lxml")
         time.sleep(5)
     except:
         print 'wait 10 minutes'
@@ -104,7 +111,7 @@ for rec in recs:
                 #elif dtt == 'Use and reproduction:':
                 #    rec['note'].append(child.text.strip())
     #fulltext
-    for section in artpage.body.find_all('section', attrs = {'class' : ' drs-item-derivatives'}):
+    for section in artpage.body.find_all('section', attrs = {'class' : 'drs-item-derivatives'}):
         for a in section.find_all('a', attrs = {'title' : 'PDF'}):
             rec['hidden'] = 'https://repository.library.northeastern.edu' + a['href']
     print '  ', rec.keys()
