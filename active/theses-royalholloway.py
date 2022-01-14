@@ -100,6 +100,8 @@ for rec in recs:
         divt = re.sub('[\n\t\r]', ' ', div.text.strip())
         if re.search('[12]\d\d\d\. *\d\d+ p\.', divt):
             rec['pages'] = re.sub('.*[12]\d\d\d\. *(\d\d+) p\..*', r'\1', divt)
+            if not 'date' in rec.keys():
+                rec['date'] =re.sub('.*([12]\d\d\d)\. *\d\d+ p\..*', r'\1', divt)
     print '  ', rec.keys()
 
 
