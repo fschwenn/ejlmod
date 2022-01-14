@@ -137,9 +137,11 @@ for rec in prerecs:
                         rec['supervisor'].append([re.sub(' \(.*', '', span.text.strip())])
                 #ISBN
                 elif tht == 'Print ISBNs':
-                    rec['isbns'].append([('a', td.text.strip()), ('b', 'Print')])
+                    for isbn in re.split(', *', td.text.strip()): 
+                        rec['isbns'].append([('a', isbn), ('b', 'Print')])
                 elif tht == 'Electronic ISBNs':
-                    rec['isbns'].append([('a', td.text.strip()), ('b', 'Online')])
+                    for isbn in re.split(', *', td.text.strip()): 
+                        rec['isbns'].append([('a', isbn), ('b', 'Online')])
     #abstract
     for div in artpage.find_all('div', attrs = {'class' : 'content-content'}):
         div2 = div.find_all('div', attrs = {'class' : 'rendering'})[0]
