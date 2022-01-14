@@ -15,6 +15,13 @@ import codecs
 import datetime
 import time
 import json
+import ssl
+
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+hdr = {'User-Agent' : 'Magic Browser'}
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special/'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
@@ -33,8 +40,8 @@ recs = []
 
 tocurl = 'https://www.hawc-observatory.org/publications'
 try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
-    time.sleep(3)
+    req = urllib2.Request(tocurl, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
 except:
     print "retry %s in 180 seconds" % (tocurl)
     time.sleep(180)
