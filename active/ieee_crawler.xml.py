@@ -82,6 +82,7 @@ def translatejnlname(ieeename):
         jnlname = 'IEEE Trans.Nucl.Sci.'
     elif ieeename in ["IEEE Xplore: Magnetics, IEEE Transactions on", "Magnetics, IEEE Transactions on", 'IEEE Transactions on Magnetics']:
         jnlname = 'IEEE Trans.Magnetics'
+
     elif ieeename in ["IEEE Xplore: Microwave Theory and Techniques, IEEE Transactions on", "IEEE Xplore: IEEE Transactions on Microwave Theory and Techniques"]:
         jnlname = 'IEEE Trans.Microwave Theor.Tech.'
     elif ieeename in ["IEEE Xplore: Plasma Science, IEEE Transactions on", "IEEE Transactions on Plasma Science"]:
@@ -115,6 +116,18 @@ def translatejnlname(ieeename):
         jnlname = 'IEEE J.Sel.Areas Inf.Theory'
     elif ieeename in ['IEEE Journal of Selected Topics in Quantum Electronics']:
         jnlname = 'IEEE J.Sel.Top.Quant.Electron.'
+    elif ieeename in ['IEEE Communications Letters']:
+        jnlname = 'IEEE Commun.Lett.'
+    elif ieeename in ['IEEE Electron Device Letters']:
+        jnlname = 'IEEE Electron.Dev.Lett.'
+    elif ieeename in ['IEEE Transactions on Electron Devices']:
+        jnlname = 'IEEE Trans.Electron.Dev.'
+    elif ieeename in ['IEEE Transactions on Automatic Control']:
+        jnlname = 'IEEE Trans.Automatic Control'
+    elif ieeename in ['IEEE Journal on Selected Areas in Communications']:
+        jnlname = 'IEEE J.Sel.Areas Commun.'
+    elif ieeename in ['IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems']:
+        jnlname = 'IEEE Trans.Comput.Aided Design Integr.Circuits Syst.'
     elif ieeename in ["IEEE Symposium Conference Record Nuclear Science 2004.",
                       "IEEE Nuclear Science Symposium Conference Record, 2005"]:
         jnlname = 'BOOK'
@@ -181,7 +194,7 @@ def ieee(number):
     allarticlelinks = []
     notproperarticles = 0
     numberofarticles = 1000000
-    i = 0 #XYZ
+    i = 0#XYZ
     while not gotallarticles:
         i += 1
         pagecommand = '&pageNumber=%i' % (i)
@@ -257,7 +270,7 @@ def ieee(number):
         inf = open(artfilename, 'r')
         articlepage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
         inf.close()
-        rec = {'keyw' : [], 'autaff' : []}
+        rec = {'keyw' : [], 'autaff' : [], 'note' : []}
         #metadata now in javascript
         for script in articlepage.find_all('script', attrs = {'type' : 'text/javascript'}):
             #if re.search('global.document.metadata', script.text):
@@ -289,7 +302,7 @@ def ieee(number):
                 if author.has_key('orcid'):
                     autaff.append('ORCID:'+author['orcid'])
                 rec['autaff'].append(autaff)
-        if jnlname in ['IEEE Trans.Magnetics', 'IEEE Trans.Appl.Supercond.', 'IEEE J.Sel.Top.Quant.Electron.']:#+['IEEE Trans.Instrum.Measur.']:
+        if jnlname in ['IEEE Trans.Magnetics', 'IEEE Trans.Appl.Supercond.', 'IEEE J.Sel.Top.Quant.Electron.']:#, 'IEEE Trans.Instrum.Measur.']:
             if gdm.has_key('externalId'):
                 rec['p1'] = gdm['externalId']
             elif gdm.has_key('articleNumber'):
@@ -342,8 +355,11 @@ def ieee(number):
             rec['tc'] = 'C'
             rec['note'] = [gdm['publicationTitle']]            
         if len(args) > 1:
-            rec['cnum'] = args[1]  
             rec['tc'] = 'C'
+            if re.search('^C\d\d\-\d\d\-\d\d', args[1]):
+                rec['cnum'] = args[1]
+            elif not args[1] in rec['note']:
+                rec['note'].append(args[1])
         #references
         if hasreferencesection:
                 refilename = '/tmp/ieee.%s.refs' % re.sub('\D', '', articlelink)
@@ -379,7 +395,10 @@ def ieee(number):
                 print '%3i/%3i %s %s (%s) %s, %s' % (i,len(allarticlelinks),jnlname,rec['vol'],rec['year'],rec['p1'],'') #rec['tit'])
             except:
                 print rec
-        recs.append(rec)
+        if not rec['tit'] in ['IEEE Communications Society', 'IEEE Transactions on Electron Devices information for authors',
+                              'IEEE Communications Society Information',
+                              'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society']:
+            recs.append(rec)
     if jnlname == 'BOOK':
         oufname = 'IEEENuclSciSympConfRec'
     else:
