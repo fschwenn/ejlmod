@@ -22,7 +22,7 @@ from selenium.webdriver.firefox.options import Options
 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-ejldir = '/afs/desy.de/user/l/library/dok/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 
 publisher = 'Royal Society'
 jnl = sys.argv[1]
@@ -55,12 +55,12 @@ driver = webdriver.PhantomJS()
 driver.implicitly_wait(300)
 driver.get(toclink)
 #tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
-tocpage = BeautifulSoup(driver.page_source)
+tocpage = BeautifulSoup(driver.page_source, features="lxml")
 
 
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
-    rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'auts' : []}
+    rec = {'jnl' : jnlname, 'tc' : 'P', 'vol' : vol, 'issue' : issue, 'autaff' : [], 'autaff2' : []}
     for h5 in div.find_all('h5', attrs = {'class' : 'issue-item__title'}):
         for a in h5.find_all('a'):
             artlink = "%s%s" % ('https://royalsocietypublishing.org', a['href'])
@@ -76,12 +76,12 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
             a.replace_with('')
     for ul in div.find_all('ul', attrs = {'aria-label' : 'author'}):
         for li in ul.find_all('li'):
-            rec['auts'].append(li.text.strip())
+            rec['autaff'].append([li.text.strip()])    
     #details from article page
     try:
         time.sleep(10)
         driver.get(artlink)
-        artpage = BeautifulSoup(driver.page_source)
+        artpage = BeautifulSoup(driver.page_source, features="lxml")
         #meta
         for meta in artpage.head.find_all('meta'):
             if meta.has_attr('name'):
@@ -99,41 +99,76 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
                     rec['note'] = [ meta['content'] ]
                 #elif meta['name'] == 'dc.Identifier':
                 #    rec['p1'] = re.sub('\D*', '', meta['content'])
+        #abstract
+        for div in artpage.find_all('div', attrs = {'class' : 'abstractInFull'}):
+            rec['abs'] = div.text.strip()
+        #license
+        for lic in artpage.find_all('license'):
+            if lic.has_attr('xlink:href'):
+                rec['license'] = {'url' : lic['xlink:href']}
+                rec['FFT'] = re.sub('\/doi\/', '/doi/pdf/', artlink)
+        #authors
+        for div in artpage.find_all('div', attrs = {'class' : 'accordion-tabbed__tab-mobile'}):
+            #name
+            for span in div.find_all('span'):
+                rec['autaff2'].append([span.text.strip()])
+            #ORCID
+            for p in div.find_all('p', attrs = {'class' : 'orcid-account'}):
+                for a in p.find_all('a'):
+                    rec['autaff2'][-1].append(re.sub('.*org\/', 'ORCID:', a.text.strip()))
+            #email
+            if len(rec['autaff2'][-1]) < 2:
+                for a in div.find_all('i', attrs = {'class' : 'icon-Email'}):
+                    rec['autaff2'][-1].append(re.sub('mailto:', 'EMAIL:', a['title']))
+            #affiliation
+            for div2 in div.find_all('div', attrs = {'class' : 'author-info'}):
+                for a in div2.find_all('a'):
+                    a.decompose()
+                ps = []
+                for p in div2.find_all('p'):
+                    pt = p.text.strip()
+                    if pt:
+                        ps.append(pt)
+                if len(ps) > 1:
+                    rec['autaff2'][-1] += ps[1:]
+        if len(rec['autaff2']) >= len(rec['autaff']):
+            rec['autaff'] = rec['autaff2']
+            
     except:
-        print '...could not article page ...'
+        print '...could not get article page ...'
     #references
     try:
         time.sleep(10)
         driver.get(re.sub('\/doi\/', '/doi/references/', artlink))
-        refpage = BeautifulSoup(driver.page_source)
+        refpage = BeautifulSoup(driver.page_source, features="lxml")
         rec['refs'] = []
         for div in refpage.body.find_all('div', attrs = {'class' : 'article__references'}):
             for li in div.find_all('li'):
                 for a in li.find_all('a', attrs = {'class' : 'ref__number'}):
-                    atext = a.text().strip()
-                    a.replace_with(re.sub('^(.*)\.' r'[\1] ', atext))
+                    atext = a.text.strip()
+                    a.replace_with(re.sub('^(.*)\.', r'[\1] ', atext))
                 for a in li.find_all('a'):
-                    atext = a.text().strip()
+                    atext = a.text.strip()
                     if atext in ['Google Scholar', 'ISI', 'Crossref']:
                         a.replace_with('')
-                rec['refs'].append([('x', li.text.strip())])                
+                lit = re.sub('\. \(doi:(10.*)\)', r', DOI: \1', li.text.strip())
+                rec['refs'].append([('x', lit)])                
     except:
         print '...could not get reference page ...'
         
-    print rec.keys()
+    print '  ', rec.keys()
     recs.append(rec)
 
   
 #write xml
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
