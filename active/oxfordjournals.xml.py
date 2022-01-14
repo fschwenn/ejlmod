@@ -334,6 +334,9 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'section-container'})
     for (artlink, note) in articles:
         i += 1
         print '---{ %i/%i }---{ %s }---' % (i, len(articles), artlink)
+        if note in ['EDITORIAL', 'FEATURES', 'Q&A', 'NEWS', 'INDEX', 'OBITUARIES']:
+            print '  skip %s' % (note)
+            continue
         try:
             time.sleep(27)
             #pagreq = urllib2.Request(artlink, headers={'User-Agent' : "Magic Browser"})
