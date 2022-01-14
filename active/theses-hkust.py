@@ -68,13 +68,14 @@ for rec in recs:
             h3.decompose()
         #author
         for h3 in div .find_all('h3'):
-            rec['autaff'] = [[ h3.text.strip(), publisher ]]
+            if not 'autaff' in rec.keys():
+                rec['autaff'] = [[ h3.text.strip(), publisher ]]
     #abstract
     for div2 in artpage.body.find_all('div', attrs = {'class' : 'abstract_content'}):
         for strong in div2.find_all('strong'):
             if strong.text == 'Abstract':
                 strong.decompose()
-        rec['abs'] = div2.text.strip()
+        rec['abs'] = re.sub(' *\[ *Hide abstract.*', '', div2.text.strip())
         div2.replace_with('XXXABSTRACTXXX')
     #information at bottom of page
     for table in artpage.body.find_all('table', attrs = {'class' : 'table-striped'}):
