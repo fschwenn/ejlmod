@@ -57,7 +57,6 @@ elif (jnl == 'jdg'):
 elif (jnl == 'cag'):
     jnlname = 'Commun.Anal.Geom.'
     issn = '1019-8385'
-    url = "http://www.intlpress.com/%s/%s-v%s.php" % (jnl.upper(),jnl.upper(),vol)
     url = 'https://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/%04i/%04i/index.php' % (jnl,int(vol),int(re.sub('\D.*', '', isu)))
 elif (jnl == 'cjm'): #fall 2012
     jnlname = 'Cambridge J.Math.'
@@ -67,12 +66,11 @@ elif (jnl == 'cms'):
     jnlname = 'Commun.Math.Sci.'
     issn = '1539-6746'
     year = str(int(vol)+2002)
-    url = "http://www.intlpress.com/%s/%s/issue%s-%s" % (jnl.upper(),year,vol,isu)
     url = "http://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/00%s/000%s/index.php" % (jnl,vol,isu)
 elif (jnl == 'jsg'):
     jnlname = 'J.Sympl.Geom.'
     issn = '1527-5256'
-    url = "http://www.intlpress.com/%s/%s-v%s.php" % (jnl.upper(),jnl.upper(),vol)
+    url = "http://www.intlpress.com/site/pub/pages/journals/items/%s/content/vols/00%s/000%s/index.php" % (jnl,vol,isu)
 elif (jnl == 'mrl'): # fulltext via http://www.intlpress.com/_newsite/site/pub/files/_fulltext/journals/mrl/
     jnlname = 'Math.Res.Lett.'
     issn = '1073-2780'
