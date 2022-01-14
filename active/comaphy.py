@@ -71,17 +71,16 @@ for rec in recs:
     for bq in artpage.find_all('blockquote'):
         rec['abs'] = re.sub('[\n\t\r]', ' ', bq.text.strip())
         bq.replace_with('WWW')
-    #affiliations
-    for font in artpage.find_all('font'):
-        ft = ''
-        for aff in re.split('; ', font.text.strip()):
-            aff = re.sub('^\(', '', aff)
-            aff = re.sub('\)$', '', aff)
-            ft += ' Aff=' + aff
-        font.replace_with(ft)
+    #affiliations [mal formatted HTML]
+    #for font in artpage.find_all('font'):
+    #    ft = ''
+    #    for aff in re.split('; ', font.text.strip()):
+    #        aff = re.sub('^\(', '', aff)
+    #        aff = re.sub('\)$', '', aff)
+    #        ft += ' Aff=' + aff
+    #    font.replace_with(ft)
     #work now on plain text
     at = re.sub('[\n\t\r]', ' ', artpage.text)
-
     #pubnote
     rec['year'] = re.sub('.* ([12]\d\d\d),.*YYY.*', r'\1', at)
     rec['p1'] = re.sub('.*, (\d+).*YYY.*', r'\1', at)
@@ -101,7 +100,11 @@ for rec in recs:
     authors = re.sub('.*Author.s.: *(.*) *WWW.*', r'\1', at)
     authors =  re.sub('^\&nbsp *', '', authors)
     for author in re.split(' *, *\&nbsp *', authors):
+        if not re.search('Aff=', author):
+            author = re.sub('\((.*)', r' Aff=\1', author)
+            author = re.sub('\) *$', '', author)
         rec['autaff'].append(re.split(' *Aff=', author))
+
 
     print rec.keys()
 
