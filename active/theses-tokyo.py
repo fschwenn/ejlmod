@@ -20,7 +20,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_specia
 bookkeepingfile = "/afs/desy.de/group/library/publisherdata/tokyou.txt"
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-startdate = now + datetime.timedelta(days=-190*2)
+startdate = now + datetime.timedelta(days=-190)
 stampofstartdate = '%4d-%02d-%02d' % (startdate.year, startdate.month, startdate.day)
 
 
