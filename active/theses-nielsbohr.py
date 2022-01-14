@@ -35,7 +35,7 @@ time.sleep(2)
 for article in tocpage.find_all('article', attrs = {'class' : 'tilebox'}):
     print article
     rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
-    for h2 in article.find_all('h2'):
+    for h2 in article.find_all('h3'):
         rec['autaff'] = [[ h2.text.strip(), publisher ]]
     for a in article.find_all('a'):
         rec['link'] = 'https://www.nbi.ku.dk' + a['href']
@@ -77,7 +77,7 @@ for rec in recs:
                 if not 'tit' in rec.keys():
                     rec['tit'] = p.text.strip()
             #supervisor
-            elif st in ['Supervisor:', 'Primary Supervisor:']:
+            elif st in ['Supervisors:', 'Supervisor:', 'Primary Supervisor:']:
                 rec['supervisor'] = [[ re.sub('[Pp]rof\. *', '', re.sub('Dr\. *', '', p.text.strip())) ]]
     print '  ', rec.keys()
     if not 'tit' in rec.keys():
