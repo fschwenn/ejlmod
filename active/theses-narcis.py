@@ -54,6 +54,7 @@ for ejldir in ejldirs:
 hdr = {'User-Agent' : 'Magic Browser'}
 
 recs = []
+pagestotal = 0
 for year in [str(now.year), str(now.year-1)]:
     page = 0
     complete = False
@@ -89,9 +90,10 @@ for year in [str(now.year), str(now.year-1)]:
                     else:
                         recs.append(rec)
                         bereitsin.append(ihttp)
-        print '---{ %i | %s }---{ %i/%i }---{ %s }---' % (page, tocurl, len(recs), ntarget, rec['artlink'])
         time.sleep(10)
         page += 1
+        pagestotal += 1
+        print '---{ %i | %s }---{ %i/%i/%i }---{ %s }---' % (page, tocurl, len(recs), 10*pagestotal, ntarget, rec['artlink'])
         if len(recs) >= ntarget or 10*page >= ntarget:
             complete = True
 
@@ -128,6 +130,9 @@ for rec in recs:
             #date
             elif meta['name'] == 'citation_publication_date':
                 rec['date'] = meta['content']
+            #title
+            elif meta['name'] == 'citation_title':
+                rec['tit'] = meta['content']
             #language
             elif meta['name'] == 'citation_language':
                 if meta['content'] == 'nl':
