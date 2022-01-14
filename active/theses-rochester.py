@@ -30,6 +30,7 @@ hdr = {'User-Agent' : 'Magic Browser'}
 jnlfilename = 'THESES-ROCHESTER-%s' % (stampoftoday)
 
 recs = []
+prerecs = []
 for (subj, aff, dep) in departments:
     starturl = 'https://urresearch.rochester.edu/browseCollectionItems.action?collectionId=' + dep
     print '==={ %s (%s) }==={ %s }===' % (subj, dep, starturl)
@@ -64,13 +65,15 @@ for (subj, aff, dep) in departments:
                         if int(rec['year']) < startyear:
                             keepit = False                            
                 if keepit:
-                    recs.append(rec)
+                    prerecs.append(rec)
     print '  %i records so far' % (len(recs))
 
 i = 0
-for rec in recs:
+keepit = True
+for rec in prerecs:
+    keepit = True
     i += 1
-    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['link'])
+    print '---{ %i/%i (%i) }---{ %s }---' % (i, len(prerecs), len(recs), rec['link'])
     try:
         req = urllib2.Request(rec['link'])
         artpage = BeautifulSoup(urllib2.urlopen(req))
@@ -126,8 +129,14 @@ for rec in recs:
                     lt = ''
             #label
             for label in tr.find_all('td', attrs = {'class' : 'previewLabel'}):
-                lt = label.text.strip()                            
-    print '  ', rec.keys()
+                lt = label.text.strip()
+    for div in artpage.body.find_all('div', attrs = {'class' : 'errorMessage'}):
+        if re.search('ill be available to view starting', div.text):
+            print 'embargo'
+            keepit = False
+    if keepit:
+        print '  ', rec.keys()
+        recs.append(rec)
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
