@@ -74,7 +74,7 @@ for jnl in journals.keys():
         for ordner in ['/', '/zu_punkten/', '/zu_punkten/enriched/', 
                        '/backup/', '/backup/%i/' % (lastyear), 
                        '/backup/%i/' % (llastyear), '/onhold/']:
-            if os.path.isfile(ejldir + ordner + jnlfilename + '.doki'):
+            if os.path.isfile(ejldir + ordner + jnlfilename + '.doki') or os.path.isfile(ejldir + ordner + 'LABS_'+jnlfilename + '.doki'):
                 print '    Datei %s exisitiert bereit in %s' % (jnlfilename, ordner)
                 goahead = False
         if not goahead:
