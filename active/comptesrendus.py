@@ -26,7 +26,10 @@ publisher = 'Academie des sciences'
 
 jnl = sys.argv[1]
 vol = sys.argv[2]
-iss = sys.argv[3]
+if len(sys.argv) > 3:
+    iss = sys.argv[3]
+else:
+    iss = False
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -56,7 +59,9 @@ recs = []
 for span in tocpage.body.find_all('span', attrs = {'class' : 'article-title'}):
     for a in span.find_all('a'):
         rec = {'jnl' : jnlname, 'tc' : 'P', 'keyw' : [], 'autaff' : [],
-               'year' : year, 'vol' : vol, 'issue' : iss, 'refs' : []}
+               'year' : year, 'vol' : vol, 'refs' : []}
+        if iss:
+            rec['issue'] = iss
         rec['artlink'] = 'https://comptes-rendus.academie-sciences.fr' + a['href']
         recs.append(rec)
 
