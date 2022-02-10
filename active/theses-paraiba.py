@@ -16,6 +16,7 @@ import codecs
 import datetime
 import time
 import json
+import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
@@ -51,13 +52,16 @@ boringdeps = ['Arquitetura e Urbanismo', 'Administrao', 'Antropologia', 'Artes C
 jnlfilename = 'THESES-PARAIBA-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
 prerecs = []
 for page in range(pages):
     tocurl = 'https://repositorio.ufpb.br/jspui/simple-search?location=&query=&filter_field_1=type&filter_type_1=equals&filter_value_1=Disserta%C3%A7%C3%A3o&rpp=' + str(rpp) + '&sort_by=dc.date.issued_dt&order=DESC&etal=0&submit_search=Update&start=' + str((page+20 + 20)*rpp)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
     for td in tocpage.body.find_all('td', attrs = {'headers' : 't2'}):
         rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [], 'keyw' :[]}
         for a in td.find_all('a'):
@@ -75,7 +79,8 @@ for rec in prerecs:
     i += 1
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
+        req = urllib2.Request(rec['link'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
         time.sleep(3)
     except:
         try:
