@@ -64,6 +64,7 @@ for year in [now.year-1, now.year]:
                 #author
                 if meta['name'] == 'DC.creator':
                     author = re.sub(' *\[.*', '', meta['content'])
+                    author = re.sub(' <\d.*', '', author)
                     rec['autaff'] = [[ author ]]
                     rec['autaff'][-1].append('Bologna U.')
                 #title
