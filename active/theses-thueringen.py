@@ -31,16 +31,16 @@ publisher = 'db-thueringen.de'
 
 typecode = 'T'
 
-startyear = str(now.year - 1)
+startyear = str(now.year - 2)
 rpp = 50
 
 driver = webdriver.PhantomJS()
 driver.implicitly_wait(30)
 
-for ddc in ['500', '510', '530']:
+for (ddc, fc) in [('500', ''), ('510', 'm'), ('520', 'a'), ('530', '')]:
     recs = []
     jnlfilename = 'THESES-THUERINGEN-%s-%s' % (stampoftoday, ddc)
-    tocurl = 'https://www.db-thueringen.de/servlets/solr/select?q=%2Bcategory.top%3A%22SDNB%5C%3A' + ddc + '%22+%2Bmods.dateIssued%3A%7B' + str(startyear) + '+TO+*%5D+%2Bstate%3A%22published%22+%2Bcategory.top%3A%22mir_genres%5C%3Adissertation%22+%2BobjectType%3A%22mods%22&fl=*&sort=mods.dateIssued+desc&version=4.5&mask=content%2Fsearch%2Fcomplex.xed&rows=' + str(rpp)
+    tocurl = 'https://www.db-thueringen.de/servlets/solr/select?q=%2Bcategory.top%3A%22SDNB%5C%3A' + ddc + '%22+%2Bmods.dateIssued%3A%7B' + str(startyear) + '%5C-01%5C-01+TO+*%5D+%2Bstate%3A%22published%22+%2Bcategory.top%3A%22mir_genres%5C%3Adissertation%22+%2BobjectType%3A%22mods%22&fl=*&sort=mods.dateIssued+desc&rows=20&version=4.5&mask=content%2Fsearch%2Fcomplex.xed'
     print '==={ DDC=%s }==={ 1 }==={ %s }===' % (ddc, tocurl)
     driver.get(tocurl)
     tocpages = [ BeautifulSoup(driver.page_source) ]
@@ -56,7 +56,7 @@ for ddc in ['500', '510', '530']:
     if not numoftheses: continue
     
     for i in range(numofpages-1):
-        tocurl = 'https://www.db-thueringen.de/servlets/solr/select?q=%2Bcategory.top%3A%22SDNB%5C%3A' + ddc + '%22+%2Bmods.dateIssued%3A%7B' + str(startyear) + '+TO+*%5D+%2Bstate%3A%22published%22+%2Bcategory.top%3A%22mir_genres%5C%3Adissertation%22+%2BobjectType%3A%22mods%22&fl=*&sort=mods.dateIssued+desc&version=4.5&mask=content%2Fsearch%2Fcomplex.xed&start=' + str(rpp*(i+1)) + '&rows=' + str(rpp)
+        tocurl = 'https://www.db-thueringen.de/servlets/solr/select?q=%2Bcategory.top%3A%22SDNB%5C%3A' + ddc + '%22+%2Bmods.dateIssued%3A%7B' + str(startyear) + '%5C-01%5C-01+TO+*%5D+%2Bstate%3A%22published%22+%2Bcategory.top%3A%22mir_genres%5C%3Adissertation%22+%2BobjectType%3A%22mods%22&fl=*&sort=mods.dateIssued+desc&rows=20&version=4.5&mask=content%2Fsearch%2Fcomplex.xed&start=' + str(rpp*(i+1)) + '&rows=' + str(rpp)
         print '==={ DDC=%s }==={ %i/%i }==={ %s }===' % (ddc, i+2, numofpages, tocurl)
         driver.get(tocurl)
         tocpages.append(BeautifulSoup(driver.page_source))
@@ -71,6 +71,8 @@ for ddc in ['500', '510', '530']:
             j += 1
             for a in div.find_all('a'):
                 rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+                if fc:
+                    rec['fc'] = fc
                 identifier = re.sub('.*id=(dbt_mods_\d+).*', r'\1', a['href'])
                 rec['artlink'] = 'https://www.db-thueringen.de/receive/' + identifier
                 print '---{ DDC=%s }---{ %i/%i }---{ %i/%i }---{ %s }---' % (ddc, i, len(tocpages), j, len(divs), rec['artlink'])
