@@ -128,6 +128,10 @@ def translatejnlname(ieeename):
         jnlname = 'IEEE J.Sel.Areas Commun.'
     elif ieeename in ['IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems']:
         jnlname = 'IEEE Trans.Comput.Aided Design Integr.Circuits Syst.'
+    elif ieeename in ['IEEE Transactions on Quantum Engineering']:
+        jnlname = 'IEEE Trans.Quantum Eng.'
+    elif ieeename in ['IEEE Transactions on Nanotechnology']:
+        jnlname = 'IEEE Trans.Nanotechnol.'
     elif ieeename in ["IEEE Symposium Conference Record Nuclear Science 2004.",
                       "IEEE Nuclear Science Symposium Conference Record, 2005"]:
         jnlname = 'BOOK'
@@ -335,7 +339,8 @@ def ieee(number):
         if gdm.has_key('doi'):
             rec['doi'] = gdm['doi']
         else:
-            rec['doi'] = '30.3000/ieee_%s_%06i' % (number, i)  
+            rec['doi'] = '30.3000/ieee_%s_%06i' % (number, i)
+            rec['link'] = articlelink
         if gdm.has_key('keywords'):
             for kws in gdm['keywords']:
                 for kw in kws['kwd']:
@@ -397,6 +402,7 @@ def ieee(number):
                 print rec
         if not rec['tit'] in ['IEEE Communications Society', 'IEEE Transactions on Electron Devices information for authors',
                               'IEEE Communications Society Information',
+                              'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems publication information',
                               'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society']:
             recs.append(rec)
     if jnlname == 'BOOK':
