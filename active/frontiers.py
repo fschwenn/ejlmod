@@ -49,6 +49,10 @@ for artlink in urls:
                     rec['jnl'] = 'Front.Astron.Space Sci.'
                 elif meta['content'] == 'Frontiers in Physics':
                     rec['jnl'] = 'Front.in Phys.'
+                elif meta['content'] == 'Frontiers in Artificial Intelligence':
+                    rec['jnl'] = 'Front.Artif.Intell.'
+                elif meta['content'] == 'Frontiers in Big Data':
+                    rec['jnl'] = 'Front.Big Data'
                 else:
                     print 'do not know journal "%s"!' % (meta['content'])
                     sys.exit(0)
