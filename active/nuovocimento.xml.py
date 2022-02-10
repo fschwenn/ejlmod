@@ -162,6 +162,7 @@ def xmltorec(xmlfilename):
                 #FFT
                 if artrec.has_key('licence') and artrec.has_key('ArticleID'):
                     artrec['FFT'] = 'http://prometeo.sif.it/papers/?pid=%s%s' % (fftprefix, artrec['ArticleID'])
+                print '  ', artrec.keys()
     return artrecs
 
 
@@ -169,6 +170,7 @@ def xmltorec(xmlfilename):
 jnlfilename = sys.argv[1]
 dateien = []
 for sa in sys.argv[2:]:
+    print sa
     dateien.append('%s/%s.xml' % (publisherdir, sa))
 
 if not dateien:
