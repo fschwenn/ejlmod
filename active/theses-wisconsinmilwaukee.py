@@ -48,7 +48,7 @@ boring = ['Educational Psychology', 'Art History', 'Communication',
           'Business Administration', 'Engineering', 'Environmental &amp; Occupational Health',
           'Information Technology Management', 'Library and Information Science',
           'Medical Informatics', 'Performing Arts', 'Social Work', 'Urban Planning',
-          'Urban Studies',
+          'Urban Studies']
 boring += ['Master of Arts', 'Master of Science', 'Master of Music', 'Master of Fine Arts',
            'Master of Library and Information Science', 'Master of Urban Planning']
 
