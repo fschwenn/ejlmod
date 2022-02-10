@@ -65,7 +65,7 @@ def tryeucllidnumber(rec):
             try:
                 euclidpage = BeautifulSoup(urllib2.urlopen('http://projecteuclid.org/' + euclid), features="lxml")
             except:
-                print '?', euclidpage
+                print '?', 'http://projecteuclid.org/' + euclid
                 return
             for meta in euclidpage.head.find_all('meta', attrs = {'name' : 'citation_doi'}):
                 if meta['content'] == rec['doi']:
