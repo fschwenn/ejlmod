@@ -18,7 +18,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+"_specia
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
-jnlfilename = 'THESES-VrijeUAmsterdam-%sF' % (stampoftoday)
+jnlfilename = 'THESES-VrijeUAmsterdam-%s' % (stampoftoday)
 
 years = [now.year+1, now.year]
 rpp = 50
