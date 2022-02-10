@@ -17,7 +17,7 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -25,7 +25,7 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'Hokkaido U.'
 
 rpp = 50
-pages = 2+14
+pages = 2
 
 jnlfilename = 'THESES-HOKKAIDO-%s' % (stampoftoday)
 hdr = {'User-Agent' : 'Magic Browser'}
