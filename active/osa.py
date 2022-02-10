@@ -51,12 +51,12 @@ if len(sys.argv) > 4:
 urltrunk = 'https://www.osapublishing.org/%s/issue.cfm?volume=%s&issue=%s' % (jnl, vol, issue)
 print urltrunk
 try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk), features="lxml")
     time.sleep(3)
 except:
     print "retry %s in 180 seconds" % (urltrunk)
     time.sleep(180)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk))
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk),features="lxml" )
 
 
 done = ['https://www.osapublishing.org/josab/abstract.cfm?uri=josab-36-7-E112']
@@ -109,15 +109,16 @@ for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         time.sleep(5)
     except:
         print "retry %s in 180 seconds" % (artlink)
         time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
     print '   read meta tags'
     for meta in artpage.find_all('meta'):
         if meta.has_attr('name'):
+            print meta['name']
             if meta['name'] == 'dc.description':
                 rec['abs'] = meta['content']
             elif meta['name'] == 'citation_doi':
