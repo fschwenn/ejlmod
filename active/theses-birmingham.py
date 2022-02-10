@@ -39,7 +39,7 @@ for (sj, subject) in subjects:
             try:
                 time.sleep(3)
                 req = urllib2.Request(tocurl, headers=hdr)
-                tocpage = BeautifulSoup(urllib2.urlopen(req))
+                tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
             except:
                 print "retry in 300 seconds"
                 time.sleep(300)
@@ -61,7 +61,7 @@ for (sj, subject) in subjects:
         i += 1
         print '---{ %s }---{ %i/%i }---{ %s }---' % (subject, i, len(recs), rec['link'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
             time.sleep(3)
         except:
             try:
