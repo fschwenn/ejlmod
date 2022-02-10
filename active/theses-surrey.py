@@ -1,33 +1,32 @@
 # -*- coding: utf-8 -*-
 #harvest theses from Surrey U.
-#FS: 2020-03-03
+#JH: 2021-12-12
 
+from time import sleep
+import urllib2
+from json import loads
 import getopt
 import sys
 import os
-import urllib2
-import urlparse
-from bs4 import BeautifulSoup
-import re
 import ejlmod2
 import codecs
 import datetime
-import time
-import json
-import requests
+import re
+import classifier
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Surrey U.'
 
+jnlfilename = 'THESES-SURREY-%s' % (stampoftoday)
 
-jnlfilename = 'THESES-SURREY-%sB' % (stampoftoday)
-
+recs = []
+rpp = 10
+pages = 20
 undepartments = ['Department of Mechanical Engineering Sciences',
                  'Centre for Environmental Strategy',
                  'Centre for Vision Speech and Signal Processing',
@@ -37,12 +36,14 @@ undepartments = ['Department of Mechanical Engineering Sciences',
                  'Department of Biochemical Sciences',
                  'Department of chemical and process engineering',
                  'Department of Chemical Engineering',
+                 'Department of Chemistry; Faculty of Engineering and Physical Sciences',
                  'Department of Electrical and Electronic Engineering, Institute for Communication Systems, 5G Innovation Centre',
                  'Department of Mechanical Engineering',
                  'Department of Microbial Sciences',
                  'Electrical and Electronic Engineering',
                  'EPSRC Centre for Doctoral Training in Micro- and NanoMaterials and Technologies',
                  'Faculty of Engineering and Physical Sciences',
+                 'Faculty of Health and Medical Sciences; School of Psychology',
                  'Institute for Communication Systems',
                  'Mechanical Engineering',
                  'Nutritional Sciences / School of Biosciences and Medicine',
@@ -65,7 +66,7 @@ undepartments = ['Department of Mechanical Engineering Sciences',
                  'School of Economics',
                  'Department of Chemistry',
                  'Department of Civil and Environmental Engineering',
-                 'Department of Computer Science',
+                 #'Department of Computer Science',
                  'Department of Sociology',
                  'Centre for Environment and Sustainability',
                  'School of Hospitality and Tourism Management',
@@ -281,112 +282,114 @@ undepartments = ['Department of Mechanical Engineering Sciences',
                  'Advanced Technology Institute',
                  'Mechanical Engineering Sciences',
                  'Department of Psychology.',
-                 'Economics.',
-                 'School of Arts',
+                 'Economics.', 'Faculty of Arts and Social Sciences; School of Economics',
+                 'School of Arts', 'Faculty of Arts and Social Sciences; School of Law',
+                 'Faculty of Arts and Social Sciences; School of Hospitality and Tourism Management',
                  'Surrey Space Centre',
                  'Department of Mathematics',
-                 'Psychology.',
+                 'Psychology.', 'Faculty of Arts and Social Sciences; School of Literature and Languages',
                  'Department of Psychology',
+                 'Faculty of Health and Medical Sciences; School of Biosciences and Medicine',
+                 'Faculty of Health and Medical Sciences; School of Veterinary Medicine',
                  'School of Management']
 
+def get_sub_side(id):
+    url = "https://openresearch.surrey.ac.uk/esplorows/rest/research/fullAssetPage/assets/"+str(id)+"?institution=44SUR_INST&language=en"
+    print "["+url+"] --> Harvesting data"
+    request = urllib2.Request(url)
+    server_data = loads(urllib2.urlopen(request).read())['esploroAssetForPortalFullAssetPage']
 
-recs = []
-for year in [now.year-1, now.year]:
-    tocurl = 'http://epubs.surrey.ac.uk/cgi/exportview/type/thesis/%i/JSON/thesis_%i.js' % (year, year)
-    print tocurl
-    tocjson = requests.get(tocurl).json()
-    time.sleep(3)
-    for recjson in tocjson:
-        rec = {'tc' : 'T', 'jnl' : 'BOOK', 'year' : str(year), 'note' : [], 'autaff' : [], 'supervisor' : []}
-        #department
-        if 'department' in recjson.keys():
-            rec['department'] = recjson['department']
-            rec['note'].append(recjson['department'])
-        #type
-        if 'thesis_type' in recjson.keys():
-            if recjson['thesis_type'] != 'doctoral':
-                rec['note'].append(recjson['thesis_type'])
-        #date
-        if 'date' in recjson.keys():
-            rec['date'] = str(recjson['date'])
-        #fulltext with license
-        if 'documents' in recjson.keys():
-            filesize = 0
-            for document in recjson['documents']:
-                if 'mime_type' in document.keys() and re.search('pdf', document['mime_type']):
-                    if 'date_embargo' in document.keys() and document['date_embargo'] > stampoftoday:
-                        print '  embargo until %s' % (document['date_embargo'])
-                    else:
-                        docrec = {'link' : document['uri']}
-                        if 'license' in document.keys():
-                            docrec['license'] = re.sub('_', '-', document['license'].upper())
-                        if document['files'][0]['filesize'] < filesize:
-                            print '  file is smaller'
-                        else:
-                            rec['document'] = docrec
-            if 'document' in rec.keys():
-                if 'license' in rec['document'].keys():
-                    rec['license'] = {'url' : rec['document']['license']}
-                    rec['FFT'] = rec['document']['link']
-                else:
-                    rec['hidden'] = rec['document']['link']
-        #keywords
-        if 'keywords' in recjson.keys():
-            rec['keyw'] = re.split(', ', recjson['keywords'])
-        #DOI
-        if 'id_number' in recjson.keys() and re.search('^10.15126', recjson['id_number']):
-            rec['doi'] = recjson['id_number']
-        elif 'uri' in recjson.keys():
-            rec['doi'] = '20.2000/Surrey/' + re.sub('\W', '', recjson['uri'])
-            rec['link'] = recjson['uri']
-        #abstract
-        if 'abstract' in recjson.keys():
-            rec['abs'] = recjson['abstract']
-        #title
-        if 'title' in recjson.keys():
-            rec['tit'] = recjson['title']
-        #pages
-        if 'pages' in recjson.keys():
-            rec['pages'] = str(recjson['pages'])
-        #author
-        if 'creators' in recjson.keys():
-            for author in recjson['creators']:
-                rec['autaff'].append(['%s, %s' % (author['name']['family'], author['name']['given'])])
-                #ORCID
-                if 'orcid' in author.keys():
-                    rec['autaff'][-1].append('ORCID:%s' % (author['orcid']))
-                #email
-                elif 'id' in author.keys() and author['id'] and re.search('@[a-z]+\.[a-z]', author['id']):
-                    rec['autaff'][-1].append('EMAIL:%s' % (author['id']))
-                #affiliation
-                rec['autaff'][-1].append(publisher)
-        #supervisor
-        if 'contributors' in recjson.keys():
-            for author in recjson['contributors']:
-                if 'name' in author.keys():
-                    rec['supervisor'].append(['%s, %s' % (author['name']['family'], author['name']['given'])])
-                    #ORCID
-                    if 'orcid' in author.keys():
-                        rec['supervisor'][-1].append('ORCID:%s' % (author['orcid']))
-                    #email
-                    elif 'id' in author.keys() and author['id'] and re.search('@[a-z]+\.[a-z]', author['id']):
-                        rec['supervisor'][-1].append('EMAIL:%s' % (author['id']))
+    rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : [], 'artlink' : url}
 
-        if 'department' in rec.keys() and rec['department'] in undepartments:
-            print '  skip "%s"' % (rec['department'])
+    #DOI
+    try:
+        for doi in server_data['entityModel']['identifiers']['assetIdentifiers']['DOI']:
+            rec['doi'] = doi
+    except:
+        rec['doi'] = '20.2000/Surrey/' + str(id)
+        rec['link'] = server_data['permalink']
+
+    #keywords
+    try:
+        rec['keyw'] = server_data['entityModel']['keywords']['translationMap']['und']
+    except:
+        pass
+
+    #title
+    rec['tit'] = server_data['title']
+    
+    if server_data.get('licenseDetails') is not None:
+        licenseDetails = server_data['licenseDetails']
+        if licenseDetails.get('licenseLabel') is not None:
+            rec['licence'] = {'url': licenseDetails.get('licenseURL'), 'statement': licenseDetails.get('licenseLabel')}
+            if server_data.get('pdfFileGSUrl') is not None:
+                rec['FFT'] = server_data['pdfFileGSUrl']
         else:
-            recs.append(rec)
-            print '  ', rec.keys()
+            if server_data.get('pdfFileGSUrl') is not None:
+                rec['hidden'] = server_data['pdfFileGSUrl']
+    rec['date'] = server_data['date']
+    rec['abs'] = server_data['description']
+    
+    # Get the authors
+    rec['autaff'] = []
+    for author in server_data['creators']:
+        name = author['displayName']
+        rec['autaff'].append([name])
+        if 'orcid' in author.keys():
+            rec['autaff'][-1].append('ORCID:'+author['orcid'])
+        rec['autaff'][-1].append(publisher)
 
-#closing of files and printing
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+    # Get the advisors
+    rec['supervisor'] = []
+    for advisor in server_data['contributors']:
+        if 'role' in advisor.keys():
+            if advisor['role'] == 'Supervisor' and advisor['displayName'] != 'Surrey, University of':
+                rec['supervisor'].append([advisor['displayName']])
+                if 'orcid' in advisor.keys():
+                    rec['supervisor'][-1].append('ORCID:'+advisor['orcid'])
+                if 'affiliationName' in advisor.keys():
+                    rec['supervisor'][-1].append(advisor['affiliationName'])
+
+    #department and pages
+    keepit = True
+    for detail in server_data['details']:
+        if detail['code'] == 'esploroAssetModel.general.assetAffiliation':
+            dep = detail['value']
+            if dep in undepartments:
+                print '  skip "%s"' % (dep)
+                keepit = False
+            else:
+                rec['note'].append(dep)
+        elif detail['code'] == 'esploroAssetModel.general.pages':
+            rec['pages'] = detail['value']
+    if keepit: 
+        recs.append(rec)
+        print '  ', len(recs), rec.keys()
+
+for page in range(pages):
+    print "\n-- Accessing Page %i/%i ---" % (page+1, pages)
+    #index_url = "https://openresearch.surrey.ac.uk/esplorows/rest/research/simpleSearch/assets?institution=44SUR_INST&q=any,contains,Dissertations%20OR%20Thesis&scope=Research&tab=Research&offset="+str(page)+"&limit=10&sort=rank&lang=en&enableAsteriskSearch=false&qInclude=facet_topic,exact,Physics"
+    index_url = "https://openresearch.surrey.ac.uk/esplorows/rest/research/simpleSearch/assets?q=any,contains,Dissertations%20OR%20Thesis&page=1&institution=44SUR_INST&scope=ResearchETD&offset="+str(page*rpp)+"&limit="+str(rpp)+"&sort=date_d"
+    req = urllib2.Request(index_url)
+    index_page = loads(urllib2.urlopen(req).read())
+    assets = index_page['assets']
+    for asset in assets:
+        if asset['resourceType'] == 'etd.doctoral':
+            get_sub_side(asset['id'])
+            sleep(5)
+        else:
+            print asset['resourceType'] 
+    sleep(10)
+
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text:
-    retfiles = open(retfiles_path,"a")
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
