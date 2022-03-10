@@ -401,7 +401,8 @@ def ieee(number):
             except:
                 print rec
         if not rec['tit'] in ['IEEE Communications Society', 'IEEE Transactions on Electron Devices information for authors',
-                              'IEEE Communications Society Information',
+                              'IEEE Communications Society Information', 'IEEE Sensors Council',
+                              'IEEE Circuits and Systems Society Information',
                               'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems publication information',
                               'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society']:
             recs.append(rec)
