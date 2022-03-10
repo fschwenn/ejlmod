@@ -37,7 +37,7 @@ def gothroughjlist():
     os.system('cp %s %s.bak.%s' % (jlist, jlist, stampoftoday))
     inf = open(jlist, 'r')
     for line in inf.readlines():
-        if re.search('ieee.*isnumber', line):
+        if re.search('ieee.*isnumber', line) and not line[0] == '#':
             tocheck.append(tuple(re.split(' *; *', line.strip())))
     inf.close()
     print ' tocheck:', tocheck
@@ -59,34 +59,39 @@ def comparewebwithbackup(tocheck):
     for (jnl, link, command, date, lastissue) in tocheck:
         print jnl, link
         done = readbackup(re.sub('[ \.]', '', jnl).lower())
-        driver.get(link)
-        WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'accordion-chevron')))
-        page = BeautifulSoup(driver.page_source)
-        (newisns, oldisns) = ([], [])
-        for a in page.body.find_all('a'):
-            if a.has_attr('href') and re.search('isnumber', a['href']) and re.search('Issue \d', a.text):
-                isn = re.sub('.*isnumber=(\d+).*', r'\1', a['href'])
-                if isn in done:
-                    oldisns.append(isn)
+        try:
+            driver.get(link)
+            WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'accordion-chevron')))
+            page = BeautifulSoup(driver.page_source)
+            (newisns, oldisns) = ([], [])
+            for a in page.body.find_all('a'):
+                if a.has_attr('href') and re.search('isnumber', a['href']) and re.search('Issue \d', a.text):
+                    isn = re.sub('.*isnumber=(\d+).*', r'\1', a['href'])
+                    if isn in done:
+                        oldisns.append(isn)
+                    else:
+                        newisns.append((isn, jnl))
+            if oldisns:
+                print ' done:', oldisns, 'todo:', newisns
+                #new ones found and sure there is no gap
+                if newisns and len(newisns) >= 2:
+                    maxisn = max([int(isn[0]) for isn in newisns])
+                    for isn in newisns:
+                        if int(isn[0]) != maxisn:
+                            todo.append(isn)
+                            print ' added ', isn
+                #nothing new found
                 else:
-                    newisns.append((isn, jnl))
-        if oldisns:
-            print ' done:', oldisns, 'todo:', newisns
-            #new ones found and sure there is no gap
-            if newisns and len(newisns) >= 2:
-                maxisn = max([int(isn[0]) for isn in newisns])
-                for isn in newisns:
-                    if int(isn[0]) != maxisn:
-                        todo.append(isn)
-                        print ' added ', isn
-            #nothing new found
+                    todo.append((0, jnl))                
             else:
-                todo.append((0, jnl))                
-        else:
-            #no old ones found -> not sure whether there is a gap
-            print ' check manually:', newisns
+                #no old ones found -> not sure whether there is a gap
+                print ' check manually:', newisns
+                todo.append((-1, jnl))
+            time.sleep(15)
+        except:
+            print ' could not read web page'
             todo.append((-1, jnl))
-        time.sleep(15)
+            time.sleep(5)            
     return todo
 
 #start harvesting and update journal list
