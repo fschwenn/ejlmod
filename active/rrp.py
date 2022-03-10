@@ -64,6 +64,7 @@ for table in tocpage.body.find_all('table', attrs = {'dwcopytype' : 'CopyTableRo
         for td in tr.find_all('td', attrs = {'width' : '60%'}):
             for a in td.find_all('a'):
                 rec['pdf'] = 'http://www.rrp.infim.ro/' + re.sub('^\.\/', '', a['href'])
+                rec['hidden'] = rec['pdf']
                 rec['p1'] = re.sub('.*? (\d+).*', r'\1', re.sub('[\n\t\r]', '', td.text.strip()))
                 if rec['p1'] not in done:
                     recs.append(rec)
