@@ -75,7 +75,7 @@ for i in range(pages):
                     date = span.text.strip()
             elif name == 'p':
                 #year = int(re.sub('.*(20\d\d).*', r'\1', rec['date']))
-                if int(date) >= now.year - 1*10:
+                if int(date) >= now.year - 1:
                     rec = {'jnl' : 'BOOK', 'tc' : 'T', 'date' : date, 'note' : []}
                     for a in child.find_all('a'):
                         if not re.search('(viewcontent.cgi|proquest.com|network.bepress.com)', a['href']):
