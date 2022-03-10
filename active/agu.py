@@ -118,6 +118,7 @@ for rec in prerecs:
     print '---{ %i/%i }---{ %s }---' % (i, len(prerecs), rec['artlink'])
     #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
     artfilename = '/tmp/%s.%s' % (jnlfilename, re.sub('\W', '', rec['artlink'][8:]))
+    print artfilename
     if not os.path.isfile(artfilename):
         time.sleep(10)
         os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilename, rec['artlink']))
