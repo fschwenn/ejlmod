@@ -34,6 +34,8 @@ confdict = {'12th International Conference on Elastic and Diffractive Scattering
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
+
 publisher = 'Deutsches Elektronen-Synchrotron'
 
 now = datetime.datetime.now()
@@ -261,7 +263,14 @@ def translatearticles(pubdbrecords):
         #POF
         for df in pubdbrecord.find_all('datafield', attrs = {'tag' : '913', 'ind1' : '0', 'ind2' : ' '}):
             for sf in df.find_all('subfield', attrs = {'code' : 'v'}):
-                rec['note'].append(sf.text)
+                sft = sf.text
+                rec['note'].append(sft)
+                if sft in ['Accelerator Research and Development', 'Accelerator R & D']:
+                    rec['fc'] = 'b'
+                elif sft in ['Detector technology and systems', 'Detector Technologies and Systems']:
+                    rec['fc'] = 'i'
+                elif sft in ['Matter and Radiation from the Universe']:
+                    rec['fc'] = 'a'
         for df in pubdbrecord.find_all('datafield', attrs = {'tag' : '913', 'ind1' : '1', 'ind2' : ' '}):
             for sf in df.find_all('subfield', attrs = {'code' : 'v'}):
                 rec['note'].append(sf.text)
@@ -282,12 +291,13 @@ def translatearticles(pubdbrecords):
                     link = sf.text
             if oa and pdf:
                 if (not rec.has_key('FFT')) and (not re.search('title', link)) and rec['tc'] in ['C', 'T', 'K']:
-                    try:
-                        oafilename = re.sub('.*\/', '', link) + '?subformat=pdfa'
-                        urllib.urlretrieve(link, '/afs/desy.de/group/library/www/html/pdf/'+oafilename)
-                        rec['FFT'] = 'http://www-library.desy.de/pdf/'+oafilename
-                    except:
-                        print 'could not download "%s"' % (link)
+                    #try:
+                    #    oafilename = re.sub('.*\/', '', link) + '?subformat=pdfa'
+                    #    urllib.urlretrieve(link, '/afs/desy.de/group/library/www/html/pdf/'+oafilename)
+                    #    rec['FFT'] = 'http://www-library.desy.de/pdf/'+oafilename
+                    #except:
+                    #    print 'could not download "%s"' % (link)
+                    rec['FFT'] = link + '?subformat=pdfa'
         #licence
         for df in pubdbrecord.find_all('datafield', attrs = {'tag' : '915', 'ind1' : ' ', 'ind2' : ' '}):
             for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
@@ -474,7 +484,6 @@ if __name__ == '__main__':
         ejlmod2.writenewXML(records[tc], xmlfile, publisher, xmlf[:-4])
         xmlfile.close()   
         #retrival
-        retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
         retfiles_text = open(retfiles_path,"r").read()
         line = "%s.%s.xml\n" % (jnlfilename, tc)
         if not line in retfiles_text: 
