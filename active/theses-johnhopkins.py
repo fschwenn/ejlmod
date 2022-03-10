@@ -128,6 +128,8 @@ for rec in recs:
                                 print divt
                             else:
                                 rec['FFT'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+        elif 'pdf_url' in rec.keys():
+            rec['hidden'] = rec['pdf_url']
     print '  ', rec.keys()
 jnlfilename = 'THESES-JOHN_HOPKINS-%s' % (stampoftoday)
 
