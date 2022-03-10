@@ -43,21 +43,29 @@ juninteresting = ['00153', '11105', '00426', '00477']
 jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '00016': ['pip', 'Phys.Perspect.', '', '', 'P'],
       '00023': ['ahp', 'Annales Henri Poincare', '', '', 'P'],
+      '00029': ['selmat', 'Selecta Math.', '', '', 'P'],
       '00031': ['trgr', 'Transform.Groups', '', '', 'P'],
       '00159': ['aar', 'Astron.Astrophys.Rev.', '', '', 'P'],
       '00205': ['arma', 'Arch.Ration.Mech.Anal.', '', '', 'P'],
       '00220': ['cmp', 'Commun.Math.Phys.', '', '', 'P'],
+      '00222': ['invmat', 'Invent.Math.', '', '', 'P'],
+      '00229': ['manusmat', 'Manuscr.Math.', '', '', 'P'],
+      '00332': ['jnonlinsci', 'J.Nonlin.Sci.', '', '', 'P'],
       '00339': ['apa', 'Appl.Phys.', 'A', '', 'P'], #HAL
       '00340': ['apb', 'Appl.Phys.', 'B', '', 'P'], #HAL
+      '00526': ['cvpde', 'Calc.Var.Part.Differ.Equ', '', '', 'P'],
       '00601': ['fbs', 'Few Body Syst.', '', '', 'P'],
       '10050': ['epja', 'Eur.Phys.J.', 'A', '', 'P'],
       '10051': ['epjb', 'Eur.Phys.J.', 'B', '', 'P'],
       '10052': ['epjc', 'Eur.Phys.J.', 'C', '', 'P'],
       '10053': ['epjd', 'Eur.Phys.J.', 'D', '', 'P'],
+      '10440': ['acapma', 'Acta Appl.Math.', '', '', 'P'],
       '10509': ['ass', 'Astrophys.Space Sci.', '', '', 'P'],
       '10511': ['ast', 'Astrophysics', '', '', 'P'],
+      '10512': ['atenerg', 'At.Energ.', '', '', 'P'],
       '10582': ['czjp', 'Czech.J.Phys.', '', '', 'P'], # stopped 2006
       '10686': ['ea', 'Exper.Astron.', '', '', 'P'],
+      '10699': ['fosi', 'Found.Sci.', '', '', 'P'],
       '10701': ['fp', 'Found.Phys.', '', '', 'P'],
       '10702': ['fpl', 'Found.Phys.Lett.', '', '', 'P'], # stopped 2006
       '10714': ['grg', 'Gen.Rel.Grav.', '', '', 'P'],
@@ -76,11 +84,14 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '11006': ['matnot', 'Math.Notes', '', '', 'P'],
       '11018': ['mt', 'Meas.Tech.', '', '', 'P'],
       '11040': ['mpag', 'Math.Phys.Anal.Geom.', '', '', 'P'],
+      '11128': ['qif', 'Quant.Inf.Proc.', '', '', 'P'],
       '11139': ['ramanujan', 'Ramanujan J.', '', '', 'P'],
       '11182': ['rpj', 'Russ.Phys.J.', '', 'Izv.Vuz.Fiz.', 'P'],
       '11207': ['soph', 'Solar Phys.', '', '', 'P'],#HAL
       '11214': ['ssr', 'Space Sci.Rev.', '', '', 'P'],
+      '11229': ['synthese', 'Synthese', '', '', 'P'],
       '11232': ['tmp', 'Theor.Math.Phys.', '', 'Teor.Mat.Fiz.', 'P'],
+      '11253': ['umj', 'Ukr.Math.J.', '', '', 'P'],
       '11425': ['sica', 'Sci.China Math.', '', '', 'P'],
       '11433': ['sicg', 'Sci.China Phys.Mech.Astron.', '', '', 'P'],
       '11434': ['csb', 'Chin.Sci.Bull.', '', '', 'P'],
@@ -89,6 +100,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '11446': ['dok', 'Dokl.Phys.', '', '', 'P'],
       '11447': ['jetp', 'J.Exp.Theor.Phys.', '', 'Zh.Eksp.Teor.Fiz.', 'P'],
       '11448': ['jtpl', 'JETP Lett.', '', 'Pisma Zh.Eksp.Teor.Fiz.', 'P'],
+      '11449': ['opsp', 'Opt.Spectrosc.', '', '', 'P'],
       '11450': ['pan', 'Phys.At.Nucl.', '', 'Yad.Fiz.', 'P'],
       '11451': ['ptss', 'Sov.Phys.Solid State', '', 'Fiz.Tverd.Tela', 'P'],
       '11452': ['plpr', 'Plasma Phys.Rep.', '', 'Fiz.Plasmy', 'P'],
@@ -109,10 +121,14 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '11972': ['mupb', 'Moscow Univ.Phys.Bull.', '', '', 'P'],
       '12036': ['jasas', 'J.Astrophys.Astron.', '', '', 'P'],
       '12043': ['pramana', 'Pramana', '', '', 'P'],
+      '12045': ['resonance', 'Reson.', '', '', 'P'],
+      '12220': ['jganal', 'J.Geom.Anal.', '', '', 'P'],
       '12267': ['gc', 'Grav.Cosmol.', '', '', 'P'],
+      '12607': ['pauaa', 'p Adic Ultra.Anal.Appl.', '', '', 'P'],
       '12648': ['ijp', 'Indian J.Phys.', '', '', 'P'],
       '13129': ['epjh', 'Eur.Phys.J.', 'H', '', 'P'],
       '13130': ['jhep', 'JHEP', '', '', 'P'],
+      '13194': ['ejphilsci', 'Eur.J.Phil.Sci.', '', '', 'P'],
       '13324': ['anmp', 'Anal.Math.Phys.', '', '', 'P'],
       '13360': ['epjp', 'Eur.Phys.J.Plus', '', '', 'P'],
       '13538': ['bjp', 'Braz.J.Phys.', '', '', 'P'],
@@ -122,19 +138,23 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '40065': ['arjoma', 'Arab.J.Math.', '', '', 'P'],
       '40306': ['avietnamm', 'Acta Math.Vietnamica', '', '', 'P'],
       '40485': ['epjti', 'EPJ Tech.Instrum.', '', '', 'P'],
+jc['40507'] = ['epjqt', 'EPJ Quant.Technol.', '', '', 'P']#yepp
       '40509': ['qsmf', 'Quant.Stud.Math.Found.', '', '', 'P'],
       '40623': ['eaplsc', 'Earth Planets Space', '', '', 'P'],
       '40766': ['rnc', 'Riv.Nuovo Cim.', '', '', 'PR'],
+      '40818': ['apde', 'Ann.PDE', '', '', 'P'],
       '40995': ['ijsta', 'Iran.J.Sci.Technol.A', '', '', 'P'],
       '41114': ['lrr', 'Living Rev.Rel.', '', '', 'R'],
       '41365': ['nst', 'Nucl.Sci.Tech.', '', '', 'P'],
       '41467': ['natcomm', 'Nature Commun.', '', '', 'P'],
+      '41534': ['natquantinf', 'npj Quantum Inf.', '', '', 'P'],
       '41550': ['natastr', 'Nature Astron.', '', '', 'P'],
       '41566': ['natphoton', 'Nature Photon.', '', '', 'P'],
       '41567': ['natphys', 'Nature Phys.', '', '', 'P'],
       '41586': ['nature', 'Nature', '', '', 'P'],
       '41598': ['scirep', 'Sci.Rep.', '', '', 'P'],
       '41605': ['rdtm', 'Rad.Det.Tech.Meth.', '', '', 'P'],
+      '41614': ['rmplasmap', 'Rev.Mod.Plasma Phys.', '', '', 'P'],
       '41781': ['csbg', 'Comput.Softw.Big Sci.', '', '', 'P'],
       '42005': ['communphys', 'Commun.Phys.', '', '', 'P'],
       '42254': ['natrp', 'Nature Rev.Phys.', '', '', 'P'],
@@ -173,33 +193,14 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
 #42005 Commun.Phys.
 #41605 Rad.Det.Tech.Meth.
 
-jc['00029'] = ['selmat', 'Selecta Math.', '', '', 'P'] #yepp
-jc['00222'] = ['invmat', 'Invent.Math.', '', '', 'P']
-jc['00526'] = ['cvpde', 'Calc.Var.Part.Differ.Equ', '', '', 'P']#yepp
-jc['10440'] = ['acapma', 'Acta Appl.Math.', '', '', 'P']
-jc['10699'] = ['fosi', 'Found.Sci.', '', '', 'P']#yepp
-jc['10946'] = ['jrlr', 'J.Russ.Laser Res.', '', '', 'P']
-jc['10947'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P']
-jc['10955'] = ['jstatphys', 'J.Statist.Phys.', '', '', 'P'] #yepp
-jc['11128'] = ['qif', 'Quant.Inf.Proc.', '', '', 'P']#yepp
-jc['11253'] = ['umj', 'Ukr.Math.J.', '', '', 'P']#yepp
-jc['11139'] = ['ramanajuan', 'Ramanujan J.', '', '', 'P']
-jc['11229'] = ['synthese', 'Synthese', '', '', 'P']#yepp
-jc['11449'] = ['opsp', 'Opt.Spectrosc.', '', '', 'P']#yepp
-jc['12045'] = ['resonance', 'Reson.', '', '', 'P']#yepp
-jc['12220'] = ['jganal', 'J.Geom.Anal.', '', '', 'P']#yepp
-jc['12607'] = ['pauaa', 'p Adic Ultra.Anal.Appl.', '', '', 'P']#yepp
-jc['13194'] = ['ejphilsci', 'Eur.J.Phil.Sci.', '', '', 'P'] #yepp
+jc['10946'] = ['jrlr', 'J.Russ.Laser Res.', '', '', 'P'] #!
+jc['10947'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P'] #!
 jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P'] #now at New publisher: Please contact Islamic Azad University
-jc['40507'] = ['epjqt', 'EPJ Quant.Technol.', '', '', 'P']#yepp
-jc['40818'] = ['apde', 'Ann.PDE', '', '', 'P']
-jc['41534'] = ['natquantinf', 'npj Quantum Inf.', '', '', 'P']#yepp
-jc['00332'] = ['jnonlinsci', 'J.Nonlin.Sci.', '', '', 'P']
-jc['00229'] = ['manusmat', 'Manuscr.Math.', '', '', 'P']#yepp
-jc['41614'] = ['rmplasmap', 'Rev.Mod.Plasma Phys.', '', '', 'P']
-jc['13370'] = ['afrmat', 'Afr.Math.', '', '', 'P']#ereugen in jnl
-jc['10512'] = ['atenerg', 'At.Energ.', '', '', 'P']#yepp
-jc['43673'] = ['aappsbul', 'AAPPS Bull.', '', '', '']
+jc['13370'] = ['afrmat', 'Afr.Math.', '', '', 'P']#yepp#ereugen in jnl
+
+jc['44214'] = ['qufr', 'Quant.Front', '', '', 'P']
+jc['44198'] = ['jnlmp', 'J.Nonlin.Math.Phys.', '', '', 'P']
+
 
 
 #known conferences
