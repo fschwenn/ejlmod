@@ -37,18 +37,23 @@ if   (jnl == 'cjp'):
     issn = '0008-4204'
 
 jnlfilename = jnl+vol+'.'+isu
+driver = webdriver.PhantomJS()
+driver.implicitly_wait(60)
 
-urltrunk = 'http://www.nrcresearchpress.com'
+urltrunk = 'https://cdnsciencepub.com'
 tocurl = '%s/toc/%s/%s/%s' % (urltrunk, jnl, vol, isu)
 print "get table of content of %s%s.%s via %s " % (jnlname, vol, isu, tocurl)
 
-try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
-    time.sleep(3)
-except:
-    print "retry %s in 180 seconds" % (tocurl)
-    time.sleep(180)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+
+tocfilname = '%s/%s.toc' % (tmpdir, jnlfilename)
+if not os.path.isfile(tocfilname):
+    os.system('wget -T 300 -t 3 -q  -U "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:39.0) Gecko/20100101 Firefox/39.0" -O %s "%s"' % (tocfilname, tocurl))
+    time.sleep(5)
+
+
+inf = open(tocfilname, 'r')
+tocpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
+inf.close()
 
 recs = []
 for div in tocpage.body.find_all('div', attrs = {'class' : 'table-of-content'}):
@@ -88,8 +93,7 @@ for rec in recs:
                 rec['keyw'] = re.split('; ', meta['content'])
             #date
             elif meta['name'] == 'dc.Date':
-                dates = re.split(' ', meta['content'])
-                rec['date'] = '%s-%02i-%02i' % (dates[2], month[dates[1]], int(dates[0]))
+                rec['date'] = meta['content']
             #DOI
             elif meta['name'] == 'dc.Identifier':
                 if meta.has_attr('scheme') and meta['scheme'] == 'doi':
@@ -109,7 +113,7 @@ for rec in recs:
             rec['pacs'] = re.split(' *, *', pacss)
     #pages, year
     for span in artpage.body.find_all('span', attrs = {'property' : 'datePublished'}):
-        rec['year'] = span.text.strip()
+        rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', span.text.strip())
     for span in artpage.body.find_all('span', attrs = {'property' : 'pageStart'}):
         rec['p1'] = span.text.strip()
     for span in artpage.body.find_all('span', attrs = {'property' : 'pageEnd'}):
@@ -136,7 +140,7 @@ for rec in recs:
                 for email in author.find_all('a', attrs = {'property' : 'email'}):
                     rec['autaff'][-1].append(re.sub('mailto:', 'EMAIL:', email['href']))
             #affiliations
-            for aff in div.find_all('div', attrs = {'property' : 'organization'}):
+            for aff in div.find_all('div', attrs = {'typeof' : 'Organization'}):
                 rec['autaff'][-1].append(aff.text.strip())
     #references
     for section in artpage.body.find_all('section', attrs = {'id' : 'bibliography'}):
