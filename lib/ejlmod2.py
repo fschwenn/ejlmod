@@ -13,7 +13,11 @@ import time
 from collclean_lib import coll_cleanforthe
 from collclean_lib import coll_clean710
 from collclean_lib import coll_split
-from inspire_utils.date import normalize_date
+try:
+    from inspire_utils.date import normalize_date
+except:
+    def normalize_date(datum):
+        return datum
 
 try:
     # needed to remove the print-commands from /usr/lib/python2.6/site-packages/refextract/references/engine.py
@@ -66,7 +70,7 @@ reorcid = re.compile('^ORCID:\d{4}\-\d{4}\-\d{4}\-\d{3}[0-9X]$')
 #(can also handle mutiple FCs like 'ai' or so)
 #from inspirelibrarylabs import fcjournalliste
 fcjournalliste = [('b', ['IEEE Trans.Appl.Supercond.', 'Supercond.Sci.Technol.']),
-                  ('m', ['Abstr.Appl.Anal.', 'Acta Appl.Math.', 'Adv.Appl.Clifford Algebras', 'Adv.Math.', 'Adv.Math.Phys.', 'Afr.Math.', 'Alg.Anal.', 'Algebr.Geom.Topol.', 'Alg.Groups Geom.', 'Alg.Logika', 'Anal.Math.Phys.', 'Anal.Part.Diff.Eq.', 'Annals Probab.', 'Ann.Inst.H.Poincare Probab.Statist.', 'Ann.Math.Sci.Appl.', 'Ann.PDE', 'Arab.J.Math.', 'Asian J.Math.', 'Axioms', 'Bayesian Anal.', 'Braz.J.Probab.Statist.', 'Bull.Am.Math.Soc.', 'Bull.Austral.Math.Soc.', 'Cahiers Topo.Geom.Diff.', 'Calc.Var.Part.Differ.Equ', 'Can.J.Math.', 'Commun.Anal.Geom.', 'Commun.Math.Phys.', 'Commun.Math.Sci.', 'Commun.Pure Appl.Math.', 'Compos.Math.', 'Compt.Rend.Math.', 'Conform.Geom.Dyn.', 'Contemp.Math.', 'Duke Math.J.', 'Eur.J.Combinatorics', 'Exper.Math.', 'Forum Math.Pi', 'Forum Math.Sigma', 'Fractals', 'Geom.Topol.', 'Geom.Topol.Monographs', 'Glasgow Math.J.', 'Hokkaido Math.J.', 'Int.Math.Res.Not.', 'Invent.Math.', 'Inverse Prob.', 'Izv.Vuz.Mat.', 'J.Alg.Geom.', 'J.Am.Math.Soc.', 'J.Appl.Math.', 'J.Appl.Math.Mech.', 'J.Austral.Math.Soc.', 'J.Diff.Geom.', 'J.Geom.Anal.', 'J.Geom.Symmetry Phys.', 'J.Inst.Math.Jussieu', 'J.Integrab.Syst.', 'J.Korean Math.Soc.', 'J.Math.Phys.', 'J.Math.Res.', 'J.Math.Sci.', 'J.Math.Soc.Jap.', 'J.Part.Diff.Eq.', 'Lect.Notes Math.', 'Lett.Math.Phys.', 'Manuscr.Math.', 'Math.Comput.', 'Mathematics', 'Math.Methods Appl.Sci.', 'Math.Nachr.', 'Math.Notes', 'Math.Phys.Anal.Geom.', 'Math.Phys.Stud.', 'Math.Proc.Cambridge Phil.Soc.', 'Math.Res.Lett.', 'Mat.Sbornik', 'Mat.Zametki', 'Moscow Math.J.', 'Pacific J.Math.', 'p Adic Ultra.Anal.Appl.', 'Proc.Am.Math.Soc.', 'Proc.Am.Math.Soc.Ser.B', 'Proc.Geom.Int.Quant.', 'Prog.Math.Phys.', 'Rept.Math.Phys.', 'Russ.J.Math.Phys.', 'Russ.Math.Surveys', 'Springer Proc.Math.Stat.', 'Tokyo J.Math.', 'Trans.Am.Math.Soc.', 'Trans.Am.Math.Soc.Ser.B', 'Trans.Moscow Math.Soc.', 'Turk.J.Math.', 'Ukr.Math.J.', 'J.Reine Angew.Math.', 'Arch.Ration.Mech.Anal.', 'Acta Math.Vietnamica', 'Quart.J.Math.Oxford Ser.', 'Int.J.Math.', 'Integral Transform.Spec.Funct.', 'Commun.Contemp.Math.', 'Selecta Math.']),
+                  ('m', ['Abstr.Appl.Anal.', 'Acta Appl.Math.', 'Adv.Appl.Clifford Algebras', 'Adv.Math.', 'Adv.Math.Phys.', 'Afr.Math.', 'Alg.Anal.', 'Algebr.Geom.Topol.', 'Alg.Groups Geom.', 'Alg.Logika', 'Anal.Math.Phys.', 'Anal.Part.Diff.Eq.', 'Annals Probab.', 'Ann.Inst.H.Poincare Probab.Statist.', 'Ann.Math.Sci.Appl.', 'Ann.PDE', 'Arab.J.Math.', 'Asian J.Math.', 'Axioms', 'Bayesian Anal.', 'Braz.J.Probab.Statist.', 'Bull.Am.Math.Soc.', 'Bull.Austral.Math.Soc.', 'Cahiers Topo.Geom.Diff.', 'Calc.Var.Part.Differ.Equ', 'Can.J.Math.', 'Commun.Anal.Geom.', 'Commun.Math.Phys.', 'Commun.Math.Sci.', 'Commun.Pure Appl.Math.', 'Compos.Math.', 'Compt.Rend.Math.', 'Conform.Geom.Dyn.', 'Contemp.Math.', 'Duke Math.J.', 'Eur.J.Combinatorics', 'Exper.Math.', 'Forum Math.Pi', 'Forum Math.Sigma', 'Fractals', 'Geom.Topol.', 'Geom.Topol.Monographs', 'Glasgow Math.J.', 'Hokkaido Math.J.', 'Int.Math.Res.Not.', 'Invent.Math.', 'Inverse Prob.', 'Izv.Vuz.Mat.', 'J.Alg.Geom.', 'J.Am.Math.Soc.', 'J.Appl.Math.', 'J.Appl.Math.Mech.', 'J.Austral.Math.Soc.', 'J.Diff.Geom.', 'J.Geom.Anal.', 'J.Geom.Symmetry Phys.', 'J.Inst.Math.Jussieu', 'J.Integrab.Syst.', 'J.Korean Math.Soc.', 'J.Math.Phys.', 'J.Math.Res.', 'J.Math.Sci.', 'J.Math.Soc.Jap.', 'J.Part.Diff.Eq.', 'Lect.Notes Math.', 'Lett.Math.Phys.', 'Manuscr.Math.', 'Math.Comput.', 'Mathematics', 'Math.Methods Appl.Sci.', 'Math.Nachr.', 'Math.Notes', 'Math.Phys.Anal.Geom.', 'Math.Phys.Stud.', 'Math.Proc.Cambridge Phil.Soc.', 'Math.Res.Lett.', 'Mat.Sbornik', 'Mat.Zametki', 'Moscow Math.J.', 'Pacific J.Math.', 'p Adic Ultra.Anal.Appl.', 'Proc.Am.Math.Soc.', 'Proc.Am.Math.Soc.Ser.B', 'Proc.Geom.Int.Quant.', 'Prog.Math.Phys.', 'Rept.Math.Phys.', 'Russ.J.Math.Phys.', 'Russ.Math.Surveys', 'Springer Proc.Math.Stat.', 'Tokyo J.Math.', 'Trans.Am.Math.Soc.', 'Trans.Am.Math.Soc.Ser.B', 'Trans.Moscow Math.Soc.', 'Turk.J.Math.', 'Ukr.Math.J.', 'J.Reine Angew.Math.', 'Arch.Ration.Mech.Anal.', 'Acta Math.Vietnamica', 'Quart.J.Math.Oxford Ser.', 'Int.J.Math.', 'Integral Transform.Spec.Funct.', 'Commun.Contemp.Math.', 'Selecta Math.', ' J.Sympl.Geom.']),
                   ('q', ['ACS Photonics', 'Atoms', 'J.Chem.Phys.', 'J.Chem.Theor.Comput.', 'J.Mod.Opt.', 'J.Molec.Struc.', 'J.Opt.', 'J.Opt.Soc.Am. A', 'J.Opt.Soc.Am. B', 'Mater.Chem.Phys.', 'Nano Lett.', 'Nanotechnol.', 'Nature Photon.']),
                   ('k', ['ACM Trans.Quant.Comput.', 'Quant.Inf.Proc.', 'Quantum Eng.', 'Quantum Rep.', 'Quantum Sci.Technol.', 'Quantum', 'AVS Quantum Sci.', 'Adv.Quantum Technol.']),
                   ('f', ['Adv.Cond.Mat.Phys.', 'Ann.Rev.Condensed Matter Phys.', 'Condens.Mat.', 'J.Noncryst.Solids', 'J.Phys.Chem.Solids', 'J.Phys.Condens.Matter', 'Solid State Commun.', 'Sov.Phys.Solid State', 'Condensed Matter Phys.', 'Phys.Status Solidi']),
@@ -297,7 +301,8 @@ refcp = re.compile('Phys')
 refcm = re.compile('Math')
 refcc = re.compile('Comput')
 refca = re.compile('Astro')
-refck = re.compile('[qQ]uantum.(Phys|phys|Infor|infor|Comp|comp|Tec|Com|Corr|Theor|Mech|Dynam|Opti|Elec)')
+#refck = re.compile('[qQ]uantum.(Phys|phys|Infor|infor|Comp|comp|Tec|Com|Corr|Theor|Mech|Dynam|Opti|Elec)')
+refck = re.compile('[qQ]uantum.(Infor|infor|Comp|comp)')
 def writeXML(recs,dokfile,publisher):
     dokfile.write('<collection>\n')
     i = 0
@@ -352,9 +357,13 @@ def writeXML(recs,dokfile,publisher):
                 #recdate = rec['date']
                 recdate = normalize_date(rec['date'])
             except:
-                recdate = False
-                print ' !! invalid date "%s"' % (rec['date'])
-                del(rec['date'])
+                try:
+                    if re.search('[12]\d\d\d', rec['date']):
+                        recdate = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
+                except:
+                        recdate = False
+                        print ' !! invalid date "%s"' % (rec['date'])
+                        del(rec['date'])
         if not 'date' in rec.keys() and 'year' in rec.keys():
             rec['date'] = rec['year']
             recdate = rec['year']
@@ -383,7 +392,8 @@ def writeXML(recs,dokfile,publisher):
                     keywords = rec['keyw']
             else:
                 keywords = rec['keyw']
-            for kw in rec['keyw']:
+            #for kw in rec['keyw']:
+            for kw in keywords:
                 #xmlstring += marcxml('6531',[('a',kw), ('9','publisher')])
                 if kw.strip(): 
                     try:
@@ -487,23 +497,23 @@ def writeXML(recs,dokfile,publisher):
         #URN
         if rec.has_key('urn'):
             xmlstring += marcxml('0247',[('a',rec['urn']), ('2','URN'), ('9',publisher)])
-        elif not 'doi' in rec.keys() and not 'hdl' in rec.keys():
-            if len(liste) > 2 or rec.has_key('isbn') or rec.has_key('isbns'):
-                pseudodoi = '20.2000/'+re.sub(' ','_','-'.join([tup[1] for tup in liste]))
-                if rec.has_key('isbn'):
-                    pseudodoi += '_' + rec['isbn']
-                elif rec.has_key('isbns'):
-                    for tupel in rec['isbns'][0]:
-                        if tupel[0] == 'a':
-                            pseudodoi += '_' + tupel[1]
-                xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
-            elif 'tit' in rec.keys():
-                pseudodoi = '30.3000/' + re.sub('\W', '', rec['tit'])
-                if 'auts' in rec.keys() and rec['auts']:
-                    pseudodoi += '/' + re.sub('\W', '', rec['auts'][0])
-                elif 'autaff' in rec.keys() and rec['autaff'] and rec['autaff'][0]:
-                    pseudodoi += '/' + re.sub('\W', '', rec['autaff'][0][0])
-                xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
+#        elif not 'doi' in rec.keys() and not 'hdl' in rec.keys():
+#            if len(liste) > 2 or rec.has_key('isbn') or rec.has_key('isbns'):
+#                pseudodoi = '20.2000/'+re.sub(' ','_','-'.join([tup[1] for tup in liste]))
+#                if rec.has_key('isbn'):
+#                    pseudodoi += '_' + rec['isbn']
+#                elif rec.has_key('isbns'):
+#                    for tupel in rec['isbns'][0]:
+#                        if tupel[0] == 'a':
+#                            pseudodoi += '_' + tupel[1]
+#                xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
+#            elif 'tit' in rec.keys():
+#                pseudodoi = '30.3000/' + re.sub('\W', '', rec['tit'])
+#                if 'auts' in rec.keys() and rec['auts']:
+#                    pseudodoi += '/' + re.sub('\W', '', rec['auts'][0])
+#                elif 'autaff' in rec.keys() and rec['autaff'] and rec['autaff'][0]:
+#                    pseudodoi += '/' + re.sub('\W', '', rec['autaff'][0][0])
+#                xmlstring += marcxml('0247',[('a',pseudodoi), ('2','NODOI'), ('9',publisher)])
         #NUMBER OF PAGES
         if rec.has_key('pages'):
             if rec['pages']:
@@ -662,6 +672,7 @@ def writeXML(recs,dokfile,publisher):
                     autlist = [('a',shapeaut(autaff[0]))]
                 for aff in autaff[1:]:
                     if re.search('ORCID', aff):
+                        aff = re.sub('\s+', '', aff)
                         if reorcid.search(aff):
                             autlist.append(('j', aff))
                         else:
@@ -740,7 +751,7 @@ def writeXML(recs,dokfile,publisher):
                             aut.append(('q', re.sub('.*, CHINESENAME: ', '', author)))
                             author = re.sub(' *, CHINESENAME.*', '', author)
                         if re.search('ORCID', author):
-                            orcid = re.sub(' ', '', re.sub('\.$', '', re.sub('.*, ORCID',  'ORCID', author)))
+                            orcid = re.sub('\s+', '', re.sub('\.$', '', re.sub('.*, ORCID',  'ORCID', author)))
                             if reorcid.search(orcid):
                                 aut.append(('j', orcid))
                             else:
@@ -857,9 +868,9 @@ def writeXML(recs,dokfile,publisher):
                     elif refck.search(comment):
                         rec['fc'] = 'k'
                         rec['note'].append('added fieldcode by note')
-                    elif refcc.search(comment):
-                        rec['fc'] = 'c'
-                        rec['note'].append('added fieldcode by note')                    
+#                    elif refcc.search(comment):
+#                        rec['fc'] = 'c'
+#                        rec['note'].append('added fieldcode by note')                    
             for comment in rec['note']:
                 try: 
                     xmlstring += marcxml('595', [('a', comment)])
@@ -929,6 +940,15 @@ def shapeaut(author):
 
 
 reqis = re.compile('^\d+ *')
+untitles = ['Calendar', 'Author Index', 'Editorial', 'News', 'Index', 'Spotlights on Recent JACS Publications', 
+            'Changes to the Editorial Board', 'Preface', 'Obituary', 'Foreword', 'Replies']
+potentialuntitles = [re.compile('[pP]reface'), re.compile('[iI]n [mM]emoriam'), re.compile('Congratulations'),
+                     re.compile('[cC]ouncil [iI]nformation'), re.compile('[jJ]ournal [cC]over'),
+                     re.compile('[Aa]uthor [iI]ndex'), re.compile('[bB]ack [mM]atter'), re.compile('Message'),
+		     re.compile('[fF]ront [mM]atter'), re.compile('Welcome'), re.compile('Committee'),
+                     re.compile('[iI]nformation for [aA]authors'), re.compile('[pP]ublication [iI]nofrmation'),
+                     re.compile('Workshops'), 
+                     re.compile('[kK]eynote [sS]peaker'), re.compile('Schedule'), re.compile('[Pp]lenary [sS]peaker')]
 def writenewXML(recs, dokfile, publisher, dokifilename):
     uniqrecs = []
     doi1s = []
@@ -946,6 +966,29 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
             doi1 = re.sub('[\(\)\/]', '_', rec['hdl'])
         elif 'urn' in rec.keys():
             doi1 = re.sub('[\(\)\/]', '_', rec['urn'])
+        else:
+            pseudodoi = False
+            if 'isbn' in rec.keys() and rec['isbn']:
+                pseudodoi = '20.2000/ISBN/' + rec['isbn']
+            elif 'isbns' in rec.keys() and rec['isbns']:
+                pseudodoi = '20.2000/ISBNS'
+                for tupel in rec['isbns'][0]:
+                    if tupel[0] == 'a':
+                        pseudodoi += '/' + tupel[1]
+            elif ('vol' in rec.keys() or 'cnum' in rec.keys()) and 'p1' in rec.keys():
+                pseudodoi = '20.2000/PBN'
+                for pbnkey in ['jnl', 'vol', 'issue', 'year', 'p1', 'p2', 'cnum']:
+                    if pbnkey in rec.keys():
+                        pseudodoi += '/' + re.sub('\W', '', rec[pbnkey])
+            elif 'tit' in rec.keys():
+                pseudodoi = '30.3000/AUT_TIT'
+                if 'auts' in rec.keys() and rec['auts']:
+                    pseudodoi += '/' + re.sub('\W', '', rec['auts'][0])
+                elif 'autaff' in rec.keys() and rec['autaff'] and rec['autaff'][0]:
+                    pseudodoi += '/' + re.sub('\W', '', rec['autaff'][0][0])
+            if pseudodoi:
+                rec['doi'] = pseudodoi
+                doi1 = re.sub('[\(\)\/]', '_', rec['doi'])
         if doi1:
             absfilename = os.path.join(absdir, doi1)
             bibfilename = os.path.join(tmpdir, doi1+'.qis.bib')
@@ -998,6 +1041,21 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
                         rec['fc'] += 'k'
                 else:    
                     rec['fc'] = 'k'
+            #check for "un"titles
+            keepit = True
+            if 'tit' in rec.keys():
+                if rec['tit'] in untitles:
+                    keepit = False
+                elif (not ('auts' in rec.keys() and rec['auts'])) and (not ('autaff' in rec.keys() and rec['autaff'])):                    
+                    for pu in potentialuntitles:
+                        if pu.search(rec['tit']):
+                            keepit = False
+                            break
+                if not keepit:
+                    if 'note' in rec.keys():
+                        rec['note'].append('after testing phase "%s" would be omitted' % (rec['tit']))
+                    else:
+                        rec['note'] = ['after testing phase "%s" would be omitted' % (rec['tit'])]                        
             if doi1 in doi1s:
                 print '--', doi1
             else:
