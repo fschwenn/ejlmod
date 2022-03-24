@@ -22,22 +22,45 @@ publisher = 'Frontiers'
 typecode = 'P'
 jnlfilename = 'frontiers.' + timestamp
 
+sectiontofc = {'Astrobiology' : 'a', 'Astrochemistry' : 'a',
+               'Exoplanets' : 'a', 'Astrostatistics' : 'a',
+               'Extragalactic Astronomy' : 'a', 'Fundamental Astronomy' : 'a',
+               'Space Physics' : 'a', 'Space Robotics' : 'a',
+               'High-Energy and Astroparticle Physics' : 'a',
+               'Planetary Science' : 'a', 'Stellar and Solar Physics' : 'a',
+               'Astronomical Instrumentation' : 'ai',
+               'Radiation Detectors and Imaging' : 'i',
+               'Cosmology' : 'ag',
+               'Condensed Matter Physics' : 'f',
+               'Machine Learning and Artificial Intelligence' : 'c',
+               'Mathematical and Statistical Physics' : 'm'}
+
 urls = sys.argv[1:]
 recs = []
 i = 0
 for artlink in urls:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(urls), artlink)
-    rec = {'tc' : 'P', 'autaff' : [], 'refs' : []}
+    if artlink in ['http://click.engage.frontiersin.com/?qs=42b61da43a3f9df6013a23b68436a54baa8c80ffee48007a24c58c48dea197f28e8e542608b09cd5f247e97e276ce0ad2dc2d41a82d633a97db80e0b25f249be',
+                   'http://click.engage.frontiersin.com/?qs=f38f1870c56dcbfecc918de16e443951cd63dd13638046942de37046a6b277e1b668fc558b74e4d8fce61d9c60b0fbbaa011c26e0b58e0b1aed51711d07b43af',
+                   'http://click.engage.frontiersin.com/?qs=7924d9eced8ace4bc1fe79b5d27da08c4edb5ac2f674162f35a53feaecc1801271ce07c9c7c074668b8e64e1ccf21c2135d1cb211cc57e34a6b9cffc865f7d03',
+                   'http://click.engage.frontiersin.com/?qs=f38f1870c56dcbfecc918de16e443951cd63dd13638046942de37046a6b277e135eed14992b8c3c7d2122930241cf225aa6a324ac73c3f57366a06bbc2fdd4a1',
+                   'http://click.engage.frontiersin.com/?qs=f38f1870c56dcbfe8541a1a57ac950e6a60498ebc55375cffafff4fd3132555d20394944b66337553cda0df56ba94f01d305afd60124df417ca75062ffee02cd',
+                   'http://click.engage.frontiersin.com/?qs=f38f1870c56dcbfe8541a1a57ac950e6a60498ebc55375cffafff4fd3132555dc2671c4873b888b1088098d8c958d81929a3a95368064553cb63c83832025ef4']:
+        continue
+    rec = {'tc' : 'P', 'autaff' : [], 'refs' : [], 'note' : []}
     try:
-        print artlink
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink), features="lxml")
         time.sleep(3)
     except:
         print "retry %s in 180 seconds" % (artlink)
         time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink), features="lxml")
     autaff = False
+    try:
+        artpage.head.find_all('meta')
+    except:
+        continue    
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #volume
@@ -105,7 +128,16 @@ for artlink in urls:
         rec['FFT'] = 'https://www.frontiersin.org/articles/%s/pdf' % (rec['doi'])
     #section
     for a in artpage.body.find_all('a', attrs = {'data-test-id' : 'section-link'}):
-        rec['note'] = [ a.text.strip() ]
+        section = a.text.strip()
+        if section in sectiontofc.keys():
+            if 'fc' in rec.keys():
+                for fc in sectiontofc[section]:
+                    if not fc in rec['fc']:
+                        rec['fc'] += fc
+            else:
+                rec['fc'] = sectiontofc[section]
+        else:
+            rec['note'].append(section)
     #references
     for div in artpage.body.find_all('div', attrs = {'class' : 'References'}):
         for a in div.find_all('a'):
