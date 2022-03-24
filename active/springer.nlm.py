@@ -138,7 +138,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '40065': ['arjoma', 'Arab.J.Math.', '', '', 'P'],
       '40306': ['avietnamm', 'Acta Math.Vietnamica', '', '', 'P'],
       '40485': ['epjti', 'EPJ Tech.Instrum.', '', '', 'P'],
-jc['40507'] = ['epjqt', 'EPJ Quant.Technol.', '', '', 'P']#yepp
+      '40507': ['epjqt', 'EPJ Quant.Technol.', '', '', 'P'],
       '40509': ['qsmf', 'Quant.Stud.Math.Found.', '', '', 'P'],
       '40623': ['eaplsc', 'Earth Planets Space', '', '', 'P'],
       '40766': ['rnc', 'Riv.Nuovo Cim.', '', '', 'PR'],
@@ -991,13 +991,15 @@ def convertissue(journalnumber, dirname):
                     if rec: recs.append(rec)
     print ' -> %i records' % (len(recs))
     if recs:
-        if 'vol' in rec.keys():
-            if 'issue' in rec.keys():
-                jnlfilename = re.sub(' ', '_', '%s%s.%s.%s' % (jc[journalnumber][0], rec['vol'], rec['issue'], cday))
+        if 'vol' in recs[-1].keys():
+            if 'issue' in recs[-1].keys():
+                jnlfilename = re.sub(' ', '_', '%s%s.%s.%s' % (jc[journalnumber][0], recs[-1]['vol'], recs[-1]['issue'], cday))
             else:
-                jnlfilename = '%s%s.%s' % (jc[journalnumber][0], rec['vol'], cday)
+                jnlfilename = '%s%s.%s' % (jc[journalnumber][0], recs[-1]['vol'], cday)
         else:
             jnlfilename = '%s.%s' % (jc[journalnumber][0], cday)
+        if re.search('JournalOnlineFirst', dirname):            
+            jnlfilename = '%sOF.%s' % (jc[journalnumber][0], cday)
         return (jnlfilename, recs)
     else:
         return ('', [])
@@ -1028,7 +1030,7 @@ for dirlev1 in os.listdir(sprdir):
     #crawl through directories of volumes (to check for online first)
     for dirlev2 in os.listdir(dirlev1fullpath):
         dirlev2fullpath = os.path.join(dirlev1fullpath, dirlev2)
-        onlinefirstpath = os.path.join(dirlev1fullpath, cday)
+        onlinefirstpath = os.path.join(dirlev2fullpath, cday)
         #crawl through directories of issues looking for online first articles
         for dirlev3 in os.listdir(dirlev2fullpath):
             #online first create artifical issue directory
