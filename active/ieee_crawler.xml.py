@@ -306,7 +306,7 @@ def ieee(number):
                 if author.has_key('orcid'):
                     autaff.append('ORCID:'+author['orcid'])
                 rec['autaff'].append(autaff)
-        if jnlname in ['IEEE Trans.Magnetics', 'IEEE Trans.Appl.Supercond.', 'IEEE J.Sel.Top.Quant.Electron.']:#, 'IEEE Trans.Instrum.Measur.']:
+        if jnlname in ['IEEE Trans.Magnetics', 'IEEE Trans.Appl.Supercond.', 'IEEE J.Sel.Top.Quant.Electron.', 'IEEE Trans.Instrum.Measur.']:
             if gdm.has_key('externalId'):
                 rec['p1'] = gdm['externalId']
             elif gdm.has_key('articleNumber'):
@@ -403,6 +403,10 @@ def ieee(number):
         if not rec['tit'] in ['IEEE Communications Society', 'IEEE Transactions on Electron Devices information for authors',
                               'IEEE Communications Society Information', 'IEEE Sensors Council',
                               'IEEE Circuits and Systems Society Information',
+                              'IEEE Transactions on Information Theory information for authors',
+                              'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems society information',
+                              'IEEE Transactions on Magnetics Institutional Listings',
+                              'IEEE Transactions on Magnetics publication information',
                               'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems publication information',
                               'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society']:
             recs.append(rec)
