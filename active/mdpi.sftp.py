@@ -28,7 +28,7 @@ tmppath = publisherpath + '/tmp'
 def tfstrip(x): return x.strip()
 
 chunksize = 100
-numberofvolumes = 2
+numberofissues = 4
 
 publisher = 'MDPI'
 jnl = sys.argv[1]
@@ -57,6 +57,7 @@ if jnl == 'proceedings':
 elif jnl == 'psf':
     jnlfilename = 'mdpi_psf%s.%s_%s' % (vol, iss, cnum)
 else:
+    reoldsyntax = re.compile('^([a-z]*\-\d+\-)(\d+).xml$')
     jnlfilename = '%s.%s' % (jnl, stampoftoday)
     donepath = os.path.join(publisherpath, 'done', jnl)
     for voldir in os.listdir(donepath):
@@ -64,7 +65,13 @@ else:
             for articledir in os.listdir(os.path.join(donepath, voldir, issuedir)):
                 for articlefile in os.listdir(os.path.join(donepath, voldir, issuedir, articledir)):
                     done.append(os.path.join(tmppath, voldir, issuedir, articledir, articlefile))
+                    if reoldsyntax.search(articlefile):
+                        iss = '%02i' % (int(re.sub('\D', '', issuedir)))
+                        afn = reoldsyntax.sub(r'\1', articlefile) + iss + reoldsyntax.sub(r'-\2.xml', articlefile)
+                        adn = afn[:-4]
+                        done.append(os.path.join(tmppath, voldir, issuedir, adn, afn))
     print 'already done:', len(done)
+
 
     
 ###clean formulas in tag
@@ -340,36 +347,28 @@ def quickcheck(jnl, vol):
     
 if not os.path.isdir(tmppath):
     os.system('mkdir %s' % (tmppath))
-print 'get %s.tar from ftp://download.mdpi.com' % (jnl)
+print 'connect to ftp://download.mdpi.com' 
 cnopts = pysftp.CnOpts()
 cnopts.hostkeys = None
 srv = pysftp.Connection(host="download.mdpi.com", username="mdpi_public_ftp", password="j7kzfbf9RDiJnEuX", port=9922, cnopts=cnopts)
-srv.get('MDPI_corpus/%s.tar' % (jnl), '%s/%s.tar' % (tmppath, jnl))
+srv.cwd('MDPI_corpus')
+srv.cwd(jnl)
+issuesonserver = []
+for vol in srv.listdir():
+    for iss in srv.listdir(vol):
+        issuesonserver.append('%s/%s' % (vol, iss))
+issueslocal = []
+for iss in issuesonserver[-numberofissues:]:
+    print 'get %s from ftp://download.mdpi.com' % (iss)
+    localfilename = '%s/%s' % (tmppath, re.sub('.*\/', '', iss))
+    srv.get(iss, localfilename)
+    issueslocal.append(localfilename)
 
-print 'read %s.tar' % (jnl)
-journalfeed = tarfile.open('%s/%s.tar' % (tmppath, jnl), 'r')
-volumesintar = []
-redir = re.compile('\/.*')
-reint = re.compile('\D')
-membersdict = {}
-for m in journalfeed.getmembers():
-    voldir = redir.sub('', m.name)
-    volint = int(reint.sub('', voldir))
-    if voldir in membersdict.keys():
-        membersdict[voldir].append(m)
-    else:
-        membersdict[voldir] = [m]
-    if not (volint, voldir) in volumesintar:
-        volumesintar.append((volint, voldir))
-volumesintar.sort()
-volumestoextract = [vol[1] for vol in volumesintar[-numberofvolumes:]]
-
-print 'extract directories %s of %s.tar' % (','.join(volumestoextract), jnl)
-memberstodo = []
-for voldir in volumestoextract:
-    memberstodo += membersdict[voldir]
-journalfeed.extractall(path=tmppath, members=memberstodo)#, numeric_owner=3770)
-journalfeed.close()
+for localfilename in issueslocal:
+    print 'read %s' % (localfilename)
+    journalfeed = tarfile.open(localfilename, 'r')
+    journalfeed.extractall(path=tmppath)#, numeric_owner=3770)
+    journalfeed.close()
 
 
 prerecs = []
@@ -415,7 +414,7 @@ for rec in prerecs:
     print '---{ %i/%i (%i) }---{ %s }---' % (i, len(prerecs), len(recs), rec['artfilename'])
     keepit = True
     inf = codecs.EncodedFile(codecs.open(rec['artfilename'], mode='rb'), 'utf8')
-    article = BeautifulSoup(''.join(inf.readlines()))
+    article = BeautifulSoup(''.join(inf.readlines()), features="lxml")
     inf.close()
     for meta in article.find_all('article-meta'):
         #DOI
@@ -550,7 +549,7 @@ for rec in prerecs:
             #copy pdf
             pdffilename = re.sub('xml$', 'pdf', rec['artfilename'])
             if os.path.isfile(pdffilename):
-                doi1 = re.sub('[\(\)\/]', '_', rec['doi'])
+                doi1 = re.sub('[\(\)\/]', '_', rec['doi'])                
                 os.system('mv %s %s/%s.pdf' % (pdffilename, pdfpath, doi1))
             print '    copied pdf file'                          
 
