@@ -116,9 +116,22 @@ for rec in recs:
         time.sleep(180)
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
     print '   read meta tags'
+
+    #ORCIDs
+    orciddict = {}
+    for div in artpage.find_all('div', attrs = {'id' : 'authorAffiliations'}):        
+        for tr in div.find_all('tr'):
+            tds = tr.find_all('td')
+            if len(tds) == 2 and re.search('orcid.org', tds[1].text):
+                author = tds[0].text.strip()
+                orcid = re.sub('.*orcid.org\/', 'ORCID:', tds[1].text.strip())
+                if author in orciddict.keys():
+                    orciddict[author] = False #if author name is not unique
+                else:
+                    orciddict[author] = orcid
     for meta in artpage.find_all('meta'):
         if meta.has_attr('name'):
-            print meta['name']
+            #print meta['name']
             if meta['name'] == 'dc.description':
                 rec['abs'] = meta['content']
             elif meta['name'] == 'citation_doi':
@@ -127,6 +140,8 @@ for rec in recs:
                 rec['keyw'].append(meta['content'])
             elif meta['name'] == 'citation_author':                
                 rec['autaff'].append([ meta['content'] ])
+                if meta['content'] in orciddict.keys() and orciddict[meta['content']]:
+                    rec['autaff'][-1].append(orciddict[meta['content']])
             elif meta['name'] == 'citation_author_institution':
                 rec['autaff'][-1].append(meta['content'])
             elif meta['name'] == 'citation_author_orcid':
