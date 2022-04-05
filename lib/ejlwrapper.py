@@ -74,6 +74,8 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('chaos'     , 3,'%s %s/aip.xml2.py  chaos %i %i' % (pythoncommand, lproc,pryear-1990,prquarter)),
         ('theses-oatd IV', 3, '%s %s/theses-oatd.py 7 9' % (pythoncommand, lproc)),
         ('symmetry'  , 1,'%s %s/mdpi.sftp.py symmetry' % (pythoncommand, lproc)),
+        ('sensors'  , 1,'%s %s/mdpi.sftp.py sensors' % (pythoncommand, lproc)),
+        ('nanomaterials'  , 1,'%s %s/mdpi.sftp.py nanomaterials' % (pythoncommand, lproc)),
         ('theses-oatd V', 2, '%s %s/theses-oatd.py 9 11' % (pythoncommand, lproc)),
         ('arnps'     ,12,'%s %s/annualreview.py arnps %i' %  (pythoncommand, lproc,pryear-1950)),
         ('theses-oatd VI', 3, '%s %s/theses-oatd.py 11 13' % (pythoncommand, lproc)),
@@ -456,7 +458,9 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-ankara', 3, '%s %s/theses-ankara.py' % (pythoncommand, lproc)),
         ('theses-new-mexico', 2, '%s %s/theses-new-mexico.py' % (pythoncommand, lproc)),
         ('theses-fub', 2, '%s %s/theses-fub.py' % (pythoncommand, lproc)),
-        ('theses-auckland', 3, '%s %s/theses-auckland.py' % (pythoncommand, lproc))]
+        ('theses-auckland', 3, '%s %s/theses-auckland.py' % (pythoncommand, lproc)),
+        ('theses-temple', 5, '%s %s/theses-temple.py' % (pythoncommand, lproc)),
+        ('theses-tennessee', 3, '%s %s/theses-tennessee.py' % (pythoncommand, lproc))]
 
 
 if prmonth == 12:
