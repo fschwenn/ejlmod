@@ -79,9 +79,15 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
             rec['autaff'].append([li.text.strip()])    
     #details from article page
     try:
-        time.sleep(10)
-        driver.get(artlink)
-        artpage = BeautifulSoup(driver.page_source, features="lxml")
+        try:
+            time.sleep(30)
+            driver.get(artlink)
+            artpage = BeautifulSoup(driver.page_source, features="lxml")
+        except:
+            print ' - wait 5 minutes -'
+            time.sleep(300)
+            driver.get(artlink)
+            artpage = BeautifulSoup(driver.page_source, features="lxml")
         #meta
         for meta in artpage.head.find_all('meta'):
             if meta.has_attr('name'):
@@ -138,9 +144,15 @@ for div in tocpage.body.find_all('div', attrs = {'class' : 'issue-item'}):
         print '...could not get article page ...'
     #references
     try:
-        time.sleep(10)
-        driver.get(re.sub('\/doi\/', '/doi/references/', artlink))
-        refpage = BeautifulSoup(driver.page_source, features="lxml")
+        time.sleep(30)
+        try:
+            driver.get(re.sub('\/doi\/', '/doi/references/', artlink))
+            refpage = BeautifulSoup(driver.page_source, features="lxml")
+        except:
+            print ' - wait 5 minutes -'
+            time.sleep(300)
+            driver.get(re.sub('\/doi\/', '/doi/references/', artlink))
+            refpage = BeautifulSoup(driver.page_source, features="lxml")
         rec['refs'] = []
         for div in refpage.body.find_all('div', attrs = {'class' : 'article__references'}):
             for li in div.find_all('li'):
