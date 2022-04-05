@@ -402,10 +402,13 @@ def ieee(number):
                 print rec
         if not rec['tit'] in ['IEEE Communications Society', 'IEEE Transactions on Electron Devices information for authors',
                               'IEEE Communications Society Information', 'IEEE Sensors Council',
-                              'IEEE Circuits and Systems Society Information',
+                              'IEEE Circuits and Systems Society Information', '[Masthead]',
                               'IEEE Transactions on Information Theory information for authors',
                               'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems society information',
+                              'IEEE Computer Society Has You Covered!',
+                              'IEEE Computer Society Information', 
                               'IEEE Transactions on Magnetics Institutional Listings',
+                              'IEEE Computer Society', 'Masthead', 'ComputingEdge',
                               'IEEE Transactions on Magnetics publication information',
                               'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems publication information',
                               'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society']:
