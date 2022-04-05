@@ -37,6 +37,9 @@ elif (jnl == 'jgrse'):
 elif (jnl == 'jgro'):
     jnlname = 'J.Geophys.Res.Oceans'
     toclink = 'https://agupubs.onlinelibrary.wiley.com/toc/21699291/%i/%s/%s' % (int(vol)+1895, vol, issue)
+elif (jnl == 'grl'):
+    jnlname = 'Geophys.Res.Lett.'
+    toclink = 'https://agupubs.onlinelibrary.wiley.com/toc/19448007/%i/%s/%s' % (int(vol)+1895, vol, issue)
 
 if len(sys.argv) > 4:
     cnum = sys.argv[4]
