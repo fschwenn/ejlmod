@@ -157,7 +157,7 @@ for rec in recs:
                 isbns = re.split(' *; *', tdt)
                 rec['isbns'] = [[('a', re.sub('\-', '', isbn))] for isbn in isbns]
             elif re.search('DOI$', tht):
-                rec['doi'] = tdt
+                rec['doi'] = re.sub('.*doi.org\/', '', tdt)
             elif re.search('Handle$', tht):
                 rec['hdl'] = tdt
             elif re.search('NBN$', tht):
@@ -188,7 +188,7 @@ for rec in recs:
                             rec['isbn'] = meta['content']
                     if meta['name'] == 'citation_doi':
                         if not 'doi' in rec.keys():
-                            rec['doi'] = meta['content']    
+                            rec['doi'] = re.sub('.*doi.org\/', '', meta['content'])
         except:
             print '  could not find PDF'
         if not 'FFT' in rec.keys():
