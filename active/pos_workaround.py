@@ -74,15 +74,21 @@ for tr in tocpage.body.find_all('tr'):
             #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['FFT'] = meta['content']
-            #date
-            elif meta['name'] == 'citation_publication_date':
-                rec['date'] = meta['content']
             #DOI
             elif meta['name'] == 'citation_doi':
                 rec['doi'] = meta['content']
             #abstract
             elif meta['name'] == 'citation_abstract':
                 rec['abs'] = meta['content']
+            #date
+            elif meta['name'] == 'citation_online_date':
+                rec['date'] = meta['content']
+                print ' online_date      ', rec['date']
+            elif meta['name'] == 'citation_publication_date':
+                rec['publication_date'] = meta['content']
+                print ' publication_date ', rec['publication_date']
+    if not 'date' in rec.keys() and 'publication_date' in rec.keys():
+        rec['date'] = rec['publication_date']
     #construct DOI if neccessasry
     if not 'doi' in rec.keys():
         rec['doi'] = '10.22323/1.%s.%04i' % (nr, int(rec['p1']))
