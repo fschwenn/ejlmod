@@ -118,6 +118,8 @@ for artlink in urls:
                 if meta['content']:
                     email = meta['content']
                     autaff.append('EMAIL:%s' % (email))
+    if not 'doi' in rec.keys():
+        continue
     if autaff:
         rec['autaff'].append(autaff)
     #license
