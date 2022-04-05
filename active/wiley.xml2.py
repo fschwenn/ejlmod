@@ -3,6 +3,12 @@
 #program to harvest Wiley-journals
 # FS 2016-12-13
 
+
+
+
+
+#blocked by Claudfare Version 2
+
 import sys
 import os
 import urllib2
@@ -105,6 +111,26 @@ elif (jnl == 'qua'):
     doitrunk = '10.1002/qua'
     jnlname = 'Int.J.Quant.Chem.'
 
+elif (jnl == 'pssb'):
+    issn = '1521-3951'
+    doitrunk = '10.1002/pssb'
+    jnlname = 'Phys.Status Solidi B'
+elif (jnl == 'adma'):
+    issn = '1521-4095'
+    doitrunk = '10.1002/adma'
+    jnlname = 'Adv.Mater.'
+elif (jnl == 'xrs'):
+    issn = '1097-4539'
+    doitrunk = '10.1002/'
+    jnlname = 'X Ray Spectrom.'
+elif (jnl == 'qj'):
+    issn = '1477-870X'
+    doitrunk = '10.1002/qj'
+    jnlname = 'Quarterly Journal of the Royal Meteorological Society'
+elif (jnl == 'mop'):
+    issn = '1098-2760'
+    doitrunk = '10.1002/mop'
+    jnlname = 'Microw.Opt.Technol.Lett.'
 
 
 urltrunk = 'http://onlinelibrary.wiley.com/doi'
@@ -160,7 +186,7 @@ for rec in recs:
     #rec['cnum'] = 'C18-09-08'
     print '---{ %i/%i }---{ %s }---{ %s }------' % (i, len(recs), rec['doi'], rec['artlink'])
     artfile = '/tmp/wiley%s.%s.%s.%s.%04i' % (jnl, year, vol, issue, i)
-    if not os.path.isfile(artfile):
+    if not os.path.isfile(artfile):        
         os.system('wget  -T 300 -t 3 -q -O %s "%s"' % (artfile, rec['artlink']))
         time.sleep(3) 
     inf = open(artfile, 'r')
@@ -175,8 +201,8 @@ for rec in recs:
         time.sleep(3)
         inf = open(artfile, 'r')
         artpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
-        inf.close()    
-    #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        inf.close()
+        
     autaff = False
     for meta in artpage.head.find_all('meta'):
         if meta.attrs.has_key('name'):
