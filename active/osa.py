@@ -49,6 +49,7 @@ if len(sys.argv) > 4:
 
 
 urltrunk = 'https://www.osapublishing.org/%s/issue.cfm?volume=%s&issue=%s' % (jnl, vol, issue)
+urltrunk = 'https://opg.optica.org/%s/issue.cfm?volume=%s&issue=%s' % (jnl, vol, issue)
 print urltrunk
 try:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk), features="lxml")
@@ -88,7 +89,7 @@ for div in divs:
                 rec['year'] = year
             for a in p.find_all('a'):
                 rec['tit'] = p.text.strip()
-                rec['artlink'] = 'https://www.osapublishing.org' + a['href']
+                rec['artlink'] = 'https://opg.optica.org' + a['href']
             if not rec['artlink'] in done:                
                 recs.append(rec)
                 done.append(rec['artlink'])
@@ -179,7 +180,7 @@ for rec in recs:
             rec['refs'].append([('x', ref)])
     if not rec['autaff']:
         del rec['autaff']
-    print '  ', rec.keys()
+    print '  ', ', '.join(['%s(%i)' % (k, len(rec[k])) for k in rec.keys()])
 
 
 
