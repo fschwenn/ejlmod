@@ -53,21 +53,27 @@ for (dep, fc) in deps:
     numofreloads = 0
     tocurl = 'https://search.lib.virginia.edu/?mode=advanced&q=date:+{' + startday + '+TO+' + endday + '}&pool=uva_library&sort=SortDatePublished_desc&filter={%22FilterResourceType%22:[%22Theses%22],%22FilterCollection%22:[%22Libra+Repository%22],%22FilterDepartment%22:[%22' + dep + '%22]}'
     print '==={ %s }==={ %s }===' % (dep, tocurl)
-    driver.get(tocurl)
-    time.sleep(5)
-    tocpage = BeautifulSoup(driver.page_source, features="lxml")
+    try:
+        driver.get(tocurl)
+        time.sleep(10)
+        tocpage = BeautifulSoup(driver.page_source, features="lxml")
+    except:
+        time.sleep(180)
+        driver.get(tocurl)
+        time.sleep(10)
+        tocpage = BeautifulSoup(driver.page_source, features="lxml")
     for span in tocpage.find_all('span', attrs = {'class' : 'total'}):
         numoftheses = int(re.sub('\D', '', span.text.strip()))
         numofreloads = (numoftheses-1) / rpp
         print '   %i theses waiting' % (numoftheses)
     for i in range(numofreloads):
-        time.sleep(5)
+        time.sleep(10)
         print '       click for more result %i/%i' % (i+1, numofreloads)
         if len(driver.find_elements_by_css_selector('.v4-button.pure-button.pure-button-primary')) == 4:
             print '         click!'
             driver.find_elements_by_css_selector('.v4-button.pure-button.pure-button-primary')[-1].click()    
     tocpage = BeautifulSoup(driver.page_source, features="lxml")
-    time.sleep(5)
+    time.sleep(10)
     for div in tocpage.find_all('div', attrs = {'class' : 'access-urls'}):
         for a in div.find_all('a'):
             rec = {'jnl' : 'BOOK', 'tc' : 'T', 'note' : []}
@@ -85,9 +91,15 @@ for rec in prerecs:
     keepit = True
     i += 1
     print '---{ %i/%i (%i) }---{ %s }---' % (i, len(prerecs), len(recs), rec['artlink'])
-    driver.get(rec['artlink'])
-    artpage = BeautifulSoup(driver.page_source, features="lxml")
-    time.sleep(5)
+    try:
+        driver.get(rec['artlink'])
+        artpage = BeautifulSoup(driver.page_source, features="lxml")
+    except:
+        print '   wait 5 minutes'
+        time.sleep(300)
+        driver.get(rec['artlink'])
+        artpage = BeautifulSoup(driver.page_source, features="lxml")
+    time.sleep(10)
     for div in artpage.find_all('div', attrs = {'id' : 'document'}):
         #title
         for h1 in div.find_all('h1'):
