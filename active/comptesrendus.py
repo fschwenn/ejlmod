@@ -105,7 +105,7 @@ for rec in recs:
         if re.search('Published online: ', divt):
             rec['date'] = re.sub('.*Published online: ([\d\-]+).*', r'\1', divt)
     #references
-    for div in artpage.body.find_all('div', attrs = {'id' : 'reference-tab'}):
+    for div in artpage.body.find_all('div', attrs = {'id' : 'references-tab'}):
         for p in div.find_all('p', attrs = {'class' : 'bibitemcls'}):
             for a in p.find_all('a'):
                 if a.has_attr('href') and re.search('doi.org', a['href']):
