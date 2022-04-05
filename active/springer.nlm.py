@@ -77,6 +77,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '10786': ['iet', 'Instrum.Exp.Tech.', '', '', 'P'],
       '10853': ['jmsme', 'J.Materials Sci.', '', '', 'P'],
       '10909': ['jltp', 'J.Low Temp.Phys.', '', '', 'P'],
+      '10946': ['jrlr', 'J.Russ.Laser Res.', '', '', 'P'],
       '10955': ['jstatphys', 'J.Statist.Phys.', '', '', 'P'],
       '10958': ['jms', 'J.Math.Sci.', '', 'Zap.Nauchn.Semin.', 'P'],
       '10967': ['jrnc', 'J.Radioanal.Nucl.Chem.', '', '', 'P'],
@@ -132,6 +133,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '13324': ['anmp', 'Anal.Math.Phys.', '', '', 'P'],
       '13360': ['epjp', 'Eur.Phys.J.Plus', '', '', 'P'],
       '13538': ['bjp', 'Braz.J.Phys.', '', '', 'P'],
+      '13370': ['afrmat', 'Afr.Math.', '', '', 'P'],
       '40009': ['nasl', 'Natl.Acad.Sci.Lett.', '', '', 'P'],
       '40010': ['pnisia', 'Proc.Nat.Inst.Sci.India (Pt.A Phys.Sci.)', '', '', 'P'],
       '40042': ['jkps', 'J.Korean Phys.Soc.', '', '', 'P'],
@@ -193,10 +195,8 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
 #42005 Commun.Phys.
 #41605 Rad.Det.Tech.Meth.
 
-jc['10946'] = ['jrlr', 'J.Russ.Laser Res.', '', '', 'P'] #!
 jc['10947'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P'] #!
 jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P'] #now at New publisher: Please contact Islamic Azad University
-jc['13370'] = ['afrmat', 'Afr.Math.', '', '', 'P']#yepp#ereugen in jnl
 
 jc['44214'] = ['qufr', 'Quant.Front', '', '', 'P']
 jc['44198'] = ['jnlmp', 'J.Nonlin.Math.Phys.', '', '', 'P']
