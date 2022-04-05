@@ -14,37 +14,117 @@ import urlparse
 from bs4 import BeautifulSoup
 import sys
 import datetime
+from ftplib import FTP
+import zipfile
 
 scientificdir = '/afs/desy.de/group/library/publisherdata/scientific'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
 
 publisher = 'Trans Tech Publications Ltd.'
 
 #current timestamp (or other unique mark)
-cday = sys.argv[1]
+if len(sys.argv) > 1:
+    cday = sys.argv[1]
+else:
+    now = datetime.datetime.now()
+    cday = '%4d-%02d-%02d-%02d-%02d' % (now.year, now.month, now.day, now.hour, now.minute)
+
 
 # uninteresting journals:
-juninteresting = ['JBBBE']
+juninteresting = ['JBBBE', 'JBBTE', 'MSF', 'RC', 'FoMSE', 'SC', 'EI']
+# interesting journals:
+jninteresting = ['AMM', 'AMR', 'DDF', 'KEM', 'SSP']
 #dictionary of journal names
-# journal-id : [file name, INPIRE journal name, type code]
-jc = {'AEF'   : ['scientificAEF',   'Advanced Engineering Forum', 'P'],
-      'AMM'   : ['scientificAMM',   'Applied Mechanics and Materials', 'P'], #!!
-      'JBBBE' : ['scientificJBBBE', 'Journal of Biomimetics, Biomaterials and Biomedical Engineering', 'P'],
-      'JERA'  : ['scientificJERA',  'International Journal of Engineering Research in Africa', 'P'],
-      'AMR'   : ['scientificAMR',   'Advanced Materials Research', 'P'], #!!
-      'DDF'   : ['scientificDDF',   'Defect and Diffusion Forum', 'P'],
-      'DFMA'  : ['scientificDFMA',  'Diffusion Foundations and Materials Applications', 'P'],
-      'JMNM'  : ['scientificJMNM',  'Journal of Metastable and Nanocrystalline Materials', 'P'],
-      'AMMJNanoR' : ['scientificJNanoR', 'Journal of Nano Research', 'P'],
-      'KEM'   : ['scientificKEM',   'Key Engineering Materials', 'P'], #!
-      'MSF'   : ['scientificMSF',   'Mater.Sci.Forum', 'P'], #!
-      'NHC'   : ['scientificNHC',   'Nano Hybrids and Composites', 'P'],
-      'SSP'   : ['scientificSSP',   'Solid State Phenomena', 'P'], #!
-      'AST'   : ['scientificAST',   'Advances in Science and Technology', 'P'],
-      'CTA'   : ['scientificCTA',   'Construction Technologies and Architecture', 'P']}
+# journal-id : [file name, INPIRE journal name, type code, do not go below this volume]
+jc = {'AEF'    : ['scientificAEF',   'Advanced Engineering Forum', 'P'],
+      'AMM'    : ['scientificAMM',   'Appl.Mech.Mater.', 'P', 484], #!!
+      'JBBBE'  : ['scientificJBBBE', 'Journal of Biomimetics, Biomaterials and Biomedical Engineering', 'P'],
+      'JBBTE'  : ['scientificJBBTE', 'Biomimetics, Biomaterials & Tissue Engineering', 'P'],#bis 2014.03, danach als JBBTE fortgefuehrt
+      'JERA'   : ['scientificJERA',  'International Journal of Engineering Research in Africa', 'P'],
+      'AMR'    : ['scientificAMR',   'Adv.Mater.Res.', 'P', 874], #!!
+      'DDF'    : ['scientificDDF',   'Defect Diff.Forum', 'P', 348],#!
+      'DF'     : ['scientificDF',    'Diffusion Foundations', 'P'],#bis 2021.04, danach als DFMA fortgefuehrt
+      'DFMA'   : ['scientificDFMA',  'Diffusion Foundations and Materials Applications', 'P'],
+      'EI'     : ['scientificEI',    'Engineering Innovations', 'P'],
+      'JMNM'   : ['scientificJMNM',  'Journal of Metastable and Nanocrystalline Materials', 'P'],
+      'JNanoR' : ['scientificJNanoR', 'Journal of Nano Research', 'P'],
+      'KEM'    : ['scientificKEM',   'Key Eng.Mater.', 'P', 598], #!
+      'MSF'    : ['scientificMSF',   'Materials Science Forum', 'P'],
+      'MSFo'   : ['scientificMSF',   'Mater.Sci.Forum', 'P'], #!
+      'NH'     : ['scientificNH',    'Nano Hybrids', 'P'],  #bis 2016.05, danach als NHC fortgefuehrt
+      'NHC'    : ['scientificNHC',   'Nano Hybrids and Composites', 'P'],
+      'SSP'    : ['scientificSSP',   'Solid State Phenom.', 'P', 213], #!
+      'AST'    : ['scientificAST',   'Advances in Science and Technology', 'P'],
+      'CTA'    : ['scientificCTA',   'Construction Technologies and Architecture', 'P']}
 
+#check server and download all new zip-files
+revol = re.compile('\D*(\d+).*')
+def downloadzipfiles():
+    done = os.listdir(os.path.join(scientificdir, 'done'))
+    ftp = FTP("ftp.scientific.net")
+    ftp.login("inspireHep", "inspire94")
+    ftp.cwd('Jats')
+    ftp.cwd('ByTitle')
+    todo = []
+    for journal in ftp.nlst():
+        if journal in jc.keys():
+            if journal in jninteresting:
+                ftp.cwd(journal)
+                for datei in ftp.nlst():
+                    if not datei in done:
+                        if len(jc[journal]) > 3:
+                            vol = int(revol.sub(r'\1', datei))
+                            if vol < jc[journal][3]:
+                                continue                                                    
+                        f2 = open(os.path.join(scientificdir, datei), "wb")
+                        ftp.retrbinary("RETR " + datei,f2.write)                        
+                        f2.close()
+                        print 'downloaded %s' % (datei)
+                        todo.append((journal, datei))
+                ftp.cwd('..')
+        elif not journal in juninteresting:
+            os.system('echo "check https://www.scientific.net/%s" | mail -s "[SCIENTIFIC] unknown journal" %s' % (journal, 'florian.schwennsen@desy.de'))
+    return todo
+
+#process one zip-file
+rexml = re.compile('\.xml$')
+def harvestvolume(journal, datei):
+    print ' ', datei
+    zfile = zipfile.ZipFile(os.path.join(scientificdir, datei))
+    zfile.extractall(scientificdir)
+    recs = []
+    for adatei in os.listdir(scientificdir):
+        if rexml.search(adatei):
+            rec = convertarticle(journal, os.path.join(scientificdir, adatei))
+            if rec:
+                recs.append(rec)
+            else:
+                os.system('rm %s/%s %s/*xml' % (scientificdir, datei, scientificdir))
+                return 
+    if recs:
+        if 'vol' in recs[-1].keys():
+            jnlfilename = '%s%s' % (jc[journal][0], recs[-1]['vol'])
+        else:
+            jnlfilename = '%s.%s' % (jc[journal][0], cday)
+        xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+        xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+        ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
+        xmlfile.close()
+        #retrival
+        retfiles_text = open(retfiles_path, "r").read()
+        line = jnlfilename+'.xml'+ "\n"
+        if not line in retfiles_text:
+            retfiles = open(retfiles_path, "a")
+            retfiles.write(line)
+            retfiles.close()
+        os.system('mv %s/%s %s/done/%s' % (scientificdir, datei, scientificdir, datei))
+        os.system('rm %s/*xml' % (scientificdir))
+    else:
+        print '  NO RECORDS IN %s' % (datei)
+    return
+            
 
 ###clean formulas in tag
 def cleanformulas(tag):
@@ -88,7 +168,7 @@ def get_references(rl):
     #convert individual references
     for ref in rl.find_all('ref'):
         for mc in ref.find_all('mixed-citation'):
-            (doi, arxiv) = ('', '', '')
+            (doi, arxiv) = ('', '')
             for el in mc.find_all('ext-link', attrs = {'ext-link-type' : 'doi'}):
                 if el.has_attr('xlink:href'):
                     link = el['xlink:href']
@@ -114,15 +194,21 @@ def get_references(rl):
     return refs
 
 ###convert individual JATS file to record
-def convertarticle(journalnumber, filename, contlevel):
-    rec = {'jnl' : jc[journalnumber][1], 'tc' : jc[journalnumber][4],
+def convertarticle(journal, filename):
+    print '  ', filename
+    rec = {'jnl' : jc[journal][1], 'tc' : jc[journal][2],
            'note' : [], 'aff' : [], 'auts' : [], 'col' : []}
     #read file
     inf = codecs.EncodedFile(codecs.open(filename, mode='rb'), 'utf8')
-    article = BeautifulSoup(''.join(inf.readlines()))
+    lines = inf.readlines()
     inf.close()
-    metas = article.find_all('book-meta')
+    article = BeautifulSoup(''.join(lines), features="lxml")
+    metas = article.find_all('article-meta')
     for meta in metas:
+        #title
+        for tg in meta.find_all('title-group'):
+            for tit in tg.find_all('article-title'):
+                rec['tit'] = tit.text.strip()
         #DOI
         for aid in meta.find_all('article-id', attrs = {'pub-id-type' : 'doi'}):
             rec['doi'] = aid.text.strip()
@@ -132,7 +218,7 @@ def convertarticle(journalnumber, filename, contlevel):
         #year
         pds = meta.find_all('pub-date', attrs = {'pub-type' : 'ppub'})
         if not pds:
-            pds = meta.find_all('pub-date', attrs = {'pub-type' : 'eub'}):
+            pds = meta.find_all('pub-date', attrs = {'pub-type' : 'eub'})
         for pd in pds:
             for year in pd.find_all('year'):
                 rec['year'] = year.text.strip()
@@ -149,7 +235,7 @@ def convertarticle(journalnumber, filename, contlevel):
                 rec['date'] += '-' + day.text.strip()
         #volume
         for vol in meta.find_all('volume'):
-            rec['vol'] = jc[journalnumber][2] + vol.text.strip()        
+            rec['vol'] = vol.text.strip()        
         #issue
         for iss in meta.find_all('issue'):
             rec['issue'] = iss.text.strip()
@@ -185,9 +271,9 @@ def convertarticle(journalnumber, filename, contlevel):
         #corrected article
         for ra in meta.find_all('related-article', attrs = {'related-article-type' : 'corrected-article'}):
             if ra.has_attr('xlink:href'):
-                rec['tit'] += ' [doi: %s]' % (ra['xlink:href'])            
+                rec['tit'] += ' [doi: %s]' % (ra['xlink:href'])      
         #affiliations
-        for aff in cg.find_all('aff'):
+        for aff in meta.find_all('aff'):
             afftext = ''
             #Division
             for od in aff.find_all('institution'):
@@ -202,7 +288,7 @@ def convertarticle(journalnumber, filename, contlevel):
             for city in aff.find_all('city'):
                 afftext += city.text.strip() + ', '
             #State
-            for state in aff.find_all('state'}):
+            for state in aff.find_all('state'):
                 afftext += state.text.strip() + ', '
             #Country
             for country in aff.find_all('country'):
@@ -232,112 +318,18 @@ def convertarticle(journalnumber, filename, contlevel):
                 for xref in contrib.find_all('xref', attrs = {'ref-type' : 'aff'}):
                     rec['auts'].append('=%s' % (xref['rid']))
     #references
-    for rl in article.find_all('ref-list', attrs = {'id' : 'Bib1'}):
+    for rl in article.find_all('ref-list'):
         rec['refs'] = get_references(rl)
-    return rec
+    if 'doi' in rec.keys() and rec['doi']:
+        print '   ', rec.keys()
+        return rec
+    else:
+        print '  NO DOI IN ', filename
+        return False
 
     
-###go through issue directory, collect records
-def convertissue(journalnumber, dirname):
-    recs = []
-    for artdir in os.listdir(dirname):
-        print ' - %s' % (artdir)
-        artdirfullpath = os.path.join(dirname, artdir)
-        if os.path.isdir(artdirfullpath):
-            for filename in os.listdir(artdirfullpath):
-                if re.search('Meta$', filename):
-                    fullfilename = os.path.join(artdirfullpath, filename)
-                    rec = convertarticle(journalnumber, fullfilename, 'article')
-                    if rec: recs.append(rec)
-    print ' -> %i records' % (len(recs))
-    if recs:
-        if 'vol' in rec.keys():
-            if 'issue' in rec.keys():
-                jnlfilename = re.sub(' ', '_', '%s%s.%s.%s' % (jc[journalnumber][0], rec['vol'], rec['issue'], cday))
-            else:
-                jnlfilename = '%s%s.%s' % (jc[journalnumber][0], rec['vol'], cday)
-        else:
-            jnlfilename = '%s.%s' % (jc[journalnumber][0], cday)
-        return (jnlfilename, recs)
-    else:
-        return ('', [])
 
 
-###################################################
-###crawl through directories of journal/book series
-for dirlev1 in os.listdir(sprdir):
-    dirlev1fullpath = os.path.join(sprdir, dirlev1)
-    #skip non 'BSE'/'JOU' directories
-    if not os.path.isdir(dirlev1fullpath):
-        continue
-    if ((dirlev1fullpath.find('BSE') == -1) and (dirlev1fullpath.find('JOU') == -1)):
-        continue
-    #extract Springer-number of journal/book
-    journalnumber = dirlev1[4:]
-    #skip uninteresting journals
-    if journalnumber in juninteresting:
-        print journalnumber, 'uninteresting'
-        continue
-    #journal not in list
-    if not journalnumber in jc.keys():
-        print 'journal skipped: ' + journalnumber
-        os.system('echo "check www.springer.com/journal/%s" | mail -s "[SPRINGER] unknown journal" %s' % (journalnumber, 'florian.schwennsen@desy.de'))
-        continue
-    else:
-        print dirlev1fullpath, journalnumber, jc[journalnumber]
-    #crawl through directories of volumes (to check for online first)
-    for dirlev2 in os.listdir(dirlev1fullpath):
-        dirlev2fullpath = os.path.join(dirlev1fullpath, dirlev2)
-        onlinefirstpath = os.path.join(dirlev1fullpath, cday)
-        #crawl through directories of issues looking for online first articles
-        for dirlev3 in os.listdir(dirlev2fullpath):
-            #online first create artifical issue directory
-            if ('ART' in dirlev3):
-		print ' fake ' + dirlev3
-                os.renames(os.path.join(dirlev2fullpath, dirlev3), os.path.join(onlinefirstpath, dirlev3))
-    #crawl through directories of volumes
-    for dirlev2 in os.listdir(dirlev1fullpath):
-        dirlev2fullpath = os.path.join(dirlev1fullpath, dirlev2)
-        onlinefirstpath = os.path.join(dirlev1fullpath, cday)
-        #Book
-        if 'BOK' in dirlev2:
-            print '==={ %s/%s }==={ %s }===' % (dirlev1, dirlev2, jc[journalnumber][1])
-            (jnlfilename, recs) = convertbook(journalnumber, dirlev2fullpath)
-            #write xml
-            xmlf = os.path.join(xmldir, jnlfilename+'.xml')
-            xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-            ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
-            xmlfile.close()
-            #retrival
-            retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-            retfiles_text = open(retfiles_path, "r").read()
-            line = jnlfilename+'.xml'+ "\n"
-            if not line in retfiles_text:
-                retfiles = open(retfiles_path, "a")
-                retfiles.write(line)
-                retfiles.close()
-        #Journal: crawl through directories of issues
-        else:
-            for dirlev3 in os.listdir(dirlev2fullpath):
-                print '==={ %s/%s/%s }==={ %s%s }===' % (dirlev1, dirlev2, dirlev3, jc[journalnumber][1], jc[journalnumber][2])
-                dirlev3fullpath = os.path.join(dirlev2fullpath, dirlev3)
-                (jnlfilename, recs) = convertissue(journalnumber, dirlev3fullpath)
-                #skip online first at the moment
-                if 'OF' in jnlfilename:
-                    print 'skip online first'
-                elif recs:
-                    #write xml
-                    xmlf = os.path.join(xmldir, jnlfilename+'.xml')
-                    xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
-                    ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
-                    xmlfile.close()
-                    #retrival
-                    retfiles_text = open(retfiles_path, "r").read()
-                    line = jnlfilename+'.xml'+ "\n"
-                    if not line in retfiles_text:
-                        retfiles = open(retfiles_path, "a")
-                        retfiles.write(line)
-                        retfiles.close()
-
-
-
+for (journal, datei) in downloadzipfiles():
+    harvestvolume(journal, datei)
+os.system('rm %s/*xml' % (scientificdir))
