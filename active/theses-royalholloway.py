@@ -11,6 +11,8 @@ import ejlmod2
 import codecs
 import datetime
 import time
+import ssl
+
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+"_special"
@@ -26,6 +28,10 @@ publisher = 'Royal Holloway, U. of London'
 
 
 hdr = {'User-Agent' : 'Magic Browser'}
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 deps = [('department-of-physics(54da7e90-0544-4dbe-bd6d-4e85fa8f7465)', ''),
         ('department-of-mathematics(7ff3623d-1e5a-45d1-8ab1-6929b58c0f0b)', 'm')]
 recs = []
@@ -33,7 +39,7 @@ for (dep, fc) in deps:
     tocurl = 'https://pure.royalholloway.ac.uk/portal/en/organisations/' + dep + '/publications.html?query=&organisationName=&organisations=&type=%2Fdk%2Fatira%2Fpure%2Fresearchoutput%2Fresearchoutputtypes%2Fthesis%2Fdoc&language=+&publicationYearsFrom=' + str(startyear) + '&publicationYearsTo=' + str(now.year) + '&publicationcategory=&peerreview=&openAccessPermissionStatus='
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
     for h2 in tocpage.body.find_all('h2'):
         for a in h2.find_all('a'):
             rec = {'tc' : 'T', 'note' : [], 'jnl' : 'BOOK', 'supervisor' : []}
@@ -52,8 +58,10 @@ i = 0
 for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), re.sub('.*\/', '../', rec['link']))
-    try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
+    try:        
+        #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
+        req = urllib2.Request(rec['link'], headers=hdr)
+        artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
         time.sleep(3)
     except:
         try:
