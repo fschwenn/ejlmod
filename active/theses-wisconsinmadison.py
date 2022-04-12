@@ -38,52 +38,29 @@ def get_sub_side(link, fc, aff):
     header = soup.find_all('div', attrs={'class', 'titles'})
     rec['tit'] = header[0].find_all('h1')[0].text.replace('\n', '')  # Insert Title
 
-    # Publication Details
-    pub_desc = soup.find_all('div', attrs={'class', 'pub_block'})[0].find_all('span', attrs={'class', 'pub_desc'})
 
-    pub_desc_in_ul = soup.find_all('div', attrs={'class', 'pub_block'})[0].find_all('ul', attrs={'class', 'pub_desc'})
 
-    # Get the author
-    author = pub_desc[0].text
-    rec['autaff'] = [[ author[3:], aff ]]
-
-    publication = []
-    physical_details = []
-
-    for li in pub_desc_in_ul[0].select('li'):
-        publication.append(li.text.replace('\n', '').replace('\t', ''))
-
-    for li in pub_desc_in_ul[1].select('li'):
-        if re.search('\d\d+ *(pages|leaves)', li.text):
-            rec['pages'] = re.sub('.*?(\d+) *(pages|leaves).*', r'\1', li.text.strip())
-        else:
-            rec['note'].append('PAGES? "%s"' % (li.text.strip()))
-#        if li.text.find('pages') != -1 or li.text.find('leaves') != -1:
-#            first_part = ""
-#            secound_part = ""
-#            if len(li.text.split(' : ')) == 1:
-#                first_part, secound_part = li.text.split(';')
-#                pages = first_part.split(' ')[1]
-#            else:
-#                try:
-#                    first_part, secound_part = li.text.split(' : ')
-#                    pages = first_part.split(',')[1].split(' ')[1]
-#                    rec['pages'] = pages
-#                except:
-#                    rec['note'].append('PAGES? "%s"' % (li.text.strip()))
+    for div in soup.find_all('div', attrs = {'id' : 'acc-pub'}):
+        for div2 in div.find_all('div'):
+            dtt = ''
+            for dt in div2.find_all('dt'):
+                dtt = dt.text.strip()
+            for dd in div2.find_all('dd'):
+                if dtt == 'Creator':
+                    rec['autaff'] = [[ re.sub('^by ', '', dd.text.strip()), publisher ]]
+                elif dtt == 'Publication':
+                    rec['date'] = dd.text.strip()
+                elif dtt == 'Physical Details':
+                    if re.search('\d\d+ leaves', dd.text):
+                        rec['pages'] = re.sub('.*?(\d\d+) leaves.*', r'\1', dd.text.strip())
 
     # Get the abstract
-    if len(soup.find_all('ul', attrs={'class', 'synopsis'})) == 0:
-        rec['abs'] = ""
-    else:
-        rec['abs'] = soup.find_all('ul', attrs={'class', 'synopsis'})[0].text.replace('\n', '')
+    for div in soup.find_all('div', attrs = {'id' : 'show-more-dtls'}):
+        rec['abs'] = div.text.strip()
 
-    # Get the date
-    for meta in  soup.find_all('meta', attrs={'name' : 'DCTERMS.issued'}):
-        rec['date'] = meta['content']
 
     # Get Notes section
-    if len(soup.find_all('div', attrs={'class', 'notes_list'})) > 0:
+    if len(soup.find_all('div', attrs={'class', 'accordion-conten'})) > 0:
         for note in soup.find_all('div', attrs={'class', 'notes_list'})[0].find_all('li'):
             if note.text[0:len('Advisor')] == "Advisor":
                 advisor = note.text.split(': ')[1]
