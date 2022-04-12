@@ -63,8 +63,8 @@ boring += ['Master of Arts', 'Master of Science', 'Master of Music', 'Master of 
 
 prerecs = []
 date = False
+tocextension = 'html'
 for i in range(pages):
-    tocextension = '%i.html' % (j+1)
     tocurl = basetocurl + tocextension
     print '==={ %i/%i }==={ %s }===' % (i+1, pages, tocurl)
     try:
