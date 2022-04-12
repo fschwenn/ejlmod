@@ -780,10 +780,13 @@ def writeXML(recs,dokfile,publisher):
                             else:
                                 print ' "%s" is not a valid ORCID' % (orcid)    
                             author = re.sub(' *, ORCID.*', '', author)
-                        if re.search('EMAIL', author):
+                        elif re.search('EMAIL', author):
                             if re.search('@', author):
                                 aut.append(('m', re.sub('.*, EMAIL:',  '', author)))
                             author = re.sub(', EMAIL.*', '', author)
+                        elif re.search('INSPIRE', author):
+                            aut.append(('i', re.sub('.*, INSPIRE', 'INSPIRE', author)))
+                            author = re.sub(', INSPIRE.*', '', author)
                         aut.append(('a', shapeaut(author)))
                     if (len(tempaffs) == 0) and (len(affdict) > 0):
                         tempaffs = [('v',affdict[affdict.keys()[0]])]
