@@ -256,12 +256,16 @@ for rec in prerecs:
             if meta['name'] == 'citation_author':
                 if meta['content']:
                     rec['autaff'] = [[ meta['content'] ]]
-            #title
+            #ORCID
             elif meta['name'] == 'citation_author_orcid':
                 rec['autaff'][-1].append('ORCID:' + meta['content'])
             #title
             elif meta['name'] == 'citation_title':
-                rec['tit'] = meta['content']
+                if 'repo' in rec.keys() and rec['repo'] == 'star-france' and re.search(' : ', meta['content']):
+                    rec['tit'] = re.sub(' : .*', '', meta['content'])
+                    rec['transtit'] = re.sub('.*? : ', '', meta['content'])
+                else:
+                    rec['tit'] = meta['content']
             #institution
             elif meta['name'] == 'citation_dissertation_institution':
                 aff = meta['content']
