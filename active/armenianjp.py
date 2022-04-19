@@ -58,6 +58,14 @@ for tr in tocpage.body.find_all('tr'):
             rec['artlink'] = a['href']
             recs.append(rec)
 
+if not recs:
+    for a in tocpage.body.find_all('a'):
+        if a.has_attr('href') and re.search('publication\/\d+', a['href']):
+             rec = {'auts' : [], 'year' : year, 'vol' : vol, 'keyw' : [],
+                    'issue' : issue, 'jnl' : jnlname, 'note' : [], 'tc' : "P"}
+             rec['artlink'] = a['href']
+             recs.append(rec)
+
 i = 0
 for rec in recs:
     i += 1
