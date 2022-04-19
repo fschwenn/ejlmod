@@ -110,7 +110,7 @@ for rec in prerecs:
                                 if re.search('Restricted', divt):
                                     print divt
                                 else:
-                                    rec['FFT'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+                                    rec['FFT'] = 'https://bura.brunel.ac.uk' + re.sub('\?.*', '', a['href'])
         if not 'FFT' in rec.keys() and 'pdf_url' in rec.keys():
             rec['hidden'] = rec['pdf_url'] 
         print '  ', rec.keys()
