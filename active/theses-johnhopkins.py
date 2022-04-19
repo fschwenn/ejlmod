@@ -127,7 +127,7 @@ for rec in recs:
                             if re.search('Restricted', divt):
                                 print divt
                             else:
-                                rec['FFT'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+                                rec['FFT'] = 'https://jscholarship.library.jhu.edu' + re.sub('\?.*', '', a['href'])
         elif 'pdf_url' in rec.keys():
             rec['hidden'] = rec['pdf_url']
     print '  ', rec.keys()
