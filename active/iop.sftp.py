@@ -561,7 +561,8 @@ def convertarticle(issn, vol, isu, artid):
                 #Email
                 if not re.search('ORCID:', authorname):
                     for email in contrib.find_all('email'):
-                        authorname += ', EMAIL:' + email.text.strip()
+                        if re.search('@', email.text):
+                            authorname += ', EMAIL:' + email.text.strip()
                 #Chineses name
                 for cname in contrib.find_all('name', attrs = {'name-style' : 'eastern'}):
                     for csn in cname.find_all('surname'):
