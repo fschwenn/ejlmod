@@ -44,6 +44,7 @@ prerecs = []
 for page in range(pages):
     tocurl = 'https://openaccess.iyte.edu.tr/xmlui/handle/11147/60/discover?filtertype=type&filter_relational_operator=equals&filter=doctoralThesis&sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp) + '&page=' + str(page+1)
     tocurl = 'https://openaccess.iyte.edu.tr/browse?type=type&sort_by=2&order=DESC&rpp=' + str(rpp) + '&etal=-1&value=doctoralThesis&offset=' + str(rpp*page)
+    tocurl = 'https://openaccess.iyte.edu.tr/simple-search?query=&location=publications&filter_field_1=itemtype&filter_type_1=equals&filter_value_1=Doctoral+Thesis&filter_field_2=dateIssued&filter_type_2=equals&filter_value_2=%5B2021+TO+2040%5D&crisID=&relationName=&sort_by=score&order=desc&rpp=' + str(rpp) + '&etal=0&start=' + str(rpp*page)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     try:
         req = urllib2.Request(tocurl, headers=hdr)
@@ -57,7 +58,7 @@ for page in range(pages):
     for div in tocpage.body.find_all('td', attrs = {'headers' : 't2'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : [], 'supervisor'  : []}
         for a in div.find_all('a'):
-            rec['artlink'] = 'https://openaccess.iyte.edu.tr' + a['href'] + '?show=full'
+            rec['link'] = 'https://openaccess.iyte.edu.tr' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
             prerecs.append(rec)
 
@@ -66,18 +67,18 @@ i = 0
 for rec in prerecs:
     keepit = True
     i += 1
-    print '---{ %i/%i (%i) }---{ %s }---' % (i, len(prerecs), len(recs), rec['artlink'])
+    print '---{ %i/%i (%i) }---{ %s }---' % (i, len(prerecs), len(recs), rec['link'])
     try:
-        req = urllib2.Request(rec['artlink'], headers=hdr)
+        req = urllib2.Request(rec['link'], headers=hdr)
         artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
         time.sleep(3)
     except:
         try:
-            print "retry %s in 180 seconds" % (rec['artlink'])
+            print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
         except:
-            print "no access to %s" % (rec['artlink'])
+            print "no access to %s" % (rec['link'])
             continue      
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
@@ -85,7 +86,6 @@ for rec in prerecs:
             if meta['name'] == 'DC.creator':
                 author = re.sub(' *\[.*', '', meta['content'])
                 rec['autaff'] = [[ author ]]
-                rec['autaff'][-1].append(publisher)
             #title
             elif meta['name'] == 'DC.title':
                 rec['tit'] = meta['content']
@@ -105,18 +105,18 @@ for rec in prerecs:
                     rec['abs'] = meta['content']
             #language
             elif meta['name'] == 'citation_language':
-                if meta['content'] != 'eng':
+                if not meta['content'] in ['eng', 'en']:
                     rec['language'] = meta['content']
             #pages
             elif meta['name'] == 'DCTERMS.extent':
-                if re.search('\d\d', meta['content']):
+                if re.search('\d\d', meta['content']):            
                     rec['pages'] = re.sub('.*?(\d\d+).*', r'\1', meta['content'])
     for tr in artpage.body.find_all('tr', attrs = {'class' : 'ds-table-row'}):
         for td in tr.find_all('td', attrs = {'class' : 'label-cell'}):
             label = td.text.strip()
         for td in tr.find_all('td', attrs = {'class' : 'word-break'}):
             #department
-            if label == 'dc.contributor.department':
+            if label in ['dc.contributor.department', 'dc.department']:
                 fac = re.sub('.zmir Institute of Technology. ', '', td.text.strip())
                 if fac in boringfacs:
                     keepit = False
@@ -125,6 +125,10 @@ for rec in prerecs:
             #supervisor
             elif label == 'dc.contributor.advisor':
                 rec['supervisor'].append([td.text.strip()])
+            #ORCID
+            elif label == 'dc.authorid':
+                rec['autaff'][-1].append(['ORCID:'+td.text.strip()])
+    rec['autaff'][-1].append(publisher)
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
