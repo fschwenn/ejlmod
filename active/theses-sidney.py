@@ -109,7 +109,7 @@ for rec in recs:
                             if re.search('Restricted', divt):
                                 print divt
                             else:
-                                rec['FFT'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+                                rec['FFT'] = 'https://ses.library.usyd.edu.au' + re.sub('\?.*', '', a['href'])
     #hidden PDF
     if not 'FFT' in rec.keys():
         if 'pdf_url' in rec.keys():
@@ -122,7 +122,7 @@ for rec in recs:
                         if re.search('Restricted', divt):
                             print divt
                         else:
-                            rec['hidden'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+                            rec['hidden'] = 'https://ses.library.usyd.edu.au' + re.sub('\?.*', '', a['href'])
     print '  ', rec.keys()
 jnlfilename = 'THESES-SIDNEY-%s' % (stampoftoday)
 
