@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#harvest theses from Porot
+#harvest theses from Porto
 #FS: 2021-02-24
 
 import getopt
@@ -47,7 +47,7 @@ def akzenteabstreifen(string):
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
 for page in range(pages):
-    tocurl = 'https://repositorio-aberto.up.pt/handle/10216/9537/browse?rpp=' + str(rpp) + '&sort_by=2&type=dateissued&offset=' + str(rpp*(page+2)) + '&etal=-1&order=DESC'
+    tocurl = 'https://repositorio-aberto.up.pt/handle/10216/9537/browse?rpp=' + str(rpp) + '&sort_by=2&type=dateissued&offset=' + str(rpp*page) + '&etal=-1&order=DESC'
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
