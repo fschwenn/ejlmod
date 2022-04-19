@@ -17,65 +17,101 @@ import time
 import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Cornell U.'
 
-typecode = 'T'
-
-
-rpp = 20
+rpp = 10
 yearstocover = 2
+pages = 30
 
 hdr = {'User-Agent' : 'Magic Browser'}
 allhdls = []
 recs = []
-for filter in ['Physics', 'Quantum+physics', 'Theoretical+physics', 'physics', 'Physics', 'Cosmology',
-               'LHC', 'CMS', 'Higgs', 'Dark+Matter', 'Supersymmetry', 'Large+Hadron+Collider',
-               'String+Theory', 'Compact+Muon+Solenoid', 'Baryogenesis', 'Neutrinos',
-               'Electroweak',
-               'Mathematics', 'Applied+mathematics', 'Astronomy', 'Astrophysics', 'Particle+physics']:
-    tocurl = 'https://ecommons.cornell.edu/handle/1813/47/discover?field=subject&filtertype=subject&filter_relational_operator=equals&filter=' + filter + '&sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp)
-    print tocurl
+boring = ['Electrical+and+Computer+Engineering', 'Biomedical+and+Biological+Sciences',
+          'Anthropology', 'Computational+Biology', 'History', 'Medicine', 'Law',
+          'Linguistics', 'Mechanical+Engineering', 'Animal+Science', 'Statistics',
+          'Chemistry+and+Chemical+Biology', 'Computer+Science', 'Microbiology',
+          'Natural+Resources', 'Science+and+Technology+Studies', 'J.S.D.%2C+Law',
+          'Ecology+and+Evolutionary+Biology', 'Food+Science+and+Technology',
+          'Genetics%2C+Genomics+and+Development', 'Information+Science',
+          'Comparative+Literature', 'Geological+Sciences', 'Government', 'Biophysics',
+          'Plant+Biology', 'Plant+Breeding', 'Psychology', 'Theoretical+and+Applied+Mechanics',
+          'Aerospace+Engineering', 'Applied+Economics+and+Management', 'Nutrition', 
+          'Biochemistry%2C+Molecular+and+Cell+Biology', 'Biomedical+Engineering',
+          'Chemical+Engineering', 'Civil+and+Environmental+Engineering', 'Communication',
+          'D.M.A.%2C+Music', 'Economics', 'English+Language+and+Literature',
+          'Germanic+Studies', 'Hotel+Administration', 'Industrial+and+Labor+Relations',
+          'Music', 'Operations+Research+and+Information+Engineering', 'Sociology',
+          'Biological+and+Environmental+Engineering', 'City+and+Regional+Planning',
+          'Design+and+Environmental+Analysis', 'Development+Sociology', 'Horticulture',
+          'Plant+Pathology+and+Plant-Microbe+Biology', 'Policy+Analysis+and+Management', 
+          'History+of+Art%2C+Archaeology%2C+and+Visual+Studies', 'Management',
+          'Asian+Literature%2C+Religion+and+Culture', 'Human+Development',
+          'Philosophy', 'Romance+Studies', 'Soil+and+Crop+Sciences', 'Medieval+Studies',
+          'Africana+Studies', 'Architecture', 'Atmospheric+Science', 'Classics', 'Entomology',
+          'Fiber+Science+and+Apparel+Design', 'Near+Eastern+Studies', 'Theatre+Arts',
+          'Neurobiology+and+Behavior', 'Regional+Science', 'Systems+Engineering', 
+          'Materials+Science+and+Engineering', 'Asian+Literature%2C+Religion%2C+and+Culture',
+          'Comparative+Biomedical+Sciences', 'Education', 'Environmental+Toxicology',
+          'Genetics%2C+Genomics+and++Development', 'Genetics+and+Development', 'Zoology',
+          'History+of+Art%2C+Archaeology+and+Visual+Studies', 'Horticultural+Biology',
+          'Immunology+and+Infectious+Disease', 'Molecular+and+Integrative+Physiology',
+          'Operations+Research', 'Pharmacology', 'Agricultural+and+Biological+Engineering',
+          'Agricultural+Economics', 'Apparel+Design', 'Behavioral+Biology', 'Biochemistry',
+          'Biometry', 'Developmental+Psychology', 'East+Asian+Literature', 'Ecology',
+          'Electrical+Engineering', 'Evolutionary+Biology', 'Fiber+Science', 'Genetics',
+          'History+of+Architecture+and+Urban+Development', 'History+of+Art+and+Archaeology',
+          'Hospitality+Management', 'Human+Behavior+and+Design', 'Musicology', 'Neurobiology',
+          'Physiology', 'Plant+Pathology', 'Resource+Economics', 'Veterinary+Medicine', 
+          'Human+Development+and+Family+Studies', 'Immunology', 'Molecular+and+Cell+Biology']
+
+
+for page in range(pages):
+    tocurl = 'https://ecommons.cornell.edu/handle/1813/47/recent-submissions?rpp=' + str(rpp) + '&offset=' + str((330+page)*rpp)
+    print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     divs = tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'})
     for div in divs:
-        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : [filter]}
+        keepit = True
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : []}
         for span in div.find_all('span', attrs = {'class' : 'date'}):
             rec['date'] = span.text.strip()
             if int(rec['date'][:4]) >= now.year - yearstocover:
                 for span in div.find_all('span', title=re.compile('rft.degree=Doctor')):
+                    degrees = re.split('.rft.degree=', span['title'])[1:]
+                    for degree in degrees:
+                        if degree in boring:
+                            #print ' skip "%s"' % (degree)
+                            keepit = False
+                        elif degree in ['Applied+Mathematics', 'Mathematics']:
+                            rec['fc'] = 'm'
+                        elif degree in ['Astronomy', 'Astronomy+and+Space+Sciences']:
+                            rec['fc'] = 'a'
+                        elif not degree in ['Doctor+of+Philosophy', 'Cornell+University'] and not re.search('^Ph..D', degree):
+                            rec['note'].append(degree)
                     for a in div.find_all('a'):
                         rec['artlink'] = 'https://ecommons.cornell.edu' + a['href'] #+ '?show=full'
                         rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                        if filter in ['Mathematics', 'Applied+mathematics']:
-                            rec['fc'] = 'm'
-                        elif filter in ['Astronomy', 'Astrophysics']:
-                            rec['fc'] = 'a'
-                        elif filter in ['String+Theory']:
-                            rec['fc'] = 't'
-                        elif filter in ['CMS']:
-                            rec['fc'] = 'e'
                         if rec['hdl'] in allhdls:
                             print 'skip double appearance of', rec['hdl']
-                        else:
+                        elif keepit:
                             recs.append(rec)
                             allhdls.append(rec['hdl'])
-    print '  %i/%i' % (len(recs), len(divs))
-    time.sleep(30)
+    print '               %i records so far ' % (len(recs))
+    time.sleep(10)
 
-    i = 0
-    for rec in recs:
+i = 0
+for rec in recs:
         i += 1
-        print '---{ %s }---{ %i/%i }---{ %s }------' % (filter, i, len(recs), rec['artlink'])
+        print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-            time.sleep(3)
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
+            time.sleep(5)
         except:
             try:
                 print "retry %s in 180 seconds" % (rec['artlink'])
@@ -91,6 +127,10 @@ for filter in ['Physics', 'Quantum+physics', 'Theoretical+physics', 'physics', '
                     author = re.sub(' *\[.*', '', meta['content'])
                     rec['autaff'] = [[ author ]]
                     rec['autaff'][-1].append(publisher)
+                #pages
+                elif meta['name'] == 'DC.description':
+                    if re.search('\d\d+ pages', meta['content']):
+                        rec['pages'] = re.sub('.*?(\d\d+) pages.*', r'\1', meta['content'])
                 #DOI
                 elif meta['name'] == 'DC.identifier' and re.search('doi.org', meta['content']):
                     rec['doi'] = re.sub('.*doi.org\/', '', meta['content'])
@@ -138,6 +178,7 @@ for filter in ['Physics', 'Quantum+physics', 'Theoretical+physics', 'physics', '
                                 print divt
                             else:
                                 rec['hidden'] = 'https://ecommons.cornell.edu' + re.sub('\?.*', '', a['href'])
+        print '  ', rec.keys()
                                     
 jnlfilename = 'THESES-CORNELL-%s' % (stampoftoday)
 
