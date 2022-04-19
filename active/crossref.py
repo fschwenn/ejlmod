@@ -31,16 +31,16 @@ for registrant in crossref.body.find_all('registrant'):
 recs = []
 for journal in crossref.body.find_all('journal'):
     #metadata of this issue/ volume
-    for journal_metadata in journal.find_all('journal_metadata'):
-        for full_title in journal_metadata.find_all('full_title'):
+    for journalmetadata in journal.find_all('journal_metadata'):
+        for full_title in journalmetadata.find_all('full_title'):
             jtit = full_title.text                
     (jvol, jiss, jdate, m, d, y) = (False, False, False, False, False, False)
-    for journal_issue in journal.find_all('journal_issue'):
-        for issue in journal_issue.find_all('issue'):
+    for journalissue in journal.find_all('journal_issue'):
+        for issue in journalissue.find_all('issue'):
             jiss = issue.text
-        for month in journal_issue.find_all('month'): m = int(month.text)
-        for day  in journal_issue.find_all('day'): d = int(day.text)
-        for year in journal_issue.find_all('year'): y = year.text
+        for month in journalissue.find_all('month'): m = int(month.text)
+        for day  in journalissue.find_all('day'): d = int(day.text)
+        for year in journalissue.find_all('year'): y = year.text
         if y:
             if m:
                 if d:
@@ -55,30 +55,6 @@ for journal in crossref.body.find_all('journal'):
     #metadata of article
     for journal_article in journal.find_all('journal_article'):
         rec = {'tc' : 'P', 'refs' : []}
-        #pbn
-        for first_page in journal_article.find_all('first_page'):
-            rec['p1'] = first_page.text
-        for last_page in journal_article.find_all('last_page'):
-            rec['p2'] = last_page.text
-        if jvol: rec['vol'] = jvol
-        if jiss: rec['iss'] = jiss
-        if jdate: rec['date'] = jdate
-        if jtit == 'Acta Physica Polonica A':
-            rec['jnl'] = 'Acta Phys.Polon.'
-            rec['vol'] = 'A' + rec['vol']
-        elif jtit == 'Acta Physica Polonica B':
-            rec['jnl'] = 'Acta Phys.Polon.'
-            rec['licence'] = {'statement' : 'CC-BY-4.0'}
-            rec['FFT'] = 'http://www.actaphys.uj.edu.pl/fulltext?series=Reg&vol=%s&page=%s' % (rec['vol'], rec['p1'])
-            rec['vol'] = 'B' + rec['vol']
-        elif jtit == 'Acta Physica Polonica B Proceedings Supplement':
-            rec['jnl'] = 'Acta Phys.Polon.Supp.'
-            rec['tc'] = 'C'
-        else:
-            rec['jnl'] = jtit
-        for publication_date in journal_article.find_all('publication_date', attr = {'media_type' : 'print'}):
-            for year in publication_date.find_all('year'):
-                rec['year'] = year.text
         #DOI
         for doi_data in journal_article.find_all('doi_data'):
             for doi in doi_data.find_all('doi'):
@@ -86,6 +62,41 @@ for journal in crossref.body.find_all('journal'):
             if jtit in ['Acta Physica Polonica A']:
                 for resource in doi_data.find_all('resource'):
                     rec['FFT'] = resource.text
+        #pbn
+        for first_page in journal_article.find_all('first_page'):
+            rec['p1'] = first_page.text
+        for last_page in journal_article.find_all('last_page'):
+            rec['p2'] = last_page.text
+        if jvol: rec['vol'] = jvol
+        if jiss: rec['issue'] = jiss
+        if jdate: rec['date'] = jdate
+        if jtit == 'Acta Physica Polonica A':
+            rec['jnl'] = 'Acta Phys.Polon.'
+            rec['vol'] = 'A' + rec['vol']
+        elif jtit == 'Acta Physica Polonica B':
+            rec['jnl'] = 'Acta Phys.Polon.'
+            rec['licence'] = {'statement' : 'CC-BY-4.0'}
+            rec['FFT'] = 'https://www.actaphys.uj.edu.pl/R/%s/%s/%s/pdf' % (rec['vol'], rec['issue'], rec['p1'])
+            rec['vol'] = 'B' + rec['vol']
+            if  rec['vol'] == 'B52' and rec['issue'] == '8':
+                rec['cnum'] = 'C21-01-07'
+                rec['tc'] = 'C'
+        elif jtit == 'Acta Physica Polonica B Proceedings Supplement':
+            rec['jnl'] = 'Acta Phys.Polon.Supp.'
+            rec['licence'] = {'statement' : 'CC-BY-4.0'}
+            rec['FFT'] = 'https://www.actaphys.uj.edu.pl/S/%s/%s/%s/pdf' % (rec['vol'], rec['issue'], rec['p1'])
+            if  rec['vol'] == '15' and rec['issue'] == '1':
+                rec['cnum'] = 'C21-09-20.10'
+                rec['FFT'] = 'https://www.actaphys.uj.edu.pl/S/%s/%s/pdf' % (rec['vol'], re.sub('.*\.', '', rec['doi']))
+            elif  rec['vol'] == '15' and rec['issue'] == '2':
+                rec['cnum'] = 'C21-09-15.3'
+                rec['FFT'] = 'https://www.actaphys.uj.edu.pl/S/%s/%s/pdf' % (rec['vol'], re.sub('.*\.', '', rec['doi']))
+            rec['tc'] = 'C'
+        else:
+            rec['jnl'] = jtit
+        for publication_date in journal_article.find_all('publication_date', attr = {'media_type' : 'print'}):
+            for year in publication_date.find_all('year'):
+                rec['year'] = year.text
         #title
         for titles in journal_article.find_all('titles'):
             for title in titles.find_all('title'): rec['tit'] = title.text
