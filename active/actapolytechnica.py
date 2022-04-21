@@ -30,22 +30,23 @@ page = BeautifulSoup(urllib2.urlopen(url))
 issues = []
 #for div in page.find_all('div', attrs = {'id' : 'issues'}):
 for div in page.find_all('ul', attrs = {'class' : 'issues_archive'}):
-    for a in div.find_all('a')[:issuesstodo]:
-        at = a.text.strip()
+    for h2 in div.find_all('h2')[:issuesstodo]:
+        at = re.sub('[\n\t\r]', ' ', h2.text.strip())
         vol = re.sub('.*Vol\.? (\d+).*', r'\1', at)
         iss = re.sub('.*No\.? (\d+).*', r'\1', at)
         yr = re.sub('.*\((\d+)\).*', r'\1', at)
-        nr = re.sub('.*\/', '', a['href'])
-        jnlfilename = re.sub(' ', '_', 'actapoly%s.%s_%s' % (vol, iss, nr))
-        #check whether file already exists
-        goahead = True
-        for ordner in ['/', '/zu_punkten/', '/zu_punkten/enriched/', '/backup/', '/onhold/']:
-            if os.path.isfile(ejldir + ordner + jnlfilename + '.doki'):
-                print '    Datei %s exisitiert bereit in %s' % (jnlfilename, ordner)
-                goahead = False
-        if goahead:
-            print 'Will process Acta Polytechnica (Prague), Volume %s, Issue %s' % (vol, iss)
-            issues.append((vol, iss, yr, a['href'], jnlfilename))
+        for a in h2.find_all('a'):
+            nr = re.sub('.*\/', '', a['href'])
+            jnlfilename = re.sub(' ', '_', 'actapoly%s.%s_%s' % (vol, iss, nr))
+            #check whether file already exists
+            goahead = True
+            for ordner in ['/', '/zu_punkten/', '/zu_punkten/enriched/', '/backup/', '/onhold/']:
+                if os.path.isfile(ejldir + ordner + jnlfilename + '.doki'):
+                    print '    Datei %s exisitiert bereit in %s' % (jnlfilename, ordner)
+                    goahead = False
+            if goahead:
+                print 'Will process Acta Polytechnica (Prague), Volume %s, Issue %s' % (vol, iss)
+                issues.append((vol, iss, yr, a['href'], jnlfilename))
         
 #issues = [('50', '3', '2010', 'https://ojs.cvut.cz/ojs/index.php/ap/issue/view/345', 'maybe_C09-05-05.1')]
 
