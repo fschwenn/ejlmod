@@ -460,7 +460,15 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-fub', 2, '%s %s/theses-fub.py' % (pythoncommand, lproc)),
         ('theses-auckland', 3, '%s %s/theses-auckland.py' % (pythoncommand, lproc)),
         ('theses-temple', 5, '%s %s/theses-temple.py' % (pythoncommand, lproc)),
-        ('theses-tennessee', 3, '%s %s/theses-tennessee.py' % (pythoncommand, lproc))]
+        ('theses-tennessee', 3, '%s %s/theses-tennessee.py' % (pythoncommand, lproc)),
+        ('theses-queensukingston', 2, '%s %s/theses-queensukingston.py' % (pythoncommand, lproc)),
+        ('theses-estadoriodejaneiro', 2, '%s %s/theses-estadoriodejaneiro.py' % (pythoncommand, lproc)),
+        ('theses-georgiatech', 3, '%s %s/theses-georgiatech.py' % (pythoncommand, lproc)),
+        ('theses-marburg', 3, '%s %s/theses-marburg.py' % (pythoncommand, lproc)),
+        ('theses-salamanca', 2, '%s %s/theses-salamanca.py' % (pythoncommand, lproc)),
+        ('theses-kwazulu', 2, '%s %s/theses-kwazulu.py' % (pythoncommand, lproc)),
+        ('theses-guelph', 3, '%s %s/theses-guelph.py' % (pythoncommand, lproc)),
+        ('theses-potsdam', 1, '%s %s/theses-potsdam.py' % (pythoncommand, lproc))]
 
 
 if prmonth == 12:
@@ -528,14 +536,14 @@ if (today.day % 3 == 0):
     listofcommands.append('wsp.xml2.py')
     prfil.write('  - wsp.xml2.py\n')
     os.system('%s %s/wsp.xml2.py' % (pythoncommand, lproc))
-    if (today.day % 6 == 0):
-        listofcommands.append('pubdbweb.py')
-        prfil.write('  - pubdbweb.py\n')
-        os.system('%s %s/pubdbweb.py' % (pythoncommand, lproc))
 elif (today.day % 3 == 1):
     listofcommands.append('ieee_wrapper.py')
     prfil.write('  - ieee_wrapper.py\n')
     os.system('%s %s/ieee_wrapper.py' % (pythoncommand, lproc))
+if (today.weekday()  == 0):
+    listofcommands.append('pubdbweb.py')
+    prfil.write('  - pubdbweb.py\n')
+    os.system('%s %s/pubdbweb.py' % (pythoncommand, lproc))
 
 #do always IOP
 #IOP books still old workflow
