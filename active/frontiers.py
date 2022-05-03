@@ -49,13 +49,22 @@ for artlink in urls:
                    'http://click.engage.frontiersin.com/?qs=f38f1870c56dcbfe8541a1a57ac950e6a60498ebc55375cffafff4fd3132555dc2671c4873b888b1088098d8c958d81929a3a95368064553cb63c83832025ef4']:
         continue
     rec = {'tc' : 'P', 'autaff' : [], 'refs' : [], 'note' : []}
-    try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink), features="lxml")
+    artfilename = re.sub('.*=', '/tmp/frontiers.', artlink)
+    if not os.path.isfile(artfilename):
+        os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilename, artlink))
         time.sleep(3)
-    except:
-        print "retry %s in 180 seconds" % (artlink)
-        time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink), features="lxml")
+    artfile = codecs.EncodedFile(codecs.open(artfilename, mode='rb', errors='replace'), 'utf8')
+    artlines = ''.join(artfile.readlines())
+    artfile.close()
+    artlines = re.sub('.*<html', '<html', artlines)
+    artpage = BeautifulSoup(artlines)       
+    #try:
+        #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink), features="lxml")
+        #time.sleep(3)
+    #except:
+        #print "retry %s in 180 seconds" % (artlink)
+        #time.sleep(180)
+        #artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(artlink), features="lxml")
     autaff = False
     try:
         artpage.head.find_all('meta')
