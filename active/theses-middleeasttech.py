@@ -17,8 +17,8 @@ import time
 from selenium import webdriver
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.firefox.options import Options
+#from selenium.webdriver.support import expected_conditions as EC
+#from selenium.webdriver.firefox.options import Options
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special/'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
@@ -33,14 +33,40 @@ jnlfilename = 'THESES-MiddleEastTechUAnkara-%s' % (stampoftoday)
 tocurl = 'https://open.metu.edu.tr/handle/11511/158'
 
 boringdegrees = ['M.S. - Master of Science', 'M.A. - Master of Arts', 'M.Arch. - Master of Architecture', 'Thesis (M.Arch.) -- Graduate School of Natural and Applied Sciences. Architecture.', 'Thesis (M.Arch.) -- Graduate School of Natural and Applied Sciences. Conservation of Cultural Heritage in Architecture.', 'Thesis (M.S.) -- Graduate School of Applied Mathematics. Mathematics.', 'Thesis (M.S.) -- Graduate School of Informatics. Operational Research.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Aerospace Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Archaeometry.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Biochemistry.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Biology.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Biomedical Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Biotechnology.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Building Science in Architecture.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Chemical Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Chemistry.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. City and Regional Planning.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Civil Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Computer Education and Instructional Technology.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Computer Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences . Earthquake Studies.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Earth System Science.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Electrical and Electronics Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Engineering Sciences.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Environmental Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Food Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Geodetic and Geographical Information Technologies.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Geological Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Industrial Design.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Industrial Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Mathematics and Science Education.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Mechanical Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Metallurgical and Materials Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Micro and Nanotechnology.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Mining Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Molecular Biology and Genetics', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Occupational Health and Safety.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Operational Research.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Petroleum and Natural Gas Engineering.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Physics.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Polymer Science and Technology.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Statistics.', 'Thesis (M.S.) -- Graduate School of Natural and Applied Sciences. Urban Design in City and Regional Planning Department.', 'Thesis (M.S.) -- Graduate School of Social Sciences. Elementary Science and Mathematics Education.', 'Thesis (M.S.) -- Graduate School of Social Sciences. Secondary Science and Mathematics Education.']
-
+boringdegrees += ['Thesis (M.S.) -- Graduate School of Social Sciences. Elementary Science and Mathematics Education.',
+                  'Thesis (Ph.D.) -- Graduate School of Informatics. Geodetic and Geographical Information Technologies',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Aerospace Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Archaeometry.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Architecture.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Biology.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Biomedical Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Biotechnology.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Chemical Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Chemistry.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. City and Regional Planning.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Civil Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Computer Education and Instructional Technology.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Conservation of Cultural Heritage in Architecture.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Earth System Science.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Electrical and Electronics Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Food Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Geological Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Industrial Design.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Industrial Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Mechanical Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Metallurgical and Materials Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Micro and Nanotechnology.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Mining Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Petroleum and Natural Gas Engineering.',
+                  'Thesis (Ph.D.) -- Graduate School of Natural and Applied Sciences. Polymer Science and Technology.',
+                  'Thesis (Ph.D.) -- Graduate School of Social Sciences. Mathematics and Science Education.']
 #driver
-opts = Options()
-opts.add_argument("--headless")
-caps = webdriver.DesiredCapabilities().FIREFOX
-caps["marionette"] = True
-driver  = webdriver.Firefox(options=opts, capabilities=caps)
-#webdriver.PhantomJS()
+#opts = Options()
+#opts.add_argument("--headless")
+#caps = webdriver.DesiredCapabilities().FIREFOX
+#caps["marionette"] = True
+#driver  = webdriver.Firefox(options=opts, capabilities=caps)
+driver = webdriver.PhantomJS()
 driver.implicitly_wait(30)
 
 prerecs = []
@@ -48,7 +74,7 @@ driver.get(tocurl)
 hdls = []
 for page in range(pages):
     print '==={ %i/%i }====' % (page+1, pages)
-    tocpage = BeautifulSoup(driver.page_source)
+    tocpage = BeautifulSoup(driver.page_source, 'lxml')
     for a in tocpage.body.find_all('a', attrs = {'class' : 'ui-link'}):
         if a.has_attr('href') and re.search('handle', a['href']):
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'keyw' : [], 'note' : []}
@@ -60,8 +86,9 @@ for page in range(pages):
                 prerecs.append(rec)
                 hdls.append(rec['hdl'])
     #next page
-    driver.find_element_by_class_name("ui-paginator-next").click()
-    time.sleep(2)
+    for el in driver.find_elements_by_class_name("ui-paginator-next"):
+        el.click()
+    time.sleep(10)
 
 i = 0
 recs = []
@@ -76,7 +103,7 @@ for rec in prerecs:
         print ' ... try again in 5 minutes'
         time.sleep(300)
         driver.get(rec['link'])
-        artpage = BeautifulSoup(driver.page_source)       
+        artpage = BeautifulSoup(driver.page_source, 'lxml')       
     time.sleep(3)
     for meta in artpage.find_all('meta'):
         if meta.has_attr('name') and meta.has_attr('content'):
@@ -105,7 +132,8 @@ for rec in prerecs:
                     rec['date'] += '-%02i' % (int(month))
             #fulltext
             elif meta['name'] == 'citation_pdf_url':
-                rec['FFT'] = meta['content']
+                if not re.search(u'[öşüçğıÇŞ]', meta['content']):
+                    rec['FFT'] = meta['content']
             #type
             elif meta['name'] == 'DC.description':
                 if meta['content'] in boringdegrees:
