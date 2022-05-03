@@ -195,11 +195,13 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
 #42005 Commun.Phys.
 #41605 Rad.Det.Tech.Meth.
 
-jc['10947'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P'] #!
+jc['10948'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P'] #!
 jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P'] #now at New publisher: Please contact Islamic Azad University
 
 jc['44214'] = ['qufr', 'Quant.Front', '', '', 'P']
-jc['44198'] = ['jnlmp', 'J.Nonlin.Math.Phys.', '', '', 'P']
+jc['44198'] = ['jnlmp', 'J.Nonlin.Math.Phys.', '', '', 'P'] #yepp
+#to be asked for
+jc['00209'] = ['matz', 'Math.Z.', '', '', 'P']
 
 
 
