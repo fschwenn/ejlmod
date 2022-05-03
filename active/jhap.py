@@ -58,6 +58,9 @@ for rec in recs:
             #date
             elif meta['name'] == 'citation_date':
                 rec['date'] = meta['content']
+            #title
+            elif meta['name'] == 'citation_title':
+                rec['tit'] = meta['content']
             #date
             elif meta['name'] == 'citation_doi':
                 rec['doi'] = meta['content']
