@@ -155,6 +155,7 @@ cattofc = {'Computing and Processing' : 'c',
            'Computation Theory and Mathematics not elsewhere classified' : 'mc',
            'Distributed and Grid Systems' : 'c',
            'Quantum Chemistry' : 'o'}
+cattofc['Fields, Waves and Electromagnetics'] = 'q'
 
 thesesstandardservers = {'kilthub' : 'Carnegie Mellon U. (main)',
                          'melbourne' : 'U. Melbourne (main)', #2
