@@ -16,6 +16,7 @@ import datetime
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+pdfdir = '/afs/desy.de/group/library/publisherdata/pdf'
 tmpdir = '/tmp'
 
 now = datetime.datetime.now()
@@ -33,6 +34,12 @@ issuenumber = sys.argv[2]
 if jnl == 'lhep':
     jnlname = 'LHEP'
     tocurl = 'http://journals.andromedapublisher.com/index.php/LHEP/issue/view/' + issuenumber
+elif jnl == 'jmlfs':
+    jnlname = 'JMLFS'
+    tocurl = 'http://journals.andromedapublisher.com/index.php/JMLFS/issue/view/' + issuenumber
+elif jnl == 'jais':
+    jnlname = 'JAIS'
+    tocurl = 'http://journals.andromedapublisher.com/index.php/JAIS/issue/view/' + issuenumber
 elif jnl == 'acp':    
     jnlname = 'BOOK'
     tocurl = ' http://main.andromedapublisher.com/ACP/' + issuenumber
@@ -86,6 +93,8 @@ for rec in recs:
             #    rec['p1'] = meta['content'] 
             #elif meta['name'] == 'citation_lastpage':
             #    rec['p2'] = meta['content'] 
+            elif meta['name'] == 'DC.Identifier' and re.search('^\d{1-5}', meta['content']):
+                rec['p1'] = meta['content']
             #DOI
             elif meta['name'] == 'citation_doi':
                 rec['doi'] = meta['content']
@@ -101,12 +110,16 @@ for rec in recs:
             #abstract
             elif meta['name'] == 'DC.Description':
                 rec['abs'] = meta['content']
+            #license
+            elif meta['name'] == 'DC.Rights':
+                rec['license'] = {'url' : meta['content']}
     #year as volume for LHEP
     if not 'vol' in rec.keys() and jnl in ['lhep']:
         rec['vol'] = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
     #licence
-    for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
-        rec['license'] = {'url' : a['href']}
+    if not 'license' in rec.keys():
+        for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
+            rec['license'] = {'url' : a['href']}
     #references
     for div in artpage.body.find_all('div', attrs = {'class' : 'item references'}):
         rec['refs'] = []
@@ -115,7 +128,19 @@ for rec in recs:
                 br.replace_with('_TRENNER_')
             div2t = re.sub('\. *\[(\d+)\] ', r'._TRENNER_[\1] ', div2.text)
             for ref in re.split('_TRENNER_', div2t):
-                rec['refs'].append([('x', ref)])
+                rec['refs'].append([('x', ref)])    
+    #get PDF to extract DOI !!!
+    if not 'doi' in rec.keys():
+        if not os.path.isfile('/tmp/%s.%s.%i.pdf' % (rec['jnl'], stampoftoday ,i)):
+            os.system('wget -O /tmp/%s.%s.%i.pdf "%s"' % (rec['jnl'], stampoftoday ,i, rec['FFT']))
+        os.system('pdftotext /tmp/%s.%s.%i.pdf /tmp/%s.%s.%i.txt' % (rec['jnl'], stampoftoday, i, rec['jnl'], stampoftoday ,i))
+        inf = open('/tmp/%s.%s.%i.txt' % (rec['jnl'], stampoftoday ,i), 'r')
+        for line in inf.readlines():
+            if re.search('DOI.*(10\.31526\/)', line) and not rec.has_key('doi'):
+                rec['doi'] = re.sub('.*?(10\.31526\/.*)', r'\1', line.strip())
+                rec['doi'] = re.sub(' .*', '', rec['doi'])
+                os.system('cp /tmp/%s.%s.%i.pdf %s/10.31526/%s' % (rec['jnl'], stampoftoday ,i, pdfdir, re.sub('\/', '_', rec['doi'])))
+        inf.close()
     print rec
 
 if recs:
@@ -172,15 +197,15 @@ elif jnl in ['acp']:
                                      
 
 #closing of files and printing
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
  
