@@ -42,7 +42,7 @@ for (depnr, department) in [('46', 'Physics'), ('48', 'Mathematics'), ('49', 'Ap
             for span in div.find_all('span', attrs = {'class' : 'date'}):
                 if re.search('[12]\d\d\d', span.text):
                     rec['year'] = re.sub('.*([12]\d\d\d).*', r'\1', span.text.strip())
-                    if int(rec['year']) < now.year - 2*10:
+                    if int(rec['year']) < now.year - 2:
                         new = False
                         print '  skip',  rec['year']
             if depnr in ['46', '48']:
