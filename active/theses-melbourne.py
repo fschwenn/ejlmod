@@ -23,17 +23,19 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'U. Melbourne (main)'
 
-rpp = 24
-pages = 1
+
+rpp = 20
+pages = 2
 startyear = now.year-1
-departments = [('295', 'U. Melbourne (main)'), ('310', 'Melbourne U.')]
+departments = [('6980e4b1-7abc-5de7-9d7e-86197cf33af5', 'U. Melbourne (main)', 'm'),
+               ('3f5551c5-a54a-5156-9e70-b35365953f96', 'Melbourne U.', '')]
 hdr = {'User-Agent' : 'Magic Browser'}
 jnlfilename = 'THESES-MELBOURNE-%s' % (stampoftoday)
 
 recs = []
-for (dep, aff) in departments:
+for (dep, aff, fc) in departments:
     for page in range(pages):
-        tocurl = 'https://minerva-access.unimelb.edu.au/handle/11343/' + dep + '/discover?sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp) + '&page=' + str(page+1)
+        tocurl = 'https://minerva-access.unimelb.edu.au/collections/' + dep + '?spc.page=' + str(page+1) + '&view=listElement&spc.sf=dc.date.available&spc.sd=DESC&spc.rpp=' + str(rpp)
         print '==={ %s: %i/%i }==={ %s }===' % (aff, page+1, pages, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
         tocpage = BeautifulSoup(urllib2.urlopen(req))
@@ -44,13 +46,15 @@ for (dep, aff) in departments:
                    'supervisor' : []}
             for span in div.find_all('span', attrs = {'class' : 'date'}):
                 if re.search('^\d\d\d\d$', span.text):
-                    rec['date'] = span.text.strip()
+                    rec['date'] = span.text.strip()                    
                     if int(rec['date']) < startyear:
                         keepit = False
             for a in div.find_all('a'):                
                 rec['artlink'] = 'https://minerva-access.unimelb.edu.au' + a['href'] + '?show=full'
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
                 if keepit:
+                    if fc:
+                        rec['fc'] = fc
                     recs.append(rec)
         print '   %i records so far' % (len(recs))
 
