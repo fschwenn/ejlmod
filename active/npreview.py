@@ -18,7 +18,7 @@ import time
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special/'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" + '_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 
 def tfstrip(x): return x.strip()
 
