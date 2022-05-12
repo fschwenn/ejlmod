@@ -35,7 +35,7 @@ for scuola in scuolae:
     tocurl = 'http://tesi.cab.unipd.it/view/facoltacdltriennale/facoltacdltriennalescuoladiscienze%s.html' % (scuola)
     print '---{ %s }---{ %s }------' % (scuola, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     time.sleep(5)
     for p in tocpage.body.find_all('p'):
         for span in p.find_all('span', attrs = {'class' : 'person_name'}):
@@ -61,13 +61,13 @@ for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         except:
             print "no access to %s" % (rec['link'])
             continue      
@@ -87,6 +87,7 @@ for rec in recs:
                 rec['hidden'] = meta['content']
     rec['autaff'][-1].append(publisher)
     for tr in artpage.find_all('tr'):
+        tht = ''
         for th in tr.find_all('th'):
             tht = th.text.strip()
         for td in tr.find_all('td'):
