@@ -23,7 +23,7 @@ from multiprocessing import Manager
 absdir = '/afs/desy.de/group/library/abs'
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" + '_special'
 
 articlesperpage = 100
 
@@ -271,6 +271,7 @@ def ieee(number):
             except:
                 print "retry in 300 seconds"
                 time.sleep(300)
+                os.system("wget -T 300 -t 3 -q -O %s %s" % (artfilename, articlelink))
         inf = open(artfilename, 'r')
         articlepage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
         inf.close()
@@ -401,17 +402,25 @@ def ieee(number):
             except:
                 print rec
         if not rec['tit'] in ['IEEE Communications Society', 'IEEE Transactions on Electron Devices information for authors',
-                              'IEEE Communications Society Information', 'IEEE Sensors Council',
-                              'IEEE Circuits and Systems Society Information', '[Masthead]',
-                              'IEEE Transactions on Information Theory information for authors',
+                              'IEEE Communications Society Information', 'IEEE Sensors Council', 'General Information',
+                              'IEEE Circuits and Systems Society Information', '[Masthead]', '[PDF Not Yet Available In IEEE Xplore]',
+                              'IEEE Transactions on Information Theory information for authors', 'Corporate Sponsors',
                               'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems society information',
-                              'IEEE Computer Society Has You Covered!',
-                              'IEEE Computer Society Information', 
-                              'IEEE Transactions on Magnetics Institutional Listings',
-                              'IEEE Computer Society', 'Masthead', 'ComputingEdge',
-                              'IEEE Transactions on Magnetics publication information',
+                              'IEEE Computer Society Has You Covered!', 'Sponsor', 'Copyright', 'Organizers and Sponsor',
+                              'IEEE Computer Society Information',  'Workshop Organization', 'Organizing Committee',
+                              'IEEE Transactions on Magnetics Institutional Listings', 'Acknowledgement', 'Organization',
+                              'IEEE Computer Society', 'Masthead', 'ComputingEdge', 'Cover', 'Tutorials', 'Conference Chairs',
+                              'IEEE Transactions on Magnetics publication information', 'Keynotes', 'Sponsors and Supporters',
                               'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems publication information',
-                              'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society']:
+                              'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society',
+                              'Table of Contents', 'Sponsors', 'Conference Organization', '[Sponsors]']:
+
+#            if 'p1' in rec.keys():
+#                del rec['p1']
+#            if 'p2' in rec.keys():
+#                del rec['p2']
+#            rec['fc'] = 'c'
+            
             recs.append(rec)
     if jnlname == 'BOOK':
         oufname = 'IEEENuclSciSympConfRec'
