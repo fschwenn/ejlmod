@@ -32,6 +32,7 @@ jids = {'AA' : 'Adv.Astron.',
         'AHEP' : 'Adv.High Energy Phys.',
         'AMP' : 'Adv.Math.Phys.',
         'IJMMS' : 'Int.J.Math.Math.Sci.',
+        'QUE' : 'Quantum Eng.',
         'JAM' : 'J.Appl.Math.'}
 
 ###clean formulas in tag
