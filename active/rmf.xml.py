@@ -41,7 +41,7 @@ elif letter == 'E':
         jnl = 'Rev.Mex.Fis.E'
 	tocurl = "https://rmf.smf.mx/ojs/index.php/rmf-e/issue/archive"
 elif letter == 'S':
-        jnl == 'Rev.Mex.Fis.Suppl.'
+        jnl = 'Rev.Mex.Fis.Suppl.'
         tocurl = "https://rmf.smf.mx/ojs/index.php/rmf-s/issue/archive"
 
 recs = []
