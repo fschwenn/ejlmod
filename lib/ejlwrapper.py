@@ -468,7 +468,12 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-salamanca', 2, '%s %s/theses-salamanca.py' % (pythoncommand, lproc)),
         ('theses-kwazulu', 2, '%s %s/theses-kwazulu.py' % (pythoncommand, lproc)),
         ('theses-guelph', 3, '%s %s/theses-guelph.py' % (pythoncommand, lproc)),
-        ('theses-potsdam', 1, '%s %s/theses-potsdam.py' % (pythoncommand, lproc))]
+        ('theses-potsdam', 1, '%s %s/theses-potsdam.py' % (pythoncommand, lproc)),
+        ('techrxiv', 1, '%s %s/figshare.py techrxiv' % (pythoncommand, lproc)),
+        ('theses-middleeasttech', 1, '%s %s/theses-middleeasttech.py' % (pythoncommand, lproc)),
+        ('theses-wigner', 3, '%s %s/theses-wigner.py' % (pythoncommand, lproc)),
+        ('theses-zaragoza', 3, '%s %s/theses-zaragoza.py' % (pythoncommand, lproc)),
+        ('theses-melbourne', 3, '%s %s/theses-melbourne.py' % (pythoncommand, lproc))]
 
 
 if prmonth == 12:
