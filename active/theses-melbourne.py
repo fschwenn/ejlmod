@@ -1,106 +1,105 @@
 # -*- coding: utf-8 -*-
 #harvest theses from Melbourne U.
-#FS: 2020-11-19
+#JH: 2022-05-08
 
 import getopt
 import sys
 import os
-import urllib2
-import urlparse
 from bs4 import BeautifulSoup
 import re
 import ejlmod2
 import codecs
 import datetime
-import time
-import json
+from time import sleep
+from urllib2 import urlopen
+from json import loads
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
+pages = 3
+
+jnlfilename = 'THESES-MELBOURNE-%s' % (stampoftoday)
 
 publisher = 'U. Melbourne (main)'
 
-
-rpp = 20
-pages = 2
-startyear = now.year-1
-departments = [('6980e4b1-7abc-5de7-9d7e-86197cf33af5', 'U. Melbourne (main)', 'm'),
-               ('3f5551c5-a54a-5156-9e70-b35365953f96', 'Melbourne U.', '')]
-hdr = {'User-Agent' : 'Magic Browser'}
-jnlfilename = 'THESES-MELBOURNE-%s' % (stampoftoday)
-
 recs = []
-for (dep, aff, fc) in departments:
-    for page in range(pages):
-        tocurl = 'https://minerva-access.unimelb.edu.au/collections/' + dep + '?spc.page=' + str(page+1) + '&view=listElement&spc.sf=dc.date.available&spc.sd=DESC&spc.rpp=' + str(rpp)
-        print '==={ %s: %i/%i }==={ %s }===' % (aff, page+1, pages, tocurl)
-        req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
-        time.sleep(3)
-        for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
-            keepit = True
-            rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'affiliation' : aff,
-                   'supervisor' : []}
-            for span in div.find_all('span', attrs = {'class' : 'date'}):
-                if re.search('^\d\d\d\d$', span.text):
-                    rec['date'] = span.text.strip()                    
-                    if int(rec['date']) < startyear:
-                        keepit = False
-            for a in div.find_all('a'):                
-                rec['artlink'] = 'https://minerva-access.unimelb.edu.au' + a['href'] + '?show=full'
-                rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                if keepit:
-                    if fc:
-                        rec['fc'] = fc
-                    recs.append(rec)
-        print '   %i records so far' % (len(recs))
 
-i = 0
-for rec in recs:
-    i += 1
-    print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
-    try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-        time.sleep(5)
-    except:
-        try:
-            print "retry %s in 180 seconds" % (rec['artlink'])
-            time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-        except:
-            print "no access to %s" % (rec['link'])
-            continue      
-    for meta in artpage.head.find_all('meta'):
-        if meta.has_attr('name'):
-            #author
-            if meta['name'] == 'DC.creator':
-                rec['autaff'] = [[ meta['content'], rec['affiliation'] ]]
-            #title
-            elif meta['name'] == 'DC.title':
-                rec['tit'] = meta['content']
-            #date
-            elif meta['name'] == 'DCTERMS.issued':
-                rec['date'] = meta['content']
-            #keywords
-            elif meta['name'] == 'DC.subject':
-                for keyw in re.split(' *; *', meta['content']):
-                    rec['keyw'].append(keyw)
-            #FFT
-            elif meta['name'] == 'citation_pdf_url':
-                rec['hidden'] = meta['content']
-            #abstract
-            elif meta['name'] == 'DCTERMS.abstract':
-                rec['abs'] = meta['content']
-    for tr in artpage.body.find_all('tr', attrs = {'class' : 'ds-table-row'}):
-        for td in tr.find_all('td', attrs = {'class' : 'label-cell'}):
-            label = td.text.strip()
-        for td in tr.find_all('td', attrs = {'class' : 'word-break'}):
-            if label == 'melbourne.thesis.supervisorname':
-                rec['supervisor'].append([td.text.strip()])
-    print '  ', rec.keys()
+def get_sub_site(url):
+    print "[%s] --> Harversting Data" % url
+    rec = {'tc': 'T', 'jnl': 'BOOK', 'artlink': url}
+    data = loads(urlopen(url).read())
+    rec_data = data.get('metadata')
+
+    # Get the author
+    rec['autaff'] = []
+    raw_author_section = rec_data.get('dc.contributor.author')
+    for i in raw_author_section:
+        rec['autaff'].append([i.get('value'), publisher])
+
+    # Get the Date
+    rec['date'] = rec_data.get('dc.date.issued')[0].get('value')
+
+    # Get the abstract
+    rec['abs'] = rec_data.get('dc.description.abstract')[0].get('value')
+
+    # Get the handle
+    rec['hdl'] = re.sub('.*handle.net\/', '', rec_data.get('dc.identifier.uri')[0].get('value'))
+    rec['link'] = 'http://hdl.handle.net/' + rec['hdl']
+
+    # Get keywords
+    rec['keyw'] = []
+    if rec_data.get('dc.subject') is not None:
+        for keyword in rec_data.get('dc.subject'):
+            rec['keyw'].append(keyword.get('value'))
+
+    # Get title
+    rec['tit'] = rec_data.get('dc.title')[0].get('value')
+
+    # Get the supervisor
+    rec['supervisor'] = []
+    if rec_data.get('melbourne.thesis.supervisorothername') is not None:
+        for supervisor in rec_data.get('melbourne.thesis.supervisorname') + rec_data.get('melbourne.thesis.supervisorothername'):
+            rec['supervisor'].append([supervisor.get('value')])
+    elif rec_data.get('melbourne.thesis.supervisorname') is not None:
+        for supervisor in rec_data.get('melbourne.thesis.supervisorname'):
+            rec['supervisor'].append([supervisor.get('value')])
+
+    # Get pdf link
+    doc_id = data.get('id')
+    rec['hidden'] = 'https://rest.neptune-prod.its.unimelb.edu.au/server/api/core/bitstreams/%s/content' % doc_id
+    rec['hidden'] = 'https://minerva-access.unimelb.edu.au/bitstreams/%s/download' % doc_id
+    recs.append(rec)
+
+schools = ['https://rest.neptune-prod.its.unimelb.edu.au/server/api/discover/search/objects?savedList=list_d76f1a6b'
+           '-c97b-4b12-9b0c-a6f25e58d073&projection=SavedItemLists&sort=dc.date.available,'
+           'DESC&page=0&size=10&scope=3f5551c5-a54a-5156-9e70-b35365953f96&embed=thumbnail']
+
+link = 'https://rest.neptune-prod.its.unimelb.edu.au/server/api/discover/search/objects?savedList=list_d76f1a6b-c97b' \
+       '-4b12-9b0c-a6f25e58d073&projection=SavedItemLists&sort=dc.date.available,' \
+       'DESC&page=0&size=10&scope=3f5551c5-a54a-5156-9e70-b35365953f96&f.itemtype=PhD%20thesis,equals&embed=thumbnail '
+
+print link
+
+url_response = loads(urlopen(link).read())
+maxpages = url_response.get('_embedded').get('searchResult').get('page').get('totalPages')
+
+
+for page in range(min(pages, maxpages)):
+    link = 'https://rest.neptune-prod.its.unimelb.edu.au/server/api/discover/search/objects?savedList=list_d76f1a6b-c97b' \
+           '-4b12-9b0c-a6f25e58d073&projection=SavedItemLists&sort=dc.date.available,' \
+           'DESC&page=' \
+           + str(
+        page) + '&size=10&scope=3f5551c5-a54a-5156-9e70-b35365953f96&f.itemtype=PhD%20thesis,equals&embed=thumbnail '
+    print '==={ %i/%i }===' % (page+1, min(pages, maxpages))
+    url_response = loads(urlopen(link).read())
+    for article in url_response.get('_embedded').get('searchResult').get('_embedded').get('objects'):
+        get_sub_site(article.get('_links').get('indexableObject').get('href'))
+        sleep(5)
+    sleep(5)
+
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -114,4 +113,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
-        
+
+
+
+
+    
