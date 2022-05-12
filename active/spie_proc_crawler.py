@@ -28,7 +28,7 @@ def spie(volume):
     urltrunc = "https://www.spiedigitallibrary.org"
     toclink = "%s/conference-proceedings-of-spie/%s.toc" % (urltrunc, volume)
     print 'open %s' % (toclink)
-    page = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink))
+    page = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(toclink), features="lxml")
     for text in page.body.find_all('text', attrs = {'class' : 'ProceedingsArticleVolTitleText'}):
         conftitle = text.text.strip()
     (section, articletype) = ('', '')
@@ -40,13 +40,20 @@ def spie(volume):
             elif 'articleType' in div['class']:
                 articletype = div.find('a').string
             elif 'TOCLineItemRow1' in div['class'] and not re.search('^Front Matter', section):
-                rec = {'keyw' : [], 'note' : [section, articletype], 'jnl' : jnlname, 'vol' : volume, 
-                       'tc' : 'C', 'autaff' : [], 'refs' : []}
-                for a in div.find_all('a', attrs = {'class' : 'TocLineItemAnchorText1'}):
-                    rec['artlink'] = '%s%s' % (urltrunc, a['href'])
-                    rec['tit'] = a.text.strip()
-                    if not rec['artlink'] in [r['artlink'] for r in recs]:
-                        recs.append(rec)
+                media = []
+                for img in div.find_all('img'):
+                    if img.has_attr('alt'):
+                        media = re.split(' \+ ', img['alt'])
+                if 'Paper' in media:
+                    rec = {'keyw' : [], 'note' : [section, articletype], 'jnl' : jnlname, 'vol' : volume, 
+                           'tc' : 'C', 'autaff' : [], 'refs' : []}
+                    for a in div.find_all('a', attrs = {'class' : 'TocLineItemAnchorText1'}):
+                        rec['artlink'] = '%s%s' % (urltrunc, a['href'])
+                        rec['tit'] = a.text.strip()
+                        if not rec['artlink'] in [r['artlink'] for r in recs]:
+                            recs.append(rec)
+                else:
+                    print '  skip', media        
     #get detailed article pages
     i = 0
     for rec in recs:
@@ -54,11 +61,11 @@ def spie(volume):
         print '  get [%i/%i] %s' % (i, len(recs), rec['artlink'])
         try:
             time.sleep(20)
-            articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=400))
+            articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=400), features="lxml")
         except:
             print 'retry %s in 5 minutes' % (rec['artlink'])
             time.sleep(300)
-            articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=400))
+            articlepage = BeautifulSoup(urllib2.urlopen(rec['artlink'], timeout=400), features="lxml")
         for meta in articlepage.head.find_all('meta'):
             if meta.has_attr('name'):
                 if meta['name'] == 'citation_author':
@@ -149,6 +156,8 @@ def spie(volume):
             rec['autaff'] = [['NONE']]
         if len(args) > 1:
             rec['cnum'] = args[1]
+            if len(args) > 2:
+                rec['fc'] = args[2]
         try:
             del rec['articlepage']
         except:
@@ -170,7 +179,7 @@ if __name__ == '__main__':
     """
     try:
         opts, args = getopt.getopt(sys.argv[1:], "")
-        if len(args) > 2:
+        if len(args) > 3:
             raise getopt.GetoptError("Too many arguments given!!!")
         elif not args:
             raise getopt.GetoptError("Missing mandatory argument volume")
@@ -183,6 +192,7 @@ if __name__ == '__main__':
     recs = spie(volume)
     if len(args) > 1:
         cnum = args[1]
+        if len(args) > 2: fc = args[2]
         outfile = 'spie%s_%s.xml' % (volume, cnum)
     else:
         outfile = 'spie%s.xml' % (volume)
