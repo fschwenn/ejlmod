@@ -53,6 +53,14 @@ boringdegrees = ['Master of Arts (MA)', 'Master of Fine Arts (MFA)',
                  'Master of Science (MS)', 'Doctor of Education (EdD)',
                  'Master of Music (MM)']
 
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 date = 9999
 for i in range(pages):
@@ -83,7 +91,8 @@ for i in range(pages):
                             rec['tit'] = a.text.strip()
                             rec['artlink'] = a['href']
                             a.replace_with('')
-                            prerecs.append(rec)
+                            if not rec['artlink'] in uninterestingDOIS:
+                                prerecs.append(rec)
     print '  ', len(prerecs)
     tocextension = '%i.html' % (i+2)
 
@@ -157,6 +166,8 @@ for rec in prerecs:
     if keepit:
         print ' ' , rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['artlink'])
 
     
     
@@ -172,3 +183,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
