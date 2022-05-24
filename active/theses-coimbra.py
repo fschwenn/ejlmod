@@ -37,13 +37,21 @@ boringdepartments = ['00505UniversidadedeCoimbraFaculdadedeLetras',
                      '0505UniversidadedeCoimbraFaculdadedeLetras']
 
 
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 recs = []
 jnlfilename = 'THESES-COIMBRA-%s' % (stampoftoday)
 for pn in range(numberofpages):
     tocurl = 'https://estudogeral.sib.uc.pt/handle/10316/15519/browse?type=dateissued&sort_by=2&order=DESC&rpp=' + str(rpp) + '&etal=0&submit_browse=Update&offset='+ str(pn * rpp)
     print '==={ %i/%i }==={ %s }===' % (pn+1, numberofpages, tocurl)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl)) 
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl), features="lxml") 
     for tr in tocpage.body.find_all('tr'):
         year = now.year
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [],
@@ -62,7 +70,8 @@ for pn in range(numberofpages):
                     if re.search('handle\/\d', a['href']):
                         rec['artlink'] = 'https://estudogeral.sib.uc.pt' + a['href'] + '?mode=full'
                         rec['hdl'] = re.sub('.*handle\/(.*\d).*', r'\1', a['href'])
-                        prerecs.append(rec)
+                        if not rec['hdl'] in uninterestingDOIS:
+                            prerecs.append(rec)
     time.sleep(5)
 
 
@@ -72,13 +81,13 @@ for rec in prerecs:
     i += 1
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['artlink'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         except:
             print "no access to %s" % (rec['artlink'])
             continue        
@@ -157,6 +166,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
         
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -170,3 +181,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
