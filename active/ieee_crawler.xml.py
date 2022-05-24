@@ -18,19 +18,21 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 from multiprocessing import Process
 from multiprocessing import Manager
+import datetime
 
 
 absdir = '/afs/desy.de/group/library/abs'
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'# + '/special'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" + '_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 
 articlesperpage = 100
 
 driver = webdriver.PhantomJS()
 driver.implicitly_wait(60)
 driver.set_page_load_timeout(30)
-
+now = datetime.datetime.now()
+stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 def meta_with_name(tag):
     return tag.name == 'meta' and tag.has_attr('name')
@@ -132,6 +134,8 @@ def translatejnlname(ieeename):
         jnlname = 'IEEE Trans.Quantum Eng.'
     elif ieeename in ['IEEE Transactions on Nanotechnology']:
         jnlname = 'IEEE Trans.Nanotechnol.'
+    elif ieeename in ['IEEE Journal of Quantum Electronics']:
+        jnlname = 'IEEE J.Quant.Electron.'
     elif ieeename in ["IEEE Symposium Conference Record Nuclear Science 2004.",
                       "IEEE Nuclear Science Symposium Conference Record, 2005"]:
         jnlname = 'BOOK'
@@ -198,7 +202,7 @@ def ieee(number):
     allarticlelinks = []
     notproperarticles = 0
     numberofarticles = 1000000
-    i = 0#XYZ
+    i = 0 #XYZ
     while not gotallarticles:
         i += 1
         pagecommand = '&pageNumber=%i' % (i)
@@ -413,7 +417,10 @@ def ieee(number):
                               'IEEE Transactions on Magnetics publication information', 'Keynotes', 'Sponsors and Supporters',
                               'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems publication information',
                               'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society',
-                              'Table of Contents', 'Sponsors', 'Conference Organization', '[Sponsors]']:
+                              'Table of Contents', 'Sponsors', 'Conference Organization', '[Sponsors]',
+                              'IEEE Information Theory Society information', 'Board of Governors',
+                              'IEEE Journal on Special Areas in Information Theory information for authors',
+                              'IEEE Journal on Special Areas in Information Theoryinformation for authors']:
 
 #            if 'p1' in rec.keys():
 #                del rec['p1']
@@ -427,7 +434,10 @@ def ieee(number):
     else:
         oufname = re.sub('[ \.]','',jnlname).lower()
     if rec.has_key('vol'): oufname += '.'+rec['vol']
-    if rec.has_key('issue'): oufname += '.'+rec['issue']
+    if rec.has_key('issue'):
+        oufname += '.'+rec['issue']
+    else:
+        oufname += '_'+stampoftoday
     if rec.has_key('cnum'): oufname += '.'+rec['cnum']
     #driver.quit()
     return (recs, oufname+'_'+number+'.xml') #XYZ
