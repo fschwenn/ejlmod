@@ -13,14 +13,8 @@ import ejlmod2
 import codecs
 import time
 
-
-ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
-#xmldir = '/afs/desy.de/user/s/schwenn/inspire/ejl'
-
-
-
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 
 def spie(volume):
     jnlname = 'Proc.SPIE Int.Soc.Opt.Eng.'
@@ -51,7 +45,9 @@ def spie(volume):
                         rec['artlink'] = '%s%s' % (urltrunc, a['href'])
                         rec['tit'] = a.text.strip()
                         if not rec['artlink'] in [r['artlink'] for r in recs]:
-                            recs.append(rec)
+                            if not rec['artlink'] in ['https://www.spiedigitallibrary.org/conference-proceedings-of-spie/11364/113640I/High-speed-electronics-for-silicon-photonics-transceivers/10.1117/12.2558467.full',
+                                                      'https://www.spiedigitallibrary.org/conference-proceedings-of-spie/11455/114556D/Photonic-generation-of-phase-coded-chirp-microwave-waveform-by-an/10.1117/12.2565263.full']:
+                                recs.append(rec)
                 else:
                     print '  skip', media        
     #get detailed article pages
@@ -168,14 +164,12 @@ def spie(volume):
             print '=== PROBLEM WITH RECORD ==='
             print rec
             print '==========================='
+            
     return recs
-
-
-
 
 if __name__ == '__main__':
     usage = """
-        python spie_proc_crawler.py volume [cnum]
+        python spie_proc_crawler.py volume [cnum] [fc]
     """
     try:
         opts, args = getopt.getopt(sys.argv[1:], "")
