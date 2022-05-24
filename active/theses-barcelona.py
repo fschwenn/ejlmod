@@ -1,3 +1,4 @@
+
 # -*- coding: utf-8 -*-
 #harvest theses from Barcelona U.
 #FS: 2020-11-19
@@ -44,8 +45,8 @@ for (subj, aff, deps) in departments:
             rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'affiliation' : aff,
                    'supervisor' : []}
             for td in tr.find_all('td', attrs = {'headers' : 't1'}):
-                if re.search('^\d\d\d\d$', td.text):
-                    rec['date'] = td.text.strip()
+                if re.search('\d\d\d\d$', td.text):
+                    rec['date'] = re.sub('.*(\d\d\d\d)$', r'\1', td.text.strip())
                     if int(rec['date']) < startyear:
                         keepit = False
             for td in tr.find_all('td', attrs = {'headers' : 't2'}):
