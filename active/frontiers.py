@@ -33,7 +33,14 @@ sectiontofc = {'Astrobiology' : 'a', 'Astrochemistry' : 'a',
                'Cosmology' : 'ag',
                'Condensed Matter Physics' : 'f',
                'Machine Learning and Artificial Intelligence' : 'c',
-               'Mathematical and Statistical Physics' : 'm'}
+               'Mathematical and Statistical Physics' : 'm',
+               'AI for Human Learning and Behavior Change' : 'c',
+               'AI in Business' : 'c',
+               'AI in Food, Agriculture and Water' : 'c',
+               'Artificial Intelligence in Finance' : 'c',
+               'Big Data and AI in High Energy Physics' : 'c',
+               'Big Data Networks' : 'c',
+               'Quantum Engineering and Technology' : 'q'}
 
 urls = sys.argv[1:]
 recs = []
