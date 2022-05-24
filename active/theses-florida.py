@@ -13,9 +13,11 @@ import codecs
 import datetime
 import time
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
@@ -114,28 +116,40 @@ boring += ['Ed.D.', 'M.A.M.C.', 'M.A.', 'M.H.P.', 'M.S.C.M.', 'M.S.', 'M.U.R.P.'
 
 jnlfilename = 'THESES-FloridaU-%s' % (stampoftoday)
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
-driver = webdriver.PhantomJS()
+driver_options = Options()
+driver_options.headless = True
+driver = webdriver.Chrome(options=driver_options)
 for page in range(pages):
-    tocurl = 'https://ufdc.ufl.edu/collections/ufetd/results?datehi=' + str(stopyear) + '-31-12&datelo=' + str(startyear) + '-01-01&filter=genre%3Atheses&page=' + str(page+1)
+    tocurl = 'https://ufdc.ufl.edu/results?datehi=' + str(stopyear) + '-31-12&datelo=' + str(startyear) + '-01-01&filter=type%3Atheses&page=' + str(page+1)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
-    try:
+    #try:
+    if 1>0:
         driver.implicitly_wait(60)
         driver.get(tocurl)
-        WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'boxed-section')))
+        WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'BriefView_container__2e-2g')))
         tocpage = BeautifulSoup(driver.page_source, features="lxml")
-        sections = tocpage.find_all('section', attrs = {'class' : 'boxed-section'})
+        sections = tocpage.find_all('article', attrs = {'class' : 'BriefView_container__2e-2g'})
         for section in sections:
-            for a in section.find_all('a'):
-                rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [], 'restricted' : False}
-                rec['link'] =  a['href']
-                #marc xml works only for some records
-                rec['artlink'] =  re.sub('.*edu\/(..)(..)(..)(..)(..)\/(.*)\/citation', r'https://ufdcimages.uflib.ufl.edu/\1/\2/\3/\4/\5/\6/marc.xml', a['href'])
-                rec['doi'] = '20.2000/FloridaU/' + re.sub('.*edu\/', '', a['href'])
-                prerecs.append(rec)
-    except:
-        print ' could not load "%s"' % (tocurl)
-        break
+            for div in section.find_all('div', attrs = {'class' : 'BriefView_title__1OtwX'}):
+                for a in div.find_all('a'):
+                    rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [], 'restricted' : False}
+                    rec['link'] =  'https://ufdc.ufl.edu' + a['href']
+                    #marc xml works only for some records
+                    rec['artlink'] =  re.sub('^\/(..)(..)(..)(..)(..)\/(.*)\/citation', r'https://ufdcimages.uflib.ufl.edu/\1/\2/\3/\4/\5/\6/marc.xml', a['href'])
+                    rec['doi'] = '20.2000/FloridaU' + re.sub('\/citation', '', a['href'])
+                    if not rec['doi'] in uninterestingDOIS:
+                        prerecs.append(rec)
+    #except:
+    #    print ' could not load "%s"' % (tocurl)
+    #    break
     time.sleep(10)
 
 i = 0
@@ -143,6 +157,7 @@ recs = []
 for rec in prerecs:
     i += 1
     keepit = True
+    embargo = False
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     #TRY MARC XML
     artfilename = '/tmp/florida_%s' % (re.sub('\W', '', rec['artlink']))
@@ -210,7 +225,7 @@ for rec in prerecs:
     for df in artpage.find_all('datafield', attrs = {'tag' : '502'}):
         for sf in df.find_all('subfield', attrs = {'code' : 'a'}):
             if re.search('Thesis \(', sf.text):
-                degree = re.sub('Thesis\((.*?)\).*', r'\1', sf.text.strip())
+                degree = re.sub('Thesis \((.*?)\).*', r'\1', sf.text.strip())
                 if degree in boring:
                     print '  skip "%s"' % (degree)
                     keepit = False
@@ -227,8 +242,9 @@ for rec in prerecs:
         print '     try', rec['link']
         try:
             driver.get(rec['link'])
-            WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'my-3')))
+            #WebDriverWait(driver, 60).until(EC.presence_of_element_located((By.CLASS_NAME, 'my-3')))
             artpage = BeautifulSoup(driver.page_source, features="lxml")
+            #print artpage
             time.sleep(5)
             for meta in artpage.head.find_all('meta'):
                 if meta.has_attr('property'):
@@ -258,17 +274,23 @@ for rec in prerecs:
                             print '   skip "%s"' % (dep)
                         else:
                             rec['note'].append(dep)
+            if not 'tit' in rec.keys() or not rec['autaff']:
+                embargo = True
+                print '    failed'                
         except:
-            keepit = False
+            embargo = True
             print '    failed'
     
     
 
 
     if keepit:
-        rec['autaff'][-1].append(publisher)
-        print'  ', rec.keys()
-        recs.append(rec)
+        if not embargo:
+            rec['autaff'][-1].append(publisher)
+            print'  ', rec.keys()
+            recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['doi'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -282,3 +304,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
