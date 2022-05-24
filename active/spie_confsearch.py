@@ -33,7 +33,8 @@ if area in ['qis', 'QIS']:
                      '11753', '11769', '11790', '11793', '11807', '11808', '11813', 
                      '11880', '11889', '11890', '11894', '11895', '11902', '11903', 
                      '11907', '11940', '11967', '11982', '11992', '11996', '11997',
-                     '12020', '12194']
+                     '12020', '12194', '12130', '12067', '12030', '12018', '11988',
+                     '11716', '11882']                     
 elif area in ['hep', 'HEP']:
     keywords = ["LHC", "RHIC", "BELLE", "CERN", "DESY", "SLAC", "Fermilab", "KEK", "JINR", "MU2E", "CALICE", "IceCube", "VIRGO"] # ILC -> iterative learning control
     namelikekeywords = ['NICA']
@@ -66,7 +67,10 @@ elif area in ['hep', 'HEP']:
                      '12073', '12076', '12078', '12127', '12128', '12153', '12156', 
                      '12157', '12163', '12164', '12178', '12192', '12193', '12194',
                      '11270']
+#interesting but only videos:
+uninteresting += ['11918', '11917', '11714'] 
 
+    
 regexs = []
 for kw in keywords+namelikekeywords:
     regexs.append(re.compile('([^A-Za-z])(%s)' % (kw)))
@@ -83,7 +87,6 @@ for ordner in [ejldir, os.path.join(ejldir, str(now.year-1)), os.path.join(ejldi
         if redoki.search(datei):
             done.append(redoki.sub(r'\1', datei))
 print '%i done, %i uninteresting' % (len(done), len(uninteresting))
-
 
 searchterm = '%22)+OR+(%22'.join(keywords)
 if namelikekeywords:
@@ -170,6 +173,7 @@ for confnumber in confnumbers:
         ouf.write('    <h3><a href="%s">%s</a></h3>\n' % (conflink, '...'))
     numberofarticles = 0
     pagenumbers = []
+    confsubtit = []
     #check number of conferencepapers in that conference?
     if checkpagination:
         urltrunc = "https://www.spiedigitallibrary.org"
@@ -182,12 +186,18 @@ for confnumber in confnumbers:
                 if div.attrs.has_key('class'):
                     if 'TOCLineItemRow1' in div['class']:
                         numberofarticles += 1
+            for text in page.body.find_all('text', attrs = {'class' : 'ConferenceTitleText'}):
+                confsubtit.append(text.text)
             time.sleep(22)
         except:
             pass
         if verbose:
             print ' ', numberofarticles
         pagestotal += numberofarticles
+    #conference infos
+    if confsubtit:
+        ouf.write('    %s<br>\n' % ('; '.join(confsubtit)))
+
     #loop of articles to get abstract?
     ouf.write('    <ol>\n')
     for (arttit, artlink, artabs) in conferences[confnumber]['articles']:
