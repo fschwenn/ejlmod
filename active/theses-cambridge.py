@@ -38,6 +38,13 @@ tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp
 tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=100&etal=0&scope=&group_by=none&page=2&sort_by=dc.date.issued_dt&order=asc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis')
 tocurls.append('https://www.repository.cam.ac.uk/handle/1810/256064/discover?rpp=100&etal=0&scope=&group_by=none&page=3&sort_by=dc.date.issued_dt&order=asc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=Thesis')
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 dois = []
 for tocurl in tocurls:
@@ -57,7 +64,7 @@ for tocurl in tocurls:
                 rec['tit'] = a.text.strip()
                 rec['link'] = 'https://www.repository.cam.ac.uk' + a['href']
                 rec['doi'] = '20.2000/OXFORD/' + re.sub('\W', '', a['href'])
-                if not rec['doi'] in dois:
+                if not rec['doi'] in dois and not rec['doi'] in uninterestingDOIS:
                     prerecs.append(rec)
                     dois.append(rec['doi'])
 
@@ -121,6 +128,8 @@ for rec in prerecs:
     if keepit:
         recs.append(rec)
         print '   ', rec.keys()
+    else:
+        newuninterestingDOIS.append(rec['doi'])
                                                           
         
     
@@ -137,3 +146,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
