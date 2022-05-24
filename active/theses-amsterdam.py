@@ -46,6 +46,13 @@ driver.implicitly_wait(30)
 driver.get('https://dare.uva.nl')
 driver.page_source
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://dare.uva.nl/search?sort=year;field1=meta;join=and;field2=meta;smode=advanced;sort-publicationDate-max=2100;typeClassification=PhD%20thesis;organisation=Faculty%20of%20Science%20(FNWI);startDoc='+str(10*page+1)
@@ -57,7 +64,8 @@ for page in range(pages):
             rec = {'tc' : 'T',  'jnl' : 'BOOK', 'autaff' : [], 'note' : [], 'supervisor' : []}
             rec['artlink'] = 'https://dare.uva.nl/search?identifier=' + i['data-identifier']
             rec['hdl'] = '11245.1/' + i['data-identifier']
-            prerecs.append(rec)
+            if not rec['hdl'] in uninterestingDOIS:
+                prerecs.append(rec)
     time.sleep(2)
 
 recs = []
@@ -144,6 +152,8 @@ for rec in prerecs:
     if keepit:
         recs.append(rec)
         print rec.keys()
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
                     
                 
                 
@@ -161,6 +171,13 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+    
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
 
 
 
