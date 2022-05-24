@@ -8,7 +8,6 @@ import urllib2
 import urlparse
 from bs4 import BeautifulSoup
 import re
-import ejlmod2
 import codecs
 import time
 import datetime
