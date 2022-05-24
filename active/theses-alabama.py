@@ -51,7 +51,6 @@ for page in range(pages):
 
 i = 0
 for rec in recs:
-    keepit = True
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['link'])
     try:
