@@ -13,6 +13,8 @@ import codecs
 from bs4 import BeautifulSoup
 import time
 import datetime
+import ssl
+
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
@@ -44,12 +46,14 @@ elif jnl == 'eureka':
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 jnlfilename = '%s%s_%s' % (jnl, vol, stampoftoday)
-
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
 
     
 print urltrunk
 try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(urltrunk), features="lxml")
+    tocpage = BeautifulSoup(urllib2.urlopen(urltrunk, context=ctx), features="lxml")
     time.sleep(3)
 except:
     print "retry %s in 180 seconds" % (urltrunk)
@@ -58,7 +62,7 @@ except:
 
 recs = []
 if jnl in ['pip', 'cip']:
-    tables = tocpage.body.find_all('div', attrs = {'class' : 'obj_article_summary'})
+    tables = tocpage.body.find_all('div', attrs = {'class' : ['obj_article_summary', 'article_summary_body']})
 elif jnl == 'eureka':
     tables = tocpage.body.find_all('table', attrs = {'class' : 'tocArticle'})
 
@@ -90,6 +94,11 @@ for table in tables:
             for a in h3.find_all('a'):
                 rec['artlink'] = a['href']
                 rec['tit'] = a.text.strip()
+    if not rec.has_key('tit'):
+        for h5 in table.find_all('h5', attrs = {'class' : 'summary_title_wrapper'}):
+            for a in h5.find_all('a'):
+                rec['artlink'] = a['href']
+                rec['tit'] = a.text.strip()
     recs.append(rec)
 
 
@@ -98,7 +107,7 @@ for rec in recs:
     i += 1
     autaff = False
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
-    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+    artpage =  BeautifulSoup(urllib2.urlopen(rec['artlink'], context=ctx), features="lxml")
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #date
