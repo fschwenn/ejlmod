@@ -77,6 +77,13 @@ boringfacs = [u'Sosyal Bilimleri Enstitüsü', u'Arkeoloji Ana Bilim Dalı', u'B
 hdr = {'User-Agent' : 'Magic Browser'}
 jnlfilename = 'THESES-ANKARA-%s' % (stampoftoday)
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://dspace.ankara.edu.tr/xmlui/handle/20.500.12575/27627/discover?rpp=' + str(rpp) + '&etal=0&group_by=none&page=' + str(page+1) + '&sort_by=dc.date.issued_dt&order=desc'
@@ -102,7 +109,7 @@ for page in range(pages):
         for a in div.find_all('a'):
             rec['link'] = 'https://dspace.ankara.edu.tr' + a['href']
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-        if keepit:
+        if keepit and not rec['hdl'] in uninterestingDOIS:
             prerecs.append(rec)
     print '  %i prerecs so far' % (len(prerecs))
 
@@ -188,6 +195,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -202,3 +211,8 @@ if not line in retfiles_text:
     retfiles.write(line)
     retfiles.close()
 
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
