@@ -32,7 +32,8 @@ publisher = 'Springer'
 
 #current timestamp (or other unique mark)
 cday = sys.argv[1]
-
+#years to cover
+years = 2
 
 
 
@@ -990,7 +991,12 @@ def convertissue(journalnumber, dirname):
                 if re.search('Meta$', filename):
                     fullfilename = os.path.join(artdirfullpath, filename)
                     rec = convertarticle(journalnumber, fullfilename, 'article')
-                    if rec: recs.append(rec)
+                    if rec:
+                        if 'year' in rec.keys():
+                            if int(rec['year']) > datetime.datetime.now().year-years:
+                                recs.append(rec)
+                        else:
+                            recs.append(rec)
     print ' -> %i records' % (len(recs))
     if recs:
         if 'vol' in recs[-1].keys():
