@@ -74,10 +74,17 @@ boring = ['Ecology & Evolutionary Biology', 'Pharmaceutical Sciences', 'Accounti
           'Gender & Women’s Studies', 'History & Theory of Art', 'Near Eastern Studies',
           'Cell Biology & Anatomy', 'Statistics', 'Microbiology', 'Rehabilitation',
           'Mining Geological & Geophysical Engineering', 'Special Education', 'Political Science',
-          'Educational Leadership',
+          'Educational Leadership', 'Cellular & Molecular Medicine', 'Molecular Medicine',
           'Information Resources & Library Science', 'Insect Science', 'Art', 'Entomology',
           'Natural Resources and the Environment', 'Natural Resources Studies', 'Plant Sciences',
           'Government and Public Policy', 'Optical Sciences', 'Speech, Language, & Hearing Sciences']
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
 
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
@@ -85,7 +92,7 @@ for j in range(pages):
     tocurl = 'https://repository.arizona.edu/handle/10150/129652/browse?order=DESC&rpp=' + str(rpp) + '&sort_by=2&etal=-1&offset=' + str(j*rpp) + '&type=dateissued'
     print '==={ %i/%i }==={ %s }===' % (j+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     divs = tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'})
     relevant = 0
     for div in divs:
@@ -93,7 +100,8 @@ for j in range(pages):
         for a in div.find_all('a'):
             rec['link'] = 'https://repository.arizona.edu' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['hdl'] in uninterestingDOIS:
+                prerecs.append(rec)
     time.sleep(15)
 
 i = 0
@@ -103,13 +111,13 @@ for rec in prerecs:
     keepit = True
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         except:
             print "no access to %s" % (rec['link'])
             continue
@@ -162,6 +170,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -175,3 +185,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
