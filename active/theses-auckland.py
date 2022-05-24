@@ -87,7 +87,16 @@ boring = ['Mechanical Engineering', 'Politics', 'Biology', 'Chemistry', 'Urban P
           'Information System and Operations Management', 'Language Teaching and Learning',
           'Medical and Health Science', 'Medical Education', 'Molecular Medicine Pathology',
           'Chemical and Mateirals Engineering', 'Musicology', 'PhD Education',
-          'Obstetrics', 'Phamacy', 'Sport and Exercise Science', 'Translation and Interpretin']
+          'Obstetrics', 'Phamacy', 'Sport and Exercise Science', 'Translation and Interpretin',
+          'Classics and Ancient History']
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 recs = []
 prerecs = []
 for page in range(pages):        
@@ -106,7 +115,8 @@ for page in range(pages):
                 rec['tit'] = a.text.strip()
                 rec['link'] = 'https://researchspace.auckland.ac.nz' + a['href']
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                prerecs.append(rec)
+                if not rec['hdl'] in uninterestingDOIS:
+                    prerecs.append(rec)
 
 i = 0
 for rec in prerecs:
@@ -163,6 +173,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
@@ -176,3 +188,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
