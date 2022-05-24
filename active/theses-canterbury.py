@@ -31,6 +31,15 @@ hdr = {'User-Agent' : 'Magic Browser'}
 jnlfilename = 'THESES-CANTERBURY-%s' % (stampoftoday)
 
 
+
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://ir.canterbury.ac.nz/handle/10092/841/discover?filtertype_1=discipline&filter_relational_operator_1=contains&filter_1=physics&submit_apply_filter=&rpp=' + str(rpp) + '&sort_by=dc.date.issued_dt&order=desc&page=' + str(page+1)
@@ -44,7 +53,8 @@ for page in range(pages):
             for h4 in a.find_all('h4'):
                 rec['artlink'] = 'https://ir.canterbury.ac.nz' + a['href']# + '?show=full'
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                prerecs.append(rec)
+                if not rec['hdl'] in uninterestingDOIS:
+                    prerecs.append(rec)
 
     recs = []
 
@@ -104,6 +114,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 
 #closing of files and printing
@@ -118,4 +130,10 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
         
