@@ -9,7 +9,7 @@ import re
 import sys
 import unicodedata
 import string
-import codecs 
+import codecs
 import urllib2
 import urlparse
 from bs4 import BeautifulSoup
@@ -48,13 +48,16 @@ if jnl == 'mathematique':
     jnlname = 'Compt.Rend.Math.'
 elif jnl == 'physique':
     year = str(1999 + int(vol))
-    tocurl = 'https://comptes-rendus.academie-sciences.fr/physique/issues/CRPHYS_%s__%s_%s/' % (year, vol, iss)
+    if iss:
+        tocurl = 'https://comptes-rendus.academie-sciences.fr/physique/issues/CRPHYS_%s__%s_%s/' % (year, vol, iss)
+    else:
+        tocurl = 'https://comptes-rendus.academie-sciences.fr/physique/volume/CRPHYS_%s__%s/' % (year, vol)
     jnlname = 'Comptes Rendus Physique'
 
 hdr = {'User-Agent' : 'Mozilla/5.0'}
 print tocurl
 req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
+tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
 recs = []
 for span in tocpage.body.find_all('span', attrs = {'class' : 'article-title'}):
     for a in span.find_all('a'):
@@ -71,7 +74,7 @@ for rec in recs:
     time.sleep(3)
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     req = urllib2.Request(rec['artlink'], headers=hdr)
-    artpage = BeautifulSoup(urllib2.urlopen(req))    
+    artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name') and meta.has_attr('content'):
             #DOI
@@ -131,7 +134,7 @@ for rec in recs:
 
     print rec.keys()
 
-  
+
 #write xml
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
 xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
@@ -141,7 +144,7 @@ xmlfile.close()
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
 retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
+if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
