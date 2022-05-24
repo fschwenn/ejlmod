@@ -18,9 +18,9 @@ driver = webdriver.Chrome(options=driver_options)
 
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
-pages = 1+5
+pages = 1
 
 now = datetime.now()
 stamp_of_today = '%4d-%02d-%02d' % (now.year, now.month, now.day)
