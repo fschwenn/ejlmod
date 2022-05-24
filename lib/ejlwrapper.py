@@ -45,7 +45,6 @@ pythoncommand = '/home/library/.virtualenvs/inspire/bin/python'
 #        ('isrnmp'    , 1,'%s %s/hindawi.xml.py isrnmp   %i %i'  % (pythoncommand, lproc,pryear,prmonth)),
 #        ('isrnastro' , 1,'%s %s/hindawi.xml.py isrnastro %i %i'  % (pythoncommand, lproc,pryear,prmonth)),
 #        ('lrr'       , 1,'%s %s/livingreviews.py %i %i' % (pythoncommand, lproc,pryear,prmonth)),
-        #('theses-queensland', 1, '%s %s/theses-queensland.py' % (pythoncommand, lproc)),
         #('theses-bicocca', 2, '%s %s/theses-bicocca.py' % (pythoncommand, lproc)),
 #        ('jdg'       , 4,'%s %s/intlpress.py jdg %i 1-3'  % (pythoncommand, lproc,(pryear-1983)*3+2+prthird)),
 #        ('ajm'       , 3,'%s %s/intlpress.py ajm %i %i'  % (pythoncommand, lproc,pryear-1996,prquarter)),
@@ -417,7 +416,8 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-rochester', 2, '%s %s/theses-rochester.py' % (pythoncommand, lproc)),
         ('theses-colorado', 2, '%s %s/theses-colorado.py' % (pythoncommand, lproc)),
         ('information'  , 1,'%s %s/mdpi.sftp.py information' % (pythoncommand, lproc)),
-        ('theses-florida', 2, '%s %s/theses-florida.py' % (pythoncommand, lproc)),
+        ('theses-buenosaires', 2, '%s %s/theses-buenosaires.py' % (pythoncommand, lproc)),
+        #('theses-florida', 2, '%s %s/theses-florida.py' % (pythoncommand, lproc)),
         ('theses-syracuse', 3, '%s %s/theses-syracuse.py' % (pythoncommand, lproc)),
         ('theses-ncsu', 2, '%s %s/theses-ncsu.py' % (pythoncommand, lproc)),
         ('theses-oviedo', 3, '%s %s/theses-oviedo.py' % (pythoncommand, lproc)),
@@ -473,7 +473,8 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-middleeasttech', 1, '%s %s/theses-middleeasttech.py' % (pythoncommand, lproc)),
         ('theses-wigner', 3, '%s %s/theses-wigner.py' % (pythoncommand, lproc)),
         ('theses-zaragoza', 3, '%s %s/theses-zaragoza.py' % (pythoncommand, lproc)),
-        ('theses-melbourne', 3, '%s %s/theses-melbourne.py' % (pythoncommand, lproc))]
+        ('theses-melbourne', 3, '%s %s/theses-melbourne.py' % (pythoncommand, lproc)),
+        ('theses-queensland', 1, '%s %s/theses-queensland.py' % (pythoncommand, lproc))]
 
 
 if prmonth == 12:
