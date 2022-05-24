@@ -100,6 +100,13 @@ boring = ['klips-13979', 'klips-13980', 'klips-13982', 'klips-13984', 'klips-139
 
                  
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 tocurltrunc = 'https://kups.ub.uni-koeln.de/cgi/search/archive/advanced?cache=1750151&order=-date%2Fcreators_name%2Ftitle&_action_search=1&exp=0%7C1%7C-date%2Fcreators_name%2Ftitle%7Carchive%7C-%7Csubjects%3Asubjects%3AANY%3AEQ%3A510+530+no%7Ctype%3Atype%3AANY%3AEQ%3Athesis%7C-%7Ceprint_status%3Aeprint_status%3AANY%3AEQ%3Aarchive%7Cmetadata_visibility%3Ametadata_visibility%3AANY%3AEQ%3Ashow&screen=Search'
 #bad certificate
 ctx = ssl.create_default_context()
@@ -113,7 +120,7 @@ for i in range(pagestocheck):
     tocurl = '%s&search_offset=%i' % (tocurltrunc, 20*i)
     print '---{ %i/%i }---{ %s }---' % (i+1, pagestocheck, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
+    tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
     time.sleep(2)
     for tr in tocpage.body.find_all('tr', attrs = {'class' : 'ep_search_result'}):        
         for a in tr.find_all('a'):
@@ -128,7 +135,8 @@ for i in range(pagestocheck):
                     rec['link'] = a['href']
                     if not re.search('PhD thesis', trtext):
                         rec['note'].append('unknown thesis type')
-                    prerecs.append(rec)
+                    if not rec['link'] in uninterestingDOIS:
+                        prerecs.append(rec)
 
 #check individual thesis pages
 i = 0
@@ -138,13 +146,13 @@ for rec in prerecs:
     i += 1
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.urlopen(rec['link'], context=ctx))
+        artpage = BeautifulSoup(urllib2.urlopen(rec['link'], context=ctx), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.open(rec['link'], context=ctx))
+            artpage = BeautifulSoup(urllib2.open(rec['link'], context=ctx), features="lxml")
         except:
             print "no access to %s" % (rec['link'])
             continue
@@ -239,6 +247,8 @@ for rec in prerecs:
 #        for k in rec.keys():
 #            print ' - ', k, rec[k]
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['link'])
     
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -252,5 +262,12 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
 
 
