@@ -117,14 +117,14 @@ for (hdl, uni, dep) in departments[kw]:
         print '   ---{ %s }---' % (tocurl)
         nall = 0 
         try:
-            tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+            tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl), features="lxml")
             time.sleep(5)
         except:
             if not fourofour:
                 try:
                     print "retry %s in 300 seconds" % (tocurl)
                     time.sleep(300)
-                    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+                    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl), features="lxml")
                 except:
                     print ' +++ 404 +++'
                     fourofour += 1
@@ -150,8 +150,9 @@ for (hdl, uni, dep) in departments[kw]:
                 for td2 in tr.find_all('td', attrs = {'headers' : 't2'}):   
                     rec['tit'] = td2.text.strip()
                     for a in td2.find_all('a'):                
-                        rec['artlink'] = 'http://%s%s' % (server, a['href'])
+                        rec['link'] = 'http://%s%s' % (server, a['href'])
                         rec['hdl'] = re.sub('.*handle\/', '',  a['href'])
+                        rec['FFT'] = re.sub('\/', '_', rec['hdl']) + '.pdf'                        
                 #author
                 for td2 in tr.find_all('td', attrs = {'headers' : 't3'}):   
                     rec['auts'] = [ td2.text.strip() ]
@@ -161,22 +162,22 @@ for (hdl, uni, dep) in departments[kw]:
                         rec['supervisor'].append( [ sv ])
                 ##get article page
                 try:
-                    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+                    artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
                     time.sleep(5)
                 except:
                     try:
                         print "retry %s in 180 seconds" % (rec['link'])
                         time.sleep(180)
-                        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+                        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
                     except:
-                        print "no access to %s" % (rec['artlink'])                            
+                        print "no access to %s" % (rec['link'])                            
                         continue
                 for meta in artpage.head.find_all('meta'):
                     if meta.attrs.has_key('name'):
                         #pages
-                        if meta['name'] == 'DCTERMS.spatial':
-                            if re.search('\d', meta['content']):
-                                rec['pages'] = re.sub('^\D?(\d+).*', r'\1', meta['content'])
+                        if meta['name'] in ['DCTERMS.spatial', 'DCTERMS.extent']:
+                            if re.search('\d\d+', meta['content']):
+                                rec['pages'] = re.sub('^\D?(\d\d+).*', r'\1', meta['content'])
                         #date
                         elif meta['name'] == 'DC.date':
                             if re.search('\d\d\d\d', meta['content']):
@@ -190,8 +191,15 @@ for (hdl, uni, dep) in departments[kw]:
                         elif meta['name'] == 'DCTERMS.abstract':
                             if len(meta['content']) > 50:
                                 rec['abs'] = meta['content']
+                        #keywords
+                        elif meta['name'] == 'DC.subject':
+                            rec['keyw'].append(meta['content'])
                 if not 'abs' in rec.keys():
                     rec['note'].append('Vorsicht! kein Abstract')
+                #license
+                for a in artpage.find_all('a'):
+                    if a.has_attr('href') and re.search('creativecommons.org', a['href']):
+                        rec['license'] = {'url' : a['href']}
                 #year
                 if 'date' in rec.keys():
                     year = int(re.sub('.*(\d\d\d\d).*', r'\1', rec['date']))
