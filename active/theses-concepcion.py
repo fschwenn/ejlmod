@@ -22,34 +22,36 @@ now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Concepcion U.'
-jnlfilename = 'THESES-CONCEPCION-%sA' % (stampoftoday)
+jnlfilename = 'THESES-CONCEPCION-%s' % (stampoftoday)
 hdr = {'User-Agent' : 'Magic Browser'}
 
 recs = []
-tocurl = 'http://repositorio.udec.cl/jspui/handle/11594/120'
-print tocurl
-req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
-for td in tocpage.body.find_all('td', attrs = {'headers' : 't1'}):
-    rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : []}
-    for a in td.find_all('a'):
-        if re.search('handle\/11594', a['href']):
-            rec['link'] = 'http://repositorio.udec.cl' + a['href'] #+ '?show=full'
-            rec['doi'] = '20.2000/Concepcion/' + re.sub('.*handle\/', '', a['href'])
-            recs.append(rec)
+rpp = 10 
+for dep in ['120', '117', '124']:
+    tocurl = 'http://repositorio.udec.cl/jspui/handle/11594/' + dep + '/browse?type=dateissued&sort_by=2&order=DESC&rpp=' + str(rpp) 
+    print tocurl
+    req = urllib2.Request(tocurl, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+    for td in tocpage.body.find_all('td', attrs = {'headers' : 't1'}):
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : []}
+        for a in td.find_all('a'):
+            if re.search('handle\/11594', a['href']):
+                rec['link'] = 'http://repositorio.udec.cl' + a['href'] #+ '?show=full'
+                rec['doi'] = '20.2000/Concepcion/' + re.sub('.*handle\/', '', a['href'])
+                recs.append(rec)
 
 i = 0
 for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         except:
             print "no access to %s" % (rec['link'])
             continue    
@@ -74,6 +76,7 @@ for rec in recs:
             #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['hidden'] = meta['content']
+    print '  ', rec.keys()
 
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
