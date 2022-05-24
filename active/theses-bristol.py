@@ -62,6 +62,14 @@ boringdeps = ['School of Geographical Sciences', 'Bristol Composites Institute (
 
 
 
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
 for year in years:
@@ -88,7 +96,8 @@ for year in years:
                     rec['link'] = a['href']
                     rec['tit'] = a.text.strip()
                     rec['doi'] = '20.2000/Bristol/' + re.sub('\W', '', a['href'])[41:]
-                    prerecs.append(rec)
+                    if not rec['doi'] in uninterestingDOIS:
+                        prerecs.append(rec)
 
 i = 0
 recs = []
@@ -151,6 +160,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['doi'])
 
 
 #closing of files and printing
@@ -165,3 +176,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
