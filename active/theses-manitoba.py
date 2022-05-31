@@ -42,7 +42,7 @@ boringdisciplines = ['Pharmacology and Therapeutics', 'Disability Studies', 'His
                      'Medical Microbiology and Infectious Diseases', 'Microbiology',
                      'Native Studies', 'Nursing', 'Pharmacy', 'Physiology and Pathophysiology',
                      'Plant Science', 'Biochemistry and Medical Genetics', 'Business Administration',
-                     'Cancer Control', 'Curriculum, Teaching and Learning',
+                     'Cancer Control', 'Curriculum, Teaching and Learning', 'English, Theatre, Film and Media'
                      'Agribusiness and Agricultural Economics', 'Food Science',
                      'Medical Microbiology', 'Accounting and Finance', 'Architecture',
                      'English', 'Family Social Sciences', 'History (Archival Studies)',
@@ -57,7 +57,16 @@ boringdegrees = ['Master of Science (M.Sc.)', 'Master of Arts (M.A.)',  'Master 
                  'Master of Landscape Architecture (M.Land.Arch.)',  'Master of Dentistry (M. Dent.)',
                  'Master of Natural Resources Management (M.N.R.M.)', 'Master of Nursing (M.N.)',
                  'Master of Social Work (M.S.W.)', 'Master of City Planning (M.C.P.)',
+                 'Master of Mathematical, Computational and Statistical Sciences (M.M.C.S.S.)',
                  'Master of Laws (LL.M.)', 'Bachelor of Science (B.Sc.)']
+
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
 
 prerecs = []
 for page in range(pages):
@@ -79,7 +88,8 @@ for page in range(pages):
                 if re.search('handle', a['href']):
                     rec['artlink'] = 'https://mspace.lib.umanitoba.ca' + a['href'] + '?show=full'
                     rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                    prerecs.append(rec)
+                    if not rec['hdl'] in uninterestingDOIS:
+                        prerecs.append(rec)
     time.sleep(2)
 
 i = 0
@@ -153,6 +163,8 @@ for rec in prerecs:
     if keepit:
         recs.append(rec)
         print '  ', rec.keys()
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
                 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -166,3 +178,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
