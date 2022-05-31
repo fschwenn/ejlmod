@@ -71,6 +71,14 @@ boring = [u'Biología Molecular y Celular, Departamento de',
           u'Instituto Universitario de Oncología, IUOPA',
           u'Sociología, Departamento de']
 
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
         tocurl = 'https://digibuo.uniovi.es/dspace/handle/10651/5573/discover?rpp=' + str(rpp) + '&page=' + str(page+1) + '&sort_by=dc.date.issued_dt&order=desc'
@@ -89,7 +97,8 @@ for page in range(pages):
                     rec['tit'] = a.text.strip()
                     rec['link'] = 'https://digibuo.uniovi.es' + a['href']
                     rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                    prerecs.append(rec)
+                    if not rec['hdl'] in uninterestingDOIS:
+                            prerecs.append(rec)
 
 i = 0
 recs = []
@@ -148,6 +157,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
@@ -161,3 +172,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
