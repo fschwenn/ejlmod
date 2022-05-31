@@ -44,6 +44,12 @@ for rejectword in ['Department of Adult Learning', 'Department of Agricultural',
                    'Department of Statistics', 'Kansas Department of Transportation', 'Master of ']:
     rejectwords.append(re.compile(rejectword))
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
 
 prerecs = []
 jnlfilename = 'THESES-KANSASSTATE-%s' % (stampoftoday)
@@ -52,14 +58,15 @@ for page in range(pages):
     tocurl = 'https://krex.k-state.edu/dspace/handle/2097/4/recent-submissions?offset=' + str(page*5)
     print '---{ %i/%i }---{ %s }------' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     time.sleep(5)
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-title'}):
         for a in div.find_all('a'):
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
             rec['artlink'] = 'https://krex.k-state.edu' + a['href']
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['hdl'] in uninterestingDOIS:
+                prerecs.append(rec)
 
 
 i = 0
@@ -69,13 +76,13 @@ for rec in prerecs:
     i += 1
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         time.sleep(5)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['link'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         except:
             print "no access to %s" % (rec['link'])
             continue
@@ -111,6 +118,8 @@ for rec in prerecs:
     rec['autaff'][-1].append(publisher)
     if keepit:
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -124,3 +133,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
