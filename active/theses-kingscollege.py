@@ -32,7 +32,7 @@ boring = ['Social Genetic & Developmental Psychiatry', 'Global Health & Social M
           'Centre for Oral, Clinical & Translational Sciences', 'Chemistry', 'Classics',
           'Comprehensive Cancer Centre', 'Culture, Media & Creative Industries',
           'Defence Studies', 'Developmental Neurobiology', 'English Language & Literature',
-          'European & International Studies', 'Geography', 'War Studies', 
+          'European & International Studies', 'Geography', 'War Studies', 'Ophthalmology',
           'School of Education, Communication & Society', 'Theology & Religious Studies', 
           'Institute of Pharmaceutical Science', 'Lau China Institute',
           'Medical & Molecular Genetics', 'Medical Education', 'Political Economy',
@@ -57,7 +57,7 @@ boring = ['Social Genetic & Developmental Psychiatry', 'Global Health & Social M
           'Neuroimaging', 'Nursing & Midwifery Research', 'Old Age Psychiatry',
           'Perinatal Imaging & Health', 'Respiratory Medicine & Allergy', 'Russia Institute',
           'Surgical & Intervention Engineering', 'Vascular Biology & Inflammation',
-          'Arts & Humanities Research Institute', "Cancer Epidemiology", 
+          'Arts & Humanities Research Institute', "Cancer Epidemiology", 'African Leadership Centre',
           "Centre for Dental Education", "Centre for Hellenic Studies", "Physiology",
           "Population & Patient Health", "Renal Sciences", "Salivary Research Unit", 
           "Child & Family Health Nursing", "Clinical Neuroscience", "Clinical Pharmacology",
@@ -68,9 +68,16 @@ boring = ['Social Genetic & Developmental Psychiatry', 'Global Health & Social M
           "Paediatric Allergy", "Paediatrics", "Periodontology", "PET Imaging Centre Facility", 
           "Middle Eastern Studies", "Midwifery", "Molecular Haematology", "Oral Immunology", 
           "King's Centre for Global Health & Health Partnerships", 'Vascular Risk & Surgery',
-          'Randall Centre of Cell & Molecular Biophysics']
+          'Randall Centre of Cell & Molecular Biophysics', 'Surgical & Interventional Engineering']
 
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
 
 prerecs = []
 #first get links of year pages
@@ -94,7 +101,8 @@ for page in range(pages):
                             rec['year'] = year
                             rec['date'] = year
                             rec['doi'] = '20.2000/KINGsCOLLEGE/' + re.sub('.*\/(.*).html', r'\1', a['href'])[-60:]
-                    prerecs.append(rec)
+                    if not rec['doi'] in uninterestingDOIS:
+                        prerecs.append(rec)
     time.sleep(5)
 
 
@@ -144,6 +152,8 @@ for rec in prerecs:
     if keepit:
         print '     ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['doi'])
     
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -157,4 +167,10 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
     
