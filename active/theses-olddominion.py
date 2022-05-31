@@ -26,6 +26,14 @@ publisher = 'Old Dominion U. (main)'
 jnlfilename = 'THESES-OLDDOMINION-%s' % (stampoftoday)
 boringdegrees = []
 basetocurl = 'https://digitalcommons.odu.edu/'
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for (url, aff, fc) in [('physics_etds/', 'Old Dominion U.', ''),
                        ('mathstat_etds/', 'Old Dominion U. (main)', 'm')]:
@@ -58,7 +66,8 @@ for (url, aff, fc) in [('physics_etds/', 'Old Dominion U.', ''),
                             rec['tit'] = a.text.strip()
                             rec['artlink'] = a['href']
                             a.replace_with('')
-                            prerecs.append(rec)
+                            if not rec['artlink'] in uninterestingDOIS:
+                                prerecs.append(rec)
     print '  ', len(prerecs)
 
 
@@ -131,6 +140,8 @@ for rec in prerecs:
     if keepit:
         print ' ' , rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['artlink'])
 
 
 #closing of files and printing
@@ -145,3 +156,10 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
+
