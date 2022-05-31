@@ -95,6 +95,13 @@ boringinstitutes = ['Education in Culture', 'Analytical Biochemistry', 'Arctic a
                     'User-friendly Private Law', 'Van der Heide group', 'Van der Zee lab', 'Van Doorn group',
                     'Vrije Universiteit Amsterdam, Amsterdam', 'Wertheim lab', 'X-ray Crystallography']
                     
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
 for page in range(pages):
@@ -108,7 +115,8 @@ for page in range(pages):
             rec['artlink'] = a['href']
         for span in li.find_all('span', attrs = {'class' : 'numberofpages'}):
             rec['pages'] = re.sub('.*?(\d\d+).*', r'\1', span.text.strip())
-        prerecs.append(rec)
+        if not rec['artlink'] in uninterestingDOIS:
+            prerecs.append(rec)
     time.sleep(5)
 
 i = 0
@@ -194,6 +202,8 @@ for rec in prerecs:
             rec['doi'] = '30.3000/Groningen/' + re.sub('\W', '', rec['link'][39:])
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['artlink'])
 
 
 #closing of files and printing
@@ -208,3 +218,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
