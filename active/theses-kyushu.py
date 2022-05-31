@@ -43,6 +43,14 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://catalog.lib.kyushu-u.ac.jp/opac_search/?lang=1&amode=2&appname=Netscape&version=5&cmode=0&kywd=&smode=1&year1_exp=' + str(startyear) + '&year2_exp=' + str(stopyear) + '&file_exp[]=4&dpmc_exp[]=all&txtl_exp=2&sort_exp=6&disp_exp=' + str(rpp) + '&start=' + str(page*rpp+1)
@@ -56,7 +64,9 @@ for page in range(pages):
                 if not div2.text.strip() in boringdegrees:
                     for a in div.find_all('a'):
                         rec['artlink'] = 'https://catalog.lib.kyushu-u.ac.jp' + a['href']
-                    prerecs.append(rec)
+                        rec['hdl'] = re.sub('.*bibid=(\d+).*', r'2324/\1', a['href'])
+                    if not rec['hdl'] in uninterestingDOIS:
+                        prerecs.append(rec)
     time.sleep(2)
         
 
@@ -129,6 +139,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -142,3 +154,10 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
+        
