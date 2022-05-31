@@ -34,19 +34,20 @@ boringdeps = ['Arquitetura e Urbanismo', 'Administrao', 'Antropologia', 'Artes C
               'Engenharia de Materiais', 'Engenharia de Produo', 'Engenharia Eltrica',
               'Engenharia Mecnica', 'Engenharia Qumica', 'Filosofia', 'Histria',
               'Finanas e Contabilidade', 'Gerenciamento Ambiental', 'Gesto Pblica',
-              'Economia do Trabalho e Economia de Empresas',
-              'Informtica', 'Jornalismo', 'Letras', 'Lingustica', 'Medicina', 'Msica',
+              'Economia do Trabalho e Economia de Empresas', #'Informtica',
+              'Jornalismo', 'Letras', 'Lingustica', 'Medicina', 'Msica',
               'Cincia da Informao', 'Engenharia Civil e Ambiental', 'Zoologia',
               'Engenharia de Alimentos', 'Farmacologia', 'Geografia', 'Odontologia', 
               'Psicologia Social', 'Psicologia', 'Servio Social', 'Sociologia',
               'Direitos Humanos', 'Lingustica e ensino', 'cincias Juridicas',
               'Qumica e Bioqumica de Alimentos', 'Tecnologia Agroalimentar',
-              'Tecnologia de Alimentos',
+              'Tecnologia de Alimentos', 'Cincias Fisiolgicas', 'Fisioterapia',
+              'Programa Multicntrico de Ps-Graduao em Cincias Fisiolgicas',
               'Economia', 'Engenharias Renovveis', 'Letras Clssicas e Vernculas', 
               'Agricultura', 'Artes Visuais', 'Cincia Animal', 'Cincias Biolgicas',
               'Comunicao', 'Engenharia Cvil e Ambiental', 'Engenharia de Energias Renovveis',
               'Engenharia e Meio Ambiente', 'Fsica', 'Solos e Engenharia Rural', 'Zootecnia',
-              'Nutrio', 'Qumica', 'Relaes Internacionais']
+              'Nutrio', 'Qumica', 'Relaes Internacionais', 'Gesto e Tecnologia Agroindustrial']
               
 
 jnlfilename = 'THESES-PARAIBA-%s' % (stampoftoday)
@@ -56,9 +57,16 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
-    tocurl = 'https://repositorio.ufpb.br/jspui/simple-search?location=&query=&filter_field_1=type&filter_type_1=equals&filter_value_1=Disserta%C3%A7%C3%A3o&rpp=' + str(rpp) + '&sort_by=dc.date.issued_dt&order=DESC&etal=0&submit_search=Update&start=' + str((page+20 + 20)*rpp)
+    tocurl = 'https://repositorio.ufpb.br/jspui/simple-search?location=&query=&filter_field_1=type&filter_type_1=equals&filter_value_1=Disserta%C3%A7%C3%A3o&rpp=' + str(rpp) + '&sort_by=dc.date.issued_dt&order=DESC&etal=0&submit_search=Update&start=' + str(page*rpp)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
@@ -67,7 +75,8 @@ for page in range(pages):
         for a in td.find_all('a'):
             rec['link'] = 'https://repositorio.ufpb.br' + a['href'] #+ '?show=full'
             rec['doi'] = '20.2000/Paraiba/' + re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['doi'] in uninterestingDOIS:
+                prerecs.append(rec)
     time.sleep(2)
         
 
@@ -142,6 +151,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['doi'])
 
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -155,3 +166,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
