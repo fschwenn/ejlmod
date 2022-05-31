@@ -40,6 +40,14 @@ boringfacs = ['Architecture', 'Chemistry', 'Architectural Restoration',
 hdr = {'User-Agent' : 'Magic Browser'}
 jnlfilename = 'THESES-IZMIR-%s' % (stampoftoday)
 
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://openaccess.iyte.edu.tr/xmlui/handle/11147/60/discover?filtertype=type&filter_relational_operator=equals&filter=doctoralThesis&sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp) + '&page=' + str(page+1)
@@ -60,7 +68,8 @@ for page in range(pages):
         for a in div.find_all('a'):
             rec['link'] = 'https://openaccess.iyte.edu.tr' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['hdl'] in uninterestingDOIS:
+                prerecs.append(rec)
 
 recs = []
 i = 0
@@ -132,6 +141,9 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
+
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -145,4 +157,11 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
         
