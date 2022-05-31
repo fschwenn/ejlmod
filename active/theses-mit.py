@@ -36,6 +36,8 @@ tocurl = 'https://dspace.mit.edu/handle/1721.1/7582/discover?sort_by=dc.date.iss
 boringkeywords = ['Joint Program in Biological Oceanography.',
                   'Joint Program in Marine Geology and Geophysics.',
                   'Joint Program in Physical Oceanography.',
+                  "Woods Hole Oceanographic Institution",
+                  "Massachusetts Institute of Technology. Department of Earth, Atmospheric, and Planetary Sciences",
                   'Sloan School of Management. Master of Finance Program.',
                   'Civil and Environmental Engineering.', 'Economics.',
                   'Harvard--MIT Program in Health Sciences and Technology.',
@@ -48,11 +50,35 @@ boringkeywords = ['Joint Program in Biological Oceanography.',
                   'Chemistry.', 'Program in Media Arts and Sciences',
                   'Aeronautics and Astronautics.', 'Biology.', 'Mechanical Engineering.',
                   'Earth, Atmospheric, and Planetary Sciences.',
-                  'Woods Hole Oceanographic Institution.',]
+                  'Woods Hole Oceanographic Institution.',
+                  'Joint Program in Applied Ocean Science and Engineering',
+                  'Joint Program in Oceanography/Applied Ocean Science and Engineering',
+                  'Massachusetts Institute of Technology. Computational and Systems Biology Program',
+                  'Massachusetts Institute of Technology. Department of Economics',
+                  'Massachusetts Institute of Technology. Department of Political Science',
+                  'Massachusetts Institute of Technology. Microbiology Graduate Program',
+                  'Massachusetts Institute of Technology. Operations Research Center',
+                  'Massachusetts Institute of Technology. Program in Science, Technology and Society',
+                  'Massachusetts Institute of Technology. Department of Brain and Cognitive Sciences',
+                  'Massachusetts Institute of Technology. Department of Linguistics and Philosophy',
+                  'Massachusetts Institute of Technology. Department of Civil and Environmental Engineering',
+                  'Massachusetts Institute of Technology. Graduate Program in Science Writing',
+                  'Massachusetts Institute of Technology. Department of Biological Engineering',
+                  'Massachusetts Institute of Technology. Department of Architecture',
+                  'Massachusetts Institute of Technology. Department of Chemical Engineering',
+                  'Massachusetts Institute of Technology. Department of Urban Studies and Planning',
+                  'Massachusetts Institute of Technology. Department of Aeronautics and Astronautics']
 
 print tocurl
 
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
 
 prerecs = []
 for offset in [0]:
@@ -65,11 +91,12 @@ for offset in [0]:
 #        time.sleep(180)
 #        tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open('%s%i' % (tocurl, offset)))
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
-        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : []}
         for a in div.find_all('a'):
             rec['artlink'] = 'https://dspace.mit.edu' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['hdl'] in uninterestingDOIS:
+                prerecs.append(rec)
 
 
 recs = []
@@ -80,14 +107,14 @@ for rec in prerecs:
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-        time.sleep(3)
+        time.sleep(5)
     except:
         try:
-            print "retry %s in 180 seconds" % (rec['link'])
+            print "retry %s in 180 seconds" % (rec['artlink'])
             time.sleep(180)
             artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
         except:
-            print "no access to %s" % (rec['link'])
+            print "no access to %s" % (rec['artlink'])
             continue      
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
@@ -126,12 +153,18 @@ for rec in prerecs:
             elif meta['name'] == 'DC.rights':
                 if re.search('creativecommons.org', meta['content']):
                     rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
+            #department
+            elif meta['name'] == 'DC.contributor':
+                dep = meta['content']
+                if dep in boringkeywords:
+                    keepit = False
+                else:
+                    rec['note'].append(dep)
     if keepit:
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
-
-
-	
 
 
 #closing of files and printing
@@ -146,3 +179,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
