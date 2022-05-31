@@ -35,6 +35,15 @@ boringdeps = ['SSH/IACS', 'SSH/ILC', 'SSH/ILC/PCOM', 'SSH/ILC/PLIN', 'SSH/INCA',
               'SST/LIBST']
 #boringdeps = []
 
+
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 hdr = {'User-Agent' : 'Magic Browser'}
 for year in [now.year, now.year-1]:
     prerecs = []
@@ -42,7 +51,7 @@ for year in [now.year, now.year-1]:
     tocurl = 'https://dial.uclouvain.be/pr/boreal/en/search/site/%2A%3A%2A?page=1&f%5B0%5D=sm_type%3ATh%C3%A8se%20%28Dissertation%29&f%5B1%5D=sm_date%3A' + str(year) + '&solrsort=ss_date%20desc'
     print '---{ %i }---{ 1 }---{ %s }---' % (year, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpages = [BeautifulSoup(urllib2.urlopen(req))]
+    tocpages = [BeautifulSoup(urllib2.urlopen(req), features="lxml")]
     numofpages = 0
     for div in tocpages[0].body.find_all('div', attrs = {'class' : 'result-label'}):
         numofrecs = int(re.sub('.*of *(\d+).*', r'\1', div.text.strip()))
@@ -51,19 +60,20 @@ for year in [now.year, now.year-1]:
         tocurl = 'https://dial.uclouvain.be/pr/boreal/en/search/site/%2A%3A%2A?page=' + str(page+2) + '&f%5B0%5D=sm_type%3ATh%C3%A8se%20%28Dissertation%29&f%5B1%5D=sm_date%3A' + str(year) + '&solrsort=ss_date%20desc'
         print '---{ %i }---{ %i/%i }---{ %s }---' % (year, page+2, numofpages, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpages.append(BeautifulSoup(urllib2.urlopen(req)))
+        tocpages.append(BeautifulSoup(urllib2.urlopen(req), features="lxml"))
         time.sleep(5)
     for tocpage in tocpages:
         for div in tocpage.body.find_all('div', attrs = {'class' : 'publication'}):
             rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'year' : str(year), 'date' : str(year), 'note' : [],
-                   'oa' : False, 'ftispdf' : False, 'supervisor' : [], 'keyw' : [], 'departments' : []}
+                   'oa' : False, 'ftispdf' : False, 'supervisor' : [], 'keyw' : []}
             for a in div.find_all('a', attrs = {'class' : 'cart_update'}):
                 rec['link'] = re.sub('.*A', 'https://dial.uclouvain.be/pr/boreal/object/boreal:', a['href'])
             for span in div.find_all('span', attrs = {'class' : 'title'}):
                 for a in span.find_all('a'):
                     rec['hdl'] = re.sub('.*net\/', '', a['href'])
                     rec['tit'] = a.text.strip()
-                    prerecs.append(rec)
+                    if not rec['hdl'] in uninterestingDOIS:
+                        prerecs.append(rec)
 
     i = 0
     recs = []
@@ -72,13 +82,13 @@ for year in [now.year, now.year-1]:
         i += 1
         print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
             time.sleep(4)
         except:
             try:
                 print "retry %s in 180 seconds" % (rec['link'])
                 time.sleep(180)
-                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
             except:
                 print "no access to %s" % (rec['link'])
                 continue    
@@ -129,10 +139,12 @@ for year in [now.year, now.year-1]:
                                         print '  skip "%s"' % (dep)
                                     keepit = False
                                 else:
-                                    rec['departments'].append(dep)
+                                    rec['note'].append(dep)
         if keepit:
             print rec.keys()
             recs.append(rec)
+        else:
+            newuninterestingDOIS.append(rec['hdl'])
 
     #closing of files and printing
     xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -147,3 +159,8 @@ for year in [now.year, now.year-1]:
         retfiles.write(line)
         retfiles.close()
     time.sleep(60)
+
+    ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+    for doi in newuninterestingDOIS:
+        ouf.write(doi + '\n')
+    ouf.close()
