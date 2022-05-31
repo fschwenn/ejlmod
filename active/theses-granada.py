@@ -45,6 +45,12 @@ def akzenteabstreifen(string):
     else:
         return unicode(unicodedata.normalize('NFKD',re.sub(u'ß', u'ss', string)).encode('ascii','ignore'),'utf-8')
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
 
 prerecs = []
 recs = []
@@ -59,7 +65,8 @@ for pn in range(numberofpages):
             if re.search('handle\/\d', a['href']):
                 rec['artlink'] = 'https://digibug.ugr.es' + a['href'] #+ '?show=full'
                 rec['hdl'] = re.sub('.*handle\/(.*\d).*', r'\1', a['href'])
-                prerecs.append(rec)
+                if not rec['hdl'] in uninterestingDOIS:
+                    prerecs.append(rec)
     time.sleep(10)
 
 i = 0
@@ -137,6 +144,8 @@ for rec in prerecs:
     if keepit:
         print rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
         
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
@@ -150,3 +159,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
