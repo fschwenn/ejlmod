@@ -40,7 +40,7 @@ boringdeps = ['Global Health', 'Religion', 'Biology', 'Electrical and Computer E
               #'Computational Engineering and Science', 'Computing and Software',
               'Engineering Physics', 'French', 'Geography and Earth Sciences', 'Health and Aging',
               'Materials Science and Engineering', 'Materials Science', 'Neuroscience', 'Philosophy',
-              'Biomechanics', 'Classical Studies', 'Communications Management', 'Environmental Science', 
+              'Biomechanics', 'Classical Studies', 'Communications Management', 'Environmental Science',
               'Political Science - International Relations', 'Political Science', 'Social Work', 'Sociology',
               'Medical Sciences (Blood and Cardiovascular)', 'Medical Sciences (Cell Biology and Metabolism)',
               'Medical Sciences (Division of Physiology/Pharmacology)', 'Rehabilitation Science',
@@ -54,10 +54,10 @@ boringdeps = ['Global Health', 'Religion', 'Biology', 'Electrical and Computer E
               'Biblical Studies, Religion', 'Church History/Christian Interpretation', 'Church History',
               'Clinical Health Sciences (Nursing)', 'Divinity College', 'Health Geography', 'Health',
               'Literature', 'Management Science/Information Systems', 'Management Science/Systems',
-              'Medical Sciences, Division of Physiology/Pharmacology', 'Physiology and Pharmacology', 
+              'Medical Sciences, Division of Physiology/Pharmacology', 'Physiology and Pharmacology',
               'Medical Sciences (Neuroscience and Behavioral Science)', 'Political Economy',
               'Romance Languages', 'Roman Studies', 'School of the Arts',
-              'Molecular Immunology, Virology and Inflammation', 'Music Criticism', 'Music', 'Neurosciences', 
+              'Molecular Immunology, Virology and Inflammation', 'Music Criticism', 'Music', 'Neurosciences',
               'Business Administration', 'Earth Sciences', 'Economics', 'Engineering', 'English',
               'Health and Radiation Physics', 'Materials Engineering', 'Medical Physics', 'Religious Sciences',
               'Medical Sciences (Growth and Development)', 'Medical Sciences (Neurosciences)', 'Medicine',
@@ -71,6 +71,14 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://macsphere.mcmaster.ca/handle/11375/272/browse?rpp=' + str(rpp) + '&sort_by=2&type=dateissued&offset=' + str(page*rpp) + '&etal=-1&order=DESC'
@@ -89,7 +97,8 @@ for page in range(pages):
         for a in div.find_all('a'):
             rec['artlink'] = 'https://macsphere.mcmaster.ca' + a['href']
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['hdl'] in uninterestingDOIS:
+                prerecs.append(rec)
     time.sleep(5)
 
 i = 0
@@ -168,6 +177,8 @@ for rec in prerecs:
     if keepit:
         recs.append(rec)
         print '   ', rec.keys()
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -181,3 +192,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
