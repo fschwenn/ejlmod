@@ -59,7 +59,6 @@ for rec in recs:
         except:
             print "no access to %s" % (rec['link'])
             continue
-    keepit = True
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name') and meta.has_attr('content'):
             #author
