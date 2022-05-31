@@ -24,39 +24,40 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'U. Bonn (main)'
 hdr = {'User-Agent' : 'Magic Browser'}
 
-years = 2 
-rpp = 200
+rpp = 50
 
 
+hdls = []
 for ddc in ['500', '510', '530']:
     jnlfilename = 'THESES-BONN-%s-%s' % (stampoftoday, ddc)
     recs = []
-    for i in range(years):
-        year = now.year - i
-        tocurl = 'https://bonndoc.ulb.uni-bonn.de/xmlui/handle/20.500.11811/1627/discover?filtertype_0=ddc&filter_relational_operator_0=equals&filter_0=ddc%3A' + ddc + '&filtertype=dateIssued&filter_relational_operator=equals&filter=[' + str(year) + '+TO+' + str(year) + ']&rpp=' + str(rpp)
-        print '==={ %i }==={ %s }==={ %s }===' % (year, ddc, tocurl)
-        req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
-        for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
-            rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'year' : str(year), 'date' : str(year)}
-            for a in div.find_all('a'):
-                for h4 in a.find_all('h4'):
-                    rec['artlink'] = 'https://bonndoc.ulb.uni-bonn.de' + a['href']# + '?show=full'
-                    rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+
+    tocurl = 'https://bonndoc.ulb.uni-bonn.de/xmlui/handle/20.500.11811/1627/discover?filtertype_0=ddc&filter_relational_operator_0=equals&filter_0=ddc%3A' + ddc + '&sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp) #&filtertype=dateIssued&filter_relational_operator=equals&filter=[' + str(year) + '+TO+' + str(year) + ']
+    print '==={ %s }==={ %s }===' % (ddc, tocurl)
+    req = urllib2.Request(tocurl, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req),features="lxml" )
+    for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
+        rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
+        for a in div.find_all('a'):
+            for h4 in a.find_all('h4'):
+                rec['artlink'] = 'https://bonndoc.ulb.uni-bonn.de' + a['href']# + '?show=full'
+                rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                if not rec['hdl'] in hdls:
                     recs.append(rec)
+                    hdls.append(rec['hdl'])
 
     i = 0
     for rec in recs:
         i += 1
         print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
             time.sleep(10)
         except:
             try:
                 print 'retry %s in 180 seconds' % (rec['artlink'])
                 time.sleep(180)
-                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
             except:
                 print 'no access to %s' % (rec['artlink'])
                 continue
@@ -89,7 +90,10 @@ for ddc in ['500', '510', '530']:
                 elif meta['name'] == 'DC.Identifier':
                     if re.search('^urn', meta['content']):
                         rec['urn'] = meta['content']
-                #URN
+                #date
+                elif meta['name'] == 'DCTERMS.issued':
+                    rec['date'] = meta['content']
+                #PDF
                 elif meta['name'] == 'citation_pdf_url':
                     rec['fulltext'] = meta['content']
                 #license
