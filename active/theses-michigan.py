@@ -38,6 +38,14 @@ boringdegrees = ['MSE', 'MS', "Master's Thesis", 'Ed.D.', 'Doctor of Anesthesia 
 jnlfilename = 'THESES-MICHIGAN-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = ['2027.42/145174']
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 allrecs = []
 for i in range(numofpages):
     #tocurl = 'https://deepblue.lib.umich.edu/handle/2027.42/39366/recent-submissions?offset=%i' % (20*i)
@@ -52,7 +60,7 @@ for i in range(numofpages):
             rec['artlink'] = 'https://deepblue.lib.umich.edu' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('\/handle\/', '', a['href'])
             rec['tit'] = a.text.strip()
-            if not rec['hdl'] in ['2027.42/145174']:
+            if not rec['hdl'] in uninterestingDOIS:
                 allrecs.append(rec)
 
 j = 0
@@ -152,6 +160,8 @@ for rec in allrecs:
     if keepit:
         print '   ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -161,9 +171,14 @@ xmlfile.close()
 #retrival
 retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
+if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
 
 
