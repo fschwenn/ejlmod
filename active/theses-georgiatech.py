@@ -46,6 +46,14 @@ ctx = ssl.create_default_context()
 ctx.check_hostname = False
 ctx.verify_mode = ssl.CERT_NONE
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 redoc = re.compile('rft.degree=Doctoral')
 for page in range(pages):
@@ -61,7 +69,8 @@ for page in range(pages):
                     rec['artlink'] = 'https://smartech.gatech.edu' + a['href'] + '?show=full'
                     rec['link'] = 'https://smartech.gatech.edu' + a['href']
                     rec['hdl'] = re.sub('.*handle\/', '',  a['href'])
-                    prerecs.append(rec)
+                    if not rec['hdl'] in uninterestingDOIS:
+                        prerecs.append(rec)
     time.sleep(7)
 
 i = 0
@@ -122,6 +131,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -135,3 +146,10 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
