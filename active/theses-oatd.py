@@ -138,6 +138,14 @@ for ejldir in ejldirs:
             #print '  %6i %s' % (len(bereitsin), datei)
 print '   %i theses already in backup or pipeline' % (len(bereitsin))
 
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 i = 0
 recs = []
 prerecs = []
@@ -216,8 +224,9 @@ for search in searches[startsearch:stopsearch]:
                     elif not rec['nodoi'] in dois:
                         print '      ', rec['nodoi']
                         rec['note'].append('NODOI:'+rec['nodoi'])
-                        prerecs.append(rec)
-                        dois.append(rec['nodoi'])
+                        if not rec['nodoi'] in uninterestingDOIS:
+                            prerecs.append(rec)
+                            dois.append(rec['nodoi'])
                     else:
                         print '     (', rec['nodoi'],')'
         print '    %i records so far' % (len(prerecs))
@@ -424,4 +433,13 @@ for rec in prerecs:
                     retfiles = open(retfiles_path, "a")
                     retfiles.write(line)
                     retfiles.close()
+    else:
+        newuninterestingDOIS.append(rec['nodoi'])
 
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
+        
