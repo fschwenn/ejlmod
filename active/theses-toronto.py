@@ -32,41 +32,51 @@ boringdeps = ['Adult Education and Counselling Psychology', 'Aerospace Science a
               'Dentistry', 'Drama', 'Earth Sciences', 'East Asian Studies', 'English',
               'Exercise Sciences', 'French Language and Literature', 'Geography', 'Law',
               'Leadership, Higher and Adult Education', 'Linguistics', 'Management',
-              'Materials Science and Engineering', 'Mechanical and Industrial Engineering', 
-              'Health Policy, Management and Evaluation', 'Immunology', 'Medical Biophysics', 
+              'Materials Science and Engineering', 'Mechanical and Industrial Engineering',
+              'Health Policy, Management and Evaluation', 'Immunology', 'Medical Biophysics',
               'Industrial Relations and Human Resources', 'Information Studies', 'Medical Science',
               'Medieval Studies', 'Molecular and Medical Genetics', 'Molecular Genetics', 'Music',
               'Near and Middle Eastern Civilizations', 'Nursing Science', 'Nutritional Sciences',
               'Pharmaceutical Sciences', 'Pharmacology', 'Philosophy', 'Religion, Study of',
-              'Social Justice Education', 'Social Work', 'Sociology', 'Spanish', 'Statistics', 
-              'Psychological Clinical Science', 'Psychology', 'Rehabilitation Science', 
+              'Social Justice Education', 'Social Work', 'Sociology', 'Spanish', 'Statistics',
+              'Psychological Clinical Science', 'Psychology', 'Rehabilitation Science',
               'Physical and Environmental Sciences', 'Physiology', 'Political Science',
               'Architecture, Landscape, and Design', 'Forestry', 'Human Development and Applied Psychology',
-              'Kinesiology and Physical Education', 'Laboratory Medicine and Pathobiology', 
-              'History and Philosophy of Science and Technology', 'History of Art', 'History', 
-              'Ecology and Evolutionary Biology', 'Economics', 'Electrical and Computer Engineering', 
+              'Kinesiology and Physical Education', 'Laboratory Medicine and Pathobiology',
+              'History and Philosophy of Science and Technology', 'History of Art', 'History',
+              'Ecology and Evolutionary Biology', 'Economics', 'Electrical and Computer Engineering',
               'Chemical Engineering Applied Chemistry', 'Chemistry', 'Women and Gender Studies Institute',
               'Chemical Engineering Applied Chemistry', 'Germanic Languages and Literatures',
-              'Sociology and Equity Studies in Education', 'Speech-Language Pathology']
+              'Sociology and Equity Studies in Education', 'Speech-Language Pathology',
+              'Chemical Engineering Applied Chemistry']
 
 rpp = 50
 pages = 10
 
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 deprecs = {}
 for i in range(pages):
     tocurl = 'https://tspace.library.utoronto.ca/handle/1807/9945/browse?rpp=' + str(rpp) + '&sort_by=2&type=dateissued&offset=' + str(i*rpp) + '&etal=-1&order=DESC'
     print '---{ %i/%i }---{ %s }---' % (i+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     for tr in tocpage.body.find_all('tr'):
         for td in tr.find_all('td', attrs = {'headers' : 't2'}):
             rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : []}
             for a in td.find_all('a'):
                 rec['artlink'] = 'https://tspace.library.utoronto.ca' + a['href'] #+ '?show=full'
                 rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                prerecs.append(rec)
+                if not rec['hdl'] in uninterestingDOIS:
+                    prerecs.append(rec)
     time.sleep(15)
 
 i = 0
@@ -76,21 +86,21 @@ for rec in prerecs:
     keepit = True
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         time.sleep(3)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['artlink'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         except:
             print "no access to %s" % (rec['artlink'])
-            continue    
+            continue
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #author
             if meta['name'] == 'DC.creator':
-                if re.search('\d\d\d\d\-\d\d\d\d',  meta['content']):
+                if re.search('\d\d\d\d\-\d\d\d\d', meta['content']):
                     rec['autaff'][-1].append('ORCID:' + meta['content'])
                 else:
                     author = re.sub(' *\[.*', '', meta['content'])
@@ -149,18 +159,20 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 jnlfilename = 'THESES-TORONTO-%s' % (stampoftoday)
 #closing of files and printing
-xmlf = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile  = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
 ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
+if not line in retfiles_text:
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
 
@@ -169,16 +181,21 @@ if not line in retfiles_text:
 #        print '+', dep
 #        jnlfilename = 'THESES-TORONTO-%s_%s' % (stampoftoday, re.sub('\W', '', dep))
 #        #closing of files and printing
-#        xmlf = os.path.join(xmldir,jnlfilename+'.xml')
-#        xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
+#        xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+#        xmlfile  = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
 #        ejlmod2.writenewXML(deprecs[dep], xmlfile, publisher, jnlfilename)
 #        xmlfile.close()
 #        #retrival
-#        retfiles_text = open(retfiles_path,"r").read()
+#        retfiles_text = open(retfiles_path, "r").read()
 #        line = jnlfilename+'.xml'+ "\n"
-#        if not line in retfiles_text: 
-#            retfiles = open(retfiles_path,"a")
+#        if not line in retfiles_text:
+#            retfiles = open(retfiles_path, "a")
 #            retfiles.write(line)
 #            retfiles.close()
 #    else:
 #        print '-', dep
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
