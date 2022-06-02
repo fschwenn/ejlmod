@@ -64,7 +64,6 @@ for ol in tocpage.find_all('ol', attrs = {'class' : 'results'}):
 i = 0
 for rec in prerecs:
     i += 1
-    keepit = False
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
