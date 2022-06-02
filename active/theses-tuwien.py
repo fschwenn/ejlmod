@@ -43,6 +43,15 @@ boringinstitutes = ['E360', 'E017', 'E017', 'E105', 'E120', 'E163', 'E164', 'E16
 boringdegrees = ['Diploma']
 
 
+
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://repositum.tuwien.at/handle/20.500.12708/5?sort_by=2&order=DESC&offset=' + str(page*rpp) + '&rpp=' + str(rpp)
@@ -57,7 +66,8 @@ for page in range(pages):
                 rec['artlink'] = 'https://repositum.tuwien.at' + a['href']
                 for img in tr.find_all('img', attrs = {'title' : 'Open Access'}):
                     rec['oa'] = True
-                    prerecs.append(rec)
+                    if not rec['hdl'] in uninterestingDOIS:
+                        prerecs.append(rec)
     time.sleep(4)
 
 i = 0
@@ -162,6 +172,8 @@ for rec in prerecs:
     if keepit:
         recs.append(rec)
         print '  ', rec.keys()
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -175,3 +187,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
