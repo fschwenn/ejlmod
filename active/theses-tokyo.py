@@ -17,7 +17,6 @@ import json
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
-bookkeepingfile = "/afs/desy.de/group/library/publisherdata/tokyou.txt"
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 startdate = now + datetime.timedelta(days=-190)
@@ -31,12 +30,13 @@ jnlfilename = 'THESES-TOKYO_U-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
-#bookkeeping
-done = []
-inf = open(bookkeepingfile, 'r')
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
 for line in inf.readlines():
-    done.append(line.strip())
+    uninterestingDOIS.append(line.strip())
 inf.close()
+
 
 tocurl = 'https://repository.dl.itc.u-tokyo.ac.jp/oai?verb=ListIdentifiers&metadataPrefix=oai_dc&from=' + stampofstartdate
 prerecs = []
@@ -50,7 +50,7 @@ while notcomplete:
     for identifier in tocpage.find_all('identifier'):
         rec = {'tc' : 'T', 'jnl' : 'BOOK', 'identifier' : identifier.text.strip(), 'note' : []}
         rec['artlink'] = 'https://repository.dl.itc.u-tokyo.ac.jp/records/' + re.sub('.*:0*', '', rec['identifier'])
-        if not rec['identifier'] in done:
+        if not rec['identifier'] in uninterestingDOIS:
             prerecs.append(rec)
     notcomplete = False
     for rt in tocpage.find_all('resumptiontoken'):
@@ -157,6 +157,8 @@ for rec in prerecs:
     if keepit:
         recs.append(rec)
         print rec
+    else:
+        newuninterestingDOIS.append(rec['identifier'])
 
 jnlfilename = 'THESES-TOKYO_U-%sB' % (stampoftoday)
 
@@ -173,8 +175,8 @@ if not line in retfiles_text:
     retfiles.write(line)
     retfiles.close()
 
-#bookkeeping
-ouf = open(bookkeepingfile, 'a')
-for identifier in newlydone:
-    ouf.write('%s\n' % (identifier))
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
 ouf.close()
