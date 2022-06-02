@@ -126,10 +126,17 @@ jnlfilename = 'THESES-ZARAGOZA-%s' % (stampoftoday)
 # Initialize Webdriver
 driver = webdriver.PhantomJS()
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
 
 def get_sub_site(url):
+    global uninterestingDOIS
     keepit = True
-    print("[%s] --> Harversting data" % url)
+    print("  [%s] --> Harversting data" % url)
 
     rec = {'tc': 'T', 'jnl': 'BOOK', 'note' : []}
     rec['link'] = re.sub('\/export.*', '', url)
@@ -164,9 +171,9 @@ def get_sub_site(url):
 
         # Get the title
         elif tag == '245':
-            for sf in datafieldfind_all('subfield', attrs = {'code' : 'a'}):
+            for sf in datafield.find_all('subfield', attrs = {'code' : 'a'}):
                 rec['tit'] = sf.text
-            for sf in datafieldfind_all('subfield', attrs = {'code' : 'b'}):
+            for sf in datafield.find_all('subfield', attrs = {'code' : 'b'}):
                 rec['tit'] += ': ' + sf.text
 
         # Get the date
@@ -244,19 +251,23 @@ def get_sub_site(url):
         rec['doi'] = '20.2000/Zargoza/' + b16encode(url.encode('utf-8')).decode('utf-8')
     if keepit:
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(url)
+    return
 
 
 for page in range(pages):
-    to_curl = 'https://zaguan.unizar.es/search?cc=tesis&ln=en&rg=' + str(rpp) + '&jrec=' + str((page+25) * rpp + 1)
+    to_curl = 'https://zaguan.unizar.es/search?cc=tesis&ln=en&rg=' + str(rpp) + '&jrec=' + str(page * rpp + 1)
     driver.get(to_curl)
-    print(to_curl)
+    print '==={ %i/%i }==={ %s }===' % (page+1, pages, to_curl)
     # Get the index links
     for article in BeautifulSoup(driver.page_source, 'lxml').find_all('a', attrs={'class': 'tituloenlazable'}):
         nothing, record, number_and_params = article.get('href').split('/')
         final = '/%s/%s' % (record, number_and_params.split('?')[0])
-
-        get_sub_site('https://zaguan.unizar.es%s/export/xm?ln=en' % final)
-        sleep(4)
+        finalurl = 'https://zaguan.unizar.es%s/export/xm?ln=en' % final
+        if not finalurl in uninterestingDOIS:
+            get_sub_site(finalurl)
+            sleep(4)
     sleep(10)
 
 
@@ -272,3 +283,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()

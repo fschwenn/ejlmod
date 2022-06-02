@@ -24,11 +24,19 @@ years = [now.year+1, now.year]
 rpp = 50
 publisher = 'Vrije U., Amsterdam'
 #concept
-boring = ['Alzheimer Disease', 'Amsterdam', 'Amyloid', 'Anxiety Disorders', 'Anxiety', 'Astrocytes', 'Biomarkers', 'Blood Platelets', 'Brain', 'Cardiovascular Diseases', 'Child', 'climate change', 'Cognition', 'Cognitive Dysfunction', 'Colorectal Neoplasms', 'Cost-Benefit Analysis', 'Critical Care', 'dementia', 'Dementia', 'Depression', 'Depressive Disorder', 'Diaphragm', 'Ecclesiology', 'economics', 'education', 'Empirical Study', 'employee', 'Endothelial Cells', 'Epigenomics', 'Fathers', 'health', 'Health', 'Immunotherapy', 'Indonesia', 'Inflammation', 'Interneurons', 'learning', 'Major Depressive Disorder', 'Multiple Sclerosis', 'Muscles', 'Neoplasms', 'Netherlands', 'Neuropeptides', 'Palliative Care', 'Pancreatic Neoplasms', 'Parenting', 'Pathology', 'Pediatrics', 'politics', 'proteins', 'Proteins', 'Pulmonary Arterial Hypertension', 'Pulmonary Hypertension', 'Roads', 'Secretory Vesicles', 'Sleep', 'Synapses', 'teeth', 'The Netherlands', 'Theology', 'Therapeutics', 'worker', 'Wounds and Injuries', 'diet', 'Rheumatic Diseases', 'Non-Small Cell Lung Carcinoma', 'surgery', 'head and neck neoplasms']
+boring = ['Alzheimer Disease', 'Amsterdam', 'Amyloid', 'Anxiety Disorders', 'Anxiety', 'Astrocytes', 'Biomarkers', 'Blood Platelets', 'Brain', 'Cardiovascular Diseases', 'Child', 'climate change', 'Cognition', 'Cognitive Dysfunction', 'Colorectal Neoplasms', 'Cost-Benefit Analysis', 'Critical Care', 'dementia', 'Dementia', 'Depression', 'Depressive Disorder', 'Diaphragm', 'Ecclesiology', 'economics', 'education', 'Empirical Study', 'employee', 'Endothelial Cells', 'Epigenomics', 'Fathers', 'health', 'Health', 'Immunotherapy', 'Indonesia', 'Inflammation', 'Interneurons', 'learning', 'Major Depressive Disorder', 'Multiple Sclerosis', 'Muscles', 'Neoplasms', 'Netherlands', 'Neuropeptides', 'Palliative Care', 'Pancreatic Neoplasms', 'Parenting', 'Pathology', 'Pediatrics', 'politics', 'proteins', 'Proteins', 'Pulmonary Arterial Hypertension', 'Pulmonary Hypertension', 'Roads', 'Secretory Vesicles', 'Sleep', 'Synapses', 'teeth', 'The Netherlands', 'Theology', 'Therapeutics', 'worker', 'Wounds and Injuries', 'diet', 'Rheumatic Diseases', 'Non-Small Cell Lung Carcinoma', 'surgery', 'head and neck neoplasms', 'Oral Biochemistry', 'Delivery of Health Care', 'Infections']
 #citation_author_institution'
 boring += ['Accounting', 'Amsterdam Business Research Institute', 'Amsterdam Movement Sciences', 'Amsterdam Neuroscience - Brain Imaging', 'Amsterdam Neuroscience - Cellular &amp; Molecular Mechanisms', 'Amsterdam Neuroscience - Complex Trait Genetics', 'Amsterdam Neuroscience - Compulsivity, Impulsivity &amp; Attention', 'Amsterdam Neuroscience - Mood, Anxiety, Psychosis, Stress &amp; Sleep', 'Amsterdam Neuroscience - Systems &amp; Network Neuroscience', 'Amsterdam Public Health', 'Animal Ecology', 'APH - Aging &amp; Later Life', 'APH - Global Health', 'APH - Health Behaviors &amp; Chronic Diseases', 'APH - Mental Health', 'APH - Methodology', 'APH - Quality of Care', 'APH - Societal Participation &amp; Health', 'Art and Culture, History, Antiquity', 'Artificial Intelligence (section level)', 'Artificial intelligence', 'Beliefs and Practices', 'Biological Psychology', 'Biophotonics and Medical Imaging', 'Biophysics Photosynthesis/Energy', 'Boundaries of Law', 'Cariology', 'Center for Neurogenomics and Cognitive Research', 'Civil Society and Philantropy (CSPh)', 'Clinical Developmental Psychology', 'Clinical Neuropsychology', 'Clinical Psychology', 'Cognitive Psychology', 'Communication Choices, Content and Consequences (CCCC)', 'Communication Science', 'Complex Trait Genetics', 'Computational Intelligence', 'Coordination Dynamics', 'Criminology', 'Dental Material Sciences', 'E&H: Environmental Bioanalytical Chemistry', 'E&H: Environmental Chemistry and Toxicology', 'E&H: Environmental Health and Toxicology', 'Earth and Climate', 'Earth Sciences', 'Economics', 'Educational and Family Studies', 'Educational Studies', 'Environmental Economics', 'Environmental Geography', 'Environmental Policy Analysis', 'Ethics, Governance and Society', 'EU Law', 'Faculty of Behavioural and Movement Sciences', 'Faculty of Humanities', 'Faculty of Law', 'Faculty of Religion and Theology', 'Faculty of Social Sciences', 'Filosofie van cultuur, politiek en organisatie', 'Finance', 'Functional Genomics', 'Geology and Geochemistry', 'Health Economics and Health Technology Assessment', 'High Performance Distributed Computing', 'Identities, Diversity and Inclusion (IDI)', 'Innovations in Human Health &amp; Life Sciences', 'Integrative Neurophysiology', 'Intellectual Property Law', 'Internet Law', 'Kooijmans Institute', 'Language, Literature and Communication', 'Language', 'LaserLaB - Biophotonics and Microscopy', 'LaserLaB - Molecular Biophysics', 'LEARN! - Child rearing', 'Literature', 'Management and Organisation', 'Mathematics', 'Maxillofacial Surgery (AMC)', 'Medicinal chemistry', 'Methodology and Applied Biostatistics', 'Migration Law', 'Mobilities, Beliefs and Belonging: Confronting Global Inequalities and Insecurities (MOBB)', 'Molecular and Cellular Neurobiology', 'Molecular and Computational Toxicology', 'Molecular Cell Physiology', 'Molecular Microbiology', 'Multi-layered governance in EUrope and beyond (MLG)', 'Network Institute', 'Neuromechanics', 'New Public Governance (NPG)', 'Nutrition and Health', 'Operations Analytics', 'Oral Cell Biology', 'Oral Implantology', 'Oral Kinesiology', 'Oral Public Health', 'Organic Chemistry', 'Organizational Psychology', 'Organization &amp; Processes of Organizing in Society (OPOS)', 'Organization Sciences', 'Periodontology', 'Philosophy, Politics and Economics', 'Philosophy', 'Physiology', 'Political Science and Public Administration', 'Preventive Dentistry', 'Public International Law', 'School of Business and Economics', 'Science &amp; Business Innovation', 'Secure and Liable Computer Systems', 'Sensorimotor Control', 'Social and Cultural Anthropology', 'Social Change and Conflict (SCC)', 'Social Inequality and the Life Course (SILC)', 'Social Law', 'Social Psychology', 'Sociology', 'Software and Sustainability (S2)', 'Spatial Economics', 'Structural Biology', 'Systems Bioinformatics', 'Systems Ecology', 'Texts and Traditions', 'Theoretical Chemistry', 'The Social Context of Aging (SoCA)', 'Tinbergen Institute', 'VU Business School', 'Water and Climate Risk', 'Youth and Lifestyle', 'AMS - Sports', 'BioAnalytical Chemistry', 'Epistemology and Metaphysics', 'Motor learning & Performance', 'Integrative Bioinformatics', 'BioAnalytical Chemistry', 'Physics of Living Systems', 'Amsterdam Centre for Family Law', 'APH - Health Behaviors &amp; Chronic Diseases', 'Art and Culture', 'Chemistry and Biology', 'Clinical Child and Family Studies', 'Criminal Law', 'Dutch Private Law', 'Educational Neuroscience', 'Family Law and the Law of Persons', 'Infectious Diseases', 'KIN Center for Digital Innovation', 'Legal Theory and Legal History', 'Prevention and Public Health', 'Research and Theory in Education', 'Systems and Network Security', 'Bioinformatics', 'Constitutional and Administrative Law', 'Epistemology and Metaphysics', 'Science &amp; Business Innovation', 'Tax Law', 'Business Web and Media', 'Geoarchaeology']
 
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 recs = []
 for year in years:
@@ -59,18 +67,21 @@ for year in years:
                     #number of pages
                     for span in div.find_all('span', attrs = {'class' : 'numberofpages'}):
                         rec['pages'] = re.sub('\D', '', span.text.strip())
-                    #thesis type
-                    for span in div.find_all('span', attrs = {'class' : 'type_classification_parent'}):
-                        thesistype = span.text.strip()
-                        if not re.search('^PhD Thesis', thesistype):
-                            rec['note'].append(thesistype)
                     #link and title
                     for h3 in div.find_all('h3'):
                         for a in h3.find_all('a'):
                             rec['link'] = a['href']
                             rec['tit'] = a.text.strip()
                             rec['doi'] = '30.3000/VrijeUAmsterdam/' + re.sub('\W', '', a['href'])[41:]
-                    prerecs.append(rec)
+                    #thesis type
+                    for span in div.find_all('span', attrs = {'class' : 'type_classification_parent'}):
+                        thesistype = span.text.strip()
+                        if not re.search('^PhD Thesis', thesistype):
+                            rec['note'].append(thesistype)
+                            if thesistype in boring:
+                                uninterestingDOIS.append(rec['doi'])
+                    if not rec['doi'] in uninterestingDOIS:
+                        prerecs.append(rec)
                 #"Finger print" concepts
                 for span in li.find_all('span', attrs = {'class' : 'concept'}):
                     concept = span.text.strip()
@@ -82,11 +93,6 @@ for rec in prerecs:
     i += 1
     keepit = True
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), re.sub('.*\/', '../', rec['link']))
-    for note in rec['note']:
-        if note in boring:
-            keepit = False
-    if not keepit:
-        continue
     try:
         artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         time.sleep(4)
@@ -151,6 +157,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['doi'])
 
 
 #closing of files and printing
@@ -165,3 +173,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+

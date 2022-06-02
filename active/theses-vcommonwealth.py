@@ -45,6 +45,14 @@ uninteresting += [re.compile('Pharmaceutical'), re.compile('Physiology'), re.com
                   re.compile('Rehabilitation'), re.compile('Social'), re.compile('Anatomy'), re.compile('Pharmacy')]
 
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 jnlfilename = 'THESES-VIRGINIACOMMONWEALTH-%s' % (stampoftoday)
 for i in range(numofpages):
@@ -60,7 +68,8 @@ for i in range(numofpages):
         for a in p.find_all('a'):
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
             rec['artlink'] = a['href']
-            prerecs.append(rec)
+            if not rec['artlink'] in uninterestingDOIS:
+                prerecs.append(rec)
             
 i = 0
 recs = []
@@ -134,7 +143,9 @@ for rec in prerecs:
                         skipit = True
                         print '    skip %s' % (dep)
                         break
-    if not skipit:
+    if skipit:
+        newuninterestingDOIS.append(rec['artlink'])
+    else:
         recs.append(rec)
         print rec.keys()
 
@@ -150,4 +161,9 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
     

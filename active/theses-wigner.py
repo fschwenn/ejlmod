@@ -29,6 +29,13 @@ rpp = 20
 pages = 2
 boringdegrees = []
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for (depnr, fc) in [('73', ''), ('77', 'm'), ('88', '')]:
     for page in range(pages):
@@ -52,7 +59,8 @@ for (depnr, fc) in [('73', ''), ('77', 'm'), ('88', '')]:
                     if re.search('handle', a['href']):
                         rec['artlink'] = 'https://repozitorium.omikk.bme.hu' + a['href'] + '?show=full'
                         rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-                        prerecs.append(rec)
+                        if not rec['hdl'] in uninterestingDOIS:
+                            prerecs.append(rec)
         time.sleep(2)
 
 i = 0
@@ -135,6 +143,9 @@ for rec in prerecs:
     if keepit:
         recs.append(rec)
         print '  ', rec.keys()
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
+
                 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -148,3 +159,10 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
+

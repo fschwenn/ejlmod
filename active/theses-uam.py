@@ -94,6 +94,14 @@ jnlfilename = 'THESES-UAM-%s' % (stampoftoday)
 
 hdr = {'User-Agent' : 'Magic Browser'}
 #tocurl = 'https://repositorio.uam.es/handle/10486/129587/discover?sort_by=dc.date.issued_dt&order=desc&rpp=10'
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://repositorio.uam.es/handle/10486/700636/discover?rpp=' + str(rpp) + '&etal=0&group_by=none&page=' + str(page+1) + '&sort_by=dc.date.issued_dt&order=desc&filtertype_0=type&filter_relational_operator_0=equals&filter_0=doctoralThesis'
@@ -103,9 +111,11 @@ for page in range(pages):
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'autaff' : [], 'supervisor' : [], 'note' : []}
         for a in div.find_all('a'):
-            rec['link'] = 'https://repositorio.uam.es' + a['href'] #+ '?show=full'
-            rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if a.has_attr('href') and re.search('handle', a['href']):
+                rec['link'] = 'https://repositorio.uam.es' + a['href'] #+ '?show=full'
+                rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+                if not rec['hdl'] in uninterestingDOIS:
+                    prerecs.append(rec)
 
 i = 0
 recs = []
@@ -181,6 +191,8 @@ for rec in prerecs:
     if keepit:
         recs.append(rec)
         print '  ', rec.keys()
+    else:
+        newuninterestingDOIS.append(rec['hdl'])
 
 
 #closing of files and printing
@@ -195,3 +207,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()

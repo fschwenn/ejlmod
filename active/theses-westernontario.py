@@ -18,14 +18,14 @@ import json
 from inspire_utils.date import normalize_date
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Western Ontario U.'
 
-pages = 2+15
+pages = 2
 
 jnlfilename = 'THESES-WesternOntario-%s' % (stampoftoday)
 
@@ -68,6 +68,13 @@ boring += ['Master of Arts', 'Master of Science', 'Master of Music', 'Master of 
            'Master of Laws', 'Master of Clinical Science',
            'Master of Library and Information Science', 'Master of Urban Planning']
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 date = False
 for i in range(pages):
@@ -98,7 +105,8 @@ for i in range(pages):
                             rec['tit'] = a.text.strip()
                             rec['link'] = a['href']
                             a.replace_with('')
-                            prerecs.append(rec)
+                            if not rec['link'] in uninterestingDOIS:
+                                prerecs.append(rec)
     print '  ', len(prerecs)
     tocextension = '%i.html' % (i+2)
 
@@ -184,6 +192,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['link'])
 
 
 #closing of files and printing
@@ -198,3 +208,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()

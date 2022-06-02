@@ -47,6 +47,13 @@ driver.implicitly_wait(30)
 driver.set_window_position(0, 0)
 driver.set_window_size(1920, 10800)
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 jnlfilename = 'THESES-VIRGINIA-%s' % (stampoftoday)
 for (dep, fc) in deps:
@@ -81,7 +88,8 @@ for (dep, fc) in deps:
                 rec['fc'] = fc
             rec['artlink'] = a['href']
             rec['doi'] = re.sub('.*org\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['doi'] in uninterestingDOIS:
+                prerecs.append(rec)
     print '   %i theses so far' % (len(prerecs))
     time.sleep(10)
        
@@ -174,6 +182,8 @@ for rec in prerecs:
     if keepit:
         print '    ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['doi'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -187,3 +197,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()

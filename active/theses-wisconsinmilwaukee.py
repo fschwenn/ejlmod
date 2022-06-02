@@ -52,6 +52,13 @@ boring = ['Educational Psychology', 'Art History', 'Communication',
 boring += ['Master of Arts', 'Master of Science', 'Master of Music', 'Master of Fine Arts',
            'Master of Library and Information Science', 'Master of Urban Planning']
 
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 date = False
 for i in range(pages):
@@ -82,7 +89,8 @@ for i in range(pages):
                             rec['tit'] = a.text.strip()
                             rec['artlink'] = a['href']
                             a.replace_with('')
-                            prerecs.append(rec)
+                            if not rec['artlink'] in uninterestingDOIS:
+                                prerecs.append(rec)
     print '  ', len(prerecs)
     tocextension = '%i.html' % (i+2)
 
@@ -161,6 +169,8 @@ for rec in prerecs:
     if keepit:
         print '  ', rec.keys()
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['artlink'])
 
 
 #closing of files and printing
@@ -175,3 +185,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()

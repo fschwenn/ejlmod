@@ -50,6 +50,7 @@ boringdisciplines = ['Mechanical Engineering', 'Engineering Education', 'Biologi
                      'Social, Political, Ethical, and Cultural Thought',
                      'Biological Systems Engineering', 'Business, Finance',
                      'Economics, Agriculture and Life Sciences',
+                     'Business, Executive Business Research',
                      'Genetics, Bioinformatics, and Computational Biology',
                      'Geosciences', 'Geospatial and Environmental Analysis',
                      'Horticulture', 'Human Nutrition, Foods, and Exercise',
@@ -69,6 +70,14 @@ boringdisciplines = ['Mechanical Engineering', 'Engineering Education', 'Biologi
 boringdegrees = []
 
 hdr = {'User-Agent' : 'Magic Browser'}
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 prerecs = []
 for page in range(pages):
     tocurl = 'https://vtechworks.lib.vt.edu/handle/10919/11041/discover?sort_by=dc.date.issued_dt&order=desc&filtertype=etdlevel&filter_relational_operator=equals&filter=doctoral&rpp=' + str(rpp) + '&page=' + str(page+1)
@@ -80,7 +89,8 @@ for page in range(pages):
         for a in div.find_all('a'):
             rec['artlink'] = 'https://vtechworks.lib.vt.edu' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['hdl'] in uninterestingDOIS:
+                prerecs.append(rec)
     time.sleep(3)
 
 i = 0
@@ -146,7 +156,9 @@ for rec in prerecs:
     if not skipit and 'degree' in rec.keys() and rec['degree'] in boringdegrees:
         print '    skip', rec['degree']
         skipit = True
-    if not skipit:
+    if skipit:
+        newuninterestingDOIS.append(rec['hdl'])
+    else:
         recs.append(rec)
 
 
@@ -162,3 +174,10 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path,"a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
+
+

@@ -36,7 +36,11 @@ boringdisciplines = ['Nursing', 'Bioengineering', 'Civil, Environmental & Archit
                      'Psychology', 'Geography', 'Psychology & Research in Education',
                      'History of Art', 'Clinical Child Psychology', 'Counseling Psychology',
                      'Hearing and Speech', 'Applied Behavioral Science', 'American Studies',
-                     'Public Administration', 
+                     'Public Administration', 'Anatomy & Cell Biology', 'Business', 'Cancer Biology',
+                     'Health Policy & Management', 'History', 'Molecular & Integrative Physiology',
+                     'Occupational Therapy Education', 'Pharmacology & Toxicology',
+                     'Pharmacology, Toxicology & Therapeutics', 'Population Health', 'Special Education',
+                     'Biochemistry & Molecular Biology', 'Biostatistics and Data Science', 
                      'Film & Media Studies', 'Communication Studies', 'Economics', 'Theatre',
                      'Ecology & Evolutionary Biology', 'Educational Leadership and Policy Studies',
                      'Health, Sport and Exercise Sciences', 'Medicinal Chemistry', 'Anthropology',
@@ -48,6 +52,13 @@ boringdisciplines = ['Nursing', 'Bioengineering', 'Civil, Environmental & Archit
                      'Microbiology, Molecular Genetics & Immunology', 'Music Education & Music Therapy',
                      'Neurosciences', 'Pathology & Laboratory Medicine', 'Social Welfare']
 boringdegrees = []
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
 
 hdr = {'User-Agent' : 'Magic Browser'}
 prerecs = []
@@ -61,7 +72,8 @@ for page in range(pages):
         for a in div.find_all('a'):
             rec['artlink'] = 'https://kuscholarworks.ku.edu' + a['href'] + '?show=full'
             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-            prerecs.append(rec)
+            if not rec['hdl'] in uninterestingDOIS:
+                prerecs.append(rec)
     time.sleep(3)
 
 i = 0
@@ -141,7 +153,9 @@ for rec in prerecs:
     if not skipit and 'degree' in rec.keys() and rec['degree'] in boringdegrees:
         print '    skip', rec['degree']
         skipit = True
-    if not skipit:
+    if skipit:
+        newuninterestingDOIS.append(rec['hdl'])
+    else:
         recs.append(rec)
         print '   ', rec.keys()
 
@@ -157,3 +171,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()

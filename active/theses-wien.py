@@ -24,7 +24,14 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 startyear = now.year - 1
 
 hdr = {'User-Agent' : 'Magic Browser'}
-artlinks = []
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 for (publisher, fac, facnum) in [('Vienna U., Dept. Math. ', 'math', '56'), ('Vienna U.', 'phys', '51')]:
     jnlfilename = 'THESES-WIEN_%s-%s' % (fac, stampoftoday)
     prerecs = []
@@ -48,9 +55,9 @@ for (publisher, fac, facnum) in [('Vienna U., Dept. Math. ', 'math', '56'), ('Vi
                 if re.search('\(\d\d\d\d\)', pt):
                     rec['year'] = re.sub('.*\(([12]\d\d\d).*', r'\1', pt)
                     if int(rec['year']) >= startyear:
-                        if not rec['artlink'] in artlinks:
+                        if not rec['artlink'] in uninterestingDOIS:
                             prerecs.append(rec)
-                            artlinks.append(rec['artlink'])
+                            uninterestingDOIS.append(rec['artlink'])
 
     recs = []
     i = 0
@@ -144,6 +151,8 @@ for (publisher, fac, facnum) in [('Vienna U., Dept. Math. ', 'math', '56'), ('Vi
         if keepit:
             recs.append(rec)
             print ' ', rec.keys()
+        else:
+            newuninterestingDOIS.append(rec['artlink'])
 
     #closing of files and printing
     xmlf = os.path.join(xmldir, jnlfilename+'.xml')
@@ -157,3 +166,9 @@ for (publisher, fac, facnum) in [('Vienna U., Dept. Math. ', 'math', '56'), ('Vi
         retfiles = open(retfiles_path, 'a')
         retfiles.write(line)
         retfiles.close()
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
