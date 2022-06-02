@@ -9,7 +9,7 @@ def coll_split(value):
     """ split at 'and' and ',' """
     colls = []
     # split at 'and' and ','
-    for val in value.split(' and '):
+    for val in re.split(' [aA][nN][dD] ', value):
         colls += val.split(', ')
     return colls
 
@@ -17,7 +17,7 @@ def coll_cleanforthe(coll):
     """ Cleanup collaboration, try to find author """
     import re
     author = None
-    re_for_the = re.compile(r'(?:^| )+(?:for the|on behalf of the|on behalf of|representing the|representing)(?: |$)+', re.IGNORECASE)
+    re_for_the = re.compile(r'(?:^| )+(?:for the|on behalf of the|on behalf of|representing the|representing|behalf of the)(?: |$)+', re.IGNORECASE)
     re_start = re.compile(r'^ *(group|team|consortium) +(.*) *$', re.IGNORECASE)
     re_the = re.compile(r'^ *the +', re.IGNORECASE)
     re_for = re.compile(r'^ *for +', re.IGNORECASE)
@@ -94,7 +94,7 @@ def coll_cleanforthe(coll):
 def coll_cleansimple(value): 
     ### Unify case, get rid of hypen, bring Coll to front ###
     knowncoll = ['ATLAS', 'CALICE', 'ALICE', 'CMS', 'CDF', 'LHCb', 'LHCf', 'H1',
-        'ZEUS', 'CLEO', 'HERMES', 'HERA-B', 'ALEPH', 'DELPHI', 'OPAL', 'L3', 
+        'ZEUS', 'CLEO', 'HERA-B', 'ALEPH', 'DELPHI', 'OPAL', 'L3', 
         'CosmoALEPH', 'SLD', 'AMS', 'BTeV', 'BaBar', 'RHIC', 'NuSTAR', 'PHENIX',
          'STAR', 'BooNE', 'MiniBooNE', 'MicroBooNE', 'SciBooNE', 'CAST', 
         'CELSIUS', 'CERES', 'CMD', 'CTA', 'GERDA', 'K2K', 'T2K', 'MAGIC', 
@@ -104,8 +104,8 @@ def coll_cleansimple(value):
         'VERITAS', 'Virgo', 'Pierre Auger', 'Majorana', 'MINERvA', 'MINOS', 
         'Muon g-2', 'XENON', 'Muon Collider', 'Linear Collider', 'European Muon',
 	'EDELWEISS']
-#    knownsubcoll = {'Belle':'-', 'BES':'', 'CDF':'-', 'Kamiokande':'-', 'CLEO':'-'}
-    knownsubcoll = {}
+    knownsubcoll = {'Belle':'-', 'BES':'', 'CDF':'-', 'Kamiokande':'-', 'CLEO':'-'}
+#    knownsubcoll = {}
     for kc in knowncoll:
         start = re.compile(r' +%s[ \/-]+' % kc, re.IGNORECASE)
         extent = re.compile(r' +%s[ \/-]*([0-9]?[A-Z0-9]) ' % kc, re.IGNORECASE)
@@ -149,7 +149,7 @@ def coll_clean710(value):
     value = re.sub('\$B\W*small A}B\W*small AR}\$', 'BaBar', value)    
     value = re.sub(r' +LHC[ \/-]*([a-z])[ \/-]+', r' LHC\1 ', value) 
     value = re.sub(r' R.and.D ', ' R&D ', value) 
-    value = re.sub(r' H\. ?E\. ?S\. ?S\.? +',' HESS ', value) 
+    value = re.sub(r' H[. ]*E[. ]*S[. ]*S[.]* +',' H.E.S.S. ', value) 
     value = re.sub(r' PROMICE[ \/-]WASA ', ' PROMICE/WASA ', value)
     value = re.sub(r' WASA[ \/-]PROMICE ', ' PROMICE/WASA ', value)
     value = re.sub(r' CELSIUS[ \/-]WASA ', ' CELSIUS/WASA ', value)
@@ -191,7 +191,7 @@ def exp4coll(collaboration):
         experiment = collaboration
         m710g = get_fieldvalues(exp_candidates[0], '710__g')
         if m710g:
-            correct_coll = m710g[0]
+            correct_coll = m710g
         return experiment, experiments, correct_coll
         
     # fuzzy search
