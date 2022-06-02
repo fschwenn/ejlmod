@@ -30,7 +30,7 @@ publisher = 'TCD, Dublin'
 
 boringschools = ['Biochemistry & Immunology', 'Business', 'Chemistry',
                  #'Computer Science & Statistics',
-                 'Creative Arts', 'Dental Sciences',
+                 'Creative Arts', 'Dental Sciences', 'Religion',
                  'Ecumenics', 'Education', 'Engineering', 'English',
                  'Histories & Humanities', 'Lang, Lit', 'Law',
                  'Linguistic Speech & Comm Sci', 'Medicine', 'Natural Sciences',
@@ -38,6 +38,14 @@ boringschools = ['Biochemistry & Immunology', 'Business', 'Chemistry',
                  'Social Sciences & Philosophy', 'Social Work & Social Policy']
 
 hdls = []
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 for year in years:
     prerecs = []
     jnlfilename = 'THESES-TrinityCollegeDublin-%s_%i' % (stampoftoday, year)
@@ -69,7 +77,7 @@ for year in years:
                             rec['hdl'] = re.sub('.*handle\/', '', a['href'])
                             if rec['hdl'] in hdls or rec['hdl'] in ['2262/82940']:
                                 print '  HDL:%s already from other collection' % (rec['hdl'])
-                            else:
+                            elif not rec['hdl'] in uninterestingDOIS:
                                 prerecs.append(rec)
                                 hdls.append(rec['hdl'])
     
@@ -110,6 +118,8 @@ for year in years:
             elif rec['school'] in boringschools:
                 print '   skip School of %s' % (rec['school'])
                 keepit = False
+            else:
+                rec['note'].append(rec['school'])
         #license
         for a in artpage.body.find_all('a', attrs = {'rel' : 'license'}):
             if re.search('creativecommons.or', a['href']):
@@ -133,6 +143,8 @@ for year in years:
                     
         if keepit:
             recs.append(rec)
+        else:
+            newuninterestingDOIS.append(rec['hdl'])
     if recs:
         #closing of files and printing
         xmlf = os.path.join(xmldir,jnlfilename+'.xml')
@@ -147,3 +159,9 @@ for year in years:
             retfiles.write(line)
             retfiles.close()
                     
+
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
