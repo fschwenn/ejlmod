@@ -65,7 +65,7 @@ pythoncommand = '/home/library/.virtualenvs/inspire/bin/python'
 #TO BE REMOCED: OSA
 
 jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear-1922,prmonth)),
-        ('theses-oatd I', 2, '%s %s/theses-oatd.py 1 3' % (pythoncommand, lproc)),
+        ('theses-oatd I', 2, '%s %s/theses-oatd.py 0 3' % (pythoncommand, lproc)),
         ('rsi'       , 1,'%s %s/aip.xml2.py rsi %i %i' % (pythoncommand, lproc,pryear-1929,prmonth)),
         ('theses-oatd II', 3, '%s %s/theses-oatd.py 3 5' % (pythoncommand, lproc)),
         ('jmp'       , 1,'%s %s/aip.xml2.py jmp %i %i' % (pythoncommand, lproc,pryear-1959,prmonth)),
@@ -474,7 +474,11 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-wigner', 3, '%s %s/theses-wigner.py' % (pythoncommand, lproc)),
         ('theses-zaragoza', 3, '%s %s/theses-zaragoza.py' % (pythoncommand, lproc)),
         ('theses-melbourne', 3, '%s %s/theses-melbourne.py' % (pythoncommand, lproc)),
-        ('theses-queensland', 1, '%s %s/theses-queensland.py' % (pythoncommand, lproc))]
+        ('theses-queensland', 1, '%s %s/theses-queensland.py' % (pythoncommand, lproc)),
+        ('theses-laval', 3, '%s %s/theses-laval.py' % (pythoncommand, lproc)),
+        ('theses-cyprus', 3, '%s %s/theses-cyprus.py' % (pythoncommand, lproc)),
+        ('theses-barcelonapolytech', 2, '%s %s/theses-barcelonapolytech' % (pythoncommand, lproc)),
+        ('mitbooks', 1, '%s %s/mitbooks.xml.py' % (pythoncommand, lproc))]
 
 
 if prmonth == 12:
