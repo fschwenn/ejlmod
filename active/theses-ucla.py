@@ -118,7 +118,7 @@ subjectstoskip += ['Meteorology', 'Agronomy', 'Chemicaloceanography', 'Vocationa
                    'Geobiology', 'Horticulture', 'Personalitypsychology', 'Recreation', 'Veterinaryscience',
                    'Agricultureengineering', 'Navalengineering', 'Automotiveengineering', 'Transportationplanning',
                    'Areaplanningdevelopment', 'Hightemperaturephysics', 'Petrology', 'Veterinaryscience']
-subjectstoskip += ['Animalbehavior', 'ChemistryPharmaceutical', 'Neurobiology',
+subjectstoskip += ['Animalbehavior', 'ChemistryPharmaceutical', 'Neurobiology', 'Chemical engineering',
                    'HealthSciencesRehabilitationandTherapy', 'MolecularBiology', 'CellularBiology',
                    'BehavioralSciences', 'HealthSciencesImmunology', 'Medicalimagingandradiology',
                    'OccupationalHealth', 'HistoryofScience', 'BiologyBioinformatics', 'AnthropologyCultural',
@@ -142,12 +142,12 @@ subjectstoskip += ['Areaplanninganddevelopment', 'Businesseducation', #'Computer
 subjectstoskip += ['AnthropologyArchaeology', 'Architecturalengineering', 'Audiology',
                    'Canadianhistory', 'Caribbeanliterature', 'Cinematography',
 		   'CommerceBusiness', #'Computationalphysics',
-                   'EconomicsCommerceBusiness',
+                   'EconomicsCommerceBusiness', 'Biophysics', 'Bioinformatics', 'Ecology',
 		   'EconomicsLabor', 'Environmentalphilosophy', 'Foreignlanguageinstruction',
 		   'Forensicanthropology', 'Geophysicalengineering', 'Giftededucation',
 		   'Instructionaldesign', 'Mining', 'Multimedia', 'Optometry', 'Patentlaw',
 		   'Petroleumgeology', 'Physicaleducation', 'Quantitativepsychologyandpsychometrics',
-		   'Rangemanagement', 'Religiouseducation', 'Systemscience',
+		   'Rangemanagement', 'Religiouseducation', 'Systemscience', 'Biomedical engineering',
 		   'Technicalcommunication', 'Textileresearch', 'FrenchCanadianculture']
 
 problematiclinks = ['https://escholarship.org/uc/item/3hv4z0z8', 'https://escholarship.org/uc/item/5gw3v7bf', 'https://escholarship.org/uc/item/69m6205w', 'https://escholarship.org/uc/item/49q2s5km', 'https://escholarship.org/uc/item/4xn23688', 'https://escholarship.org/uc/item/8tj5d61d', 'https://escholarship.org/uc/item/28w4j5xc', 'https://escholarship.org/uc/item/6972h04z', 'https://escholarship.org/uc/item/8w73232j']
@@ -169,7 +169,7 @@ for i in range(numberofpages):
         time.sleep(10)
     inf = open(tocfilename, 'r')
     lines = ''.join(inf.readlines())
-    tocpage = BeautifulSoup(lines)
+    tocpage = BeautifulSoup(lines, features="lxml")
     inf.close()
     #req = urllib2.Request(tocurl, headers=hdr)
     #tocpage = BeautifulSoup(urllib2.urlopen(req))
@@ -217,7 +217,7 @@ for rec in recs:
         os.system('wget -T 300 -t 3 -q -O %s "%s"' % (artfilename, rec['artlink']))
         time.sleep(10)
     inf = open(artfilename, 'r')
-    artpage = BeautifulSoup(''.join(inf.readlines()))
+    artpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
     inf.close()
     #withdrawn?
     withdrawn = False
