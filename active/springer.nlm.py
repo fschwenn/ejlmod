@@ -496,7 +496,7 @@ def convertarticle(journalnumber, filename, contlevel):
                                'Books And Arts', 'World View', 'Seven Days', 'Career Column', 'Career Brief',
                                'research-highlight', 'Research Highlight', 
                                'Futures', 'Where I Work', 'Books & Arts', 'Expert Recommendation', 'Measure for Measure',
-                               'News Round-up', 'News & Views']:
+                               'News Round-up', 'News & Views', 'Q&a', 'q-and-a', 'Q&A']:
                     return {}
                 #check whether article in fact is part of proceedings
                 elif re.search('Proceedings of ', subjt) and 'P' in rec['tc']:
