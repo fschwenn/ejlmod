@@ -115,12 +115,12 @@ def harvestissue(jnl, vol, issue):
         i += 1
         print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
         try:
-            time.sleep(40)
+            time.sleep(60)
             driver.get(rec['artlink'])
             page = BeautifulSoup(driver.page_source, features="lxml")
         except:
-            print "retry in 180 seconds"
-            time.sleep(180)
+            print "retry in 300 seconds"
+            time.sleep(300)
             pagreq = urllib2.Request(rec['artlink'], headers=hdr)
             page = BeautifulSoup(urllib2.urlopen(pagreq), features="lxml")
         #DOI
