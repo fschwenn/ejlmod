@@ -140,9 +140,9 @@ def tfstrip(x): return x.strip()
 def translatearticles(pubdbrecords):
     done =  map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/*desypubdb*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir)))
     done += map(tfstrip,os.popen("grep '^3.*DOI' %s/backup/%i/*desypubdb*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir, now.year-1)))
-    done += map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*desypubdb*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir)))
-    done += map(tfstrip,os.popen("grep '^3.*DOI' %s/zu_punkten/*desypubdb*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir)))
-    done += map(tfstrip,os.popen("grep '^3.*DOI' %s/zu_punkten/enriched/*desypubdb*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir)))
+    #done += map(tfstrip,os.popen("grep '^3.*DOI' %s/onhold/*desypubdb*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir)))
+    #done += map(tfstrip,os.popen("grep '^3.*DOI' %s/zu_punkten/*desypubdb*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir)))
+    #done += map(tfstrip,os.popen("grep '^3.*DOI' %s/zu_punkten/enriched/*desypubdb*doki |sed 's/.*=//'|sed 's/;//'" % (ejldir)))
     #print done
     #done = [] #tempo
     print '%i DOIs in done' % (len(done))    
