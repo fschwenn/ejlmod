@@ -33,7 +33,7 @@ for inst in ['Physikalisches+Institut', 'Institut+f%C3%BCr+Theoretische+Physik+u
         tocurl = 'https://opus.bibliothek.uni-wuerzburg.de/solrsearch/index/search/searchtype/simple/query/%2A%3A%2A/browsing/true/doctypefq/doctoralthesis/start/0/rows/100/institutefq/' + inst + '/yearfq/' + str(year)
         print '---{ %s }---{ %i }---{ %s }---' % (inst, year, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
+        tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
         time.sleep(5)
         for div in tocpage.body.find_all('div', attrs = {'class' : 'result_box'}):
             for div2 in div.find_all('div', attrs = {'class' : 'results_title'}):
@@ -49,13 +49,13 @@ for inst in ['Physikalisches+Institut', 'Institut+f%C3%BCr+Theoretische+Physik+u
         i += 1
         print '---{ %i/%i }---{ %s }------{ %s }---' % (i, len(recs), inst, rec['link'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
             time.sleep(10)
         except:
             try:
                 print "retry %s in 180 seconds" % (rec['link'])
                 time.sleep(180)
-                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
             except:
                 print "no access to %s" % (rec['link'])
                 continue
