@@ -45,7 +45,7 @@ for cate in categories.keys():
         
         print tocurl
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
+        tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
         time.sleep(3)
 
         for a in tocpage.body.find_all('a', attrs = {'class' : 'titleLink'}):
@@ -72,7 +72,7 @@ for cate in categories.keys():
         i += 1
         print '---{ %s }---{ %i/%i }---{ %s }------' % (cate, i, len(categories[cate]['recs']), rec['artlink'])
         req = urllib2.Request(rec['artlink'], headers=hdr)
-        artpage = BeautifulSoup(urllib2.urlopen(req))    
+        artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")    
         for meta in artpage.head.find_all('meta'):
             if meta.has_attr('name'):
                 #abstract
