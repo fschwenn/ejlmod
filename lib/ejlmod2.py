@@ -1088,4 +1088,5 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
             else:
                 print '--', doi1
     writeXML(uniqrecs, dokfile, publisher)
+    print('FINISHED writenewXML(%s)' % (dokifilename))
     return
