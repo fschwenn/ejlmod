@@ -9,6 +9,8 @@ import datetime
 import os
 import re
 import sys
+import subprocess
+import time
 
 protocol = "/afs/desy.de/group/library/publisherdata/log/protocol"
 #get previous month
@@ -33,7 +35,9 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 logfile = '/afs/desy.de/group/library/publisherdata/log/ejlwrapper.log.%i.%02d.%02d' % (pryear,prmonth,today.day)
 #logfile = '/afs/desy.de/group/library/publisherdata/log/ejlwrapper.log.%i.%i.%i' % (pryear,prmonth,10)
 lproc = '/afs/desy.de/user/l/library/proc'
+lproc3 = '/afs/desy.de/user/l/library/proc/python3'
 pythoncommand = '/home/library/.virtualenvs/inspire/bin/python'
+python3command = '/home/library/.virtualenvs/inspire3-python3.8/bin/python'
 #journal -> (months between two issues, call)
 #        ('physri'      , 1,'%s %s/hindawi.xml.py physri %i %i'  % (pythoncommand, lproc,pryear,prmonth)),
 #        ('ijmms'      , 1,'%s %s/hindawi.xml.py ijmms %i %i'  % (pythoncommand, lproc,pryear,prmonth)),
@@ -66,11 +70,11 @@ pythoncommand = '/home/library/.virtualenvs/inspire/bin/python'
 
 jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear-1922,prmonth)),
         ('theses-oatd I', 2, '%s %s/theses-oatd.py 0 3' % (pythoncommand, lproc)),
-        ('rsi'       , 1,'%s %s/aip.xml2.py rsi %i %i' % (pythoncommand, lproc,pryear-1929,prmonth)),
+        ('rsi'       , 1,'%s %s/aip3.py rsi %i %i' % (python3command, lproc3,pryear-1929,prmonth)),
         ('theses-oatd II', 3, '%s %s/theses-oatd.py 3 5' % (pythoncommand, lproc)),
-        ('jmp'       , 1,'%s %s/aip.xml2.py jmp %i %i' % (pythoncommand, lproc,pryear-1959,prmonth)),
+        ('jmp'       , 1,'%s %s/aip3.py jmp %i %i' % (python3command, lproc3,pryear-1959,prmonth)),
         ('theses-oatd III', 2, '%s %s/theses-oatd.py 5 7' % (pythoncommand, lproc)),
-        ('chaos'     , 3,'%s %s/aip.xml2.py  chaos %i %i' % (pythoncommand, lproc,pryear-1990,prquarter)),
+        ('chaos'     , 3,'%s %s/aip3.py  chaos %i %i' % (python3command, lproc3,pryear-1990,prquarter)),
         ('theses-oatd IV', 3, '%s %s/theses-oatd.py 7 9' % (pythoncommand, lproc)),
         ('symmetry'  , 1,'%s %s/mdpi.sftp.py symmetry' % (pythoncommand, lproc)),
         ('sensors'  , 1,'%s %s/mdpi.sftp.py sensors' % (pythoncommand, lproc)),
@@ -104,7 +108,7 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-boston', 2, '%s %s/theses-boston.py' % (pythoncommand, lproc)),
         ('aanda'     , 1,'%s %s/edpjournals.py aanda %i %02i' % (pythoncommand, lproc,pryear,prmonth)),
         ('jsg'       , 3,'%s %s/intlpress.py jsg %i %s'  % (pythoncommand, lproc,pryear-2002, prquarter)),
-        ('ltp'       , 1,'%s %s/aip.xml2.py ltp %i %i' % (pythoncommand, lproc,pryear-1974,prmonth)),
+        ('ltp'       , 1,'%s %s/aip3.py ltp %i %i' % (python3command, lproc3,pryear-1974,prmonth)),
         ('mnrasl', 1, '%s %s/oxfordjournals.xml.py mnrasl %s 1' % (pythoncommand, lproc, mnrasbignumber/4)),
         ('sps'       , 2,'%s %s/scipost.py sps %i %i' % (pythoncommand, lproc, 2*(pryear-2016) + prmonth/6, prmonth % 6 + 1)),
         ('bjps'      , 3,'%s %s/oxfordjournals.xml.py bjps %i %i' % (pythoncommand, lproc,pryear-1949,prquarter)),
@@ -129,45 +133,45 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-pennstate', 2, '%s %s/theses-pennstate.py' % (pythoncommand, lproc)),
         ('theses-DCN', 2, '%s %s/theses-DCN.py' % (pythoncommand, lproc)),
         ('theses-PANDA', 2, '%s %s/theses-PANDA.py' % (pythoncommand, lproc)),
-        ('php'       , 1,'%s %s/aip.xml2.py php %i %i' % (pythoncommand, lproc,pryear-1993,prmonth)),
-        ('OSAol', 1, '%s  %s/osa.py ol %i %i'  % (pythoncommand, lproc,pryear-1975, prmonth * 2 - 1)),
-        ('OSAol', 1, '%s  %s/osa.py ol %i %i'  % (pythoncommand, lproc,pryear-1975, prmonth * 2)),
-        ('OSAoe', 1, '%s  %s/osa.py oe %i %i'  % (pythoncommand, lproc,pryear-1992, prmonth * 2 - 1)),
-        ('OSAoe', 1, '%s  %s/osa.py oe %i %i'  % (pythoncommand, lproc,pryear-1992, prmonth * 2)),
-        ('OSAao', 1, '%s  %s/osa.py ao %i %i'  % (pythoncommand, lproc,pryear-1961, prmonth * 3 - 2)),
-        ('OSAao', 1, '%s  %s/osa.py ao %i %i'  % (pythoncommand, lproc,pryear-1961, prmonth * 3 - 1)),
-        ('OSAao', 1, '%s  %s/osa.py ao %i %i'  % (pythoncommand, lproc,pryear-1961, prmonth * 3)),
-        ('OSAjosaa', 1, '%s  %s/osa.py josaa %i %i'  % (pythoncommand, lproc,pryear-1983, prmonth)),
-        ('OSAjosab', 1, '%s  %s/osa.py josab %i %i'  % (pythoncommand, lproc,pryear-1983, prmonth)),
-        ('adva', 1, '%s %s/aip.xml2.py adva %i %i' % (pythoncommand, lproc,pryear-2010,prmonth)),
+        ('php'       , 1,'%s %s/aip3.py php %i %i' % (python3command, lproc3,pryear-1993,prmonth)),
+        ('OSAol', 1, '%s  %s/osa3.py ol %i %i'  % (python3command, lproc3,pryear-1975, prmonth * 2 - 1)),
+        ('OSAol', 1, '%s  %s/osa3.py ol %i %i'  % (python3command, lproc3,pryear-1975, prmonth * 2)),
+        ('OSAoe', 1, '%s  %s/osa3.py oe %i %i'  % (python3command, lproc3,pryear-1992, prmonth * 2 - 1)),
+        ('OSAoe', 1, '%s  %s/osa3.py oe %i %i'  % (python3command, lproc3,pryear-1992, prmonth * 2)),
+        ('OSAao', 1, '%s  %s/osa3.py ao %i %i'  % (python3command, lproc3,pryear-1961, prmonth * 3 - 2)),
+        ('OSAao', 1, '%s  %s/osa3.py ao %i %i'  % (python3command, lproc3,pryear-1961, prmonth * 3 - 1)),
+        ('OSAao', 1, '%s  %s/osa3.py ao %i %i'  % (python3command, lproc3,pryear-1961, prmonth * 3)),
+        ('OSAjosaa', 1, '%s  %s/osa3.py josaa %i %i'  % (python3command, lproc3,pryear-1983, prmonth)),
+        ('OSAjosab', 1, '%s  %s/osa3.py josab %i %i'  % (python3command, lproc3,pryear-1983, prmonth)),
+        ('adva', 1, '%s %s/aip3.py adva %i %i' % (python3command, lproc3,pryear-2010,prmonth)),
         ('particles', 1, '%s %s/mdpi.sftp.py particles' % (pythoncommand, lproc)),
         ('physics', 1, '%s %s/mdpi.sftp.py physics' % (pythoncommand, lproc)),
         ('mnras', 1, '%s %s/oxfordjournals.xml.py mnras %s %s in_progress' % (pythoncommand, lproc, 1 + mnrasbignumber/4, mnrasbignumber % 4 + 1)),
         ('mnras', 1, '%s %s/oxfordjournals.xml.py mnras %s %s in_progress' % (pythoncommand, lproc, 1 + (mnrasbignumber+1)/4, (mnrasbignumber+1)%4 + 1)),
         ('mnras', 1, '%s %s/oxfordjournals.xml.py mnras %s %s in_progress' % (pythoncommand, lproc, 1 + (mnrasbignumber+2)/4, (mnrasbignumber+2)%4 + 1)),
         ('mnrasl', 1, '%s %s/oxfordjournals.xml.py mnrasl %s 1 in_progress' % (pythoncommand, lproc, 1 + mnrasbignumber/4)),
-        ('apl'       , 1, '%s %s/aip.xml2.py apl %i %i' % (pythoncommand, lproc, 2*pryear - 3924 + ((prmonth-1) / 6), 1 + (4*prmonth - 3) % 24)),
-        ('apl'       , 1, '%s %s/aip.xml2.py apl %i %i' % (pythoncommand, lproc, 2*pryear - 3924 + ((prmonth-1) / 6), 1 + (4*prmonth - 2) % 24)),
-        ('apl'       , 1, '%s %s/aip.xml2.py apl %i %i' % (pythoncommand, lproc, 2*pryear - 3924 + ((prmonth-1) / 6), 1 + (4*prmonth - 1) % 24)),
-        ('apl'       , 1, '%s %s/aip.xml2.py apl %i %i' % (pythoncommand, lproc, 2*pryear - 3924 + ((prmonth-1) / 6), 1 + 4*prmonth % 24)),
-        ('jcp'       , 1, '%s %s/aip.xml2.py jcp %i %i' % (pythoncommand, lproc, 2*pryear - 3888 + ((prmonth-1) / 6), 1 + (4*prmonth - 3) % 24)),
-        ('jcp'       , 1, '%s %s/aip.xml2.py jcp %i %i' % (pythoncommand, lproc, 2*pryear - 3888 + ((prmonth-1) / 6), 1 + (4*prmonth - 2) % 24)),
-        ('jcp'       , 1, '%s %s/aip.xml2.py jcp %i %i' % (pythoncommand, lproc, 2*pryear - 3888 + ((prmonth-1) / 6), 1 + (4*prmonth - 1) % 24)),
-        ('jcp'       , 1, '%s %s/aip.xml2.py jcp %i %i' % (pythoncommand, lproc, 2*pryear - 3888 + ((prmonth-1) / 6), 1 + 4*prmonth % 24)),
-        ('jap'       , 1, '%s %s/aip.xml2.py jap %i %i' % (pythoncommand, lproc, 2*pryear - 3913 + ((prmonth-1) / 6), 1 + (4*prmonth - 3) % 24)),
-        ('jap'       , 1, '%s %s/aip.xml2.py jap %i %i' % (pythoncommand, lproc, 2*pryear - 3913 + ((prmonth-1) / 6), 1 + (4*prmonth - 2) % 24)),
-        ('jap'       , 1, '%s %s/aip.xml2.py jap %i %i' % (pythoncommand, lproc, 2*pryear - 3913 + ((prmonth-1) / 6), 1 + (4*prmonth - 1) % 24)),
-        ('jap'       , 1, '%s %s/aip.xml2.py jap %i %i' % (pythoncommand, lproc, 2*pryear - 3913 + ((prmonth-1) / 6), 1 + 4*prmonth % 24)),
+        ('apl'       , 1, '%s %s/aip3.py apl %i %i' % (python3command, lproc3, 2*pryear - 3924 + ((prmonth-1) / 6), 1 + (4*prmonth - 3) % 24)),
+        ('apl'       , 1, '%s %s/aip3.py apl %i %i' % (python3command, lproc3, 2*pryear - 3924 + ((prmonth-1) / 6), 1 + (4*prmonth - 2) % 24)),
+        ('apl'       , 1, '%s %s/aip3.py apl %i %i' % (python3command, lproc3, 2*pryear - 3924 + ((prmonth-1) / 6), 1 + (4*prmonth - 1) % 24)),
+        ('apl'       , 1, '%s %s/aip3.py apl %i %i' % (python3command, lproc3, 2*pryear - 3924 + ((prmonth-1) / 6), 1 + 4*prmonth % 24)),
+        ('jcp'       , 1, '%s %s/aip3.py jcp %i %i' % (python3command, lproc3, 2*pryear - 3888 + ((prmonth-1) / 6), 1 + (4*prmonth - 3) % 24)),
+        ('jcp'       , 1, '%s %s/aip3.py jcp %i %i' % (python3command, lproc3, 2*pryear - 3888 + ((prmonth-1) / 6), 1 + (4*prmonth - 2) % 24)),
+        ('jcp'       , 1, '%s %s/aip3.py jcp %i %i' % (python3command, lproc3, 2*pryear - 3888 + ((prmonth-1) / 6), 1 + (4*prmonth - 1) % 24)),
+        ('jcp'       , 1, '%s %s/aip3.py jcp %i %i' % (python3command, lproc3, 2*pryear - 3888 + ((prmonth-1) / 6), 1 + 4*prmonth % 24)),
+        ('jap'       , 1, '%s %s/aip3.py jap %i %i' % (python3command, lproc3, 2*pryear - 3913 + ((prmonth-1) / 6), 1 + (4*prmonth - 3) % 24)),
+        ('jap'       , 1, '%s %s/aip3.py jap %i %i' % (python3command, lproc3, 2*pryear - 3913 + ((prmonth-1) / 6), 1 + (4*prmonth - 2) % 24)),
+        ('jap'       , 1, '%s %s/aip3.py jap %i %i' % (python3command, lproc3, 2*pryear - 3913 + ((prmonth-1) / 6), 1 + (4*prmonth - 1) % 24)),
+        ('jap'       , 1, '%s %s/aip3.py jap %i %i' % (python3command, lproc3, 2*pryear - 3913 + ((prmonth-1) / 6), 1 + 4*prmonth % 24)),
         ('procnas'   , 1, '%s %s/procnas.py %i %i,%i' % (pythoncommand, lproc, pryear-1903, 4*(prmonth-1)+1, 4*(prmonth-1)+2)),
         ('procnas'   , 1, '%s %s/procnas.py %i %i,%i' % (pythoncommand, lproc, pryear-1903, 4*(prmonth-1)+3, 4*(prmonth-1)+4)),
         ('arcmp'     ,12, '%s %s/annualreview.py arcmp  %i' %  (pythoncommand, lproc,pryear-2009)),
         ('theses-kit_etp', 2, '%s %s/theses-kit_etp.py' % (pythoncommand, lproc)),
         ('condensedmatter'   , 1,'%s %s/mdpi.sftp.py condensedmatter' % (pythoncommand, lproc)),
         ('atoms'   , 1,'%s %s/mdpi.sftp.py atoms' % (pythoncommand, lproc)),
-        ('ajp'       , 1,'%s %s/aip.xml2.py ajp %i %i' % (pythoncommand, lproc,pryear-1932,prmonth)),
+        ('ajp'       , 1,'%s %s/aip3.py ajp %i %i' % (python3command, lproc3,pryear-1932,prmonth)),
         ('jatis'     , 3, '%s %s/spie_journal.py jatis %i %i' % (pythoncommand, lproc, pryear-2014, prquarter)),
         ('messenger' , 3, '%s %s/messenger.py %i' % (pythoncommand, lproc, 4*pryear + prquarter - 7902)),
-        ('phf'       , 1, '%s %s/aip.xml2.py phf %i %i' % (pythoncommand, lproc, pryear - 1988, prmonth)),
+        ('phf'       , 1, '%s %s/aip3.py phf %i %i' % (python3command, lproc3, pryear - 1988, prmonth)),
         ('science', 1, '%s %s/sciencemag.py science %i' % (pythoncommand, lproc, pryear)),
         ('scienceadvances', 1, '%s %s/sciencemag.py sciadv %i' % (pythoncommand, lproc, pryear)),
         ('theses-unesp', 2, '%s %s/theses-unesp.py' % (pythoncommand, lproc)),
@@ -291,8 +295,8 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-chennai', 2, '%s %s/theses-chennai.py' % (pythoncommand, lproc)),
         ('theses-caltech', 2, '%s %s/theses-caltech.py' % (pythoncommand, lproc)),
         ('theses-iowa', 2, '%s %s/theses-iowa.py' % (pythoncommand, lproc)),
-        ('jva', 2, '%s %s/aip.xml2.py jva %i %i' % (pythoncommand, lproc, pryear-1982, prsixth)),
-        ('jvb', 2, '%s %s/aip.xml2.py jvb %i %i' % (pythoncommand, lproc, pryear-1982, prsixth)),
+        ('jva', 2, '%s %s/aip3.py jva %i %i' % (python3command, lproc3, pryear-1982, prsixth)),
+        ('jvb', 2, '%s %s/aip3.py jvb %i %i' % (python3command, lproc3, pryear-1982, prsixth)),
         ('mathematics' , 1,'%s %s/mdpi.sftp.py mathematics' % (pythoncommand, lproc)),
         ('theses-floridastate', 2, '%s %s/theses-floridastate.py' % (pythoncommand, lproc)),
         ('theses-southermethodist', 3, '%s %s/theses-southermethodist.py' % (pythoncommand, lproc)),
@@ -369,9 +373,9 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-barcelona', 2, '%s %s/theses-barcelona.py' % (pythoncommand, lproc)),
         ('theses-seoulnatlu', 2, '%s %s/theses-seoulnatlu.py' % (pythoncommand, lproc)),
         ('quantum', 1, '%s %s/quantum.py %i' % (pythoncommand, lproc, pryear-2016)),
-        ('OSAoptica', 1, '%s  %s/osa.py optica %i %i'  % (pythoncommand, lproc,pryear-2013, prmonth)),
+        ('OSAoptica', 1, '%s  %s/osa3.py optica %i %i'  % (python3command, lproc3,pryear-2013, prmonth)),
         ('quantumrep'  , 1,'%s %s/mdpi.sftp.py quantumrep' % (pythoncommand, lproc)),
-        ('aqs'     , 3, '%s %s/aip.xml2.py  aqs %i %i' % (pythoncommand, lproc,pryear-2018,prquarter)),
+        ('aqs'     , 3, '%s %s/aip3.py  aqs %i %i' % (python3command, lproc3,pryear-2018,prquarter)),
         ('theses-witwatersrand', 3, '%s %s/theses-witwatersrand.py' % (pythoncommand, lproc)),
         ('theses-birmingham', 2, '%s %s/theses-birmingham.py' % (pythoncommand, lproc)),
         ('theses-montana', 2, '%s %s/theses-montana.py' % (pythoncommand, lproc)),
@@ -381,7 +385,7 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('spsc'       , 3,'%s %s/scipost.py spsc %i %i' % (pythoncommand, lproc, pryear-2017, prquarter)),
         ('spsln'       , 2,'%s %s/scipost.py spsln' % (pythoncommand, lproc)),
         ('lboro' , 1, '%s %s/figshare.py lboro' % (pythoncommand, lproc)),
-        ('pto', 1, '%s %s/aip.xml2.py pto %i %i' % (pythoncommand, lproc, pryear-1947, prmonth)),
+        ('pto', 1, '%s %s/aip3.py pto %i %i' % (python3command, lproc3, pryear-1947, prmonth)),
         ('ljp', 3, '%s %s/ljp.py' % (pythoncommand, lproc)),
         ('nalefd', 1, '%s %s/acs.py nalefd %i %i' % (pythoncommand, lproc, pryear-2000, prmonth)),
         ('jctcce', 1, '%s %s/acs.py jctcce %i %i' % (pythoncommand, lproc, pryear-2004, prmonth)),
@@ -478,22 +482,23 @@ jnls = [('cjp'       , 1,'%s %s/cjp.py cjp %i %i' % (pythoncommand, lproc,pryear
         ('theses-laval', 3, '%s %s/theses-laval.py' % (pythoncommand, lproc)),
         ('theses-cyprus', 3, '%s %s/theses-cyprus.py' % (pythoncommand, lproc)),
         ('theses-barcelonapolytech', 2, '%s %s/theses-barcelonapolytech' % (pythoncommand, lproc)),
-        ('mitbooks', 1, '%s %s/mitbooks.xml.py' % (pythoncommand, lproc))]
+        ('mitbooks', 1, '%s %s/mitbooks.xml.py' % (pythoncommand, lproc)),
+        ('theses-puebla', 2, '%s %s/theses-puebla.py' % (pythoncommand, lproc))]
 
 
 if prmonth == 12:
-    jnls.append(('OSAoe'  , 1, '%s %s/osa.py oe %i %i'  % (pythoncommand, lproc,pryear-1992, prmonth * 2 + 1)))
-    jnls.append(('OSAoe'  , 1, '%s %s/osa.py oe %i %i'  % (pythoncommand, lproc,pryear-1992, prmonth * 2 + 2)))
-    jnls.append(('apl'    , 1, '%s %s/aip.xml2.py apl %i %i' % (pythoncommand, lproc, 2*pryear - 3924 + 1, 25)))
-    jnls.append(('apl'    , 1, '%s %s/aip.xml2.py apl %i %i' % (pythoncommand, lproc, 2*pryear - 3924 + 1, 26)))
+    jnls.append(('OSAoe'  , 1, '%s %s/osa3.py oe %i %i'  % (python3command, lproc3, pryear-1992, prmonth * 2 + 1)))
+    jnls.append(('OSAoe'  , 1, '%s %s/osa3.py oe %i %i'  % (python3command, lproc3, pryear-1992, prmonth * 2 + 2)))
+    jnls.append(('apl'    , 1, '%s %s/aip3.py apl %i %i' % (python3command, lproc3, 2*pryear - 3924 + 1, 25)))
+    jnls.append(('apl'    , 1, '%s %s/aip3.py apl %i %i' % (python3command, lproc3, 2*pryear - 3924 + 1, 26)))
     jnls.append(('procnas', 1, '%s %s/procnas.py %i 49,50' % (pythoncommand, lproc, pryear-1903)))
     jnls.append(('procnas', 1, '%s %s/procnas.py %i 51,52' % (pythoncommand, lproc, pryear-1903)))
 #n    jnls.append(('fourier', 1, '%s %s/fourier.py %i %i'  % (pythoncommand, lproc, pryear-1950, 7)))
     jnls.append(('cag', 1, '%s %s/intlpress.py cag %i %i'  % (pythoncommand, lproc, pryear-1992, 7)))
     jnls.append(('cag', 1, '%s %s/intlpress.py cag %i %i'  % (pythoncommand, lproc, pryear-1992, 8)))
 elif prmonth == 6:
-    jnls.append(('apl'  , 1, '%s %s/aip.xml2.py apl %i %i' % (pythoncommand, lproc, 2*pryear - 3924, 25)))
-    jnls.append(('apl'  , 1, '%s %s/aip.xml2.py apl %i %i' % (pythoncommand, lproc, 2*pryear - 3924, 26)))
+    jnls.append(('apl'  , 1, '%s %s/aip3.py apl %i %i' % (python3command, lproc3, 2*pryear - 3924, 25)))
+    jnls.append(('apl'  , 1, '%s %s/aip3.py apl %i %i' % (python3command, lproc3, 2*pryear - 3924, 26)))
 
 #work from 3th to 28th day of a month
 def checkday(entrynumber):
@@ -502,74 +507,74 @@ def checkday(entrynumber):
     #return (5 + (entrynumber % 24) == 5)
 
 #writing to do list to protocol
+listofcommands = []
 prfil = open(protocol,"a")
 print "previous month = %i/%i [today = %s]\n" % (prmonth,pryear, today.day)
 prfil.write("---------{ %s }---{ running ejlwrapper.py for previous month %i/%i }---------\n will start the following commands:\n" % (stampoftoday, prmonth,pryear))
 for entrynumber in range(len(jnls)):
     if (prmonth % jnls[entrynumber][1] == 0) and checkday(entrynumber):
-        a=1
-        prfil.write('  - '+jnls[entrynumber][2]+'\n')
-prfil.close()
-
-listofcommands = []
-
-#report the jobs
-for entrynumber in range(len(jnls)):
-    if (prmonth % jnls[entrynumber][1] == 0) and checkday(entrynumber):
         listofcommands.append(jnls[entrynumber][2])
-os.system('echo "%s" | mail -s "ejlwrapper commands"  florian.schwennsen@desy.de ' % ('\n '.join(listofcommands)))
-
-
-prfil = open(protocol,"a")
-prfil.write(' detailed protocols will be written to %s\n' % (logfile))
-prfil.write(' has executed the following commands:\n')
-prfil.close()
-
-
-
-os.system("touch "+logfile)
-#do always WSP
-
-#do the jobs
-for entrynumber in range(len(jnls)):
-    if (prmonth % jnls[entrynumber][1] == 0) and checkday(entrynumber):
-        print jnls[entrynumber]
-        os.system("sleep 30 && "+jnls[entrynumber][2]+" >> "+logfile)
-        #print "sleep 120 && "+jnls[entrynumber][2]+" >> "+logfile
-        prfil = open(protocol,"a")
         prfil.write('  - '+jnls[entrynumber][2]+'\n')
-        prfil.close()
-        
 #do always WSP or IOP or IEEE
-prfil = open(protocol,"a")
 if (today.day % 3 == 0):
-    listofcommands.append('wsp.xml2.py')
+    listofcommands.append('%s %s/wsp.xml2.py' % (pythoncommand, lproc))
     prfil.write('  - wsp.xml2.py\n')
-    os.system('%s %s/wsp.xml2.py' % (pythoncommand, lproc))
 elif (today.day % 3 == 1):
-    listofcommands.append('ieee_wrapper.py')
+    listofcommands.append('%s %s/ieee_wrapper.py' % (pythoncommand, lproc))
     prfil.write('  - ieee_wrapper.py\n')
-    os.system('%s %s/ieee_wrapper.py' % (pythoncommand, lproc))
 if (today.weekday()  == 0):
-    listofcommands.append('pubdbweb.py')
+    listofcommands.append('%s %s/pubdbweb.py' % (pythoncommand, lproc))
     prfil.write('  - pubdbweb.py\n')
-    os.system('%s %s/pubdbweb.py' % (pythoncommand, lproc))
-
-#do always IOP
 #IOP books still old workflow
 if (today.day % 7 == 0):
-    listofcommands.append('iop.stacks.py')
+    listofcommands.append('%s %s/iop.stack.py' % (pythoncommand, lproc))
     prfil.write('  - iop.stacks.py\n')
-    os.system('%s %s/iop.stack.py' % (pythoncommand, lproc))
 else:
-    listofcommands.append('iop.sftp.py')
+    listofcommands.append('%s %s/iop.sftp.py' % (pythoncommand, lproc))
     prfil.write('  - iop.sftp.py\n')
-    os.system('%s %s/iop.sftp.py' % (pythoncommand, lproc))
-
-    
+prfil.write(' detailed protocols will be written to %s\n' % (logfile))
+prfil.write(' has executed the following commands:\n')
 prfil.close()    
 
-os.system('echo "%s" | mail -s "ejlwrapper finished"  florian.schwennsen@desy.de ' % ('\n '.join(listofcommands)))
+#report the jobs
+os.system('echo "%s" | mail -s "ejlwrapper commands"  florian.schwennsen@desy.de ' % ('\n '.join(listofcommands)))
+os.system("touch "+logfile)
+
+
+#do the jobs
+refin = re.compile('FINISHED writenewXML\((.*)\)')
+rerdf = re.compile('No handlers could be found for logger "rdflib.term"\n')
+shortreport = ''
+for com in listofcommands:
+    writtenfiles = []
+    print(com)
+    time.sleep(10)
+    commando = re.split(' +', com)
+    harvest = subprocess.Popen(commando, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    result, errors = harvest.communicate()
+    errors = rerdf.sub('', errors)
+    #detailed log
+    logfil = open(logfile,"a")
+    logfil.write('========={ %s }=========\n' % (' '.join(com)))
+    logfil.write(result)
+    for line in re.split('\n', result):
+        if refin.search(line):
+            writtenfiles.append(refin.sub(r'\n   \1.xml', line))
+    logfil.write(errors)
+    logfil.close()
+    #summary to bes 
+    shortreport += '\n- ' + ' '.join(commando)
+    shortreport += '\n  ' + '\n  '.join(writtenfiles) + '\n'
+    if len(errors) > 0:
+        shortreport += '\n  ' + errors + '\n'
+    prfil = open(protocol,"a")
+    prfil.write('  {did} ' + com + '\n')
+    prfil.close()
+        
+shortreport += '\n\ndetailed protocols has been written to '+logfile
+
+os.system('echo "%s" | mail -s "ejlwrapper finished"  florian.schwennsen@desy.de ' % (shortreport))
+
 os.system('echo "ejlwrapper finished" >> '+logfile)
 prfil = open(protocol,"a")
 prfil.write(' ejlwrapper.py has executed ALL commands.\n')
