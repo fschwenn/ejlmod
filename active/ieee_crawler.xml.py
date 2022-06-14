@@ -244,7 +244,7 @@ def ieee(number):
                     if not link in ['/document/8733895/']:
                         articlelinks.append(urltrunc+link)
             else:
-                print ' not an article: %s' % (headline.text.strip())
+                #print ' not an article: %s' % (headline.text.strip())
                 notproperarticles += 1
         if articlelinks:
             allarticlelinks += articlelinks
