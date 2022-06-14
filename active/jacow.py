@@ -194,6 +194,7 @@ def convertToInspire(argv):
     xmlrecords = re.sub('&','&amp;', xmlrecords)
     records = create_records(xmlrecords)
     infile.close()
+    print 'processing %s records' % len(records)
       
     outfile = codecs.EncodedFile(codecs.open(ejl+'jacow.'+conf+'.xml',mode='wb'),'utf8')
     outfile.write('<?xml version="1.0" encoding="UTF-8"?>\n<collection>\n')
@@ -364,7 +365,7 @@ def convertToInspire(argv):
                 m773[j][0].append(('v', conf_acronym))
             record_add_fields(record, '773', m773)
         else:
-            m773 = [('p','JaCoW'),('q',conf_acronym),('v',conf_acronym),('w',cnum),('c',year)]
+            m773 = [('p','JaCoW'),('q',conf_acronym),('v',conf_acronym),('w',cnum),('y',year)]
             record_add_field(record,'773',' ',' ','', m773)
 
         # add pseudo DOIconf_acronym if there is none
