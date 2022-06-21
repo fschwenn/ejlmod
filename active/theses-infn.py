@@ -33,6 +33,7 @@ publisher = 'INFN'
 
 
 tocurl = 'http://www.infn.it/thesis/index.php'
+print tocurl
 
 br = mechanize.Browser()
 br.set_handle_robots(False)   # ignore robots
@@ -42,7 +43,11 @@ response = br.open(tocurl)
 for year in [now.year, now.year-1]:
     jnlfilename = 'THESES-INFN-%s_%i' % (stampoftoday, year)
     tids = []
-    br.select_form("ricerca")
+    try:        
+        br.select_form("ricerca")
+    except:
+        print "Immernoch Zugang beschraenkt?"
+        sys.exit(0)
     #select year
     control = br.form.find_control("TESI[data_conseguimentoyy]")
     control.value = [str(year)]
