@@ -34,7 +34,7 @@ for uni in [('Oklahoma U.', '11244/10476'), ('Oklahome State U.', '11244/10462')
         tocurl = 'https://shareok.org/handle/%s/browse?rpp=%i&sort_by=2&type=dateissued&offset=%i&etal=-1&order=DESC' % (uni[1], articlesperpage, articlesperpage*i)
         print '---{ %s }---{ %i/%i }---{ %s }---' % (uni[0], i+1, numopages, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
+        tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
         time.sleep(10)
         for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
             rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
@@ -47,13 +47,13 @@ for uni in [('Oklahoma U.', '11244/10476'), ('Oklahome State U.', '11244/10462')
         i += 1
         print '---{ %i/%i}---{ %s}------' % (i, len(recs), rec['artlink'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
             time.sleep(3)
         except:
             try:
                 print "retry %s in 180 seconds" % (rec['artlink'])
                 time.sleep(180)
-                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+                artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
             except:
                 print "no access to %s" % (rec['artlink'])
                 continue      
