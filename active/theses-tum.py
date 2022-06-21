@@ -34,7 +34,7 @@ tocurl = 'https://mediatum.ub.tum.de/680895?nodes_per_page=100&sortfield0=-year-
 print tocurl
 hdr = {'User-Agent' : 'Magic Browser'}
 req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
+tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
 recs = []
 divs = tocpage.body.find_all('div', attrs = {'class' : 'preview_text'})
 i = 0 
@@ -51,7 +51,7 @@ for rec in recs:
     time.sleep(3)
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
     req = urllib2.Request(rec['artlink'], headers=hdr)
-    artpage = BeautifulSoup(urllib2.urlopen(req))
+    artpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     #title
     for div in artpage.body.find_all('div', attrs = {'class' : 'field-title'}):
         for div2 in div.find_all('div', attrs = {'class' : 'mask_value'}):
