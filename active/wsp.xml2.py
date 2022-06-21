@@ -43,7 +43,7 @@ def getreferencesfromweb(doi):
     if not os.path.isfile(reffile):
         os.system("wget -T 300 -t 3 -q -O %s %s" % (reffile, link))
     inf = open(reffile, 'r')
-    refpage = BeautifulSoup(''.join(inf.readlines()))
+    refpage = BeautifulSoup(''.join(inf.readlines()), features="lxml")
     inf.close()
     #refpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(link))
     refs = []
@@ -93,7 +93,7 @@ def concert(rawrecs):
     print 'found %i xml files' % (len(rawrecs))
     for rawrec in rawrecs:
         xmlrec = codecs.EncodedFile(codecs.open(rawrec,mode='rb'),'utf8')
-        wsprecord = BeautifulSoup(''.join(xmlrec.readlines()))
+        wsprecord = BeautifulSoup(''.join(xmlrec.readlines()), features="lxml")
         xmlrec.close()
         rec = {'tc' : 'P', 'note' : [], 'autaff' : [], 'keyw' : []}
         #ignore references in metadata delivery
