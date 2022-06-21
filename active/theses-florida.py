@@ -140,7 +140,7 @@ for page in range(pages):
         for section in sections:
             for div in section.find_all('div', attrs = {'class' : 'BriefView_title__1OtwX'}):
                 for a in div.find_all('a'):
-                    rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [], 'restricted' : False}
+                    rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [], 'restricted' : False, 'autaff' : []}
                     rec['link'] =  'https://ufdc.ufl.edu' + a['href']
                     #marc xml works only for some records
                     rec['artlink'] =  re.sub('^\/(..)(..)(..)(..)(..)\/(.*)\/citation', r'https://ufdcimages.uflib.ufl.edu/\1/\2/\3/\4/\5/\6/marc.xml', a['href'])
@@ -285,7 +285,7 @@ for rec in prerecs:
 
 
     if keepit:
-        if not embargo:
+        if not embargo and rec['autaff']:
             rec['autaff'][-1].append(publisher)
             print'  ', rec.keys()
             recs.append(rec)
