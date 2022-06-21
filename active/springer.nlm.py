@@ -21,6 +21,7 @@ import datetime
 #from invenio.search_engine import search_pattern
 #from invenio.search_engine import perform_request_search
 from refextract import  extract_references_from_string
+from extract_jats_references import jatsreferences
 
 
 sprdir = '/afs/desy.de/group/library/publisherdata/springer'
@@ -573,9 +574,10 @@ def convertarticle(journalnumber, filename, contlevel):
         if not abstracts:
             abstracts = meta.find_all('abstract')
         for abstract in abstracts:
-            rec['abs'] = ''
-            for p in abstract.find_all('p'):
-                rec['abs'] += cleanformulas(p)
+            if not 'abs' in rec:
+                rec['abs'] = ''
+                for p in abstract.find_all('p'):
+                    rec['abs'] += cleanformulas(p)
         #license
         for permissions in meta.find_all('permissions'):
             for licence in permissions.find_all('license', attrs = {'license-type' : 'open-access'}):
@@ -695,7 +697,8 @@ def convertarticle(journalnumber, filename, contlevel):
                     rec['col'].append(coll.text.strip())
     #references
     for rl in article.find_all('ref-list', attrs = {'id' : 'Bib1'}):
-        rec['refs'] = get_references(rl)
+        #rec['refs'] = get_references(rl)
+        rec['refs'] = jatsreferences(rl, citationtag='mixed-citation')
     if journalnumber == '13130':
         if 'refs' in rec.keys():
             springerrefs = rec['refs']
@@ -1059,7 +1062,6 @@ for dirlev1 in os.listdir(sprdir):
             ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
             xmlfile.close()
             #retrival
-            retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
             retfiles_text = open(retfiles_path, "r").read()
             line = jnlfilename+'.xml'+ "\n"
             if not line in retfiles_text:
