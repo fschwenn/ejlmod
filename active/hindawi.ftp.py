@@ -21,6 +21,7 @@ xmldir = '/afs/desy.de/user/l/library/inspire/ejl' #+ '/special'
 ejdir = '/afs/desy.de/user/l/library/dok/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
 feeddir = '/afs/desy.de/group/library/publisherdata/hindawi'
+from extract_jats_references import jatsreferences
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
@@ -34,6 +35,8 @@ jids = {'AA' : 'Adv.Astron.',
         'IJMMS' : 'Int.J.Math.Math.Sci.',
         'QUE' : 'Quantum Eng.',
         'JAM' : 'J.Appl.Math.'}
+
+
 
 ###clean formulas in tag
 def cleanformulas(tag):
@@ -374,7 +377,8 @@ def extractrecord(publisherfile):
     #BACK
     for back in hindawirecord.find_all('back'):
         for rl in back.find_all('ref-list'):
-            rec['refs'] = get_references(rl)
+            #rec['refs'] = get_references(rl)
+            rec['refs'] = jatsreferences(rl)
     if category and category in ['Editorial']:
         print '  skip %s' % (category)
         return False
