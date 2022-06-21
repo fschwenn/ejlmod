@@ -544,6 +544,7 @@ os.system("touch "+logfile)
 #do the jobs
 refin = re.compile('FINISHED writenewXML\((.*)\)')
 rerdf = re.compile('No handlers could be found for logger "rdflib.term"\n')
+relxml = re.compile('.afs.*?No parser was explicitly specified, so I.*?BeautifulSoup constructor')
 shortreport = ''
 for com in listofcommands:
     writtenfiles = []
@@ -553,13 +554,14 @@ for com in listofcommands:
     harvest = subprocess.Popen(commando, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     result, errors = harvest.communicate()
     errors = rerdf.sub('', errors)
+    errors = relxml.sub('LXML-NOTE', errors)
     #detailed log
     logfil = open(logfile,"a")
     logfil.write('========={ %s }=========\n' % (' '.join(com)))
     logfil.write(result)
     for line in re.split('\n', result):
         if refin.search(line):
-            writtenfiles.append(refin.sub(r'\n   \1.xml', line))
+            writtenfiles.append(refin.sub(r'   \1.xml', line))
     logfil.write(errors)
     logfil.close()
     #summary to bes 
