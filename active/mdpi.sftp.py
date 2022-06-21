@@ -18,6 +18,7 @@ import time
 import pysftp
 import tarfile
 from refextract import  extract_references_from_string
+from extract_jats_references import jatsreferences
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" #+ '_special'
@@ -543,7 +544,8 @@ for rec in prerecs:
                         rec['col'].append(coll.text.strip())
             #references
             for rl in article.find_all('ref-list'):
-                rec['refs'] = get_references(rl)
+                #rec['refs'] = get_references(rl)
+                rec['refs'] = jatsreferences(rl)
             print '  ', rec.keys()
             recs.append(rec)
             #copy pdf
