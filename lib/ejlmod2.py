@@ -34,7 +34,7 @@ tmpdir = '/afs/desy.de/user/l/library/tmp'
 
 #
 journalskb = '/opt/invenio/etc/docextract/journal-titles-inspire.kb'
-#journalskb = '/afs/desy.de/user/l/library/lists/journal-titles-inspire.kb'
+journalskb = '/afs/desy.de/user/l/library/lists/journal-titles-inspire.2022-06-17.kb'
 
 #from collclean import clean710
 
@@ -66,7 +66,10 @@ rekeywsplit2 =  re.compile('; .*; ')
 
 #valid arXiv numbers
 rearxivold = re.compile('^[a-z\-]+\/\d{7}$')
+rearxivnewshort = re.compile('^\d{4}\.\d{4,5}')
 rearxivnew = re.compile('^ar[xX]iv:\d{4}\.\d{4,5}')
+rearxivhttpold = re.compile('https?:.*arxiv.org.*?([a-z\-]+\/\d{7}).*')
+rearxivhttpnew = re.compile('https?:.*arxiv.org.*(\d{4}\.\d{4,5}).*')
 #valid ORCID
 reorcid = re.compile('^ORCID:\d{4}\-\d{4}\-\d{4}\-\d{3}[0-9X]$')
 
@@ -507,7 +510,7 @@ def writeXML(recs,dokfile,publisher):
             for isbn in rec['isbns']:
                 xmlstring += marcxml('020', isbn)
         elif rec.has_key('isbn'):
-            xmlstring += marcxml('020',[('a', re.sub('\-', '', rec['isbn']))])
+            xmlstring += marcxml('020',[('a', re.sub('\D', '', rec['isbn']))])
         #DOI
         if rec.has_key('doi'):
             xmlstring += marcxml('0247',[('a',rec['doi']), ('2','DOI'), ('9',publisher)])
@@ -575,11 +578,19 @@ def writeXML(recs,dokfile,publisher):
                 if not rec.has_key('exp') and colexpdict.has_key(col):
                     xmlstring += marcxml('693',[('e',colexpdict[col])])
         #arXiv NUMBER
-        if rec.has_key('arxiv'):
-            if re.search('^[0-9]',rec['arxiv']):
+        if rec.has_key('arxiv'):            
+            if re.search('^[0-9]', rec['arxiv']):
                 rec['arxiv'] = 'arXiv:'+rec['arxiv']
             if rearxivnew.search(rec['arxiv']) or rearxivold.search(rec['arxiv']):
                 xmlstring += marcxml('037',[('a',rec['arxiv']),('9','arXiv')])
+            elif rearxivnewshort.search(rec['arxiv']):
+                xmlstring += marcxml('037',[('a', 'arxiv:' + rec['arxiv']),('9','arXiv')])
+            elif rearxivhttpnew.search(rec['arxiv']):
+                bull = rearxivhttpnew.sub(r'\arxiv:\1', rec['arxiv'])
+                xmlstring += marcxml('037',[('a',bull),('9','arXiv')])
+            elif rearxivhttpold.search(rec['arxiv']):
+                bull = rearxivhttpold.sub(r'\1', rec['arxiv'])
+                xmlstring += marcxml('037',[('a',bull),('9','arXiv')])
             else:
                 xmlstring += marcxml('037',[('a',rec['arxiv'])])
         #REPORT NUMBER
@@ -870,7 +881,20 @@ def writeXML(recs,dokfile,publisher):
                             print 'real UTF8 Problem in Referenzen'
                             xmlstring += marcxml('595', [('a', 'real UTF8 Problem in Referenzen')])
                 else:
-                    xmlstring += marcxml('999C5',ref)
+                    cleanref = []
+                    for part in ref:
+                        if part[0] == 'r':
+                            if rearxivhttpold.search(part[1]):
+                                cleanref.append(('r', rearxivhttpold.sub(r'\1', part[1])))
+                            elif rearxivhttpnew.search(part[1]):
+                                cleanref.append(('r', rearxivhttpnew.sub(r'arxiv:\1', part[1])))
+                            elif rearxivnewshort.search(part[1]):
+                                cleanref.append(('r', 'arxiv:' + part[1]))
+                            else:
+                                cleanref.append(part)
+                        else:
+                            cleanref.append(part)
+                    xmlstring += marcxml('999C5', cleanref)
         xmlstring += marcxml('980',[('a','HEP')])
         #COMMENTS
         #temporary informations used for selection process
