@@ -25,7 +25,7 @@ publisher = 'Czech Technical University in Prague'
 
 #all issues page
 url = 'https://ojs.cvut.cz/ojs/index.php/ap/issue/archive'
-page = BeautifulSoup(urllib2.urlopen(url))
+page = BeautifulSoup(urllib2.urlopen(url), features="lxml")
 
 issues = []
 #for div in page.find_all('div', attrs = {'id' : 'issues'}):
@@ -53,7 +53,7 @@ for div in page.find_all('ul', attrs = {'class' : 'issues_archive'}):
 #individual issues
 for issue in issues:
     print issue
-    page = BeautifulSoup(urllib2.urlopen(issue[3]))
+    page = BeautifulSoup(urllib2.urlopen(issue[3]), features="lxml")
     jnlfilename = issue[4]
     recs = []    
 #    for table in page.find_all('table', attrs = {'class' : 'tocArticle'}):
@@ -64,7 +64,7 @@ for issue in issues:
             for a in h3.find_all('a'):
                 link = a['href']
                 rec['tit'] = a.text
-                articlepage = BeautifulSoup(urllib2.urlopen(link))
+                articlepage = BeautifulSoup(urllib2.urlopen(link), features="lxml")
                 for meta in articlepage.head.find_all('meta'):
                     if meta.has_attr('name') and meta.has_attr('content'):
                         #keywords
