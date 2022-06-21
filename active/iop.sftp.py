@@ -25,6 +25,8 @@ pdfdir = '/afs/desy.de/group/library/publisherdata/pdf'
 publisher = 'IOP'
 ftpdir = "/afs/desy.de/group/library/preprints/incoming/IOP"
 from refextract import extract_references_from_string
+from extract_jats_references import jatsreferences
+
 
 #ISSN to journal name
 jnl = {'1538-3881': ['Astron.J.', '', '', 'P'],
@@ -89,6 +91,8 @@ repacs = re.compile('^\d\d\.\d\d...$')
 
 #uninteresting journals in feed
 jnlskip = {'2058-8585' : 'Flexible and Printed Electronics'}
+
+untypes = ['Foreword']
 
 #CNUMs for conferences in JINST
 confdict = {'12th Workshop on Resistive Plate Chambers and Related Detectors (RPC2014)': 'C14-02-23.2',
@@ -174,9 +178,9 @@ if not os.path.isdir(iopdirtmp):
     os.system('mkdir %s' % (iopdirtmp))
 
 #extract the feeds:
-for datei in todo:
-    print 'extracting %s' % (os.path.join(iopdirraw, datei))
-    os.system('cd %s && unzip -q -d %s -o %s' % (iopdirraw, iopdirtmp, datei))
+#for datei in todo:
+#    print 'extracting %s' % (os.path.join(iopdirraw, datei))
+#    os.system('cd %s && unzip -q -d %s -o %s' % (iopdirraw, iopdirtmp, datei))
 
 #create base name
 iopftrunc = stampoftoday
@@ -251,9 +255,9 @@ def get_references(rl):
                 refno = '%s ' % (lt)
             else:
                 refno = '[%s] ' % (lt)
-        #journal
-        for mc in ref.find_all('element-citation', attrs = {'publication-type' : 'journal'}):
-            (title, authors, pbn, doi) = ('', [], '', '')
+        #journal and preprint
+        for mc in ref.find_all('element-citation', attrs = {'publication-type' : ['journal', 'preprint']}):
+            (title, authors, pbn, doi, arxiv) = ('', [], '', '', '')
             #authors
             for nametag in mc.find_all('name'):
                 name = ''
@@ -293,13 +297,22 @@ def get_references(rl):
             #DOI
             for pi in mc.find_all('pub-id', attrs = {'pub-id-type' : 'doi'}):
                 doi = pi.text.strip()
+            #arXiv
+            for el in mc.find_all('ext-link', attrs = {'ext-link-type' : 'arxiv'}):
+                arxiv = el.text.strip()
+                if re.search('^\d\d\d\d\.\d\d\d\d', arxiv):
+                    arxiv = 'arXiv:'+arxiv
             #all together            
             if doi:
                 reference = [('x', refno + '%s: %s, %s, DOI: %s' % (', '.join(authors), title, pbn, doi))]
-                reference.append(('a', 'doi:'+doi))
+                if arxiv:
+                    reference.append(('r', arxiv))
+                reference.append(('a', 'doi:'+doi))                
                 if lt: reference.append(('o', re.sub('\D', '', lt)))
             else:
                 reference = [('x', refno + '%s: %s, %s' % (', '.join(authors), title, pbn))]
+                if arxiv:
+                    reference.append(('r', arxiv))
             refs.append(reference)
         #book
         for mc in ref.find_all('element-citation', attrs = {'publication-type' : ['confproc', 'book']}):
@@ -398,6 +411,7 @@ def get_references(rl):
 
 #convert individual article        
 def convertarticle(issn, vol, isu, artid):
+    keepit = True
     if issn in jnl.keys():
         rec = {'jnl' : jnl[issn][0], 'note' : [], 'keyw' : [], 'aff' : [], 'refs' : [],
                'auts' : [], 'col' : []}
@@ -447,6 +461,8 @@ def convertarticle(issn, vol, isu, artid):
         for ac in meta.find_all('article-categories'):
             for subj in ac.find_all('subject'):
                 subjt = subj.text.strip()
+                if subjt in untypes:
+                    keepit = False
                 if re.search('[a-zA-Z]', subjt):
                     rec['note'].append(subjt)
                 if subjt in ['Review']:
@@ -588,7 +604,8 @@ def convertarticle(issn, vol, isu, artid):
                     rec['col'].append(coll.text.strip())
     #references
     for rl in article.find_all('ref-list'):
-        rec['refs'] = get_references(rl)
+        #rec['refs'] = get_references(rl)
+        rec['refs'] = jatsreferences(rl)        
     for note in rec['note']:
         if note in confdict.keys():
             rec['cnum'] = confdict[note]
@@ -650,6 +667,8 @@ def convertarticle(issn, vol, isu, artid):
                                           'List of Reviewers', 'Conference Chairs',
                                           'Peer Review Declaration', 'Committee', 'Preface']:
         print '   skip non-article'
+    elif not keepit:
+        print '   skip non-article'        
     else:
         return rec
 
