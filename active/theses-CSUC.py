@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-#harvest theses from Barcelona, Autonoma U. 
+#harvest theses from Barcelona, Autonoma U.
 #FS: 2019-09-15
 
 
@@ -25,8 +25,6 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Barcelona, Autonoma U.'
 
-typecode = 'T'
-
 jnlfilename = 'THESES-TDX-%s' % (stampoftoday)
 
 sections = ['396268', '65', '668603']
@@ -37,7 +35,7 @@ for section in sections:
     tocurl = 'https://www.tdx.cat/handle/10803/' + section + '/discover?filtertype=dateIssued&filter_relational_operator=equals&filter=[' + str(now.year - 1) + '+TO+' + str(now.year + 1) + ']&rpp=100'
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
     time.sleep(3)
     for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK'}
@@ -51,18 +49,18 @@ recs = []
 i = 0
 for rec in prerecs:
     i += 1
-    print '---{ %i/%i}---{ %s}------' % (i, len(prerecs), rec['artlink'])
+    print '---{ %i/%i }---{ %s}------' % (i, len(prerecs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-        time.sleep(3)
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
+        time.sleep(13)
     except:
         try:
-            print "retry %s in 180 seconds" % (rec['link'])
+            print "retry %s in 180 seconds" % (rec['artlink'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         except:
-            print "no access to %s" % (rec['link'])
-            continue      
+            print "no access to %s" % (rec['artlink'])
+            continue
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #author
@@ -91,27 +89,27 @@ for rec in prerecs:
             #abstract
             elif meta['name'] == 'DCTERMS.abstract':
                 rec['abs'] = meta['content']
-            #license            
+            #pages
+            elif meta['name'] == 'DC.extent':
+                if re.search('\d\d+ p', meta['content'])                :
+                    rec['pages'] = re.sub('.*?(\d\d+).*', r'\1', meta['content'])
+            #license
             elif meta['name'] == 'DC.rights':
                 if re.search('creativecommons.org', meta['content']):
                     rec['licence'] = {'url' : re.sub('.*http', 'http', meta['content'])}
-                    
     recs.append(rec)
-
-
-
 	
 
 
 #closing of files and printing
-xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
-xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
-ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
+xmlf = os.path.join(xmldir, jnlfilename+'.xml')
+xmlfile = codecs.EncodedFile(codecs.open(xmlf, mode='wb'), 'utf8')
+ejlmod2.writenewXML(recs, xmlfile, publisher, jnlfilename)
 xmlfile.close()
 #retrival
-retfiles_text = open(retfiles_path,"r").read()
+retfiles_text = open(retfiles_path, "r").read()
 line = jnlfilename+'.xml'+ "\n"
-if not line in retfiles_text: 
-    retfiles = open(retfiles_path,"a")
+if not line in retfiles_text:
+    retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
