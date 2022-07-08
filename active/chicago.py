@@ -37,6 +37,8 @@ jnlfilename = 'chicago.%s%s.%s' % (jnl, vol, issue)
 
 if jnl == 'phos':
     jnlname = 'Phil.Sci.'
+elif jnl == 'bjps':
+    jnlname = 'Brit.J.Phil.Sci.'
 else:
     print 'journal not known'
     
@@ -77,7 +79,7 @@ for div in tocpage.body.find_all('ul', attrs = {'class' : 'table-of-content__sec
                 rec['tit'] = h5.text.strip()
             #authors
             for span in child.find_all('span', attrs = {'class' : 'hlFld-ContribAuthor'}):
-                rec['auts'].append(span.text.strip())                
+                rec['auts'].append(re.sub(' and$', '', span.text.strip()))               
             #pages
             divs = child.find_all('div', attrs = {'class' : 'art_meta citation'})
             if not divs:
@@ -92,8 +94,8 @@ for div in tocpage.body.find_all('ul', attrs = {'class' : 'table-of-content__sec
             if not links:
                 links = child.find_all('a', attrs = {'class' : 'issue-item__btn', 'title' : 'Full Text'})                
             for a in links:
-                if re.search('10.1086', a['href']):
-                    rec['doi'] = re.sub('.*(10.1086)', r'\1', a['href'])
+                if re.search('10.10(86|93)', a['href']):
+                    rec['doi'] = re.sub('.*(10.1086|10.1093)', r'\1', a['href'])
                     if re.search('\/(abs|full)\/', a['href']):
                         rec['artlink'] = 'https://www.journals.uchicago.edu' + a['href']
             #abstract
@@ -114,6 +116,8 @@ for rec in recs:
     if not 'abs' in rec.keys():
         for meta in artpage.head.find_all('meta', attrs = {'name' : 'dc.Description'}):
             rec['abs'] = meta['content']
+        for meta in artpage.head.find_all('meta', attrs = {'name' : 'dc.Date'}):
+            rec['date'] = meta['content']
     #references
     #would need selenium or so
             
