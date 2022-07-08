@@ -77,25 +77,49 @@ elif jid == 'JMJ':
     jnlname = 'J.Inst.Math.Jussieu'
 elif jid == 'MAM':
     jnlname = 'Microscopy Microanal.'
+elif jid == 'PHS':
+    jnlname = 'Phil.Sci.'
+    camjnlname = 'philosophy-of-science'
 #Now at Global Science Press
 #elif jid == 'CPH':
 #    jnlname = 'Commun.Comput.Phys.'
 
-if len(sys.argv) > 5:
-    toclink = explicittoclink
+
+if jid in ['PHS']:
+    supertocurl = 'https://www.cambridge.org/core/journals/%s/all-issues' % (camjnlname)
+    supertocfilename = '/tmp/%s.toc' % (camjnlname)
+    #os.system('wget -q -O %s %s' % (supertocfilename, supertocurl))
+    tocf = open(supertocfilename, 'r')
+    toc = BeautifulSoup(''.join(tocf.readlines()), features="lxml")
+    tocf.close()
+    for li in toc.body.find_all('li', attrs = {'class' : 'accordion-navigation'}):
+        for a in li.find_all('a', attrs = {'class' : 'row'}):
+            if a.has_attr('aria-label') and re.search('Volume '+vol, a['aria-label']):
+                print a['aria-label']
+                for li2 in li.find_all('li'):
+                    aa = li2.find_all('a', attrs = {'class' : 'row'})
+                    if len(aa) == 1:
+                        for span in li2.find_all('span', attrs = {'class' : 'issue'}):
+                            print ' ', span, aa[0]['href']
+                            if re.search('Issue '+iss, span.text):
+                                toclink = 'https://www.cambridge.org' + aa[0]['href']
+                                print toclink
 else:
-    toclink = 'http://journals.cambridge.org/action/displayIssue?jid=%s&volumeId=%s' % (jid, vol)
-    if len(sys.argv) > 3:
-        toclink += '&issueId=%s' % (iss)
-        print toclink
+    if len(sys.argv) > 5:
+        toclink = explicittoclink
+    else:
+        toclink = 'http://journals.cambridge.org/action/displayIssue?jid=%s&volumeId=%s' % (jid, vol)
+        if len(sys.argv) > 3:
+            toclink += '&issueId=%s' % (iss)
+            print toclink
 
 #toclink = "https://www.cambridge.org/core/journals/glasgow-mathematical-journal/issue/FF36FC6AD93313180F0F572188FA2F70"
 
         
 if not os.path.isfile('/tmp/%s.0.toc' % (jnlfilename)):
-    os.system('wget -O /tmp/%s.0.toc "%s"' % (jnlfilename, toclink))
+    os.system('wget -q -O /tmp/%s.0.toc "%s"' % (jnlfilename, toclink))
 tocf = open('/tmp/%s.0.toc' % (jnlfilename), 'r')
-toc = BeautifulSoup(''.join(tocf.readlines()))
+toc = BeautifulSoup(''.join(tocf.readlines()), features="lxml")
 tocf.close()
 
 #check number of toc-pages
@@ -116,10 +140,10 @@ for i in range(numpages):
     toclink = '%s?pageNum=%i' % (baseurl, i+1)
     print ' . ', toclink
     if not os.path.isfile('/tmp/%s.%i.toc' % (jnlfilename, i)):
-        os.system('wget -O /tmp/%s.%i.toc "%s"' % (jnlfilename, i, toclink))
+        os.system('wget -q -O /tmp/%s.%i.toc "%s"' % (jnlfilename, i, toclink))
         time.sleep(3)
     tocf = open('/tmp/%s.%i.toc' % (jnlfilename, i), 'r')
-    toc = BeautifulSoup(''.join(tocf.readlines()))
+    toc = BeautifulSoup(''.join(tocf.readlines()), features="lxml")
     tocf.close()
     for div in toc.body.find_all('div'):
         if div.has_attr('class') and 'columns' in div['class']:
