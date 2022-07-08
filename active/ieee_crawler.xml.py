@@ -417,10 +417,10 @@ def ieee(number):
                               'IEEE Transactions on Magnetics publication information', 'Keynotes', 'Sponsors and Supporters',
                               'IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems publication information',
                               'IEEE Open Access Publishing', 'Introducing IEEE Collabratec', 'IEEE Control Systems Society',
-                              'Table of Contents', 'Sponsors', 'Conference Organization', '[Sponsors]',
-                              'IEEE Information Theory Society information', 'Board of Governors',
-                              'IEEE Journal on Special Areas in Information Theory information for authors',
-                              'IEEE Journal on Special Areas in Information Theoryinformation for authors']:
+                              'Table of Contents', 'Sponsors', 'Conference Organization', '[Sponsors]', 'Contents',
+                              'IEEE Information Theory Society information', 'Board of Governors', 'Commitees',
+                              'IEEE Journal on Special Areas in Information Theory information for authors', 'Copyright Page',
+                              'IEEE Journal on Special Areas in Information Theoryinformation for authors', 'Title Page']:
 
 #            if 'p1' in rec.keys():
 #                del rec['p1']
