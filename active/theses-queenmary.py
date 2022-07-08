@@ -42,18 +42,26 @@ boring = ['Engineering and Materials Science', #'Electronic Engineering and Comp
           'Geography', 'History', 'C4DM', 'Business and Management']
 prerecs = []
 
+
+inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
+uninterestingDOIS = []
+newuninterestingDOIS = []
+for line in inf.readlines():
+    uninterestingDOIS.append(line.strip())
+inf.close()
+
 realpages = pages
 for page in range(pages):
     if len(prerecs) < numberofrecords:
         tocurl = 'https://qmro.qmul.ac.uk/xmlui/handle/123456789/56376/discover?rpp=' + str(rpp) + '&etal=0&group_by=none&page=' + str(page+1) + '&filtertype_0=dateIssued&filtertype_1=type&filter_relational_operator_1=equals&filter_relational_operator_0=equals&filter_1=Thesis&filter_0=%5B' + str(startyear) + '+TO+' + str(stopyear) + '%5D'
         print '==={ %i/%i }==={ %s }===' % (page+1, realpages, tocurl)
         try:
-            tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+            tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl), features="lxml")
             time.sleep(3)
         except:
             print "retry %s in 180 seconds" % (tocurl)
             time.sleep(180)
-            tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+            tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl), features="lxml")
         if page == 0:
             for p in tocpage.body.find_all('p', attrs = {'class' : 'pagination-info'}):
                 if re.search('\d of \d+', p.text):
@@ -67,7 +75,8 @@ for page in range(pages):
                     rec['tit'] = a.text.strip()
                     rec['link'] = 'https://qmro.qmul.ac.uk' + a['href']
                     rec['doi'] = '20.2000/QueenMary/' + re.sub('\W', '', a['href'])
-                    prerecs.append(rec)
+                    if not rec['doi'] in uninterestingDOIS:
+                        prerecs.append(rec)
 
 i = 0
 recs = []
@@ -75,15 +84,15 @@ for rec in prerecs:
     i += 1
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
         time.sleep(3)
     except:
         print "retry %s in 180 seconds" % (rec['link'])
         time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
-            if meta['name'] == 'citation_author':
+            if meta['name'] in ['citation_author', 'DC.creator']:
                 if not re.search('Queen Mary', meta['content']):
                     rec['autaff'] = [[ meta['content'], publisher ]]
             elif meta['name'] == 'DCTERMS.issued':
@@ -109,6 +118,8 @@ for rec in prerecs:
             keepit = False
     if keepit:
         recs.append(rec)
+    else:
+        newuninterestingDOIS.append(rec['doi'])
 
 #closing of files and printing
 xmlf = os.path.join(xmldir,jnlfilename+'.xml')
@@ -122,3 +133,8 @@ if not line in retfiles_text:
     retfiles = open(retfiles_path, "a")
     retfiles.write(line)
     retfiles.close()
+
+ouf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'a')
+for doi in newuninterestingDOIS:
+    ouf.write(doi + '\n')
+ouf.close()
