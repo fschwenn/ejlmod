@@ -48,7 +48,7 @@ for series in serieses:
     subject = re.sub('.*\/', '', series)
     print '---{ %s }---' % (series)
     tocreq = urllib2.Request(toclink, headers={'User-Agent' : "Magic Browser"}) 
-    toc = BeautifulSoup(urllib2.urlopen(tocreq))
+    toc = BeautifulSoup(urllib2.urlopen(tocreq), features="lxml")
     for td in toc.body.find_all('td', attrs = {'class' : 'result_biblio'}):        
         for h2 in td.find_all('h2'):
             for a in h2.find_all('a'):
