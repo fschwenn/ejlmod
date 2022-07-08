@@ -29,8 +29,8 @@ typecode = 'T'
 
 jnlfilename = 'THESES-MIT-%s' % (stampoftoday)
 
-#tocurl = 'https://dspace.mit.edu/handle/1721.1/7695/discover?sort_by=dc.date.issued_dt&order=desc&rpp=200'
-tocurl = 'https://dspace.mit.edu/handle/1721.1/7582/discover?sort_by=dc.date.issued_dt&order=desc&rpp=200'
+rpp = 100
+pages = 4
 
 #these keywords are in fact the departments/institute/PhD prorgams
 boringkeywords = ['Joint Program in Biological Oceanography.',
@@ -67,9 +67,11 @@ boringkeywords = ['Joint Program in Biological Oceanography.',
                   'Massachusetts Institute of Technology. Department of Architecture',
                   'Massachusetts Institute of Technology. Department of Chemical Engineering',
                   'Massachusetts Institute of Technology. Department of Urban Studies and Planning',
-                  'Massachusetts Institute of Technology. Department of Aeronautics and Astronautics']
-
-print tocurl
+                  'Massachusetts Institute of Technology. Department of Aeronautics and Astronautics',
+                  'System Design and Management Program.',
+                  'Massachusetts Institute of Technology. Department of Materials Science and Engineering',
+                  'Massachusetts Institute of Technology. Department of Biology',
+                  'Massachusetts Institute of Technology. Department of Chemistry']
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
@@ -81,11 +83,13 @@ for line in inf.readlines():
 inf.close()
 
 prerecs = []
-for offset in [0]:
+for page in range(pages):
+    tocurl = 'https://dspace.mit.edu/handle/1721.1/7582/discover?sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp) + '&page=' + str(page+1)
+    print page+1, pages, tocurl
 #    try:
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpage = BeautifulSoup(urllib2.urlopen(req))
-    time.sleep(3)
+    tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
+    time.sleep(5)
 #    except:
 #        print "retry in 180 seconds"
 #        time.sleep(180)
@@ -106,13 +110,13 @@ for rec in prerecs:
     keepit = True
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
-        time.sleep(5)
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
+        time.sleep(10)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['artlink'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         except:
             print "no access to %s" % (rec['artlink'])
             continue      
