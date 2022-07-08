@@ -92,8 +92,25 @@ boringinstitutes = ['Education in Culture', 'Analytical Biochemistry', 'Arctic a
                     'Univ. Giessen, Justus-Liebig-Universität Giessen, Fac. Psychologie und Sportwissenschaften, Institut für Psychologische Diagnostik',
                     'Univ Groningen, University of Groningen, Grad Sch Humanities', 'Univ Groningen, University of Groningen, Univ Med Ctr Groningen, Div Geriatr Med, Univ Ctr Geriatr Med',
                     'Univ Med Ctr Groningen, University of Groningen, Dept Surg, Div Vasc Surg',
+                    'Groningen Institute of Archaeology', 'Neurolinguistics and Language Development (NLD)',
                     'User-friendly Private Law', 'Van der Heide group', 'Van der Zee lab', 'Van Doorn group',
                     'Vrije Universiteit Amsterdam, Amsterdam', 'Wertheim lab', 'X-ray Crystallography']
+
+boringwords = ['health', 'clinical', 'patients', 'cancer', 'disease', 'molecular', 'therapy', 'surgical', 'kidney',
+               'diabetes', 'liver', 'biomarkers', 'injury', 'vitro', 'metabolic', 'Disease', 'diseases', 'therapeutic',
+               'Molecular', 'metabolism', 'medical', 'Health', 'cellular', 'lung', 'lipid', 'immunotherapy', 'healthy',
+               'glaucoma', 'dementia', 'blood', 'lymphoma', 'leukemia', 'pediatric', 'Tumor', 'tumor', 'social',
+               'protein', 'proteins', 'asthma', 'Bacillus', 'chemistry', 'surgery', 'Clinical', 'Social', 'patient',
+               'bacteria', 'biological', 'schizophrenia', 'cardiovascular', 'psychological', 'Escherichia', 'Drosophila',
+               'Bacterial', 'anxiety', 'myocardial', 'cerebral', 'cardiac', 'microbial', 'medicine', 'drugs', 'biology',
+               'animal', 'pathogenesis', 'Metabolic', 'influenza', 'dental']
+def checkboringwords(title):
+    for part in re.split('\W+', title):
+        if part in boringwords:
+            #print '  skip "%s" because of "%s"' % (title, part)
+            return True
+    return False
+    
                     
 inf = open('/afs/desy.de/user/l/library/dok/ejl/uninteresting.dois', 'r')
 uninterestingDOIS = []
@@ -113,15 +130,21 @@ for page in range(pages):
         for a in li.find_all('a', attrs = {'rel' : 'Thesis'}):
             rec = {'tc' : 'T', 'jnl' : 'BOOK', 'supervisor' : [], 'note' : [], 'isbns' : []}
             rec['artlink'] = a['href']
+            rec['tit'] = a.text.strip()
         for span in li.find_all('span', attrs = {'class' : 'numberofpages'}):
             rec['pages'] = re.sub('.*?(\d\d+).*', r'\1', span.text.strip())
         if not rec['artlink'] in uninterestingDOIS:
-            prerecs.append(rec)
+            if checkboringwords(rec['tit']):
+                newuninterestingDOIS.append(rec['artlink'])
+            else:
+                prerecs.append(rec)
+    print '   picked %i from %i so far (%i to be checked in total)' % (len(prerecs), (page+1)*rpp, pages*rpp)
     time.sleep(5)
 
+    
 i = 0
 recs = []
-for rec in prerecs:
+for rec in prerecs:    
     i += 1
     keepit = True
     print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['artlink'])
