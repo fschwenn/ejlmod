@@ -47,12 +47,12 @@ elif jnl == 'acp':
 
 print tocurl
 try:
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl), features="lxml")
     time.sleep(3)
 except:
     print "retry %s in 180 seconds" % (tocurl)
     time.sleep(180)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl), features="lxml")
 
 recs = []
 for div in tocpage.find_all('div', attrs = {'class' : 'title'}):
@@ -68,12 +68,12 @@ for rec in recs:
     print '---{ %i/%i }---{ %s }---' % (i, len(recs), rec['artlink'])
     try:
         print rec['artlink']
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         time.sleep(3)
     except:
         print "retry %s in 180 seconds" % (rec['artlink'])
         time.sleep(180)
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
     for meta in artpage.head.find_all('meta'):
         if meta.has_attr('name'):
             #author
@@ -93,7 +93,7 @@ for rec in recs:
             #    rec['p1'] = meta['content'] 
             #elif meta['name'] == 'citation_lastpage':
             #    rec['p2'] = meta['content'] 
-            elif meta['name'] == 'DC.Identifier' and re.search('^\d{1-5}', meta['content']):
+            elif meta['name'] == 'DC.Identifier' and re.search('^\d{1,5}', meta['content']):
                 rec['p1'] = meta['content']
             #DOI
             elif meta['name'] == 'citation_doi':
@@ -113,8 +113,8 @@ for rec in recs:
             #license
             elif meta['name'] == 'DC.Rights':
                 rec['license'] = {'url' : meta['content']}
-    #year as volume for LHEP
-    if not 'vol' in rec.keys() and jnl in ['lhep']:
+    #year as volume for LHEP and JAIS
+    if not 'vol' in rec.keys() and jnl in ['lhep', 'jais']:
         rec['vol'] = re.sub('.*([12]\d\d\d).*', r'\1', rec['date'])
     #licence
     if not 'license' in rec.keys():
@@ -141,7 +141,8 @@ for rec in recs:
                 rec['doi'] = re.sub(' .*', '', rec['doi'])
                 os.system('cp /tmp/%s.%s.%i.pdf %s/10.31526/%s' % (rec['jnl'], stampoftoday ,i, pdfdir, re.sub('\/', '_', rec['doi'])))
         inf.close()
-    print rec
+    print rec.keys()
+
 
 if recs:
     if 'issue' in rec.keys():
