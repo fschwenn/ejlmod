@@ -34,7 +34,7 @@ tmpdir = '/afs/desy.de/user/l/library/tmp'
 
 #
 journalskb = '/opt/invenio/etc/docextract/journal-titles-inspire.kb'
-journalskb = '/afs/desy.de/user/l/library/lists/journal-titles-inspire.2022-06-17.kb'
+journalskb = '/afs/desy.de/user/l/library/lists/journal-titles-inspire.kb'
 
 #from collclean import clean710
 
@@ -1112,5 +1112,5 @@ def writenewXML(recs, dokfile, publisher, dokifilename):
             else:
                 print '--', doi1
     writeXML(uniqrecs, dokfile, publisher)
-    print('FINISHED writenewXML(%s)' % (dokifilename))
+    print('FINISHED writenewXML(%s;%i)' % (dokifilename, len(recs)))
     return
