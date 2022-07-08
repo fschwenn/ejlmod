@@ -205,10 +205,9 @@ for i in range(len(recs)):
                 b.decompose()
                 recs[i]['pacs'] = re.split(' *[,;] *', div.text.strip())
     #license
-    for div in artpage.body.find_all('div', attrs = {'class' : 'section__body'}):
-        for p in div.find_all('p'):
-            if re.search('\(CC\-', p.text):
-                recs[i]['license'] = {'statement' : re.sub('.*\((CC.*?)\).*', r'\1', p.text.strip())}
+    for a in artpage.body.find_all('a'):
+        if a.has_attr('href') and re.search('creativecommons.org', a['href']):
+            recs[i]['license'] = {'url' : a['href']}
     #FFT
     if 'license' in recs[i].keys():
         for div in artpage.body.find_all('div', attrs = {'class' : 'section__body'}):
@@ -218,7 +217,7 @@ for i in range(len(recs)):
             
             
 
-    print recs[i]
+    print recs[i].keys()
         
 
 
