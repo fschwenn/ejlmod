@@ -178,9 +178,9 @@ if not os.path.isdir(iopdirtmp):
     os.system('mkdir %s' % (iopdirtmp))
 
 #extract the feeds:
-#for datei in todo:
-#    print 'extracting %s' % (os.path.join(iopdirraw, datei))
-#    os.system('cd %s && unzip -q -d %s -o %s' % (iopdirraw, iopdirtmp, datei))
+for datei in todo:
+    print 'extracting %s' % (os.path.join(iopdirraw, datei))
+    os.system('cd %s && unzip -q -d %s -o %s' % (iopdirraw, iopdirtmp, datei))
 
 #create base name
 iopftrunc = stampoftoday
