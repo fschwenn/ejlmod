@@ -21,36 +21,35 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 
 now = datetime.datetime.now()
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
 publisher = 'Harvard U. (main)'
-rpp = 50
+rpp = 20
 numofpages = 1
-departments = ['Mathematics', 'Physics']
+departments = [('m', 'Mathematics'), ('', 'Physics'), ('a', 'Astronomy'), ('c', 'Computer+Science')]
+
 
 driver = webdriver.PhantomJS()
 driver.implicitly_wait(30)
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
-for dep in departments:
+for (fc, dep) in departments:
     for i in range(numofpages):
         tocurl = 'https://dash.harvard.edu/handle/1/4927603/browse?type=department&value=%s&rpp=%i&sort_by=2&type=dateissued&offset=%i&etal=-1&order=DESC' % (dep, rpp, i*rpp)
         print '---{ %s }---{ %i/%i }---{ %s }------' % (dep, i+1, numofpages, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req))
+        tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
         time.sleep(10)
         for div in tocpage.body.find_all('div', attrs = {'class' : 'artifact-description'}):
             for a in div.find_all('a'):
                 rec = {'tc' : 'T', 'jnl' : 'BOOK', 'oa' : False, 'note' : [ dep ]}
                 rec['link'] = 'https://dash.harvard.edu' + a['href']
-                #rec['doi'] = '20.2000/HARVARD/' + re.sub('\/handle\/', '', a['href'])
                 rec['tit'] = a.text.strip()
-                if dep == 'Mathematics':
-                    rec['fc'] = 'm'
+                if fc: rec['fc'] = fc
                 recs.append(rec)
             
 jnlfilename = 'THESES-HARVARD-%s' % (stampoftoday)
@@ -60,12 +59,12 @@ for rec in recs:
     print '---{ %i/%i }---{ %s }------' % (j, len(recs), rec['link'])
     try:
         driver.get(rec['link'])
-        artpage = BeautifulSoup(driver.page_source)
+        artpage = BeautifulSoup(driver.page_source, features="lxml")
     except:
         time.sleep(60)
         print 'wait a minute'
         driver.get(rec['link'])
-        artpage = BeautifulSoup(driver.page_source)
+        artpage = BeautifulSoup(driver.page_source, features="lxml")
     time.sleep(5)
     #author
     for meta in artpage.find_all('meta', attrs = {'name' : 'citation_author'}):
@@ -77,8 +76,8 @@ for rec in recs:
                     rec['date'] = meta['content']
                 #abstract
                 elif meta['name'] == 'DCTERMS.abstract':
-                    if meta.has_attr('xml:lang') and meta['xml:lang'] == 'en':
-                        rec['abs'] = meta['content']
+                    #if meta.has_attr('xml:lang') and meta['xml:lang'] in ['en', 'en_US']:
+                    rec['abs'] = meta['content']
                 #FFT
                 elif meta['name'] == 'citation_pdf_url':
                     rec['FFT'] = meta['content']
