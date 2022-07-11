@@ -34,7 +34,7 @@ pages = 3
 for page in range(pages):
     tocurl = 'https://openscience.ub.uni-mainz.de/simple-search?query=&filter_field_1=organisationalUnit&filter_type_1=equals&filter_value_1=FB+08+Physik%2C+Mathematik+u.+Informatik&filter_field_2=publicationType&filter_type_2=equals&filter_value_2=Dissertation&sort_by=dc.date.issued_dt&order=desc&rpp=' + str(rpp) + '&etal=0&start=' + str(page*rpp)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
-    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
+    tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl), features="lxml")
     for tr in tocpage.body.find_all('tr'):
         rec = {'tc' : 'T', 'keyw' : [], 'jnl' : 'BOOK', 'note' : []}
         for td in tr.find_all('td', attrs = {'headers' : 't1'}):
@@ -53,13 +53,13 @@ for rec in recs:
     i += 1
     print '---{ %i/%i }---{ %s }------' % (i, len(recs), rec['artlink'])
     try:
-        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+        artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         time.sleep(4)
     except:
         try:
             print "retry %s in 180 seconds" % (rec['artlink'])
             time.sleep(180)
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']))
+            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['artlink']), features="lxml")
         except:
             print "no access to %s" % (rec['artlink'])
             continue
