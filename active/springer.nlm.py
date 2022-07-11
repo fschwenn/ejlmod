@@ -717,6 +717,8 @@ def convertarticle(journalnumber, filename, contlevel):
             rec['cnum'] = confdict[note]
             rec['tc'] = 'C'
             rec['note'].append('added cnum:%s' % (rec['cnum']))
+    #remove "*" from title
+    rec['tit'] = re.sub(' \*$', '', rec['tit'])
     return rec
 
 #combine Springer and SISSA references
