@@ -42,7 +42,7 @@ cls = 999
 for i in range(pages):
     if 100*i <= cls:
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx))
+        tocpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
         for record in tocpage.find_all('record'):
             for df in record.find_all('datafield', attrs = {'tag' : '980'}):
                 for sf in df.find_all('subfield', attrs = {'code' : 'b'}):
