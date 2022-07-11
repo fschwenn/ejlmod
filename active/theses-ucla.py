@@ -140,7 +140,7 @@ subjectstoskip += ['Areaplanninganddevelopment', 'Businesseducation', #'Computer
                    'Cognitivepsychology', 'Materials Science', 'Public health', 'Demography',
                    'Theater', 'Politicalscience', 'Musictheory']
 subjectstoskip += ['AnthropologyArchaeology', 'Architecturalengineering', 'Audiology',
-                   'Canadianhistory', 'Caribbeanliterature', 'Cinematography',
+                   'Canadianhistory', 'Caribbeanliterature', 'Cinematography', 'Musictherapy',
 		   'CommerceBusiness', #'Computationalphysics',
                    'EconomicsCommerceBusiness', 'Biophysics', 'Bioinformatics', 'Ecology',
 		   'EconomicsLabor', 'Environmentalphilosophy', 'Foreignlanguageinstruction',
