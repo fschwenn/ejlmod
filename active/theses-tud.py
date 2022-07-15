@@ -49,12 +49,12 @@ for p in tocpage.body.find_all('p'):
                 if re.search('\([12]\d\d\d\)', p.text):
                     rec['year'] = re.sub('.*\(([12]\d\d\d)\).*', r'\1', pt)
                     if int(rec['year']) < now.year - 1:
-                        print '  skip %s' % (rec['year'])
+                        #print '  skip %s' % (rec['year'])
                         takeit = False
                 if takeit:
                     prerecs.append(rec)
-    else:
-        print '  skip %s' % (doctype)
+#    else:
+#        print '  skip %s' % (doctype)
 
 i = 0
 for rec in prerecs:
