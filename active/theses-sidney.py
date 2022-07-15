@@ -35,7 +35,7 @@ refac = re.compile('(Life|Health|Medicine|Social|Information|Music|Arts|Chemistr
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 for j in range(pages):
-    tocurl = 'https://ses.library.usyd.edu.au/handle/2123/35/browse?rpp=' + str(rpp) + '&sort_by=2&type=dateissued&offset=' + str(j*rpp) + '&etal=-1&order=DESC'
+    tocurl = 'https://ses.library.usyd.edu.au/handle/2123/35/browse?rpp=' + str(rpp) + '&sort_by=3&type=dateissued&offset=' + str(j*rpp) + '&etal=-1&order=DESC'
     print tocurl
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req))
