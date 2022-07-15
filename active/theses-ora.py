@@ -47,7 +47,7 @@ boring = ['Biochemistry', 'Biomedical Services', 'Chemistry', 'Classics Faculty'
           'Blavatnik School of Government', 'Continuing Education',
           'Linguistics Philology and Phonetics Faculty', 'Music Faculty',
           'Oxford Internet Institute', 'Paediatrics', 'Politics & Int Relations',
-          'Primary Care Health Sciences', 'Saïd Business School',
+          'Primary Care Health Sciences', u'Saïd Business School',
           "Women's & Reproductive Health", 'MSD', 'HUMS', 'SSD']
 supdeptofc= {'Condensed Matter Physics' : 'f',
              'Mathematical Institute' : 'm',
