@@ -27,8 +27,8 @@ publisher = 'Guelph U.'
 hdr = {'User-Agent' : 'Magic Browser'}
 
 rpp = 50
-pages = 6
-years = 3
+pages = 10
+years = 2
 boringdisciplines = ['Mechanical+Engineering', 'Environmental+Sciences', 'Animal+and+Poultry+Science',
                      'Chemistry', 'Department+of+Animal+Biosciences', 'Department+of+Chemistry',
                      'Department+of+Economics+and+Finance', 'Department+of+Family+Relations+and+Applied+Nutrition',
@@ -64,7 +64,7 @@ boringdegrees = ['Master+of+Science', 'masters', 'Doctor+of+Education', 'Doctor+
 recs = []
 redeg = re.compile('rft.degree=')
 for page in range(pages):
-    tocurl = 'https://atrium.lib.uoguelph.ca/xmlui/handle/10214/151/browse?order=DESC&rpp='+str(rpp)+'&sort_by=3&etal=-1&offset=' + str((50+page)*rpp) + '&type=dateissued'
+    tocurl = 'https://atrium.lib.uoguelph.ca/xmlui/handle/10214/151/browse?order=DESC&rpp='+str(rpp)+'&sort_by=3&etal=-1&offset=' + str((page)*rpp) + '&type=dateissued'
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
