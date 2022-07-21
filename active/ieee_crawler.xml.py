@@ -173,7 +173,7 @@ def addreferences(refsdict, articlelink):
             reffile.write(ref.encode('utf-8')+'\n')
     reffile.close()
     print '  found %i references' % (len(arefs))
-    time.sleep(1)
+    time.sleep(22)
     
 
 
@@ -474,3 +474,4 @@ if __name__ == '__main__':
         retfiles = open(retfiles_path,"a")
         retfiles.write(line)
         retfiles.close()
+driver.quit()
