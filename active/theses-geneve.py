@@ -53,10 +53,10 @@ for (cn, dep, aff) in departments:
                     continue
                 if child.name == 'h3':
                     year = int(child.text.strip())
-                    print '     ', year
+                    #print '     ', year
                 elif child.name == 'h4':
                     section = child.text.strip()
-                    print '       ', section
+                    #print '       ', section
                 elif child.name == 'table':
                     if year >= startyear and section == 'Doctoral Thesis':
                         for td in child.find_all('td'):
