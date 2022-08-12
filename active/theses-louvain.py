@@ -14,6 +14,8 @@ import codecs
 import datetime
 import time
 import json
+import ssl
+
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'#+'/special/'
 retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
@@ -44,6 +46,11 @@ for line in inf.readlines():
     uninterestingDOIS.append(line.strip())
 inf.close()
 
+#bad certificate
+ctx = ssl.create_default_context()
+ctx.check_hostname = False
+ctx.verify_mode = ssl.CERT_NONE
+
 hdr = {'User-Agent' : 'Magic Browser'}
 for year in [now.year, now.year-1]:
     prerecs = []
@@ -51,7 +58,7 @@ for year in [now.year, now.year-1]:
     tocurl = 'https://dial.uclouvain.be/pr/boreal/en/search/site/%2A%3A%2A?page=1&f%5B0%5D=sm_type%3ATh%C3%A8se%20%28Dissertation%29&f%5B1%5D=sm_date%3A' + str(year) + '&solrsort=ss_date%20desc'
     print '---{ %i }---{ 1 }---{ %s }---' % (year, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
-    tocpages = [BeautifulSoup(urllib2.urlopen(req), features="lxml")]
+    tocpages = [BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")]
     numofpages = 0
     for div in tocpages[0].body.find_all('div', attrs = {'class' : 'result-label'}):
         numofrecs = int(re.sub('.*of *(\d+).*', r'\1', div.text.strip()))
@@ -60,7 +67,7 @@ for year in [now.year, now.year-1]:
         tocurl = 'https://dial.uclouvain.be/pr/boreal/en/search/site/%2A%3A%2A?page=' + str(page+2) + '&f%5B0%5D=sm_type%3ATh%C3%A8se%20%28Dissertation%29&f%5B1%5D=sm_date%3A' + str(year) + '&solrsort=ss_date%20desc'
         print '---{ %i }---{ %i/%i }---{ %s }---' % (year, page+2, numofpages, tocurl)
         req = urllib2.Request(tocurl, headers=hdr)
-        tocpages.append(BeautifulSoup(urllib2.urlopen(req), features="lxml"))
+        tocpages.append(BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml"))
         time.sleep(5)
     for tocpage in tocpages:
         for div in tocpage.body.find_all('div', attrs = {'class' : 'publication'}):
@@ -82,7 +89,8 @@ for year in [now.year, now.year-1]:
         i += 1
         print '---{ %i/%i (%i) }---{ %s }------' % (i, len(prerecs), len(recs), rec['link'])
         try:
-            artpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(rec['link']), features="lxml")
+            req = urllib2.Request(rec['link'], headers=hdr)
+            artpage = BeautifulSoup(urllib2.urlopen(req, context=ctx), features="lxml")
             time.sleep(4)
         except:
             try:
