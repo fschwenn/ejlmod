@@ -189,7 +189,7 @@ for rec in prerecs:
                     rec['autaff'][-1].append('EMAIL:%s' % (meta['content']))
             #ORCID
             elif meta['name'] == 'eprints.creators_orcid':
-                orcid = re.sub('.*(\d\d\d\d\-\d\d\d\d\-\d\d\d\d\-\d\d\d\d).*', r'\1', meta['content']) 
+                orcid = re.sub('.*(\d\d\d\d\-\d\d\d\d\-\d\d\d\d\-\d\d\d[\dX]).*', r'\1', meta['content']) 
                 rec['autaff'][-1].append('ORCID:%s' % (orcid))
             #title
             elif meta['name'] == 'eprints.title':
@@ -238,7 +238,7 @@ for rec in prerecs:
                     klips = re.sub('\/? *', '', klips)
                     if klips in boring:
                         keepit = False
-                        print '  skip %s' % (td.text.strip())
+                        #print '  skip %s' % (td.text.strip())
                 rec['note'].append('%s : %s' % (klips, td.text.strip()))
     #502
     rec['MARC'] = [('502', [('d', rec['date'][:4]), ('c', 'Cologne U.'), ('b', 'PhD')])]
