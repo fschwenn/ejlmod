@@ -129,7 +129,7 @@ for rec in prerecs:
             elif meta['name'] == 'DC.description':
                 rec['note'].append(meta['content'])
                 if re.search('Mag.ster en', meta['content'], re.IGNORECASE):
-                    print '   skip "%s"' % (meta['content'])
+                    #print '   skip "%s"' % (meta['content'])
                     wrongdegree = True
     if 'pdflink' in rec.keys():
         if 'licence' in rec.keys():
