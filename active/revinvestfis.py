@@ -17,7 +17,7 @@ import datetime
 import ssl
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles" + '_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"# + '_special'
 tmpdir = '/tmp'
 
 def tfstrip(x): return x.strip()
