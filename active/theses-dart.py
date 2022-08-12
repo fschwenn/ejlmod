@@ -33,6 +33,7 @@ years = [now.year-1, now.year]
 #years = [2012, 2011, 2010, 2009]
 #whether to check ALL sources or only those where we do not have a dedicated harvester
 checkall = False 
+verbose = False
 
 # do not work: "M-theory", "M-brane", "D-brane", "D-particle", "T-duality", "T-parity", "S-duality",
 # do not give results: "DEAP-3600", 'Einstein-Yang-Mills-Higgs', "Glashow-Iliopoulos-Maiani", "Isgur-Wise", "Kazakov-Migdal",
@@ -64,12 +65,12 @@ singlewords = ["ABJM", "antibaryon", "antifermion", "antifield", "antihydrogen",
                "tachyon", "technicolor", "TeV", "Tevatron", "topcolor", "TPC", "TQFT", "Ward-Takahashi",
                "Wess-Zumino", "Wheeler-DeWitt", "WIMP", "Wino", "wormhole", "XENON1T",
                "Yang-Mills", "Yang-Mills-Higgs", "Zino"]
-singlewords += ['qubit', 'QIS', 'NISQ']
+singlewords += ['qubit', 'QIS', 'NISQ', 'IBMQ', 'Qiskit', 'qudit', 'qutrit']
 multwords = [['AdS', 'CFT'], ['quantum', 'field', 'theory'], ['PANDA', 'FAIR'], ['quantum', 'chromodynamics'],
              ['Quantum', 'Cosmology'], ['quantum', 'electrodynamics'], ['gravitational', 'radiation'],
              ['gravitational', 'waves'], ['quantum', 'gravity'], ['string', 'theory'],
              ['wakefield', 'acceleration']]
-multwords += [['quantum', 'computing']]
+multwords += [['quantum', 'computing'], ['quantum', 'sensing'], ['quantum', 'algorithm']]
 
 #hyphens do not work as expected
 realsinglewords = []
@@ -116,7 +117,7 @@ dedicated += ['Université Paris-Saclay', 'Université Grenoble Alpes',
               'Université de Montpellier', 'Université Paul Sabatier - Toulouse III',
               'Université de Nantes', 'University of Surrey', 'Normandie Université',
               'Lund University']
-dedicated += ['Ruhr-Universität Bochum', 'Justus-Liebig-Universität Gießen']
+dedicated += ['Ruhr-Universität Bochum', 'Justus-Liebig-Universität Gießen', 'STAR']
 
 #regular expressins for identifiers
 rehdl = re.compile('.*hdl.handle.net\/')
@@ -167,9 +168,9 @@ bereitsin.append('20.2000/DART-EUROPE/2082645')
 def checkweblinks(rec):    
     for weblink in rec['weblinks']:        
         if 'doi' in rec.keys() and 'hdl' in rec.keys() and 'urn' in rec.keys():
-            print '   PIDs complete'
+            if verbose: print '   PIDs complete'
         elif 'doi' in rec.keys() and 'hdl' in rec.keys():
-            print '   DOI and HDL are enough, do not look for URN'
+            if verbose: print '   DOI and HDL are enough, do not look for URN'
         elif re.search('www.theses.fr', weblink) or re.search('d\-nb.info\/\d', weblink):
             continue
         elif weblink in ['https://d-nb.info/120141492X/34', 'https://plus.si.cobiss.net/opac7/bib/3384164 ?lang=sl']:
@@ -183,11 +184,11 @@ def checkweblinks(rec):
             try:
                 response = requests.get(weblink)
                 content_type = response.headers['content-type']
-                print '       content_type = %s' % (content_type)
+                if verbose: print '       content_type = %s' % (content_type)
             except:
                 content_type = ''
             if re.search('pdf', content_type):
-                print '   skip PDF'
+                if verbose: print '   skip PDF'
             else:
                 try:
                     req = urllib2.Request(weblink, headers=hdr)
@@ -202,11 +203,11 @@ def checkweblinks(rec):
                                 doi = meta['content']
                                 if redoi2.search(doi):
                                     rec['doi'] = doi
-                                    print '   (* found DOI=%s in %s *)' % (doi, weblink)
+                                    if verbose: print '   (* found DOI=%s in %s *)' % (doi, weblink)
                                     rec['note'].append('   (* found DOI=%s in %s *)' % (doi, weblink))
                                 elif redoi1.search(doi):
                                     rec['doi'] = redoi1.sub(r'\1', doi)
-                                    print '   (* found DOI=%s in %s *)' % (rec['doi'], weblink)
+                                    if verbose: print '   (* found DOI=%s in %s *)' % (rec['doi'], weblink)
                                     rec['note'].append('   (* found DOI=%s in %s *)' % (rec['doi'], weblink))
                         #URN
                         if not 'urn' in rec.keys():
@@ -214,15 +215,15 @@ def checkweblinks(rec):
                                 urn = meta['content']
                                 if reurn2.search(urn) or reurn2b.search(urn):
                                     rec['urn'] = urn
-                                    print '   (* found URN=%s in %s *)' % (urn, weblink)
+                                    if verbose: print '   (* found URN=%s in %s *)' % (urn, weblink)
                                     rec['note'].append('   (* found URN=%s in %s *)' % (urn, weblink))
                                 elif reurn3.search(urn):
                                     rec['urn'] = reurn3.sub(r'\1', urn)
-                                    print '   (* found URN=%s in %s *)' % (rec['urn'], weblink)
+                                    if verbose: print '   (* found URN=%s in %s *)' % (rec['urn'], weblink)
                                     rec['note'].append('   (* found URN=%s in %s *)' % (rec['urn'], weblink))
                                 elif reurn4.search(urn):
                                     rec['urn'] = reurn4.sub(r'\1', urn)
-                                    print '   (* found URN=%s in %s *)' % (rec['urn'], weblink)
+                                    if verbose: print '   (* found URN=%s in %s *)' % (rec['urn'], weblink)
                                     rec['note'].append('   (* found URN=%s in %s *)' % (rec['urn'], weblink))
                         #HDL
                         if not 'hdl' in rec.keys():
@@ -230,11 +231,11 @@ def checkweblinks(rec):
                                 hdl = meta['content']
                                 if re.search('^\d+\/\d+$', hdl):
                                     rec['hdl'] = hdl                                
-                                    print '   (* found HDL=%s in %s *)' % (hdl, weblink)
+                                    if verbose: print '   (* found HDL=%s in %s *)' % (hdl, weblink)
                                     rec['note'].append('   (* found HDL=%s in %s *)' % (hdl, weblink))
                                 elif re.search('http.*handle.net\/\d+\/', hdl):
                                     rec['hdl'] = re.sub('.*handle.net\/', '', hdl)                          
-                                    print '   (* found HDL=%s in %s *)' % (hdl, weblink)
+                                    if verbose: print '   (* found HDL=%s in %s *)' % (hdl, weblink)
                                     rec['note'].append('   (* found HDL=%s in %s *)' % (hdl, weblink))
                 #special cases
                 if not 'doi' in rec.keys():
@@ -244,7 +245,7 @@ def checkweblinks(rec):
                             for a in div.find_all('a'):
                                 if redoi1.search(a['href']):
                                     rec['doi'] = redoi1.sub(r'\1', a['href'])
-                                    print '   (* found DOI=%s in %s *)' % (rec['doi'], weblink)
+                                    if verbose: print '   (* found DOI=%s in %s *)' % (rec['doi'], weblink)
                                     rec['note'].append('   (* found DOI=%s in %s *)' % (rec['doi'], weblink))
     return
 
@@ -314,29 +315,29 @@ for search in searches:
                         rec['artlink'] = 'https://www.dart-europe.org/full.php?id=' + input['value']
                         rec['nodoi'] = '20.2000/DART-EUROPE/' + input['value']
                         if rec['nodoi'] in bereitsin:
-                            print '    ((', rec['nodoi'],'))'
+                            if verbose: print '    ((', rec['nodoi'],'))'
                             statistics[search]['bereitsin'] += 1
                             statistics[search]['total'] += 1
                         elif (rec['collection'] in dedicated) or (rec['university'] in dedicated):
                             if checkall:
-                                print '      ', rec['nodoi']
+                                if verbose: print '      ', rec['nodoi']
                                 rec['note'].append('NODOI:'+rec['nodoi'])
                                 recs.append(rec)
                                 dois.append(rec['nodoi'])
                                 statistics[search]['harvested'] += 1
                             else:
-                                print '     [ %s ] %s | %s ' % (rec['nodoi'], rec['collection'], rec['university'])
+                                if verbose: print '     [ %s ] %s | %s ' % (rec['nodoi'], rec['collection'], rec['university'])
                                 statistics[search]['dedicated'] += 1
                             statistics[search]['total'] += 1
                         elif not rec['nodoi'] in dois:
-                            print '      ', rec['nodoi']
+                            if verbose: print '      ', rec['nodoi']
                             rec['note'].append('NODOI:'+rec['nodoi'])
                             recs.append(rec)
                             dois.append(rec['nodoi'])
                             statistics[search]['harvested'] += 1
                             statistics[search]['total'] += 1
                         else:
-                            print '     (', rec['nodoi'],')'
+                            if verbose: print '     (', rec['nodoi'],')'
                             statistics[search]['total'] += 1
             print '    %i records so far' % (len(recs))
         #if not recs:
@@ -346,9 +347,9 @@ for search in searches:
 #statistics
 totals = [(statistics[search]['total'], search) for search in statistics.keys()]
 totals.sort()
-print '   tot hrv ded bin'
+if verbose: print '   tot hrv ded bin'
 for (tot, search) in totals:
-    print ' - %3i %3i %3i %3i %s' % (tot, statistics[search]['harvested'], statistics[search]['dedicated'], statistics[search]['bereitsin'], search)
+    if verbose: print ' - %3i %3i %3i %3i %s' % (tot, statistics[search]['harvested'], statistics[search]['dedicated'], statistics[search]['bereitsin'], search)
         
 i = 0
 for rec in recs:
