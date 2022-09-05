@@ -619,11 +619,6 @@ def convertarticle(issn, vol, isu, artid):
 
     #from stacks-code
     if 1 > 0:
-        #JCAP special case
-        if rec['jnl'] in ['JCAP', 'JHEP', 'JSTAT']:
-            rec['vol'] = '%s%02i' % (rec['year'][2:4], int(rec['issue']))
-            if 'issue' in rec.keys():
-                del rec['issue']
         #issue
         for issuenode in article.find_all('issue'):
             issue = issuenode.text.strip()
@@ -633,6 +628,11 @@ def convertarticle(issn, vol, isu, artid):
                 rec['issue'] = issue
                 if issue.startswith("S"): #we have a supplememnt 
                     rec['jnl'] += " Suppl."
+        #JCAP special case
+        if rec['jnl'] in ['JCAP', 'JHEP', 'JSTAT']:
+            rec['vol'] = '%s%02i' % (rec['year'][2:4], int(rec['issue']))
+            if 'issue' in rec.keys():
+                del rec['issue']
         #fulltext
         if 'license' in rec.keys():
             rec['FFT'] = 'http://iopscience.iop.org/article/%s/pdf' % (rec['doi'])
