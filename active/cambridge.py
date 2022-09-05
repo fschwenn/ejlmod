@@ -88,7 +88,8 @@ elif jid == 'PHS':
 if jid in ['PHS']:
     supertocurl = 'https://www.cambridge.org/core/journals/%s/all-issues' % (camjnlname)
     supertocfilename = '/tmp/%s.toc' % (camjnlname)
-    #os.system('wget -q -O %s %s' % (supertocfilename, supertocurl))
+    if not os.path.isfile(supertocfilename):
+        os.system('wget -q -O %s %s' % (supertocfilename, supertocurl))
     tocf = open(supertocfilename, 'r')
     toc = BeautifulSoup(''.join(tocf.readlines()), features="lxml")
     tocf.close()
@@ -103,7 +104,6 @@ if jid in ['PHS']:
                             print ' ', span, aa[0]['href']
                             if re.search('Issue '+iss, span.text):
                                 toclink = 'https://www.cambridge.org' + aa[0]['href']
-                                print toclink
 else:
     if len(sys.argv) > 5:
         toclink = explicittoclink
@@ -111,7 +111,7 @@ else:
         toclink = 'http://journals.cambridge.org/action/displayIssue?jid=%s&volumeId=%s' % (jid, vol)
         if len(sys.argv) > 3:
             toclink += '&issueId=%s' % (iss)
-            print toclink
+    print toclink
 
 #toclink = "https://www.cambridge.org/core/journals/glasgow-mathematical-journal/issue/FF36FC6AD93313180F0F572188FA2F70"
 
