@@ -63,10 +63,17 @@ for journal in crossref.body.find_all('journal'):
                 for resource in doi_data.find_all('resource'):
                     rec['FFT'] = resource.text
         #pbn
-        for first_page in journal_article.find_all('first_page'):
-            rec['p1'] = first_page.text
-        for last_page in journal_article.find_all('last_page'):
-            rec['p2'] = last_page.text
+        if jtit in ['Acta Physica Polonica B', 'Acta Physica Polonica B Proceedings Supplement']:
+            for doi_data in journal_article.find_all('doi_data'):
+                for resource in doi_data.find_all('resource'):
+                    rec['p1'] = re.sub('.*A', '', resource.text)
+                    for last_page in journal_article.find_all('last_page'):
+                        rec['pages'] = last_page.text
+        else:
+            for first_page in journal_article.find_all('first_page'):
+                rec['p1'] = first_page.text
+            for last_page in journal_article.find_all('last_page'):
+                rec['p2'] = last_page.text
         if jvol: rec['vol'] = jvol
         if jiss: rec['issue'] = jiss
         if jdate: rec['date'] = jdate
