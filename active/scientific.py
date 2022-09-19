@@ -20,7 +20,7 @@ import zipfile
 scientificdir = '/afs/desy.de/group/library/publisherdata/scientific'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"+'_special'
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 publisher = 'Trans Tech Publications Ltd.'
 
@@ -33,31 +33,31 @@ else:
 
 
 # uninteresting journals:
-juninteresting = ['JBBBE', 'JBBTE', 'MSF', 'RC', 'FoMSE', 'SC', 'EI']
+juninteresting = ['JBBBE', 'JBBTE', 'MSF', 'RC', 'FoMSE', 'SC', 'EI', 'SBC', 'MSFo', 'CTA']
 # interesting journals:
-jninteresting = ['AMM', 'AMR', 'DDF', 'KEM', 'SSP']
+jninteresting = ['AMM', 'AMR', 'DDF', 'AEF', 'SSP', 'KEM', 'JERA', 'JNanoR', 'AST']
 #dictionary of journal names
-# journal-id : [file name, INPIRE journal name, type code, do not go below this volume]
-jc = {'AEF'    : ['scientificAEF',   'Advanced Engineering Forum', 'P'],
-      'AMM'    : ['scientificAMM',   'Appl.Mech.Mater.', 'P', 484], #!!
-      'JBBBE'  : ['scientificJBBBE', 'Journal of Biomimetics, Biomaterials and Biomedical Engineering', 'P'],
-      'JBBTE'  : ['scientificJBBTE', 'Biomimetics, Biomaterials & Tissue Engineering', 'P'],#bis 2014.03, danach als JBBTE fortgefuehrt
-      'JERA'   : ['scientificJERA',  'International Journal of Engineering Research in Africa', 'P'],
-      'AMR'    : ['scientificAMR',   'Adv.Mater.Res.', 'P', 874], #!!
-      'DDF'    : ['scientificDDF',   'Defect Diff.Forum', 'P', 348],#!
-      'DF'     : ['scientificDF',    'Diffusion Foundations', 'P'],#bis 2021.04, danach als DFMA fortgefuehrt
-      'DFMA'   : ['scientificDFMA',  'Diffusion Foundations and Materials Applications', 'P'],
-      'EI'     : ['scientificEI',    'Engineering Innovations', 'P'],
-      'JMNM'   : ['scientificJMNM',  'Journal of Metastable and Nanocrystalline Materials', 'P'],
-      'JNanoR' : ['scientificJNanoR', 'Journal of Nano Research', 'P'],
-      'KEM'    : ['scientificKEM',   'Key Eng.Mater.', 'P', 598], #!
-      'MSF'    : ['scientificMSF',   'Materials Science Forum', 'P'],
-      'MSFo'   : ['scientificMSF',   'Mater.Sci.Forum', 'P'], #!
-      'NH'     : ['scientificNH',    'Nano Hybrids', 'P'],  #bis 2016.05, danach als NHC fortgefuehrt
-      'NHC'    : ['scientificNHC',   'Nano Hybrids and Composites', 'P'],
-      'SSP'    : ['scientificSSP',   'Solid State Phenom.', 'P', 213], #!
-      'AST'    : ['scientificAST',   'Advances in Science and Technology', 'P'],
-      'CTA'    : ['scientificCTA',   'Construction Technologies and Architecture', 'P']}
+# journal-id : [file name, INPIRE journal name, type code, do not go below this volume] (2015)
+jc = {'AEF'    : ['scientificAEF',    'Advanced Engineering Forum', 'P', 12],
+      'AMM'    : ['scientificAMM',    'Appl.Mech.Mater.', 'P', 722], #!!
+      'JBBBE'  : ['scientificJBBBE',  'Journal of Biomimetics, Biomaterials and Biomedical Engineering', 'P'],
+      'JBBTE'  : ['scientificJBBTE',  'Biomimetics, Biomaterials & Tissue Engineering', 'P'],#bis 2014.03, danach als JBBTE fortgefuehrt
+      'JERA'   : ['scientificJERA',   'International Journal of Engineering Research in Africa', 'P', 13],
+      'AMR'    : ['scientificAMR',    'Adv.Mater.Res.', 'P', 1082], #!!
+      'DDF'    : ['scientificDDF',    'Defect Diff.Forum', 'P', 360],#!
+      'DF'     : ['scientificDF',     'Diffusion Foundations', 'P'],#bis 2021.04, danach als DFMA fortgefuehrt
+      'DFMA'   : ['scientificDFMA',   'Diffusion Foundations and Materials Applications', 'P', 2],
+      'EI'     : ['scientificEI',     'Engineering Innovations', 'P'],
+      'JMNM'   : ['scientificJMNM',   'Journal of Metastable and Nanocrystalline Materials', 'P', 0],
+      'JNanoR' : ['scientificJNanoR', 'J.Nano Res.', 'P', 29],
+      'KEM'    : ['scientificKEM',    'Key Eng.Mater.', 'P', 636], #!
+      'MSF'    : ['scientificMSF',    'Materials Science Forum', 'P', 0],
+      'MSFo'   : ['scientificMSF',    'Mater.Sci.Forum', 'P'], #!
+      'NH'     : ['scientificNH',     'Nano Hybrids', 'P'],  #bis 2016.05, danach als NHC fortgefuehrt
+      'NHC'    : ['scientificNHC',    'Nano Hybrids and Composites', 'P', 8],
+      'SSP'    : ['scientificSSP',    'Solid State Phenom.', 'P', 225], #!
+      'AST'    : ['scientificAST',    'Adv.Sci.Tech.', 'P', 96],
+      'CTA'    : ['scientificCTA',    'Construction Technologies and Architecture', 'P', 0]}
 
 #check server and download all new zip-files
 revol = re.compile('\D*(\d+).*')
@@ -256,6 +256,7 @@ def convertarticle(journal, filename):
                 if licence.has_attr('xlink:href'):
                     if re.search('creativecommons.org', licence['xlink:href']):
                         rec['license'] = {'url' : licence['xlink:href']}
+                        rec['FFT'] = 'https://www.scientific.net/%s.%s.%s.pdf' % (journal, rec['vol'], rec['p1'])
         #conference (<conf-name>, <conf-date>, <conf-loc>)
         for conf in meta.find_all('conference'):
             confnote = conf.text.strip()
@@ -325,9 +326,7 @@ def convertarticle(journal, filename):
         return rec
     else:
         print '  NO DOI IN ', filename
-        return False
-
-    
+        return False    
 
 
 for (journal, datei) in downloadzipfiles():
