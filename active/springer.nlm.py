@@ -164,6 +164,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '42254': ['natrp', 'Nature Rev.Phys.', '', '', 'P'],
       '43538': ['pinsa', 'Proc.Indian Natl.Sci.Acad.', '', '', 'RP'],
       '43673': ['aappsb', 'AAPPS Bull.', '', '', ''],
+      '44198': ['jnlmp', 'J.Nonlin.Math.Phys.', '', '', 'P'],
 #Books
        '0304': ['lnm', 'Lect.Notes Math.', '', '', 'PS', ''],
        '0361': ['spprph', 'Springer Proc.Phys.', '', '', 'C', ''],
@@ -198,14 +199,12 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
 #41605 Rad.Det.Tech.Meth.
 
 jc['10948'] = ['jsnovm', 'J.Supercond.Nov.Mag.', '', '', 'P'] #!
+jc['00209'] = ['matz', 'Math.Z.', '', '', 'P']
+jc['10082'] = ['oqe', 'Opt.Quant.Electron.', '', '', 'P']
 jc['40094'] = ['jtap', 'J.Theor.Appl.Phys.', '', '', 'P'] #now at New publisher: Please contact Islamic Azad University
 
-jc['44214'] = ['qufr', 'Quant.Front', '', '', 'P']
-jc['44198'] = ['jnlmp', 'J.Nonlin.Math.Phys.', '', '', 'P'] #yepp
+jc['44214'] = ['qufr', 'Quant.Front', '', '', 'P']#new journal, no publications yet (20220915)
 #to be asked for
-jc['00209'] = ['matz', 'Math.Z.', '', '', 'P']
-
-
 
 #known conferences
 confdict = {u'Proceedings of the 7th International Conference on Trapped Charged Particles and Fundamental Physics (TCP 2018), Traverse City, Michigan, USA, 30 September-5 October 2018' : 'C18-09-30',
