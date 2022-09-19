@@ -71,7 +71,7 @@ uninterestingsubjects = ['Chemistry', 'Biochemistry', 'Organic chemistry',
                          "Language", "Latin American history", "Latin American literature",
                          "Latin American Studies", "Law enforcement", "Law", "LGBTQ studies", "Linguistics",
                          "Literature", "Low Temperature Physics", "Macroecology", "Management", "Marketing",
-                         "Mass communications", "Materials science", "Mathematics education", "Mathematics",
+                         "Mass communications", "Materials science", "Mathematics education", 
                          "Mechanical engineering", "Mechanics", "Medical imaging", "Medicine",
                          "Medieval literature", "Mental health", "Meteorology", "Microbiology",
                          "Middle Eastern history", "Middle School education", "Molecular biology",
@@ -163,7 +163,7 @@ for p in tocpage.body.find_all('p'):
             if re.search('\([12]\d\d\d', p.text):
                 rec['year'] = re.sub('.*\(([12]\d\d\d).*', r'\1', p.text.strip())
                 if int(rec['year']) < startyear:
-                    print '  %s too old' % (rec['year'])
+                    #print '  %s too old' % (rec['year'])
                     tooold = True
                 else:
                     prerecs.append(rec)
