@@ -28,27 +28,27 @@ else:
     years = [now.year]
 
 #which domains (topics) should be checked
-subdomains = ["stat.ml", "stat.ap", "stat.co",
-              "phys.phys.phys-atom-ph", "phys.phys.phys-data-an", "phys.phys.phys-plasm-ph",
-              "phys.phys.phys-ins-det", "phys.phys.phys-comp-ph", "phys.phys.phys-acc-ph",
-              "phys.cond.cm-sm", "phys.cond.cm-msqhe", "phys.cond.cm-sce",
-              "phys.astr.co", "phys.astr.im", "phys.astr.he", "phys.astr.ga",
-              "phys.hexp", "phys.nucl", "phys.mphy", "phys.nexp", "phys.qphy",
-              "phys.hthe", "phys.hphe", "phys.grqc", "phys.hlat",
-              "math.math-ap", "math.math-pr", "math.math-ag", "math.math-co", "math.math-dg",
-              "math.math-nt", "math.math-at", "math.math-rt", "math.math-ca", "math.math-gt",
-              "math.math-oa", "math.math-sg", "math.math-qa", "math.math-ra", "math.math-ph",
-              "info.info-ni", "info.info-se", "info.info-dc", "info.info-cv", "info.info-lg",
-              "info.info-it", "info.info-sc", "info.info-ms", "info.info-dl"]
-subdomains += ["phys.phys"]
+subdomains = [("stat.ml", "s"), ("stat.ap", "s"), ("stat.co", "s"),
+              ("phys.phys.phys-atom-ph", "q"), ("phys.phys.phys-data-an", ""), ("phys.phys.phys-plasm-ph", ""),
+              ("phys.phys.phys-ins-det", "i"), ("phys.phys.phys-comp-ph", "c"), ("phys.phys.phys-acc-ph", "b"),
+              ("phys.cond.cm-sm", "f"), ("phys.cond.cm-msqhe", "f"), ("phys.cond.cm-sce", "f"),
+              ("phys.astr.co", "a"), ("phys.astr.im", "ai"), ("phys.astr.he", "a"), ("phys.astr.ga", "a"),
+              ("phys.hexp", "e"), ("phys.nucl", "n"), ("phys.mphy", "m"), ("phys.nexp", "x"), ("phys.qphy", "k"),
+              ("phys.hthe", "t"), ("phys.hphe", "p"), ("phys.grqc", "g"), ("phys.hlat", "l"),
+              ("math.math-ap", "m"), ("math.math-pr", "m"), ("math.math-ag", "m"), ("math.math-co", "m"), ("math.math-dg", "m"),
+              ("math.math-nt", "m"), ("math.math-at", "m"), ("math.math-rt", "m"), ("math.math-ca", "m"), ("math.math-gt", "m"),
+              ("math.math-oa", "m"), ("math.math-sg", "m"), ("math.math-qa", "m"), ("math.math-ra", "m"), ("math.math-ph", "m"),
+              ("info.info-ni", "c"), ("info.info-se", "c"), ("info.info-dc", "c"), ("info.info-cv", "c"), ("info.info-lg", "c"),
+              ("info.info-it", "c"), ("info.info-sc", "c"), ("info.info-ms", "c"), ("info.info-dl", "c")]
+subdomains += [("phys.phys", "")]
 
 domains = {}
-for subdom in subdomains:
+for (subdom, fc) in subdomains:
     dom = re.sub('\..*', '', subdom)
     if dom in domains.keys():
-        domains[dom].append(subdom)
+        domains[dom].append((subdom, fc))
     else:
-        domains[dom] = [subdom]
+        domains[dom] = [(subdom, fc)]
 
 #avoid duplicates as some theses are in more than one domain
 doiliste = {}
@@ -80,7 +80,7 @@ for year in years:
     for dom in domains.keys():
         print '==={ %i }==={ %s }===' % (year, dom)
         prerecs = []
-        for subdom in domains[dom]:
+        for (subdom, fc) in domains[dom]:
             tocurl = 'https://tel.archives-ouvertes.fr/search/index/?q=%2A&domain_t=' + subdom + '&producedDateY_i=' + str(year) + '&rows=100'
             print '           ---{ %s : %s }---' % (subdom, tocurl)
             req = urllib2.Request(tocurl, headers=hdr)
@@ -107,6 +107,8 @@ for year in years:
                                'note' : [ subdom ], 'rn' : [], 'refs' : [], 'supervisor' : []}
                         rec['link'] = 'https://tel.archives-ouvertes.fr' + a['href']
                         rec['tit'] = a.text.strip()
+                        if fc:
+                            rec['fc'] = fc
                     if a['href'][1:] in telnrs:
                         print '           skip %s' % (a['href'][1:])
                     else:
