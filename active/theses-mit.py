@@ -68,10 +68,15 @@ boringkeywords = ['Joint Program in Biological Oceanography.',
                   'Massachusetts Institute of Technology. Department of Chemical Engineering',
                   'Massachusetts Institute of Technology. Department of Urban Studies and Planning',
                   'Massachusetts Institute of Technology. Department of Aeronautics and Astronautics',
-                  'System Design and Management Program.',
+                  'System Design and Management Program.', 'Sloan School of Management',
                   'Massachusetts Institute of Technology. Department of Materials Science and Engineering',
                   'Massachusetts Institute of Technology. Department of Biology',
-                  'Massachusetts Institute of Technology. Department of Chemistry']
+                  'Massachusetts Institute of Technology. Department of Chemistry',
+                  'Massachusetts Institute of Technology. Program in Comparative Media Studies/Writing',
+                  'Program in Media Arts and Sciences (Massachusetts Institute of Technology)',
+                  'Harvard-MIT Program in Health Sciences and Technology',
+                  'Massachusetts Institute of Technology. Supply Chain Management Program',
+                  'Massachusetts Institute of Technology. Center for Real Estate. Program in Real Estate Development.']
 
 hdr = {'User-Agent' : 'Magic Browser'}
 
