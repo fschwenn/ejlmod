@@ -230,8 +230,8 @@ for search in searches[startsearch:stopsearch]:
                     else:
                         print '     (', rec['nodoi'],')'
         print '    %i records so far' % (len(prerecs))
-    if not prerecs:
-        print '[]',tocpage.text
+#    if not prerecs:
+#        print '[]',tocpage.text
 
 i = 0
 rehdl = re.compile('.*hdl.handle.net\/')
