@@ -56,11 +56,11 @@ for p in tocpage.find_all('p'):
                 rec['doi'] = '20.2000/KAMIOKANDE/' + re.sub('\W', '', a['href'][16:-4])
             a.decompose()
         pt = re.sub('[\n\t\r]', ' ', p.text.strip())
-        print pt
+        #print pt
         halfs = re.split(' *,? *PhD Thesis *,? *', pt)
         firstparts = re.split(' *, *', halfs[0])
         secondparts = re.split(' *, *', halfs[1])
-        print 'SP', secondparts
+        #print 'SP', secondparts
         if re.search('\d', secondparts[-1]):
             rec['date'] = re.sub('.*([12]\d\d\d).*', r'\1', secondparts[-1])
             rec['year'] = rec['date']
@@ -72,7 +72,7 @@ for p in tocpage.find_all('p'):
         rec['tit'] = ', '.join(firstparts[:-1])
         if int(rec['year']) >= now.year - 2:
             recs.append(rec)
-            print rec
+            #print rec
 
 
 
