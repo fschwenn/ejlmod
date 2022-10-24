@@ -147,7 +147,8 @@ def spie(jnl, vol, iss):
         except:
             pass
         if rec.has_key('year'):
-            print '  %s %s.%s (%s) %s, %s' % (jnlname,vol, iss, rec['year'],rec['p1'],rec['tit'])
+            #print '  %s %s.%s (%s) %s, %s' % (jnlname,vol, iss, rec['year'],rec['p1'],rec['tit'])
+            print '  %s %s.%s (%s) %s' % (jnlname,vol, iss, rec['year'],rec['p1'])
         else:
             print '=== PROBLEM WITH RECORD ==='
             print rec
