@@ -115,11 +115,7 @@ chunksize = 50
 publisher = 'oatd.org'
 comment = Comment('Kommentar')
 #check already harvested
-ejldirs = ['/afs/desy.de/user/l/library/dok/ejl/onhold',
-           '/afs/desy.de/user/l/library/dok/ejl',
-           '/afs/desy.de/user/l/library/dok/ejl/zu_punkten',
-           '/afs/desy.de/user/l/library/dok/ejl/zu_punkten/enriched',
-           '/afs/desy.de/user/l/library/dok/ejl/backup',
+ejldirs = ['/afs/desy.de/user/l/library/dok/ejl/backup',
            '/afs/desy.de/user/l/library/dok/ejl/backup/%i' % (now.year-1)]
 redoki = re.compile('THESES.OATD')
 renodoi = re.compile('^I\-\-NODOI:(.*)\-\-$')
@@ -165,7 +161,7 @@ for search in searches[startsearch:stopsearch]:
     i += 1
     page = 0
     tocurl = 'https://oatd.org/oatd/search?q=' + search + ' AND ' + date + '&level.facet=doctoral&sort=author&start=' + str(page*rpp+1)
-    print '==={ %i/%i }==={ %s }==={ %s }===' % (i, stopsearch-startsearch, search, tocurl)
+    print '==={ %i/%i }==={ %s }===' % (i, stopsearch-startsearch, tocurl)
     try:
         driver.get(tocurl)
         WebDriverWait(driver, 30).until(EC.presence_of_element_located((By.CLASS_NAME, 'citeFormatName')))
