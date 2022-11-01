@@ -25,22 +25,22 @@ stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 publisher = 'Norwegian U. Sci. Tech.'
 rpp = 20
 
-
 hdr = {'User-Agent' : 'Magic Browser'}
 recs = []
 jnlfilename = 'THESES-NUST-%s' % (stampoftoday)
-tocurl = 'https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/227485/browse?resetOffset=true&sort_by=2&order=DESC&rpp=%i&type=type&value=Doctoral+thesis' % (rpp)
-print tocurl
-req = urllib2.Request(tocurl, headers=hdr)
-tocpage = BeautifulSoup(urllib2.urlopen(req))
-time.sleep(2)
-for div in tocpage.body.find_all('h4', attrs = {'class' : 'artifact-title'}):
-    for a in div.find_all('a'):
-        rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
-        rec['artlink'] = 'https://ntnuopen.ntnu.no' + a['href']
-        rec['hdl'] = re.sub('.*handle\/', '', a['href'])
-        rec['tit'] = a.text.strip()
-        recs.append(rec)
+for dep in ['2425196', '227485', '227491', '227496']:
+    tocurl = 'https://ntnuopen.ntnu.no/ntnu-xmlui/handle/11250/' + dep + '227485/browse?resetOffset=true&sort_by=2&order=DESC&rpp=%i&type=type&value=Doctoral+thesis' % (rpp)
+    print tocurl
+    req = urllib2.Request(tocurl, headers=hdr)
+    tocpage = BeautifulSoup(urllib2.urlopen(req))
+    time.sleep(2)
+    for div in tocpage.body.find_all('h4', attrs = {'class' : 'artifact-title'}):
+        for a in div.find_all('a'):
+            rec = {'tc' : 'T', 'jnl' : 'BOOK', 'note' : []}
+            rec['artlink'] = 'https://ntnuopen.ntnu.no' + a['href']
+            rec['hdl'] = re.sub('.*handle\/', '', a['href'])
+            rec['tit'] = a.text.strip()        
+            recs.append(rec)
 
 j = 0
 for rec in recs:
@@ -64,6 +64,9 @@ for rec in recs:
             #subject
             elif meta['name'] == 'DC.subject':
                 rec['note'].append( meta['content'] )
+            #title
+            elif meta['name'] == 'citation_title':
+                rec['tit'] = meta['content']
             #FFT
             elif meta['name'] == 'citation_pdf_url':
                 rec['hidden'] = meta['content']
