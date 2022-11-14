@@ -484,7 +484,7 @@ def jatsreferences(soup, citationtag='element-citation'):
     pidreport = 'dois:%i, hdls:%i, arxivs:%i, recids:%i' % (statistik['dois'], statistik['hdls'], statistik['arxivs'], statistik['recids'])
     statistikline = '[jatsreferences] %i/%i: good=%i (%s), bad=%i (%s) | %s' % (len(refs), len(srefs), statistik['goodrefs']['sum'], statistikgoodrefs, statistik['badrefs']['sum'], statistikbadrefs, pidreport)
     if verbose: print statistikline
-    return(refs)
+    return refs
 
 
 
