@@ -71,7 +71,7 @@ boring = ['Electrical+and+Computer+Engineering', 'Biomedical+and+Biological+Scie
 
 
 for page in range(pages):
-    tocurl = 'https://ecommons.cornell.edu/handle/1813/47/recent-submissions?rpp=' + str(rpp) + '&offset=' + str((330+page)*rpp)
+    tocurl = 'https://ecommons.cornell.edu/handle/1813/47/recent-submissions?rpp=' + str(rpp) + '&offset=' + str((page)*rpp)
     print '==={ %i/%i }==={ %s }===' % (page+1, pages, tocurl)
     req = urllib2.Request(tocurl, headers=hdr)
     tocpage = BeautifulSoup(urllib2.urlopen(req), features="lxml")
