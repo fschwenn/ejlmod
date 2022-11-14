@@ -77,7 +77,7 @@ for rec in recs:
                 rec['transtit'] = meta['content']
             #keywords
             elif meta['name'] == 'DC.subject':
-                if not meta['content'] in ['Tesis y disertaciones académicas', 'Universidad de Salamanca (España)',
+                if not meta['content'] in [u'Tesis y disertaciones académicas', u'Universidad de Salamanca (España)',
                                            'Resumen de tesis', 'Thesis Abstracts']:
                     rec['keyw'].append(meta['content'])
             #abstract
