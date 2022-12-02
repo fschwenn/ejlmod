@@ -49,7 +49,7 @@ conferences = {u'Selected Papers from the 1st International Electronic Conferenc
 
 
 missingpubnotes = ["10.3390/universe8020085","10.3390/sym14010130","10.3390/photonics9020061","10.3390/sym14020265","10.3390/metrology1020008","10.3390/app112411669","10.3390/e24010104","10.3390/molecules27030597","10.3390/e24010043","10.3390/sym14010180","10.3390/nano12020243","10.3390/nano11112972","10.3390/foundations1020017","10.3390/galaxies9040078","10.3390/math9182178","10.3390/e23111371","10.3390/universe6050068","10.3390/e23101353","10.3390/e23111377","10.3390/psf2021003008","10.3390/universe7010015","10.3390/galaxies9020023","10.3390/ECU2021-09310","10.3390/e24010012","10.3390/atmos12091230","10.3390/e24010101","10.3390/universe705013","10.3390/universe7050139","10.3390/e23101333","10.3390/e23101350","10.3390/photonics8120552","10.3390/sym13060978","10.3390/app11104357","10.3390/rs12203440","10.3390/sym1010000","10.3390/w12113263","10.3390/math8091469","10.3390/data5030085","10.3390/e22010111","10.3390/s20071930","10.3390/books978-3-03921-765-6","10.3390/e22010101","10.3390/quantum1020025","10.3390/universe5050099","10.3390/sym11070880","10.3390/data3040056","10.3390/universe5030080","10.3390/sym10090396","10.3390/sym10090415","10.3390/jimaging4060077","10.3390/mi8090277","10.3390/polym12051066","10.3390/s150100515","10.3390/fractalfract2040026","10.3390/geosciences11060239","10.3390/s151127905","10.3390/cli3030474"]
-
+calor22 = ["10.3390/instruments6030036", "10.3390/instruments6040075", "10.3390/instruments6040071", "10.3390/instruments6040070", "10.3390/instruments6040068", "10.3390/instruments6040067", "10.3390/instruments6040065", "10.3390/instruments6040064", "10.3390/instruments6040063", "10.3390/instruments6040062", "10.3390/instruments6040060", "10.3390/instruments6040059", "10.3390/instruments6040058", "10.3390/instruments6040057", "10.3390/instruments6040055", "10.3390/instruments6040054", "10.3390/instruments6040053", "10.3390/instruments6040052", "10.3390/instruments6040051", "10.3390/instruments6040049", "10.3390/instruments6040048", "10.3390/instruments6040046", "10.3390/instruments6040045", "10.3390/instruments6040044", "10.3390/instruments6040043", "10.3390/instruments6030041", "10.3390/instruments6030040", "10.3390/instruments6030039", "10.3390/instruments6030037", "10.3390/instruments6030035", "10.3390/instruments6030034", "10.3390/instruments6030033", "10.3390/instruments6030032", "10.3390/instruments6030031", "10.3390/instruments6030030", "10.3390/instruments6030029", "10.3390/instruments6030028", "10.3390/instruments6030027", "10.3390/instruments6030025", "10.3390/instruments6040050", "10.3390/instruments6040047", "10.3390/instruments6030026"]
 
 
 done = []
@@ -425,6 +425,10 @@ for rec in prerecs:
             if rec['doi'] in done and not rec['doi'] in missingpubnotes:
                 print '  %s already in done'  % (rec['doi'])
                 keepit = False
+            #check conference
+            if rec['doi'] in calor22:
+                rec['tc'] = 'C'
+                rec['cnum'] = 'C22-05-15.4'
         #date
         for pd in  meta.find_all('pub-date', attrs = {'pub-type' : 'epub'}):
             for year in pd.find_all('year'):
