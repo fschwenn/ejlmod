@@ -25,6 +25,7 @@ publisher = 'Antwerp U.'
 rpp = 20
 
 starturl = 'https://repository.uantwerpen.be/submit.phtml?UDses=131032129%3A24586&UDstate=1&UDmode=&UDaccess=&UDrou=%25Start:bopwexe&UDopac=opacirua&UDextra='
+starturl = 'https://repository.uantwerpen.be/submit.phtml?UDses=141700795%3A491263&UDstate=1&UDmode=&UDaccess=&UDrou=%25Start:bopwexe&UDopac=opacirua&UDextra='
 
 br = mechanize.Browser()
 br.set_handle_robots(False)   # ignore robots
@@ -106,7 +107,7 @@ for rec in recs:
                 sv = re.sub('\n', '', sv)
                 rec['supervisor'].append([sv])
     print ' ', rec.keys()
-    print rec
+#    print rec
 
 #closing of files and printing
 if recs:
