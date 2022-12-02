@@ -27,7 +27,7 @@ from extract_jats_references import jatsreferences
 sprdir = '/afs/desy.de/group/library/publisherdata/springer'
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
 ejldir = '/afs/desy.de/user/l/library/dok/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 publisher = 'Springer'
 
@@ -110,7 +110,7 @@ jc = {'00006': ['aaca', 'Adv.Appl.Clifford Algebras', '', '', 'P'],
       '11454': ['tp', 'Tech.Phys.', '', '', 'P'],
       '11455': ['tpl', 'Tech.Phys.Lett.', '', '', 'P'],
       '11467': ['fpc', 'Front.Phys.(Beijing)', '', '', 'P'],
-      '11470': ['cmmp', 'Comput.Math., Math.Phys.', '', '', 'P'],
+      '11470': ['cmmp', 'Comput.Math.Math.Phys.', '', '', 'P'],
       '11490': ['lasp', 'Laser Phys.', '', '', 'P'], # stopped 2012
       '11496': ['ppn', 'Phys.Part.Nucl.', '', 'Fiz.Elem.Chast.Atom.Yadra', 'P'],
       '11497': ['ppnl', 'Phys.Part.Nucl.Lett.', '', 'Pisma Fiz.Elem.Chast.Atom.Yadra', 'P'],
@@ -488,6 +488,14 @@ def convertarticle(journalnumber, filename, contlevel):
                 subjt = subj.text.strip()
                 if re.search('[a-zA-Z]', subjt):
                     rec['note'].append(subjt)
+                    if subjt == 'NUCLEI/Experiment':
+                        rc['fc'] = 'x'
+                    elif subjt == 'NUCLEI/Theory':
+                        rc['fc'] = 'n'
+                    elif subjt == 'ELEMENTARY PARTICLES AND FIELDS/Experiment':
+                        rc['fc'] = 'e'
+                    elif subjt == 'ELEMENTARY PARTICLES AND FIELDS/Theory':
+                        rc['fc'] = 'pt'
                 if subjt in ['Review', 'Review Article', 'Review Paper', 'Short Review', 'Systematic Review']:
                     if not 'R' in rec['tc']:
                         rec['tc'] += 'R'
