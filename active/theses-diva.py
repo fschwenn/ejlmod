@@ -149,7 +149,7 @@ for cate in categories.keys():
                         elif gname == 'script':
                             section = ''
                                 
-        print rec
+        print rec.keys()
         time.sleep(10)
 
 
