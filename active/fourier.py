@@ -14,7 +14,7 @@ from bs4 import BeautifulSoup
 import time
 
 xmldir = '/afs/desy.de/user/l/library/inspire/ejl'
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 
 tmpdir = '/tmp'
 def tfstrip(x): return x.strip()
@@ -30,6 +30,7 @@ else:
     typecode = 'P'
 jnlfilename = 'annif%s.%s' % (vol, iss)
 tocurl = 'https://aif.centre-mersenne.org/issues/AIF_%s__%s_%s/' % (year, vol, iss)
+print tocurl
 
 try:
     tocpage = BeautifulSoup(urllib2.build_opener(urllib2.HTTPCookieProcessor).open(tocurl))
@@ -46,7 +47,7 @@ for span in tocpage.body.find_all('span', attrs = {'class' : 'article-title'}):
     for a in span.find_all('a'):
         rec['artlink'] = 'https://aif.centre-mersenne.org' + a['href']
         rec['tit'] = a.text.strip()
-    recs.append(rec)
+        recs.append(rec)
 
 hdr = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.11 (KHTML, like Gecko) Chrome/23.0.1271.64 Safari/537.11',
        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
