@@ -140,19 +140,27 @@ for div in divs:
                         if not rec['auts']:
                             h2.decompose()
                             rec['auts'].append(re.sub(',*', '', div.text.strip()))
+        if not rec['auts']:
+            del(rec['auts'])
+            rec['autaff'] = []
+            for div in volpage.find_all('div', attrs = {'class' : 'productInfo'}):
+                for h3 in div.find_all('h3'):
+                    if re.search('[Aa]uthor information', h3.text):
+                        for div2 in div.find_all('div', attrs = {'class' : 'metadataInfoFont'}):
+                            for s in div2.find_all('strong'):
+                                rec['autaff'].append([s.text.strip()])
+                                s.decompose()
+                            if rec['autaff']:
+                                rec['autaff'][-1].append(div2.text.strip())
+                            else:
+                                rec['autaff'] = [re.split(',', div2.text.strip(), 1)]
+            #print rec['autaff']
         if 'date' in rec.keys():
             print '  ', rec.keys()
             recs.append(rec)
         else:
             print '  no date!'
             print rec
-
-    
-    
-
-
-
-
 
 
 
