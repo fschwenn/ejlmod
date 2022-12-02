@@ -52,6 +52,7 @@ journals = {#'aaa'   : ('Abstr.Appl.Anal. ', 'Hindawi'),
 
 #journals = {'jgsp' : ('J.Geom.Symmetry Phys.', 'Bulgarian Academy of Sciences')}
 
+
 jnl = sys.argv[1]
 vol = sys.argv[2]
 iss = sys.argv[3]
@@ -88,7 +89,10 @@ if jnl in journals.keys():
             for a in div2.find_all('a'):
                 for span in a.find_all('span', attrs = {'class' : 'TOCLineItemText1'}):
                     rec = {'jnl' : jnlname, 'auts' : [], 'tc' : 'P', 'vol' : vol, 'note' : []}
-                    #rec['cnum'] = 'C20-06-08.6'
+                    if (jnl == 'pgiq'):
+                        rec['tc'] = 'C'
+                        if len(sys.argv) > 4:
+                            rec['cnum'] = sys.argv[4]
                     if iss != 'none':
                         rec['issue'] = iss
                     rec['artlink'] = 'https://projecteuclid.org' + a['href']
