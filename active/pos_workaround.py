@@ -3,7 +3,6 @@
 #program to harvest PoS
 # FS 2019-06-03
 
-
 import sys
 import os
 import ejlmod2
@@ -41,6 +40,9 @@ for tr in tocpage.body.find_all('tr'):
     #cnum
     if len(sys.argv) > 4:
         rec['cnum'] = sys.argv[4]
+    #fc
+    if len(sys.argv) > 5:
+        rec['fc'] = sys.argv[5]
     #title
     for span in tr.find_all('span', attrs = {'class' : 'contrib_title'}):
         rec['tit'] = span.text.strip()
