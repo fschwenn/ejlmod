@@ -26,6 +26,7 @@ rpp = 20
 
 starturl = 'https://repository.uantwerpen.be/submit.phtml?UDses=131032129%3A24586&UDstate=1&UDmode=&UDaccess=&UDrou=%25Start:bopwexe&UDopac=opacirua&UDextra='
 starturl = 'https://repository.uantwerpen.be/submit.phtml?UDses=141700795%3A491263&UDstate=1&UDmode=&UDaccess=&UDrou=%25Start:bopwexe&UDopac=opacirua&UDextra='
+starturl = 'https://repository.uantwerpen.be/submit.phtml?UDses=142468891%3A333120&UDstate=1&UDmode=&UDaccess=&UDrou=%25Start:bopwexe&UDopac=opacirua&UDextra='
 
 br = mechanize.Browser()
 br.set_handle_robots(False)   # ignore robots
@@ -41,6 +42,7 @@ response = br.open(starturl)
 br.form = list(br.forms())[0]
 control = br.form.find_control('FDopc_zv')
 control.value = "(facultyac:a::irc.18)(pubtype:a::pt.13)"
+control.value = "(facultyac:a::irc.18 OR facultyac:a::irc.19)(pubtype:a::pt.13)"
 control.size = "20"
 response = br.submit()
 tocpage = BeautifulSoup(response.read(), features="lxml")
