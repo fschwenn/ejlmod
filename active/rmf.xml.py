@@ -50,6 +50,8 @@ redoi = re.compile('.*doi.org\/(10.\d+\/.*?)(, .*|\.$|$)')
 def get_article(url, section):
 	rec = {'jnl': jnl, 'tc': 'P', 'note' : [section], 'refs' : [],
                'vol' : volume, 'issue' : issue, 'keyw' : []}
+        if len(sys.argv) > 4:
+                rec['cnum'] = sys.argv[4]
 
 	soup = BeautifulSoup(urllib2.urlopen(url), 'lxml')
 
