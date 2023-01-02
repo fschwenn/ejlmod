@@ -143,7 +143,7 @@ for table in tocpage.body.find_all('table', attrs = {'cellpadding' : '5'}):
             artlinks.append(b.text)
         for a in td.find_all('a', attrs = {'class' : 'SLink'}):
             if a.has_attr('href') and not re.search('^ *Editorial', a.text) and not re.search('php\/getFT.phtml', a['href']):
-                if not a.has_attr('title'):
+                if not a.has_attr('title') and not re.search('http', a['href']):
                     artlinks.append('http://www.mathnet.ru' + a['href'])
 
 
@@ -257,7 +257,7 @@ xmlfile  = codecs.EncodedFile(codecs.open(xmlf,mode='wb'),'utf8')
 ejlmod2.writenewXML(recs,xmlfile,publisher, jnlfilename)
 xmlfile.close()
 #retrival
-retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"
+retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_special'
 retfiles_text = open(retfiles_path,"r").read()
 line = jnlfilename+'.xml'+ "\n"
 if not line in retfiles_text: 
