@@ -70,7 +70,7 @@ def fsunwrap(tag):
 
 tocfile = '/tmp/%s.toc' % (jnlfilename)
 if not os.path.isfile(tocfile):
-    os.system('wget -O %s "%s"' % (tocfile, toclink))
+    os.system('wget -q -O %s "%s"' % (tocfile, toclink))
 inf = open(tocfile, 'r')
 toc = BeautifulSoup(''.join(inf.readlines()))
 inf.close()
@@ -120,7 +120,7 @@ for tag in toc.body.find_all():
             absfile = '/tmp/%s.abs' % (re.sub('\/', '_', rec['doi']))
             if not os.path.isfile(absfile):
                 time.sleep(23)
-                os.system('wget -O %s "%s"' % (absfile, abslink))
+                os.system('wget -q -O %s "%s"' % (absfile, abslink))
                 print abslink
             inf = open(absfile, 'r')
             abs = BeautifulSoup(''.join(inf.readlines()))
@@ -167,7 +167,7 @@ for tag in toc.body.find_all():
                 reffile = '/tmp/%s.ref' % (re.sub('\/', '_', rec['doi']))
                 if not os.path.isfile(reffile):
                     time.sleep(23)
-                    os.system('wget -O %s "%s"' % (reffile, reflink))
+                    os.system('wget -q -O %s "%s"' % (reffile, reflink))
                     print reflink
                 inf = open(reffile, 'r')
                 ref = BeautifulSoup(''.join(inf.readlines()))
