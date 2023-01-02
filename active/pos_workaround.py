@@ -29,14 +29,31 @@ tocpage = BeautifulSoup(urllib2.urlopen(tocurl), features="lxml")
 
 note = False
 recs = []
-for tr in tocpage.body.find_all('tr'):
+recoll = re.compile('.* (with|Measurement|Experimental|Signal|Search).*(ATLAS|ALICE|CMS|DUNE|TOTEM|NA62|MEG|Belle|KM3NeT|KLOE|JUNO|ICARUS|ILD|ICAL|CDF|BABAR|ALEPH|ZEUS|HERA|JAXO).*')
+trs = tocpage.body.find_all('tr')
+for tr in trs:
+    rec = {'vol' : vol, 'tc' : 'C', 'year' : year, 'jnl' : 'PoS', 'auts' : [], 'col' : [], 'fc' : ''}
     #print tr.text
     if tr.has_attr('class'):
         note = tr.text.strip()
         print '===[ %s ]===' % (note)
     arturl = False
-    rec = {'vol' : vol, 'tc' : 'C', 'year' : year, 'jnl' : 'PoS', 'auts' : [], 'col' : []}
-    if note: rec['note'] = [note]
+    if note:
+        rec['note'] = [note]
+        if note == 'Accelerators: Physics, Performance, and R&D for future facilities':
+            rec['fc'] += 'b'
+        elif note == 'Astroparticle Physics and Cosmology':
+            rec['fc'] += 'a'
+        elif note == 'Computing and Data Handling':
+            rec['fc'] += 'c'
+        elif note == 'Dark Matter':
+            rec['fc'] += 'a'
+        elif note == 'Detectors for Future Facilities, R&D, novel techniques':
+            rec['fc'] += 'i'
+        elif note == 'Formal Theory':
+            rec['fc'] += 't'
+        elif note == 'Operation, Performance and Upgrade (incl. HL-LHC) of Present Detectors':
+            rec['fc'] += 'i'
     #cnum
     if len(sys.argv) > 4:
         rec['cnum'] = sys.argv[4]
@@ -46,6 +63,7 @@ for tr in tocpage.body.find_all('tr'):
     #title
     for span in tr.find_all('span', attrs = {'class' : 'contrib_title'}):
         rec['tit'] = span.text.strip()
+        
     #articleID
     for span in tr.find_all('span', attrs = {'class' : 'contrib_code'}):
         for a in span.find_all('a'):
@@ -91,7 +109,7 @@ for tr in tocpage.body.find_all('tr'):
                 print ' publication_date ', rec['publication_date']
     if not 'date' in rec.keys() and 'publication_date' in rec.keys():
         rec['date'] = rec['publication_date']
-    #construct DOI if neccessasry
+    #construct DOI if neccessary
     if not 'doi' in rec.keys():
         rec['doi'] = '10.22323/1.%s.%04i' % (nr, int(rec['p1']))
     #get PDF
@@ -112,6 +130,13 @@ for tr in tocpage.body.find_all('tr'):
                     rec['license'] = {'url' : a['href']}
         recs.append(rec) 
         print '  ', rec['doi'], rec.keys()
+    #collaboration from title
+    if not rec['col'] and recoll.search(rec['tit']):
+        collaboration = recoll.sub(r'\2', rec['tit'])
+        rec['col'].append(collaboration)
+        rec['fc'] += 'e'
+        rec['note'].append('COL=%s guessed from TIT=%s' % (collaboration, rec['tit']))
+    
 
 #closing of files and printing
 xmlf    = os.path.join(xmldir,jnlfilename+'.xml')
