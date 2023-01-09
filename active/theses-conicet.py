@@ -22,7 +22,7 @@ retfiles_path = "/afs/desy.de/user/l/library/proc/retinspire/retfiles"#+'_specia
 rpp = 50
 
 now = datetime.datetime.now()
-startyear = now.year-1
+startyear = now.year-2
 stopyear = now.year
 stampoftoday = '%4d-%02d-%02d' % (now.year, now.month, now.day)
 
