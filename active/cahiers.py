@@ -67,7 +67,7 @@ for volurl in volurls:
                     issue = at[-1]
                     print '---{ %s.%s }---' % (vol, issue)
                 else:
-                    print ' ', at
+#                    print ' ', at
                     rec = {'jnl' : 'Cahiers Topo.Geom.Diff.', 'year' : year, 'tc' : 'P', 'vol' : vol}
                     if issue: rec['issue'] = issue
                     rec['FFT'] = a['href']
@@ -77,7 +77,7 @@ for volurl in volurls:
                     for br in p.find_all('br'):
                        br.replace_with(' XXX ')
                     parts = re.split(' *XXX ', re.sub('[\n\t\r]', ' ', p.text.strip()))
-                    print ' ', parts
+#                    print ' ', parts
                     #pages
                     rec['p1'] = re.sub('.*?(\d+)\-.*', r'\1', parts[1].strip())
                     rec['p2'] = re.sub('.*\-', '', parts[1].strip())
